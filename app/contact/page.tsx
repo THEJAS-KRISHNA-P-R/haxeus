@@ -66,14 +66,14 @@ export default function ContactPage() {
   ]
 
   return (
-    <div className="min-h-screen py-16">
+    <div className="min-h-screen py-16 bg-white dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Get in <span className="text-red-600">Touch</span>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Get in <span className="text-red-600 dark:text-red-500">Touch</span>
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Have a question, suggestion, or just want to say hello? We'd love to hear from you. Reach out to us using
             any of the methods below.
           </p>
@@ -82,15 +82,15 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <Card className="shadow-lg">
+            <Card className="shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
-                <CardTitle className="text-2xl text-gray-900">Send us a Message</CardTitle>
+                <CardTitle className="text-2xl text-gray-900 dark:text-white">Send us a Message</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name" className="dark:text-gray-300">Full Name</Label>
                       <Input
                         id="name"
                         name="name"
@@ -98,11 +98,11 @@ export default function ContactPage() {
                         value={formData.name}
                         onChange={handleChange}
                         required
-                        className="mt-1"
+                        className="mt-1 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email Address</Label>
+                      <Label htmlFor="email" className="dark:text-gray-300">Email Address</Label>
                       <Input
                         id="email"
                         name="email"
@@ -110,13 +110,13 @@ export default function ContactPage() {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="mt-1"
+                        className="mt-1 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="subject">Subject</Label>
+                    <Label htmlFor="subject" className="dark:text-gray-300">Subject</Label>
                     <Input
                       id="subject"
                       name="subject"
@@ -124,12 +124,12 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="mt-1"
+                      className="mt-1 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="message">Message</Label>
+                    <Label htmlFor="message" className="dark:text-gray-300">Message</Label>
                     <Textarea
                       id="message"
                       name="message"
@@ -137,7 +137,7 @@ export default function ContactPage() {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      className="mt-1"
+                      className="mt-1 dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                       placeholder="Tell us how we can help you..."
                     />
                   </div>
@@ -152,26 +152,26 @@ export default function ContactPage() {
 
           {/* Contact Information */}
           <div className="space-y-6">
-            <Card className="shadow-lg">
+            <Card className="shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
-                <CardTitle className="text-xl text-gray-900">Contact Information</CardTitle>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                  <p className="text-gray-600">support@haxeuz.com</p>
-                  <p className="text-gray-600">orders@haxeuz.com</p>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Email</h3>
+                  <p className="text-gray-600 dark:text-gray-400">support@haxeuz.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">orders@haxeuz.com</p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
-                  <p className="text-gray-600">+91 98765 43210</p>
-                  <p className="text-sm text-gray-500">Mon-Fri, 9 AM - 6 PM IST</p>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Phone</h3>
+                  <p className="text-gray-600 dark:text-gray-400">+91 98765 43210</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Mon-Fri, 9 AM - 6 PM IST</p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Address</h3>
-                  <p className="text-gray-600">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Address</h3>
+                  <p className="text-gray-600 dark:text-gray-400">
                     HAXEUZ Fashion Pvt. Ltd.
                     <br />
                     123 Design Street
@@ -184,23 +184,23 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg">
+            <Card className="shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
-                <CardTitle className="text-xl text-gray-900">Business Hours</CardTitle>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">Business Hours</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Monday - Friday</span>
-                    <span className="text-gray-900 font-medium">9:00 AM - 6:00 PM</span>
+                    <span className="text-gray-600 dark:text-gray-400">Monday - Friday</span>
+                    <span className="text-gray-900 dark:text-white font-medium">9:00 AM - 6:00 PM</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Saturday</span>
-                    <span className="text-gray-900 font-medium">10:00 AM - 4:00 PM</span>
+                    <span className="text-gray-600 dark:text-gray-400">Saturday</span>
+                    <span className="text-gray-900 dark:text-white font-medium">10:00 AM - 4:00 PM</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Sunday</span>
-                    <span className="text-gray-900 font-medium">Closed</span>
+                    <span className="text-gray-600 dark:text-gray-400">Sunday</span>
+                    <span className="text-gray-900 dark:text-white font-medium">Closed</span>
                   </div>
                 </div>
               </CardContent>
@@ -211,10 +211,10 @@ export default function ContactPage() {
         {/* FAQ Section */}
         <div className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Frequently Asked <span className="text-red-600">Questions</span>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Frequently Asked <span className="text-red-600 dark:text-red-500">Questions</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 dark:text-gray-400">
               Find quick answers to common questions about our products and services.
             </p>
           </div>
@@ -222,9 +222,9 @@ export default function ContactPage() {
           <div className="max-w-4xl mx-auto">
             <Accordion type="single" collapsible className="space-y-4">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="border rounded-lg px-6">
-                  <AccordionTrigger className="text-left font-semibold text-gray-900">{faq.question}</AccordionTrigger>
-                  <AccordionContent className="text-gray-600 pb-4">{faq.answer}</AccordionContent>
+                <AccordionItem key={index} value={`item-${index}`} className="border dark:border-gray-700 rounded-lg px-6 bg-white dark:bg-gray-800">
+                  <AccordionTrigger className="text-left font-semibold text-gray-900 dark:text-white">{faq.question}</AccordionTrigger>
+                  <AccordionContent className="text-gray-600 dark:text-gray-400 pb-4">{faq.answer}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
@@ -232,9 +232,9 @@ export default function ContactPage() {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center bg-gray-50 rounded-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h3>
-          <p className="text-gray-600 mb-6">Our customer support team is here to help you with any inquiries.</p>
+        <div className="text-center bg-gray-50 dark:bg-gray-800 rounded-lg p-8">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Still have questions?</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Our customer support team is here to help you with any inquiries.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button className="bg-red-600 text-white hover:bg-red-700">Call Us Now</Button>
             

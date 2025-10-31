@@ -10,6 +10,31 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Smooth scroll snap */
+  .snap-scroll {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+  
+  .snap-start {
+    scroll-snap-align: start;
+  }
+  
+  .snap-center {
+    scroll-snap-align: center;
+  }
+  
+  /* Performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Smooth animations */
+  .smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 @layer base {
@@ -91,4 +116,105 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Buttery smooth dark mode transitions - Optimized */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent layout shift during transitions */
+html * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Root level - Most important for theme switching */
+html,
+body {
+  transition: background-color 0.4s ease-in-out,
+              color 0.4s ease-in-out !important;
+}
+
+/* Only transition color-related properties, not layout properties */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow;
+  transition-duration: 0.35s;
+  transition-timing-function: ease-in-out;
+  /* Exclude transform and other layout properties for smoother performance */
+}
+
+/* Specific overrides for smooth transitions */
+div, section, main, article, aside, header, footer, nav {
+  transition: background-color 0.4s ease-in-out,
+              border-color 0.4s ease-in-out,
+              box-shadow 0.3s ease-in-out;
+}
+
+/* Text elements */
+h1, h2, h3, h4, h5, h6, p, span, label, a {
+  transition: color 0.35s ease-in-out;
+}
+
+/* Interactive elements - slightly faster */
+button, 
+input, 
+textarea, 
+select,
+[role="button"],
+[class*="Button"] {
+  transition: background-color 0.3s ease-in-out,
+              border-color 0.3s ease-in-out,
+              color 0.3s ease-in-out,
+              box-shadow 0.25s ease-in-out,
+              transform 0.2s ease-out;
+}
+
+/* Cards and surfaces */
+[class*="Card"],
+[class*="card"],
+[class*="bg-white"],
+[class*="bg-gray"] {
+  transition: background-color 0.4s ease-in-out,
+              border-color 0.4s ease-in-out,
+              box-shadow 0.3s ease-in-out;
+}
+
+/* SVG and Icons */
+svg {
+  transition: color 0.3s ease-in-out,
+              fill 0.3s ease-in-out,
+              stroke 0.3s ease-in-out;
+}
+
+/* Images - only opacity */
+img {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Remove transitions during page load */
+.page-loading * {
+  transition: none !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* GPU acceleration for smooth rendering */
+body {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }

@@ -4,10 +4,11 @@ const ProductDetailsSkeleton = dynamic(() => import("./ProductDetailsSkeleton").
 
 import { useState } from "react";
 import Image from "next/image";
-import { supabase } from "@/lib/supabase";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Product {
-  id: string;
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -21,64 +22,37 @@ export default function ProductDetails({ product }: { product: Product }) {
   const [selectedSize, setSelectedSize] = useState<string | null>(product.available_sizes[0] || null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
   const handleAddToCart = async () => {
     if (!selectedSize) {
-      alert("Please select a size.");
+      toast({
+        title: "Size Required",
+        description: "Please select a size before adding to cart.",
+        variant: "destructive",
+      });
       return;
     }
+    
     setLoading(true);
-    // Check if user is signed in
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session || !session.user) {
-      alert("Please sign in to add items to your cart.");
+    try {
+      await addItem(product.id, selectedSize, quantity);
+      
+      toast({
+        title: "Added to Cart",
+        description: `${product.name} (${selectedSize}) has been added to your cart.`,
+        className: "bg-white border-green-500",
+      });
+    } catch (error: any) {
+      console.error('Add to cart error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Could not add to cart. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-      // Optionally, redirect to sign-in page:
-      // router.push("/auth");
-      return;
-    }
-    // Upsert logic for backend_cartitem
-    // Check if item already exists for this user/product/size
-    const { data: existing, error: fetchError } = await supabase
-      .from("backend_cartitem")
-      .select("id, quantity")
-      .eq("user_id", session.user.id)
-      .eq("product_id", product.id)
-      .eq("size", selectedSize)
-      .maybeSingle();
-
-    let error = null;
-    if (fetchError) {
-      setLoading(false);
-      alert("Could not check cart. Please try again.\n" + fetchError.message);
-      return;
-    }
-    if (existing) {
-      // Update quantity
-      const { error: updateError } = await supabase
-        .from("backend_cartitem")
-        .update({ quantity: existing.quantity + quantity })
-        .eq("id", existing.id);
-      error = updateError;
-    } else {
-      // Insert new cart item
-      const { error: insertError } = await supabase.from("backend_cartitem").insert([
-        {
-          user_id: session.user.id,
-          product_id: product.id,
-          size: selectedSize,
-          quantity,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-      error = insertError;
-    }
-    setLoading(false);
-    if (error) {
-      console.error('Supabase cart error:', error);
-      alert("Could not add to cart. Please try again.\n" + error.message);
-    } else {
-      alert("Added to cart!");
     }
   };
 

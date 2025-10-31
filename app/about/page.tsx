@@ -92,20 +92,20 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* Hero Section */}
-      <section className="bg-white py-16 lg:py-24">
+      <section className="bg-white dark:bg-gray-950 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                Our <span className="text-red-600">Story</span>
+              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
+                Our <span className="text-red-600 dark:text-red-500">Story</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
                 HAXEUZ was born from a simple belief: that clothing should be more than just fabric. It should be a
                 medium for artistic expression, a statement of quality, and a commitment to sustainability.
               </p>
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
                 Since 2019, we've been crafting premium T-shirts that tell stories, inspire creativity, and provide
                 unmatched comfort. Every piece in our collection is a testament to our dedication to excellence.
               </p>
@@ -132,13 +132,13 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Our <span className="text-red-600">Values</span>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Our <span className="text-red-600 dark:text-red-500">Values</span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
               These core values guide everything we do, from design and production to customer service and community
               engagement.
             </p>
@@ -146,10 +146,10 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow">
+              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <div className="text-4xl mb-4">{value.icon}</div>
-                <h3 className="text-xl font-semibold mb-3 text-gray-900">{value.title}</h3>
-                <p className="text-gray-600">{value.description}</p>
+                <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{value.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{value.description}</p>
               </Card>
             ))}
           </div>
@@ -157,31 +157,31 @@ export default function AboutPage() {
       </section>
 
       {/* Timeline Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Our <span className="text-red-600">Journey</span>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Our <span className="text-red-600 dark:text-red-500">Journey</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 dark:text-gray-400">
               From a small startup to a recognized brand, here's how we've grown over the years.
             </p>
           </div>
 
           <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-red-600"></div>
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-red-600 dark:bg-red-500"></div>
             <div className="space-y-12">
               {timeline.map((item, index) => (
                 <div key={index} className={`flex items-center ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}>
                   <div className={`w-1/2 ${index % 2 === 0 ? "pr-8 text-right" : "pl-8 text-left"}`}>
-                    <Card className="p-6 shadow-lg">
-                      <div className="text-2xl font-bold text-red-600 mb-2">{item.year}</div>
-                      <h3 className="text-xl font-semibold mb-3 text-gray-900">{item.title}</h3>
-                      <p className="text-gray-600">{item.description}</p>
+                    <Card className="p-6 shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <div className="text-2xl font-bold text-red-600 dark:text-red-500 mb-2">{item.year}</div>
+                      <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{item.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
                     </Card>
                   </div>
                   <div className="relative z-10">
-                    <div className="w-4 h-4 bg-red-600 rounded-full border-4 border-white shadow-lg"></div>
+                    <div className="w-4 h-4 bg-red-600 dark:bg-red-500 rounded-full border-4 border-white dark:border-gray-950 shadow-lg"></div>
                   </div>
                   <div className="w-1/2"></div>
                 </div>
@@ -192,20 +192,20 @@ export default function AboutPage() {
       </section>
 
       {/* Team Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Meet Our <span className="text-red-600">Team</span>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Meet Our <span className="text-red-600 dark:text-red-500">Team</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 dark:text-gray-400">
               The passionate individuals behind HAXEUZ who make our vision a reality.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {team.map((member, index) => (
-              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow">
+              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <div className="relative w-32 h-32 mx-auto mb-4">
                   <Image
                     src={member.image || "/placeholder.svg"}
@@ -214,9 +214,9 @@ export default function AboutPage() {
                     className="object-cover rounded-full"
                   />
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-900">{member.name}</h3>
-                <p className="text-red-600 font-medium mb-3">{member.role}</p>
-                <p className="text-gray-600">{member.description}</p>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{member.name}</h3>
+                <p className="text-red-600 dark:text-red-500 font-medium mb-3">{member.role}</p>
+                <p className="text-gray-600 dark:text-gray-400">{member.description}</p>
               </Card>
             ))}
           </div>
@@ -224,7 +224,7 @@ export default function AboutPage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative h-96">
@@ -240,54 +240,54 @@ export default function AboutPage() {
               />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Why Choose <span className="text-red-600">HAXEUZ</span>?
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                Why Choose <span className="text-red-600 dark:text-red-500">HAXEUZ</span>?
               </h2>
 
               <div className="space-y-6">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-4 mt-1">
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
                     <span className="text-white text-sm font-bold">✓</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Premium Quality Materials</h3>
-                    <p className="text-gray-600">
+                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Premium Quality Materials</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
                       We use only the finest 100% cotton, pre-shrunk and tested for durability and comfort.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-4 mt-1">
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
                     <span className="text-white text-sm font-bold">✓</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Unique Artistic Designs</h3>
-                    <p className="text-gray-600">
+                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Unique Artistic Designs</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
                       Original artwork and designs you won't find anywhere else, created by talented artists.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-4 mt-1">
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
                     <span className="text-white text-sm font-bold">✓</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Sustainable Practices</h3>
-                    <p className="text-gray-600">
+                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Sustainable Practices</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
                       Eco-friendly production processes and packaging that minimize environmental impact.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-4 mt-1">
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
                     <span className="text-white text-sm font-bold">✓</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Customer Satisfaction</h3>
-                    <p className="text-gray-600">
+                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Customer Satisfaction</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
                       99% customer satisfaction rate with hassle-free returns and dedicated support.
                     </p>
                   </div>

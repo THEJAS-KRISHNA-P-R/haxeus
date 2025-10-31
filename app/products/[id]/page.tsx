@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
+import { useCart } from "@/contexts/CartContext"
+import { WishlistButton } from "@/components/WishlistButton"
 import { Heart, ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react"
 
 interface Product {
@@ -20,7 +22,8 @@ interface Product {
   price: number
   front_image: string
   back_image: string
-  sizes: string[]
+  available_sizes?: string[]
+  sizes?: string[]
 }
 
 const staticProducts: Product[] = [
@@ -82,29 +85,17 @@ export default function ProductDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
+  const { addItem } = useCart()
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedColor, setSelectedColor] = useState("")
   const [quantity, setQuantity] = useState(1)
   const [showBack, setShowBack] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [addingToCart, setAddingToCart] = useState(false)
 
   useEffect(() => {
-    // Check auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
     fetchProduct()
-
-    return () => subscription.unsubscribe()
   }, [params.id])
 
   const fetchProduct = async () => {
@@ -119,7 +110,11 @@ export default function ProductDetailPage() {
         }
         setProduct(staticProduct)
       } else {
-        setProduct(data)
+        // Map Supabase data to match our interface
+        setProduct({
+          ...data,
+          sizes: data.available_sizes || data.sizes || ["S", "M", "L", "XL", "XXL"]
+        })
       }
     } catch (error) {
       console.warn("Error fetching product:", error)
@@ -136,16 +131,12 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (product) {
-      if (product.sizes.length > 0) setSelectedSize(product.sizes[0])
+      const productSizes = product.sizes || product.available_sizes || []
+      if (productSizes.length > 0) setSelectedSize(productSizes[0])
     }
   }, [product])
 
   const addToCart = async () => {
-    if (!user) {
-      router.push("/auth")
-      return
-    }
-
     if (!selectedSize) {
       toast({
         title: "Please select a size",
@@ -155,55 +146,32 @@ export default function ProductDetailPage() {
       return
     }
 
+    setAddingToCart(true)
     try {
-      // Check if item already exists in cart
-      const { data: existingItem } = await supabase
-        .from("cart_items")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("product_id", product!.id)
-        .eq("size", selectedSize)
-        .single()
-
-      if (existingItem) {
-        // Update quantity
-        const { error } = await supabase
-          .from("cart_items")
-          .update({ quantity: existingItem.quantity + quantity })
-          .eq("id", existingItem.id)
-
-        if (error) throw error
-      } else {
-        // Insert new item
-        const { error } = await supabase.from("cart_items").insert({
-          user_id: user.id,
-          product_id: product!.id,
-          size: selectedSize,
-          quantity: quantity,
-        })
-
-        if (error) throw error
-      }
-
+      await addItem(product!.id, selectedSize, quantity)
+      
       toast({
         title: "Added to cart!",
         description: `${product!.name} has been added to your cart.`,
       })
     } catch (error: any) {
+      console.error('Add to cart error:', error)
       toast({
         title: "Error",
-        description: "Could not add to cart.",
+        description: error.message || "Could not add to cart.",
         variant: "destructive",
       })
+    } finally {
+      setAddingToCart(false)
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading product details...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 dark:border-red-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading product details...</p>
         </div>
       </div>
     )
@@ -211,9 +179,9 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Product not found</h1>
           <Button onClick={() => router.push("/products")} className="bg-red-600 hover:bg-red-700">
             Back to Products
           </Button>
@@ -223,12 +191,12 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-6">
-            <div className="aspect-square relative bg-black rounded-2xl overflow-hidden shadow-2xl">
+            <div className="aspect-square relative bg-gradient-to-br from-gray-100 via-gray-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl overflow-hidden shadow-2xl dark:shadow-red-900/20">
               <Image
                 src={showBack ? product.back_image : product.front_image}
                 alt={product.name}
@@ -244,14 +212,14 @@ export default function ProductDetailPage() {
               <Button
                 variant={!showBack ? "default" : "outline"}
                 onClick={() => setShowBack(false)}
-                className={`flex-1 ${!showBack ? "bg-red-600 text-white hover:bg-red-700" : ""}`}
+                className={`flex-1 ${!showBack ? "bg-red-600 text-white hover:bg-red-700" : "dark:border-gray-600 dark:hover:bg-gray-800"}`}
               >
                 Front View
               </Button>
               <Button
                 variant={showBack ? "default" : "outline"}
                 onClick={() => setShowBack(true)}
-                className={`flex-1 ${showBack ? "bg-red-600 text-white hover:bg-red-700 hover:text-black" : ""}`}
+                className={`flex-1 ${showBack ? "bg-red-600 text-white hover:bg-red-700 hover:text-black" : "dark:border-gray-600 dark:hover:bg-gray-800"}`}
               >
                 Back View
               </Button>
@@ -261,22 +229,22 @@ export default function ProductDetailPage() {
           {/* Product Details */}
           <div className="space-y-8">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{product.name}</h1>
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-3xl font-bold text-red-600">₹{product.price.toLocaleString("en-IN")}</span>
+                <span className="text-3xl font-bold text-red-600 dark:text-red-500">₹{product.price.toLocaleString("en-IN")}</span>
                 
               </div>
-              <p className="text-gray-700 leading-relaxed text-lg">{product.description}</p>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">{product.description}</p>
             </div>
 
             {/* Size Selection */}
             <div>
-              <Label className="text-lg font-semibold mb-4 block">Size</Label>
+              <Label className="text-lg font-semibold mb-4 block dark:text-white">Size</Label>
               <RadioGroup value={selectedSize} onValueChange={setSelectedSize} className="flex gap-3 flex-wrap">
-                  {product.sizes.map((size) => (
+                  {(product.sizes || product.available_sizes || []).map((size) => (
                   <div
                       key={size}
-                    className={`border-2 cursor-pointer rounded-lg p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${selectedSize === size ? "bg-red-600 text-white border-red-600" : "hover:bg-gray-50 border-gray-200"}`}
+                    className={`border-2 cursor-pointer rounded-lg p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${selectedSize === size ? "bg-red-600 text-white border-red-600" : "hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600 dark:text-gray-300"}`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {/* Remove the radio disc, just show the label */}
@@ -289,16 +257,16 @@ export default function ProductDetailPage() {
 
             {/* Quantity */}
             <div>
-              <Label htmlFor="quantity" className="text-lg font-semibold mb-4 block">
+              <Label htmlFor="quantity" className="text-lg font-semibold mb-4 block dark:text-white">
                 Quantity
               </Label>
               <Select value={quantity.toString()} onValueChange={(value) => setQuantity(Number.parseInt(value))}>
-                <SelectTrigger className="w-32 h-12">
+                <SelectTrigger className="w-32 h-12 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                   {[1, 2, 3, 4, 5].map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
+                    <SelectItem key={num} value={num.toString()} className="dark:text-gray-300 dark:hover:bg-gray-700">
                       {num}
                     </SelectItem>
                   ))}
@@ -310,44 +278,43 @@ export default function ProductDetailPage() {
             <div className="flex gap-4">
               <Button
                 onClick={addToCart}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white h-14 text-lg"
+                disabled={addingToCart}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white h-14 text-lg disabled:opacity-50"
                 size="lg"
               >
                 <ShoppingCart className="w-5 h-5 mr-2" />
-                Add to Cart
+                {addingToCart ? 'Adding...' : 'Add to Cart'}
               </Button>
-              <Button
-                variant="outline"
+              <WishlistButton 
+                productId={product.id}
                 size="lg"
                 className="h-14 px-6 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
-              >
-                <Heart className="w-5 h-5" />
-              </Button>
+              />
             </div>
 
             {/* Features */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-4 text-center">
-                <Truck className="w-8 h-8 mx-auto mb-2 text-red-600" />
-                <div className="font-semibold">Free Shipping</div>
-                <div className="text-sm text-gray-600">On orders above ₹2000</div>
+              <Card className="p-4 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <Truck className="w-8 h-8 mx-auto mb-2 text-red-600 dark:text-red-500" />
+                <div className="font-semibold dark:text-white">Free Shipping</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">On orders above ₹2000</div>
               </Card>
-              <Card className="p-4 text-center">
-                <Shield className="w-8 h-8 mx-auto mb-2 text-red-600" />
-                <div className="font-semibold">Quality Guarantee</div>
-                <div className="text-sm text-gray-600">Premium materials</div>
+              <Card className="p-4 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <Shield className="w-8 h-8 mx-auto mb-2 text-red-600 dark:text-red-500" />
+                <div className="font-semibold dark:text-white">Quality Guarantee</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Premium materials</div>
               </Card>
-              <Card className="p-4 text-center">
-                <RotateCcw className="w-8 h-8 mx-auto mb-2 text-red-600" />
-                <div className="font-semibold">Easy Returns</div>
-                <div className="text-sm text-gray-600">30-day return policy</div>
+              <Card className="p-4 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <RotateCcw className="w-8 h-8 mx-auto mb-2 text-red-600 dark:text-red-500" />
+                <div className="font-semibold dark:text-white">Easy Returns</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">30-day return policy</div>
               </Card>
             </div>
 
             {/* Product Features */}
-            <Card className="p-6">
-              <h3 className="font-bold text-lg mb-4">Product Features</h3>
-              <ul className="space-y-2 text-gray-700">
+            <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <h3 className="font-bold text-lg mb-4 dark:text-white">Product Features</h3>
+              <ul className="space-y-2 text-gray-700 dark:text-gray-300">
                 <li>• 100% premium cotton blend</li>
                 <li>• Pre-shrunk for perfect fit</li>
                 <li>• Machine washable (cold water recommended)</li>
