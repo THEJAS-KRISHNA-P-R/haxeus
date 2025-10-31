@@ -15,6 +15,9 @@ export const metadata = {
     generator: 'v0.dev'
 }
 
+// Force dynamic rendering for all pages due to navbar using useSearchParams
+export const dynamic = 'force-dynamic'
+
 export default function RootLayout({
   children,
 }: {
