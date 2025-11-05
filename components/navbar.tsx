@@ -272,6 +272,11 @@ export function Navbar() {
                 >
                   Wishlist
                 </Link>
+                {/* Dark Mode Toggle for Mobile */}
+                <div className="px-3 py-2 flex items-center justify-between text-gray-700 dark:text-gray-300">
+                  <span>Dark Mode</span>
+                  <DarkModeToggle />
+                </div>
                 {user ? (
                   <>
                     <Link
