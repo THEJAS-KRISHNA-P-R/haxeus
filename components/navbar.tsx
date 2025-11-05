@@ -11,8 +11,15 @@ import { supabase } from "@/lib/supabase"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import type { Session } from "@supabase/supabase-js"
 import { useCart } from "@/contexts/CartContext"
-import { DarkModeToggle } from "@/contexts/ThemeContext"
+import { DarkModeToggle, useTheme } from "@/contexts/ThemeContext"
 import { motion, AnimatePresence } from "framer-motion"
+import { StaggeredMenu } from "@/components/StaggeredMenu"
+import type { StaggeredMenuItem } from "@/components/StaggeredMenu"
+import dynamic from "next/dynamic"
+
+const GooeyNav = dynamic(() => import("@/components/GooeyNav"), {
+  ssr: false,
+})
 
 export function Navbar() {
   const [user, setUser] = useState<any>(null)
@@ -23,6 +30,7 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { theme } = useTheme()
 
   useEffect(() => {
     // Get initial session
@@ -66,31 +74,69 @@ export function Navbar() {
     router.push("/")
   }
 
-  return (
-    <nav className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-50 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo (desktop) */}
-          <Link
-            href="/"
-            className="hidden md:flex items-center space-x-2 text-2xl font-bold text-red-600 hover:scale-105 transition-transform"
-          >
-            <Image 
-              src="/android-chrome-192x192.png" 
-              alt="Logo" 
-              width={32} 
-              height={32} 
-              priority 
-              className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200 transition-all duration-300" 
-            />
-            <span>HAXEUZ</span>
-          </Link>
+  // Menu items for staggered menu
+  const menuItems: StaggeredMenuItem[] = [
+    { label: 'Products', ariaLabel: 'View all products', link: '/products' },
+    { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
+    { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' },
+    { label: 'Cart', ariaLabel: `View cart with ${totalItems} items`, link: '/cart' },
+    { label: 'Wishlist', ariaLabel: 'View your wishlist', link: '/profile?tab=wishlist' },
+  ]
 
-          {/* Logo (mobile, centered) */}
-          <div className="flex flex-1 justify-center md:hidden">
+  if (user) {
+    menuItems.push({ label: 'Profile', ariaLabel: 'View your profile', link: '/profile' })
+  } else {
+    menuItems.push({ label: 'Sign In', ariaLabel: 'Sign in to your account', link: '/auth' })
+  }
+
+  const isDarkMode = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+  // GooeyNav items for desktop
+  const gooeyNavItems = [
+    { label: 'Products', href: '/products' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
+  ]
+
+  // Get initial active index based on current pathname
+  const getInitialActiveIndex = () => {
+    const index = gooeyNavItems.findIndex(item => pathname === item.href)
+    return index >= 0 ? index : 0
+  }
+
+  return (
+    <>
+      {/* Mobile Staggered Menu - Only visible on mobile */}
+      <div className={`md:hidden fixed top-0 left-0 w-full h-screen z-50 ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+        <StaggeredMenu
+          position="right"
+          items={menuItems}
+          displaySocials={false}
+          displayItemNumbering={true}
+          menuButtonColor={isDarkMode ? "#f3f4f6" : "#111827"}
+          openMenuButtonColor={isDarkMode ? "#111827" : "#f3f4f6"}
+          changeMenuColorOnOpen={true}
+          colors={isDarkMode ? ['#1f2937', '#111827'] : ['#f3f4f6', '#e5e7eb']}
+          accentColor="#ef4444"
+          onMenuOpen={() => setIsMenuOpen(true)}
+          onMenuClose={() => setIsMenuOpen(false)}
+          customFooter={
+            <div className="flex items-center justify-between px-2 py-3">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Dark Mode</span>
+              <DarkModeToggle />
+            </div>
+          }
+        />
+      </div>
+
+      {/* Main Navbar */}
+      <nav className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-40 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo (desktop) */}
             <Link
               href="/"
-              className="flex items-center space-x-2 text-2xl font-bold text-red-600"
+              className="hidden md:flex items-center space-x-2 text-2xl font-bold text-red-600 hover:scale-105 transition-transform"
             >
               <Image 
                 src="/android-chrome-192x192.png" 
@@ -102,211 +148,123 @@ export function Navbar() {
               />
               <span>HAXEUZ</span>
             </Link>
-          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/products" className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium">
-              Products
-            </Link>
-            <Link href="/about" className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium">
-              About
-            </Link>
-            <Link href="/contact" className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium">
-              Contact
-            </Link>
-          </div>
-
-          {/* Desktop Search & Actions */}
-          <div className="hidden md:flex items-center space-x-3">
-            {/* Search */}
-            <div className="relative">
-              <AnimatePresence mode="wait">
-                {isSearchOpen ? (
-                  <motion.div
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 250, opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
-                      <Input
-                        type="text"
-                        placeholder="Search products..."
-                        value={searchQuery}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        onBlur={() => !searchQuery && setIsSearchOpen(false)}
-                        autoFocus
-                        className="pl-9 pr-4 h-9 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-red-500 focus:ring-red-500"
-                      />
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsSearchOpen(true)}
-                      className="hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      <Search className="h-5 w-5" />
-                    </Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Logo (mobile, centered) */}
+            <div className="flex flex-1 justify-center md:hidden">
+              <Link
+                href="/"
+                className="flex items-center space-x-2 text-2xl font-bold text-red-600"
+              >
+                <Image 
+                  src="/android-chrome-192x192.png" 
+                  alt="Logo" 
+                  width={32} 
+                  height={32} 
+                  priority 
+                  className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200 transition-all duration-300" 
+                />
+                <span>HAXEUZ</span>
+              </Link>
             </div>
 
-            {/* Cart */}
-            <Link href="/cart" className="relative">
-              <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-gray-800">
-                <ShoppingCart className="h-5 w-5" />
-                                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </Button>
-            </Link>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center">
+              <GooeyNav
+                items={gooeyNavItems}
+                particleCount={20}
+                particleDistances={[120, 15]}
+                particleR={150}
+                initialActiveIndex={getInitialActiveIndex()}
+                animationTime={800}
+                timeVariance={400}
+                colors={[1, 2, 3, 1, 2, 3, 1, 4]}
+              />
+            </div>
 
-            {/* Wishlist */}
-            <Link href="/profile?tab=wishlist">
-              <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-gray-800">
-                <Heart className="h-5 w-5" />
-              </Button>
-            </Link>
+            {/* Desktop Search & Actions */}
+            <div className="hidden md:flex items-center space-x-3">
+              {/* Search */}
+              <div className="relative">
+                <AnimatePresence mode="wait">
+                  {isSearchOpen ? (
+                    <motion.div
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 250, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <Input
+                          type="text"
+                          placeholder="Search products..."
+                          value={searchQuery}
+                          onChange={(e) => handleSearch(e.target.value)}
+                          onBlur={() => !searchQuery && setIsSearchOpen(false)}
+                          autoFocus
+                          className="pl-9 pr-4 h-9 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-red-500 focus:ring-red-500"
+                        />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsSearchOpen(true)}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
+                        <Search className="h-5 w-5" />
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-            {/* Dark Mode Toggle */}
-            <DarkModeToggle />
+              {/* Cart */}
+              <Link href="/cart" className="relative">
+                <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <ShoppingCart className="h-5 w-5" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {totalItems}
+                    </span>
+                  )}
+                </Button>
+              </Link>
 
-            {/* User */}
-            {user ? (
-              <Button variant="ghost" size="sm" onClick={() => router.push("/profile")} className="hover:bg-gray-100 dark:hover:bg-gray-800">
-                <User className="h-5 w-5" />
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => router.push("/auth")} className="hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 dark:hover:text-red-400 hover:border-red-600 dark:hover:border-red-500">
-                Sign In
-              </Button>
-            )}
-          </div>
+              {/* Wishlist */}
+              <Link href="/profile?tab=wishlist">
+                <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <Heart className="h-5 w-5" />
+                </Button>
+              </Link>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-menu"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
+              {/* Dark Mode Toggle */}
+              <DarkModeToggle />
+
+              {/* User */}
+              {user ? (
+                <Button variant="ghost" size="sm" onClick={() => router.push("/profile")} className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <User className="h-5 w-5" />
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={() => router.push("/auth")} className="hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 dark:hover:text-red-400 hover:border-red-600 dark:hover:border-red-500">
+                  Sign In
+                </Button>
+              )}
+            </div>
+
+            {/* Mobile - Empty div for spacing (menu button is in StaggeredMenu) */}
+            <div className="md:hidden w-16"></div>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden overflow-hidden"
-              id="mobile-menu"
-            >
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                {/* Mobile Search */}
-                <div className="px-3 py-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <Input
-                      type="text"
-                      placeholder="Search products..."
-                      value={searchQuery}
-                      onChange={(e) => handleSearch(e.target.value)}
-                      className="pl-9 pr-4 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-red-500"
-                    />
-                  </div>
-                </div>
-
-                <Link
-                  href="/products"
-                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Products
-                </Link>
-                <Link
-                  href="/about"
-                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  About
-                </Link>
-                <Link
-                  href="/contact"
-                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Contact
-                </Link>
-                <Link
-                  href="/cart"
-                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Cart ({totalItems})
-                </Link>
-                <Link
-                  href="/profile?tab=wishlist"
-                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Wishlist
-                </Link>
-                {/* Dark Mode Toggle for Mobile */}
-                <div className="px-3 py-2 flex items-center justify-between text-gray-700 dark:text-gray-300">
-                  <span>Dark Mode</span>
-                  <DarkModeToggle />
-                </div>
-                {user ? (
-                  <>
-                    <Link
-                      href="/profile"
-                      className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="block px-3 py-2 text-gray-700 dark:text-gray-300 w-full text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                    >
-                      Sign Out
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    href="/auth"
-                    className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </nav>
+      </nav>
+    </>
   )
 }
