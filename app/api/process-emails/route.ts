@@ -9,9 +9,11 @@ export const maxDuration = 60 // 60 seconds timeout
 
 export async function POST(request: Request) {
   try {
-    // Verify cron secret for security
+    // Optional: Verify cron secret if set (for security)
     const authHeader = request.headers.get('authorization')
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const cronSecret = process.env.CRON_SECRET
+    
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
