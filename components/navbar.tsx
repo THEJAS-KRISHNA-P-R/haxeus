@@ -15,11 +15,7 @@ import { DarkModeToggle, useTheme } from "@/contexts/ThemeContext"
 import { motion, AnimatePresence } from "framer-motion"
 import { StaggeredMenu } from "@/components/StaggeredMenu"
 import type { StaggeredMenuItem } from "@/components/StaggeredMenu"
-import dynamic from "next/dynamic"
-
-const GooeyNav = dynamic(() => import("@/components/GooeyNav"), {
-  ssr: false,
-})
+import DesktopNav from "@/components/DesktopNav"
 
 export function Navbar() {
   const [user, setUser] = useState<any>(null)
@@ -91,18 +87,12 @@ export function Navbar() {
 
   const isDarkMode = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
 
-  // GooeyNav items for desktop
-  const gooeyNavItems = [
+  // Desktop nav items
+  const desktopNavItems = [
     { label: 'Products', href: '/products' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
   ]
-
-  // Get initial active index based on current pathname
-  const getInitialActiveIndex = () => {
-    const index = gooeyNavItems.findIndex(item => pathname === item.href)
-    return index >= 0 ? index : 0
-  }
 
   return (
     <>
@@ -130,7 +120,7 @@ export function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <nav className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-40 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95 transition-colors duration-300">
+      <nav className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-0 z-40 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo (desktop) */}
@@ -144,7 +134,7 @@ export function Navbar() {
                 width={32} 
                 height={32} 
                 priority 
-                className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200 transition-all duration-300" 
+                className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200" 
               />
               <span>HAXEUZ</span>
             </Link>
@@ -161,7 +151,7 @@ export function Navbar() {
                   width={32} 
                   height={32} 
                   priority 
-                  className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200 transition-all duration-300" 
+                  className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200" 
                 />
                 <span>HAXEUZ</span>
               </Link>
@@ -169,16 +159,7 @@ export function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center">
-              <GooeyNav
-                items={gooeyNavItems}
-                particleCount={20}
-                particleDistances={[120, 15]}
-                particleR={150}
-                initialActiveIndex={getInitialActiveIndex()}
-                animationTime={800}
-                timeVariance={400}
-                colors={[1, 2, 3, 1, 2, 3, 1, 4]}
-              />
+              <DesktopNav items={desktopNavItems} />
             </div>
 
             {/* Desktop Search & Actions */}

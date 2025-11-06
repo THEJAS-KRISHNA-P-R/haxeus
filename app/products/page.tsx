@@ -95,14 +95,16 @@ const staticProducts: Product[] = [
 ]
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  // Load static products immediately to prevent skeleton flash
+  const [products, setProducts] = useState<Product[]>(staticProducts)
+  const [loading, setLoading] = useState(false)
   const [sortBy, setSortBy] = useState("default")
   const [priceRange, setPriceRange] = useState("all")
   const searchParams = useSearchParams()
   const searchQuery = searchParams?.get("search") || ""
 
   useEffect(() => {
+    // Quietly fetch from Supabase in background
     fetchProducts()
   }, [])
 
@@ -110,22 +112,18 @@ export default function ProductsPage() {
     try {
       const { data, error } = await supabase.from("products").select("*").order("id")
 
-      if (error) {
-        console.warn("Using static products:", error.message)
-        setProducts(staticProducts)
-      } else {
-        // Map Supabase data to match our interface
-        const mappedProducts = data?.map(product => ({
+      if (!error && data && data.length > 0) {
+        // Update with Supabase data if available
+        const mappedProducts = data.map(product => ({
           ...product,
           sizes: product.available_sizes || product.sizes || ["S", "M", "L", "XL", "XXL"]
-        })) || []
-        setProducts(mappedProducts.length > 0 ? mappedProducts : staticProducts)
+        }))
+        setProducts(mappedProducts)
       }
+      // If error or no data, keep using static products (already set)
     } catch (error) {
-      console.warn("Error fetching products, using static data:", error)
-      setProducts(staticProducts)
-    } finally {
-      setLoading(false)
+      // Static products already loaded, no action needed
+      console.warn("Using static product data:", error)
     }
   }
 
@@ -164,32 +162,8 @@ export default function ProductsPage() {
     return filtered
   }, [products, searchQuery, sortBy, priceRange])
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-12 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                Featured <span className="text-red-600 dark:text-red-500">Collection</span>
-              </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Discover our most popular premium T-shirts, carefully crafted for ultimate comfort and style.
-              </p>
-            </motion.div>
-          </div>
-          <ProductGridSkeleton />
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-12 overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-12 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -199,7 +173,7 @@ export default function ProductsPage() {
           className="text-center mb-12"
         >
           <motion.h1 
-            className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300"
+            className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -214,7 +188,7 @@ export default function ProductsPage() {
             </motion.span>
           </motion.h1>
           <motion.p 
-            className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto transition-colors duration-300"
+            className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -241,7 +215,7 @@ export default function ProductsPage() {
             
             <motion.div whileHover={hoverScale} whileTap={tapScale}>
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-500 transition-all shadow-sm">
+                <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-500 shadow-sm">
                   <SelectValue placeholder="Price Range" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
@@ -255,7 +229,7 @@ export default function ProductsPage() {
 
             <motion.div whileHover={hoverScale} whileTap={tapScale}>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-500 transition-all shadow-sm">
+                <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-500 shadow-sm">
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
@@ -352,7 +326,7 @@ export default function ProductsPage() {
                   transition={{ duration: 0.3 }}
                   className="snap-start"
                 >
-                  <Card className="group overflow-hidden bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 transition-all duration-500 border-0 dark:border dark:border-gray-700 h-full">
+                  <Card className="group overflow-hidden bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 border-0 dark:border dark:border-gray-700 h-full">
                     {/* Product Image */}
                     <Link href={`/products/${product.id}`}>
                       <div className="aspect-square relative bg-gradient-to-br from-gray-900 to-black overflow-hidden cursor-pointer">
@@ -412,7 +386,7 @@ export default function ProductsPage() {
                     <CardContent className="p-6">
                       <Link href={`/products/${product.id}`}>
                         <motion.h3 
-                          className="text-lg font-bold text-gray-900 dark:text-white mb-2 hover:text-red-600 dark:hover:text-red-500 transition-colors cursor-pointer line-clamp-1"
+                          className="text-lg font-bold text-gray-900 dark:text-white mb-2 hover:text-red-600 dark:hover:text-red-500 cursor-pointer line-clamp-1"
                           whileHover={{ x: 5 }}
                           transition={{ duration: 0.2 }}
                         >
@@ -432,7 +406,7 @@ export default function ProductsPage() {
                             transition={{ delay: index * 0.05 + sizeIndex * 0.05 }}
                             whileHover={{ scale: 1.1, backgroundColor: "#dc2626", color: "#ffffff" }}
                           >
-                            <Badge variant="outline" className="text-xs px-2 py-1 cursor-pointer transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-red-600 dark:hover:border-red-600">
+                            <Badge variant="outline" className="text-xs px-2 py-1 cursor-pointer dark:border-gray-600 dark:text-gray-300 dark:hover:bg-red-600 dark:hover:border-red-600">
                               {size}
                             </Badge>
                           </motion.div>
@@ -486,7 +460,7 @@ export default function ProductsPage() {
             <Button
               variant="outline"
               size="lg"
-              className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent transition-all duration-300 px-10 py-6 rounded-full text-lg font-semibold shadow-lg"
+              className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent px-10 py-6 rounded-full text-lg font-semibold shadow-lg"
             >
               Contact Us for Custom Designs
             </Button>

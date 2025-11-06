@@ -48,9 +48,9 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen scroll-smooth overflow-x-hidden bg-white dark:bg-gray-950 transition-colors duration-300">
+    <div className="min-h-screen scroll-smooth overflow-x-hidden bg-white dark:bg-gray-950">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-16 lg:py-24 snap-start transition-colors duration-300">
+      <section className="bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-16 lg:py-24 snap-start">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -61,7 +61,7 @@ export default function HomePage() {
             >
               <motion.div variants={fadeInUp}>
                 <motion.h1 
-                  className="text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight transition-colors duration-300"
+                  className="text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -78,7 +78,7 @@ export default function HomePage() {
                   Meets Comfort
                 </motion.h1>
                 <motion.p 
-                  className="text-lg text-gray-600 dark:text-gray-400 mt-6 leading-relaxed transition-colors duration-300"
+                  className="text-lg text-gray-600 dark:text-gray-400 mt-6 leading-relaxed"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
@@ -91,14 +91,14 @@ export default function HomePage() {
               <motion.div variants={fadeIn} className="flex gap-4 flex-wrap">
                 <Link href="/products">
                   <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                    <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-full text-lg shadow-lg hover:shadow-xl transition-all">
+                    <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-full text-lg shadow-lg hover:shadow-xl">
                       Shop Collection
                     </Button>
                   </motion.div>
                 </Link>
                 <Link href="/about">
                   <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                    <Button variant="outline" size="lg" className="px-8 py-6 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-lg transition-colors duration-300">
+                    <Button variant="outline" size="lg" className="px-8 py-6 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-950 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white text-lg">
                       Our Story
                     </Button>
                   </motion.div>
@@ -299,7 +299,7 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: index * 0.15 }}
               >
                 <motion.div whileHover={cardHover} whileTap={{ scale: 0.98 }}>
-                  <Card className="overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 transition-all duration-500 border-0 dark:border dark:border-gray-700 bg-white dark:bg-gray-800">
+                  <Card className="overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 border-0 dark:border dark:border-gray-700 bg-white dark:bg-gray-800">
                     <Link href={`/products/${product.id}`}>
                       <div className="aspect-square relative bg-gradient-to-br from-gray-900 to-black group cursor-pointer overflow-hidden">
                         <motion.div
@@ -327,7 +327,7 @@ export default function HomePage() {
                       <p className="text-2xl font-bold text-gray-900 dark:text-white mb-4">₹{product.price.toLocaleString("en-IN")}</p>
                       <Link href={`/products/${product.id}`}>
                         <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                          <Button className="w-full bg-red-600 text-white hover:bg-red-700 py-6 text-lg font-semibold rounded-xl shadow-md hover:shadow-lg transition-all">
+                          <Button className="w-full bg-red-600 text-white hover:bg-red-700 py-6 text-lg font-semibold rounded-xl shadow-md hover:shadow-lg">
                             View Details
                           </Button>
                         </motion.div>
@@ -418,7 +418,7 @@ export default function HomePage() {
 
               <motion.div variants={fadeInRight}>
                 <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl">
                     Learn More About Us
                   </Button>
                 </motion.div>

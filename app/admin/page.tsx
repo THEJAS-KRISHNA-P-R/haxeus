@@ -214,7 +214,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <CardTitle>Recent Orders</CardTitle>
             <Link href="/admin/orders">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-300">
                 View All
               </Button>
             </Link>

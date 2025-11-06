@@ -8,9 +8,15 @@ const nextConfig = {
   },
   images: {
     formats: ['image/avif', 'image/webp'],
-    domains: [
-      'hebbkx1anhila5yf.public.blob.vercel-storage.com',
-      'localhost',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'hebbkx1anhila5yf.public.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
     unoptimized: false,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],

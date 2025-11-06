@@ -118,7 +118,7 @@ body {
   }
 }
 
-/* Buttery smooth dark mode transitions - Optimized */
+/* Buttery smooth dark mode transitions - Optimized for performance */
 html {
   scroll-behavior: smooth;
 }
@@ -129,77 +129,48 @@ html * {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Root level - Most important for theme switching */
-html,
-body {
-  transition: background-color 0.4s ease-in-out,
-              color 0.4s ease-in-out !important;
-}
-
-/* Only transition color-related properties, not layout properties */
+/* Global dark mode transitions - PERFECTLY SYNCHRONIZED */
 *,
 *::before,
 *::after {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow;
-  transition-duration: 0.35s;
-  transition-timing-function: ease-in-out;
-  /* Exclude transform and other layout properties for smoother performance */
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 500ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Specific overrides for smooth transitions */
-div, section, main, article, aside, header, footer, nav {
-  transition: background-color 0.4s ease-in-out,
-              border-color 0.4s ease-in-out,
-              box-shadow 0.3s ease-in-out;
-}
-
-/* Text elements */
-h1, h2, h3, h4, h5, h6, p, span, label, a {
-  transition: color 0.35s ease-in-out;
-}
-
-/* Interactive elements - slightly faster */
-button, 
-input, 
-textarea, 
-select,
-[role="button"],
-[class*="Button"] {
-  transition: background-color 0.3s ease-in-out,
-              border-color 0.3s ease-in-out,
-              color 0.3s ease-in-out,
-              box-shadow 0.25s ease-in-out,
-              transform 0.2s ease-out;
-}
-
-/* Cards and surfaces */
-[class*="Card"],
-[class*="card"],
-[class*="bg-white"],
-[class*="bg-gray"] {
-  transition: background-color 0.4s ease-in-out,
-              border-color 0.4s ease-in-out,
-              box-shadow 0.3s ease-in-out;
-}
-
-/* SVG and Icons */
-svg {
-  transition: color 0.3s ease-in-out,
-              fill 0.3s ease-in-out,
-              stroke 0.3s ease-in-out;
-}
-
-/* Images - only opacity */
-img {
-  transition: opacity 0.3s ease-in-out;
-}
-
-/* Remove transitions during page load */
-.page-loading * {
+/* Images and media - no transition to prevent flicker */
+img,
+picture,
+video,
+canvas {
   transition: none !important;
 }
 
-/* Reduced motion */
+/* SVG elements - synchronized with global timing */
+svg,
+svg * {
+  transition-property: color, fill, stroke;
+  transition-duration: 500ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Framer Motion elements - preserve their own animations */
+[style*="transform"],
+[style*="opacity"][style*="transition"] {
+  /* Let Framer Motion handle these properties */
+  transition-property: transform, opacity !important;
+}
+
+/* Form inputs - keep responsive for better UX */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -212,6 +183,7 @@ img {
 }
 
 /* GPU acceleration for smooth rendering */
+html,
 body {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);

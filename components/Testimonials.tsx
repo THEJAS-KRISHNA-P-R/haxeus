@@ -30,7 +30,7 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial="hidden"
@@ -39,10 +39,10 @@ export default function Testimonials() {
           variants={scrollReveal}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            What Our <span className="text-red-600">Customers</span> Say
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            What Our <span className="text-red-600 dark:text-red-500">Customers</span> Say
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Don't just take our word for it. Here's what our community of satisfied customers has to say about their
             HAXEUZ experience.
           </p>
@@ -65,7 +65,7 @@ export default function Testimonials() {
                 whileHover={{ scale: 1.02, y: -5 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="p-8 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white border-0 h-full">
+                <Card className="p-8 shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 bg-white dark:bg-gray-800 border-0 dark:border dark:border-gray-700 h-full">
                   <motion.div 
                     className="flex mb-6"
                     initial={{ opacity: 0, scale: 0.5 }}
@@ -84,18 +84,18 @@ export default function Testimonials() {
                       </motion.span>
                     ))}
                   </motion.div>
-                  <p className="text-gray-700 mb-6 italic text-lg leading-relaxed">"{testimonial.text}"</p>
+                  <p className="text-gray-700 dark:text-gray-300 mb-6 italic text-lg leading-relaxed">"{testimonial.text}"</p>
                   <div className="flex items-center">
                     <motion.div
-                      className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-full mr-4 flex items-center justify-center shadow-lg"
+                      className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-full mr-4 flex items-center justify-center shadow-lg"
                       whileHover={{ scale: 1.1, rotate: 360 }}
                       transition={{ duration: 0.5 }}
                     >
                       <span className="text-white font-bold text-xl">{testimonial.name.charAt(0)}</span>
                     </motion.div>
                     <div>
-                      <h4 className="font-bold text-gray-900 text-lg">{testimonial.name}</h4>
-                      <p className="text-sm text-gray-600">{testimonial.role}</p>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-lg">{testimonial.name}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{testimonial.role}</p>
                     </div>
                   </div>
                 </Card>

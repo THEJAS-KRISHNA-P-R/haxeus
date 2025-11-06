@@ -86,8 +86,11 @@ export default function ProductDetailPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { addItem } = useCart()
-  const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
+  
+  // Initialize with static product immediately to prevent loading flash
+  const staticProduct = staticProducts.find((p) => p.id === Number.parseInt(params.id as string))
+  const [product, setProduct] = useState<Product | null>(staticProduct || null)
+  const [loading, setLoading] = useState(false)
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedColor, setSelectedColor] = useState("")
   const [quantity, setQuantity] = useState(1)
@@ -95,6 +98,7 @@ export default function ProductDetailPage() {
   const [addingToCart, setAddingToCart] = useState(false)
 
   useEffect(() => {
+    // Only fetch if we need to update from Supabase
     fetchProduct()
   }, [params.id])
 
@@ -102,30 +106,16 @@ export default function ProductDetailPage() {
     try {
       const { data, error } = await supabase.from("products").select("*").eq("id", params.id).single()
 
-      if (error) {
-        console.warn("Using static product data:", error.message)
-        const staticProduct = staticProducts.find((p) => p.id === Number.parseInt(params.id as string))
-        if (!staticProduct) {
-          throw new Error("Product not found")
-        }
-        setProduct(staticProduct)
-      } else {
-        // Map Supabase data to match our interface
+      if (!error) {
+        // Update with Supabase data if available
         setProduct({
           ...data,
           sizes: data.available_sizes || data.sizes || ["S", "M", "L", "XL", "XXL"]
         })
       }
     } catch (error) {
-      console.warn("Error fetching product:", error)
-      const staticProduct = staticProducts.find((p) => p.id === Number.parseInt(params.id as string))
-      if (staticProduct) {
-        setProduct(staticProduct)
-      } else {
-        router.push("/products")
-      }
-    } finally {
-      setLoading(false)
+      // Static product already loaded, no action needed
+      console.warn("Using static product data:", error)
     }
   }
 
@@ -166,17 +156,6 @@ export default function ProductDetailPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 dark:border-red-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading product details...</p>
-        </div>
-      </div>
-    )
-  }
-
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -191,7 +170,20 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-8 opacity-0 animate-fadeIn">
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease-out forwards;
+        }
+      `}</style>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}

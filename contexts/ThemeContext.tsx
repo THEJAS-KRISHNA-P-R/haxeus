@@ -93,25 +93,32 @@ export function DarkModeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="relative w-9 h-9 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 group overflow-hidden"
+      className="relative w-9 h-9 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 group overflow-hidden"
       aria-label="Toggle dark mode"
+      style={{ transition: 'background-color 500ms cubic-bezier(0.4, 0, 0.2, 1)' }}
     >
       {/* Sun Icon */}
       <Sun
-        className={`absolute w-5 h-5 text-yellow-500 transition-all duration-500 ease-in-out ${
+        className={`absolute w-5 h-5 text-yellow-500 ${
           isDark 
             ? "rotate-90 scale-0 opacity-0" 
             : "rotate-0 scale-100 opacity-100"
         }`}
+        style={{ 
+          transition: 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1), opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
       />
       
       {/* Moon Icon */}
       <Moon
-        className={`absolute w-5 h-5 text-blue-400 transition-all duration-500 ease-in-out ${
+        className={`absolute w-5 h-5 text-blue-400 ${
           isDark 
             ? "rotate-0 scale-100 opacity-100" 
             : "-rotate-90 scale-0 opacity-0"
         }`}
+        style={{ 
+          transition: 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1), opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
       />
     </button>
   )

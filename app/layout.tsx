@@ -25,6 +25,26 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const storageKey = 'haxeuz-theme';
+                const theme = localStorage.getItem(storageKey) || 'light';
+                const root = document.documentElement;
+                
+                if (theme === 'system') {
+                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  root.classList.add(systemTheme);
+                } else {
+                  root.classList.add(theme);
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider defaultTheme="light" storageKey="haxeuz-theme">
           <CartProvider>
