@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email TEXT UNIQUE NOT NULL,
   name TEXT,
-  status TEXT DEFAULT 'active', -- 'active', 'unsubscribed'
+  subscribed BOOLEAN DEFAULT true,
+  subscription_source TEXT,
   subscribed_at TIMESTAMP DEFAULT NOW(),
   unsubscribed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS email_templates (
 CREATE INDEX IF NOT EXISTS idx_email_queue_status ON email_queue(status);
 CREATE INDEX IF NOT EXISTS idx_email_queue_created ON email_queue(created_at);
 CREATE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter_subscribers(email);
-CREATE INDEX IF NOT EXISTS idx_newsletter_status ON newsletter_subscribers(status);
+CREATE INDEX IF NOT EXISTS idx_newsletter_subscribed ON newsletter_subscribers(subscribed);
 
 -- ROW LEVEL SECURITY
 ALTER TABLE email_queue ENABLE ROW LEVEL SECURITY;

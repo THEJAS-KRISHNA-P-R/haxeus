@@ -8,6 +8,35 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- For better search
 
 -- ========================================
+-- 0. USER ROLES (Required for RLS Policies)
+-- ========================================
+CREATE TABLE IF NOT EXISTS user_roles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  role TEXT NOT NULL DEFAULT 'customer',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_role ON user_roles(role);
+
+-- Enable RLS on user_roles
+ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own role" ON user_roles;
+DROP POLICY IF EXISTS "Service role can manage roles" ON user_roles;
+
+CREATE POLICY "Users can view own role" ON user_roles 
+  FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role can manage roles" ON user_roles 
+  FOR ALL 
+  USING (true);
+
+-- ========================================
 -- 1. ENHANCED PRODUCTS TABLE WITH SIZE-SPECIFIC INVENTORY
 -- ========================================
 DROP TABLE IF EXISTS product_inventory CASCADE;
@@ -16,7 +45,7 @@ DROP TABLE IF EXISTS product_images CASCADE;
 DROP TABLE IF EXISTS product_videos CASCADE;
 
 -- Product Images (Multiple images per product)
-CREATE TABLE product_images (
+CREATE TABLE IF NOT EXISTS product_images (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
   image_url TEXT NOT NULL,
@@ -26,7 +55,7 @@ CREATE TABLE product_images (
 );
 
 -- Product Videos (360° views, demos)
-CREATE TABLE product_videos (
+CREATE TABLE IF NOT EXISTS product_videos (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
   video_url TEXT NOT NULL,
@@ -36,7 +65,7 @@ CREATE TABLE product_videos (
 );
 
 -- Size-Specific Inventory (Real-time stock tracking)
-CREATE TABLE product_inventory (
+CREATE TABLE IF NOT EXISTS product_inventory (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
   size TEXT NOT NULL,
@@ -53,7 +82,7 @@ CREATE TABLE product_inventory (
 -- ========================================
 -- 2. PRODUCT REVIEWS & RATINGS
 -- ========================================
-CREATE TABLE product_reviews (
+CREATE TABLE IF NOT EXISTS product_reviews (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -70,7 +99,7 @@ CREATE TABLE product_reviews (
 );
 
 -- Review Images
-CREATE TABLE review_images (
+CREATE TABLE IF NOT EXISTS review_images (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   review_id UUID REFERENCES product_reviews(id) ON DELETE CASCADE,
   image_url TEXT NOT NULL,
@@ -78,7 +107,7 @@ CREATE TABLE review_images (
 );
 
 -- Review Helpfulness Tracking
-CREATE TABLE review_votes (
+CREATE TABLE IF NOT EXISTS review_votes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   review_id UUID REFERENCES product_reviews(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -90,7 +119,7 @@ CREATE TABLE review_votes (
 -- ========================================
 -- 3. ABANDONED CART TRACKING
 -- ========================================
-CREATE TABLE abandoned_carts (
+CREATE TABLE IF NOT EXISTS abandoned_carts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   cart_value DECIMAL(10, 2),
@@ -104,7 +133,7 @@ CREATE TABLE abandoned_carts (
 );
 
 -- Save for Later
-CREATE TABLE saved_for_later (
+CREATE TABLE IF NOT EXISTS saved_for_later (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
@@ -116,7 +145,7 @@ CREATE TABLE saved_for_later (
 -- ========================================
 -- 4. SEARCH ANALYTICS
 -- ========================================
-CREATE TABLE search_queries (
+CREATE TABLE IF NOT EXISTS search_queries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   query TEXT NOT NULL,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -128,7 +157,7 @@ CREATE TABLE search_queries (
 -- ========================================
 -- 5. EMAIL CAMPAIGNS & NEWSLETTERS
 -- ========================================
-CREATE TABLE newsletter_subscribers (
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email TEXT UNIQUE NOT NULL,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -138,7 +167,7 @@ CREATE TABLE newsletter_subscribers (
   unsubscribed_at TIMESTAMP
 );
 
-CREATE TABLE email_campaigns (
+CREATE TABLE IF NOT EXISTS email_campaigns (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   subject TEXT NOT NULL,
@@ -160,7 +189,7 @@ ALTER TABLE wishlist ADD COLUMN IF NOT EXISTS notify_back_in_stock BOOLEAN DEFAU
 ALTER TABLE wishlist ADD COLUMN IF NOT EXISTS price_at_addition DECIMAL(10, 2);
 
 -- Price Drop History
-CREATE TABLE price_changes (
+CREATE TABLE IF NOT EXISTS price_changes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
   old_price DECIMAL(10, 2),
@@ -172,7 +201,7 @@ CREATE TABLE price_changes (
 -- ========================================
 -- 7. PRODUCT RECOMMENDATIONS
 -- ========================================
-CREATE TABLE product_relations (
+CREATE TABLE IF NOT EXISTS product_relations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
   related_product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
@@ -183,7 +212,7 @@ CREATE TABLE product_relations (
 );
 
 -- User Product Views (for personalization)
-CREATE TABLE product_views (
+CREATE TABLE IF NOT EXISTS product_views (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -194,7 +223,7 @@ CREATE TABLE product_views (
 -- ========================================
 -- 8. COUPONS & DISCOUNTS
 -- ========================================
-CREATE TABLE coupons (
+CREATE TABLE IF NOT EXISTS coupons (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   code TEXT UNIQUE NOT NULL,
   discount_type TEXT NOT NULL, -- percentage, fixed
@@ -209,7 +238,7 @@ CREATE TABLE coupons (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE coupon_usage (
+CREATE TABLE IF NOT EXISTS coupon_usage (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   coupon_id UUID REFERENCES coupons(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -221,7 +250,7 @@ CREATE TABLE coupon_usage (
 -- ========================================
 -- 9. LOYALTY PROGRAM
 -- ========================================
-CREATE TABLE loyalty_points (
+CREATE TABLE IF NOT EXISTS loyalty_points (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
   total_points INTEGER DEFAULT 0,
@@ -231,7 +260,7 @@ CREATE TABLE loyalty_points (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE loyalty_transactions (
+CREATE TABLE IF NOT EXISTS loyalty_transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   points INTEGER NOT NULL,
@@ -244,7 +273,7 @@ CREATE TABLE loyalty_transactions (
 -- ========================================
 -- 10. RETURNS & EXCHANGES
 -- ========================================
-CREATE TABLE return_requests (
+CREATE TABLE IF NOT EXISTS return_requests (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -257,7 +286,7 @@ CREATE TABLE return_requests (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE return_items (
+CREATE TABLE IF NOT EXISTS return_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   return_request_id UUID REFERENCES return_requests(id) ON DELETE CASCADE,
   order_item_id UUID REFERENCES order_items(id) ON DELETE CASCADE,
@@ -269,7 +298,7 @@ CREATE TABLE return_items (
 -- ========================================
 -- 11. ANALYTICS EVENTS
 -- ========================================
-CREATE TABLE analytics_events (
+CREATE TABLE IF NOT EXISTS analytics_events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   event_type TEXT NOT NULL, -- page_view, add_to_cart, purchase, etc.
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -295,23 +324,23 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP;
 -- ========================================
 -- INDEXES FOR PERFORMANCE
 -- ========================================
-CREATE INDEX idx_product_inventory_product_id ON product_inventory(product_id);
-CREATE INDEX idx_product_inventory_stock ON product_inventory(stock_quantity);
-CREATE INDEX idx_product_reviews_product_id ON product_reviews(product_id);
-CREATE INDEX idx_product_reviews_user_id ON product_reviews(user_id);
-CREATE INDEX idx_product_reviews_rating ON product_reviews(rating);
-CREATE INDEX idx_review_images_review_id ON review_images(review_id);
-CREATE INDEX idx_abandoned_carts_user_id ON abandoned_carts(user_id);
-CREATE INDEX idx_abandoned_carts_recovered ON abandoned_carts(recovered);
-CREATE INDEX idx_search_queries_query ON search_queries USING gin(query gin_trgm_ops);
-CREATE INDEX idx_newsletter_email ON newsletter_subscribers(email);
-CREATE INDEX idx_product_relations_product_id ON product_relations(product_id);
-CREATE INDEX idx_product_views_product_id ON product_views(product_id);
-CREATE INDEX idx_coupons_code ON coupons(code);
-CREATE INDEX idx_loyalty_points_user_id ON loyalty_points(user_id);
-CREATE INDEX idx_return_requests_order_id ON return_requests(order_id);
-CREATE INDEX idx_analytics_events_type ON analytics_events(event_type);
-CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_product_inventory_product_id ON product_inventory(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_inventory_stock ON product_inventory(stock_quantity);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_product_id ON product_reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_user_id ON product_reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_rating ON product_reviews(rating);
+CREATE INDEX IF NOT EXISTS idx_review_images_review_id ON review_images(review_id);
+CREATE INDEX IF NOT EXISTS idx_abandoned_carts_user_id ON abandoned_carts(user_id);
+CREATE INDEX IF NOT EXISTS idx_abandoned_carts_recovered ON abandoned_carts(recovered);
+CREATE INDEX IF NOT EXISTS idx_search_queries_query ON search_queries USING gin(query gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter_subscribers(email);
+CREATE INDEX IF NOT EXISTS idx_product_relations_product_id ON product_relations(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_views_product_id ON product_views(product_id);
+CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_user_id ON loyalty_points(user_id);
+CREATE INDEX IF NOT EXISTS idx_return_requests_order_id ON return_requests(order_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_type ON analytics_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events(created_at);
 
 -- ========================================
 -- ROW LEVEL SECURITY
@@ -331,6 +360,32 @@ ALTER TABLE loyalty_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loyalty_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE return_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE return_items ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Anyone can view inventory" ON product_inventory;
+DROP POLICY IF EXISTS "Admins can manage inventory" ON product_inventory;
+DROP POLICY IF EXISTS "Anyone can view approved reviews" ON product_reviews;
+DROP POLICY IF EXISTS "Users can create reviews" ON product_reviews;
+DROP POLICY IF EXISTS "Users can update own reviews" ON product_reviews;
+DROP POLICY IF EXISTS "Admins can manage all reviews" ON product_reviews;
+DROP POLICY IF EXISTS "Anyone can view review images" ON review_images;
+DROP POLICY IF EXISTS "Users can add images to own reviews" ON review_images;
+DROP POLICY IF EXISTS "Users can vote on reviews" ON review_votes;
+DROP POLICY IF EXISTS "Users can view own abandoned carts" ON abandoned_carts;
+DROP POLICY IF EXISTS "Admins can view all abandoned carts" ON abandoned_carts;
+DROP POLICY IF EXISTS "Users manage own saved items" ON saved_for_later;
+DROP POLICY IF EXISTS "Anyone can subscribe to newsletter" ON newsletter_subscribers;
+DROP POLICY IF EXISTS "Users can view own subscription" ON newsletter_subscribers;
+DROP POLICY IF EXISTS "Users can update own subscription" ON newsletter_subscribers;
+DROP POLICY IF EXISTS "Anyone can view product relations" ON product_relations;
+DROP POLICY IF EXISTS "Admins can manage relations" ON product_relations;
+DROP POLICY IF EXISTS "Anyone can view active coupons" ON coupons;
+DROP POLICY IF EXISTS "Admins can manage coupons" ON coupons;
+DROP POLICY IF EXISTS "Users can view own loyalty points" ON loyalty_points;
+DROP POLICY IF EXISTS "Users can view own loyalty transactions" ON loyalty_transactions;
+DROP POLICY IF EXISTS "Users can view own returns" ON return_requests;
+DROP POLICY IF EXISTS "Users can create returns" ON return_requests;
+DROP POLICY IF EXISTS "Admins can manage all returns" ON return_requests;
 
 -- Product Inventory: Read by all, modify by admins
 CREATE POLICY "Anyone can view inventory" ON product_inventory FOR SELECT USING (true);
@@ -402,6 +457,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_product_rating ON product_reviews;
 CREATE TRIGGER trigger_update_product_rating
 AFTER INSERT OR UPDATE OR DELETE ON product_reviews
 FOR EACH ROW EXECUTE FUNCTION update_product_rating();
@@ -421,6 +477,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_decrement_inventory ON order_items;
 CREATE TRIGGER trigger_decrement_inventory
 AFTER INSERT ON order_items
 FOR EACH ROW EXECUTE FUNCTION decrement_inventory();
@@ -450,6 +507,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_award_loyalty_points ON orders;
 CREATE TRIGGER trigger_award_loyalty_points
 AFTER UPDATE ON orders
 FOR EACH ROW EXECUTE FUNCTION award_loyalty_points();

@@ -7,3 +7,16 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NEXT_PRIVATE_TARGET = "server"
+
+# Environment variables
+[context.production.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "https://your-project.supabase.co"
+  NODE_VERSION = "18"
+
+# Scheduled functions
+[functions]
+  included_files = ["netlify/functions/**"]
+  node_bundler = "esbuild"
