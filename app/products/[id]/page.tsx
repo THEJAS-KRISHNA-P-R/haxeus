@@ -9,11 +9,13 @@ import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { supabase } from "@/lib/supabase"
+import { supabase, ProductInventory } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { useCart } from "@/contexts/CartContext"
 import { WishlistButton } from "@/components/WishlistButton"
-import { Heart, ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react"
+import { Heart, ShoppingCart, Truck, Shield, RotateCcw, Star } from "lucide-react"
+import { getProductInventory, checkStockAvailability } from "@/lib/inventory"
+import { getProductReviews, getProductRatingsSummary } from "@/lib/reviews"
 
 interface Product {
   id: number
@@ -96,10 +98,15 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [showBack, setShowBack] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
+  const [inventory, setInventory] = useState<ProductInventory[]>([])
+  const [reviews, setReviews] = useState<any[]>([])
+  const [ratingSummary, setRatingSummary] = useState<any>(null)
 
   useEffect(() => {
     // Only fetch if we need to update from Supabase
     fetchProduct()
+    fetchInventory()
+    fetchReviews()
   }, [params.id])
 
   const fetchProduct = async () => {
@@ -116,6 +123,30 @@ export default function ProductDetailPage() {
     } catch (error) {
       // Static product already loaded, no action needed
       console.warn("Using static product data:", error)
+    }
+  }
+
+  const fetchInventory = async () => {
+    try {
+      const inventoryData = await getProductInventory(Number(params.id))
+      setInventory(inventoryData)
+    } catch (error) {
+      console.warn("Could not fetch inventory:", error)
+    }
+  }
+
+  const fetchReviews = async () => {
+    try {
+      const { reviews: reviewsData } = await getProductReviews(Number(params.id), {
+        limit: 5,
+        sortBy: 'helpful'
+      })
+      setReviews(reviewsData)
+
+      const summary = await getProductRatingsSummary(Number(params.id))
+      setRatingSummary(summary)
+    } catch (error) {
+      console.warn("Could not fetch reviews:", error)
     }
   }
 
@@ -224,7 +255,25 @@ export default function ProductDetailPage() {
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{product.name}</h1>
               <div className="flex items-center gap-4 mb-6">
                 <span className="text-3xl font-bold text-red-600 dark:text-red-500">₹{product.price.toLocaleString("en-IN")}</span>
-                
+                {ratingSummary && ratingSummary.totalReviews > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-5 h-5 ${
+                            i < Math.round(ratingSummary.averageRating)
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-300 dark:text-gray-600'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.totalReviews} reviews)
+                    </span>
+                  </div>
+                )}
               </div>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">{product.description}</p>
             </div>
@@ -232,18 +281,41 @@ export default function ProductDetailPage() {
             {/* Size Selection */}
             <div>
               <Label className="text-lg font-semibold mb-4 block dark:text-white">Size</Label>
-              <RadioGroup value={selectedSize} onValueChange={setSelectedSize} className="flex gap-3 flex-wrap">
-                  {(product.sizes || product.available_sizes || []).map((size) => (
-                  <div
+              <div className="flex gap-3 flex-wrap">
+                {(product.sizes || product.available_sizes || []).map((size) => {
+                  const stock = inventory.find(inv => inv.size === size)
+                  const available = !stock || stock.stock_quantity > 0
+                  const lowStock = stock && stock.stock_quantity > 0 && stock.stock_quantity <= stock.low_stock_threshold
+                  
+                  return (
+                    <div
                       key={size}
-                    className={`border-2 cursor-pointer rounded-lg p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${selectedSize === size ? "bg-red-600 text-white border-red-600" : "hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600 dark:text-gray-300"}`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {/* Remove the radio disc, just show the label */}
-                    {size}
-                  </div>
-                  ))}
-              </RadioGroup>
+                      className={`relative border-2 rounded-lg p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${
+                        !available
+                          ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-gray-700'
+                          : selectedSize === size
+                          ? 'bg-red-600 text-white border-red-600 cursor-pointer'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600 dark:text-gray-300 cursor-pointer'
+                      }`}
+                      onClick={() => available && setSelectedSize(size)}
+                    >
+                      {size}
+                      {!available && <span className="ml-1 text-xs">✕</span>}
+                      {lowStock && available && <span className="ml-1 text-xs">⚡</span>}
+                      {lowStock && available && (
+                        <Badge className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs">
+                          {stock.stock_quantity} left
+                        </Badge>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              {selectedSize && inventory.find(inv => inv.size === selectedSize && inv.stock_quantity <= inv.low_stock_threshold) && (
+                <p className="mt-2 text-yellow-600 dark:text-yellow-500 text-sm font-medium">
+                  ⚡ Hurry! Only {inventory.find(inv => inv.size === selectedSize)?.stock_quantity} left in stock
+                </p>
+              )}
             </div>
 
 
@@ -317,6 +389,120 @@ export default function ProductDetailPage() {
             </Card>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        {ratingSummary && ratingSummary.totalReviews > 0 && (
+          <div className="mt-16">
+            <Card className="p-8 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Customer Reviews</h2>
+              
+              {/* Rating Summary */}
+              <div className="flex flex-col md:flex-row gap-8 mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
+                <div className="text-center md:text-left">
+                  <div className="text-5xl font-bold text-gray-900 dark:text-white mb-2">
+                    {ratingSummary.averageRating.toFixed(1)}
+                  </div>
+                  <div className="flex justify-center md:justify-start mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-6 h-6 ${
+                          i < Math.round(ratingSummary.averageRating)
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300 dark:text-gray-600'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-400">
+                    Based on {ratingSummary.totalReviews} reviews
+                  </div>
+                </div>
+
+                {/* Rating Distribution */}
+                <div className="flex-1">
+                  {[5, 4, 3, 2, 1].map((rating) => {
+                    const count = ratingSummary.ratingDistribution[rating] || 0
+                    const percentage = ratingSummary.totalReviews > 0 
+                      ? (count / ratingSummary.totalReviews) * 100 
+                      : 0
+                    
+                    return (
+                      <div key={rating} className="flex items-center gap-3 mb-2">
+                        <span className="text-sm w-8 text-gray-600 dark:text-gray-400">{rating} ⭐</span>
+                        <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-yellow-400"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm w-12 text-right text-gray-600 dark:text-gray-400">{count}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Individual Reviews */}
+              <div className="space-y-6">
+                {reviews.map((review) => (
+                  <div key={review.id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < review.rating
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300 dark:text-gray-600'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          {review.verified_purchase && (
+                            <Badge className="bg-green-500 text-white text-xs">Verified Purchase</Badge>
+                          )}
+                        </div>
+                        {review.title && (
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{review.title}</h4>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(review.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {review.comment && (
+                      <p className="text-gray-700 dark:text-gray-300 mb-3">{review.comment}</p>
+                    )}
+                    {review.images && review.images.length > 0 && (
+                      <div className="flex gap-2 mb-3">
+                        {review.images.map((img: any) => (
+                          <div key={img.id} className="w-20 h-20 relative rounded-lg overflow-hidden">
+                            <Image src={img.image_url} alt="Review" fill className="object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-4 text-sm">
+                      <button className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        Helpful ({review.helpful_count})
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {ratingSummary.totalReviews > 5 && (
+                <Button variant="outline" className="w-full mt-6">
+                  View All {ratingSummary.totalReviews} Reviews
+                </Button>
+              )}
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   )
