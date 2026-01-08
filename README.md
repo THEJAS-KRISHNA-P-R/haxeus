@@ -4,33 +4,52 @@ A modern, high-performance e-commerce platform for premium artistic T-shirts bui
 
 ---
 
-## ✨ Features
+## 📚 Documentation
 
-### Shopping Experience
-- **Product Catalog**: Browse premium T-shirt collection with advanced search and filters
-- **Smart Search**: Expandable search bar in navbar with URL parameter sync
-- **Product Filters**: Filter by price range, sort by price/name
-- **Shopping Cart**: Persistent cart with localStorage (guests) + Supabase sync (users)
-- **Order Tracking**: Real-time order status updates and history
+**For complete documentation, see [DOCUMENTATION.md](DOCUMENTATION.md)**
 
-### User Features
-- **Authentication**: Email/password + OAuth via Supabase Auth
-- **User Profiles**: Manage account, addresses, and order history
-- **Wishlist**: Save favorite products
-- **Reviews**: Rate and review products (coming soon)
+This includes:
+- Full installation guide
+- Database setup instructions
+- Admin panel configuration
+- Email system setup
+- Deployment guide
+- Troubleshooting tips
+- Feature documentation
 
-### UI/UX
-- **Smooth Animations**: Framer Motion animations throughout
-- **Snap Scroll**: Optimized scrolling experience
-- **Responsive Design**: Mobile-first design with Tailwind CSS
-- **Loading States**: Skeleton loaders for better perceived performance
-- **Error Boundaries**: Graceful error handling
+---
 
-### Performance
-- **Code Splitting**: Webpack optimization with smart chunking
-- **Image Optimization**: AVIF/WebP formats with lazy loading
-- **GPU Acceleration**: Hardware-accelerated animations
-- **Tree Shaking**: Optimized bundle sizes
+## ✨ Quick Start
+
+### Prerequisites
+- Node.js v18+
+- npm v8+
+- Supabase account
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/haxeuz-ecommerce.git
+cd haxeuz-ecommerce
+
+# Install dependencies
+npm install
+
+# Setup environment
+cp .env.example .env.local
+# Edit .env.local with your Supabase credentials
+
+# Setup database
+# 1. Open Supabase SQL Editor
+# 2. Run supabase/COMPLETE_DATABASE_SETUP.sql
+# 3. Make yourself admin (instructions in the SQL file)
+
+# Run development server
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000)
 
 ---
 
@@ -43,11 +62,95 @@ A modern, high-performance e-commerce platform for premium artistic T-shirts bui
 - **UI Components**: shadcn/ui (Radix UI primitives)
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
-- **State Management**: React Context API
-- **Fonts**: Inter (Google Fonts via next/font)
 
 ### Backend
 - **Database**: Supabase (PostgreSQL 15)
+- **Authentication**: Supabase Auth (email/password, OAuth)
+- **Storage**: Supabase Storage for product images
+- **Security**: Row Level Security (RLS) policies
+
+---
+
+## 📋 Environment Variables
+
+Create `.env.local` in the root directory:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Get these from your Supabase project dashboard at [supabase.com](https://supabase.com)
+
+---
+
+## 🗂️ Project Structure
+
+```
+haxeuz-v26/
+├── app/                      # Next.js App Router pages
+├── components/               # React components
+├── contexts/                 # React Context providers
+├── hooks/                    # Custom React hooks
+├── lib/                      # Utilities & configs
+├── supabase/                 # Database setup
+│   └── COMPLETE_DATABASE_SETUP.sql  # Single file for complete DB setup
+├── public/                   # Static assets
+├── DOCUMENTATION.md          # Complete documentation
+└── README.md                 # This file
+```
+
+---
+
+## 🚀 Development Commands
+
+```bash
+npm run dev          # Start dev server on localhost:3000
+npm run build        # Build for production
+npm start            # Start production server
+npm run lint         # Run ESLint
+```
+
+---
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Push to GitHub
+2. Import repository on [vercel.com](https://vercel.com)
+3. Add environment variables
+4. Deploy!
+
+See [DOCUMENTATION.md](DOCUMENTATION.md) for detailed deployment instructions.
+
+---
+
+## 🎯 Key Features
+
+- **Product Catalog**: Browse, search, and filter products
+- **Shopping Cart**: Persistent cart with real-time sync
+- **User Authentication**: Email/password + OAuth
+- **Order Tracking**: Real-time order status updates
+- **Admin Dashboard**: Manage products, orders, and users
+- **Email System**: Automated welcome and order emails
+- **Loyalty Program**: Earn and redeem points
+- **Coupons**: Discount codes and promotions
+- **Reviews**: Customer ratings and reviews
+- **Wishlist**: Save favorite products
+
+---
+
+## 📞 Support
+
+For detailed documentation, troubleshooting, and setup guides, see:
+- **[DOCUMENTATION.md](DOCUMENTATION.md)** - Complete guide
+- **[supabase/COMPLETE_DATABASE_SETUP.sql](supabase/COMPLETE_DATABASE_SETUP.sql)** - Database setup
+
+---
+
+**Built with ❤️ by the HAXEUZ Team**  
+Powered by Next.js 15, Supabase, and Framer Motion
 - **Authentication**: Supabase Auth (email/password, OAuth)
 - **Storage**: Supabase Storage for product images
 - **Real-time**: Supabase Realtime subscriptions

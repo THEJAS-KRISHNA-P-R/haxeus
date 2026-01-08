@@ -12,19 +12,23 @@ import { supabase, type UserAddress } from "@/lib/supabase"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
 import { sendOrderConfirmationEmail } from "@/lib/email"
-import { ArrowLeft, CreditCard, Wallet, Building2 } from "lucide-react"
+import { ArrowLeft, CreditCard, Wallet, Building2, Smartphone, QrCode } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { QRCodeSVG } from "qrcode.react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, clearCart } = useCart()
   const { toast } = useToast()
+  const isMobile = useIsMobile()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [addresses, setAddresses] = useState<UserAddress[]>([])
   const [selectedAddress, setSelectedAddress] = useState<string>("")
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "online">("cod")
+  const [selectedPaymentApp, setSelectedPaymentApp] = useState<string>("gpay")
 
   useEffect(() => {
     checkAuth()
@@ -70,6 +74,37 @@ export default function CheckoutPage() {
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const shipping = subtotal > 2000 ? 0 : 150
   const total = subtotal + shipping
+
+  const UPI_ID = "shahzadak735@okaxis"
+  const UPI_NAME = "HAXEUZ"
+  
+  // Generate UPI payment string
+  const generateUPIString = () => {
+    return `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`Order Payment - HAXEUZ`)}`
+  }
+
+  // Handle UPI payment on mobile
+  const handleUPIPayment = () => {
+    const upiString = generateUPIString()
+    
+    // UPI app URLs for different payment apps
+    const appUrls: Record<string, string> = {
+      gpay: `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
+      phonepe: `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
+      paytm: `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
+      default: upiString
+    }
+
+    const url = appUrls[selectedPaymentApp] || appUrls.default
+    
+    // Open payment app
+    window.location.href = url
+    
+    toast({
+      title: "Opening payment app",
+      description: "Complete the payment in your UPI app",
+    })
+  }
 
   async function handlePlaceOrder() {
     if (!selectedAddress) {
@@ -269,7 +304,7 @@ export default function CheckoutPage() {
               <CardHeader>
                 <CardTitle className="dark:text-white">Payment Method</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <RadioGroup value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
                   <div
                     className={`border rounded-lg p-4 cursor-pointer transition ${
@@ -290,22 +325,136 @@ export default function CheckoutPage() {
                   </div>
 
                   <div
-                    className={`border rounded-lg p-4 cursor-pointer transition opacity-50 ${
+                    className={`border rounded-lg p-4 cursor-pointer transition ${
                       paymentMethod === "online" ? "border-red-600 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-600"
                     }`}
+                    onClick={() => setPaymentMethod("online")}
                   >
                     <div className="flex items-center gap-3">
-                      <RadioGroupItem value="online" id="online" disabled />
-                      <label htmlFor="online" className="flex-1 cursor-not-allowed flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 dark:text-gray-400" />
+                      <RadioGroupItem value="online" id="online" />
+                      <label htmlFor="online" className="flex-1 cursor-pointer flex items-center gap-3">
+                        <Smartphone className="w-5 h-5 dark:text-gray-300" />
                         <div>
-                          <div className="font-semibold dark:text-gray-300">Online Payment</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Coming soon</div>
+                          <div className="font-semibold dark:text-white">UPI Payment</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {isMobile ? "Pay via UPI app" : "Scan QR code to pay"}
+                          </div>
                         </div>
                       </label>
                     </div>
                   </div>
                 </RadioGroup>
+
+                {/* UPI Payment Details */}
+                {paymentMethod === "online" && (
+                  <div className="mt-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+                    {isMobile ? (
+                      // Mobile: Show payment app selection
+                      <div className="space-y-4">
+                        <Label className="text-sm font-semibold dark:text-white">Select Payment App</Label>
+                        <RadioGroup value={selectedPaymentApp} onValueChange={setSelectedPaymentApp}>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div
+                              className={`border rounded-lg p-3 cursor-pointer transition ${
+                                selectedPaymentApp === "gpay" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600"
+                              }`}
+                              onClick={() => setSelectedPaymentApp("gpay")}
+                            >
+                              <div className="flex items-center gap-2">
+                                <RadioGroupItem value="gpay" id="gpay" />
+                                <label htmlFor="gpay" className="cursor-pointer text-sm font-medium dark:text-white">
+                                  Google Pay
+                                </label>
+                              </div>
+                            </div>
+                            <div
+                              className={`border rounded-lg p-3 cursor-pointer transition ${
+                                selectedPaymentApp === "phonepe" ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20" : "border-gray-300 dark:border-gray-600"
+                              }`}
+                              onClick={() => setSelectedPaymentApp("phonepe")}
+                            >
+                              <div className="flex items-center gap-2">
+                                <RadioGroupItem value="phonepe" id="phonepe" />
+                                <label htmlFor="phonepe" className="cursor-pointer text-sm font-medium dark:text-white">
+                                  PhonePe
+                                </label>
+                              </div>
+                            </div>
+                            <div
+                              className={`border rounded-lg p-3 cursor-pointer transition ${
+                                selectedPaymentApp === "paytm" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600"
+                              }`}
+                              onClick={() => setSelectedPaymentApp("paytm")}
+                            >
+                              <div className="flex items-center gap-2">
+                                <RadioGroupItem value="paytm" id="paytm" />
+                                <label htmlFor="paytm" className="cursor-pointer text-sm font-medium dark:text-white">
+                                  Paytm
+                                </label>
+                              </div>
+                            </div>
+                            <div
+                              className={`border rounded-lg p-3 cursor-pointer transition ${
+                                selectedPaymentApp === "default" ? "border-gray-600 bg-gray-50 dark:bg-gray-800" : "border-gray-300 dark:border-gray-600"
+                              }`}
+                              onClick={() => setSelectedPaymentApp("default")}
+                            >
+                              <div className="flex items-center gap-2">
+                                <RadioGroupItem value="default" id="default" />
+                                <label htmlFor="default" className="cursor-pointer text-sm font-medium dark:text-white">
+                                  Other UPI
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </RadioGroup>
+                        <Button
+                          onClick={handleUPIPayment}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                        >
+                          <Smartphone className="w-4 h-4 mr-2" />
+                          Pay ₹{total.toLocaleString("en-IN")} via UPI
+                        </Button>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                          You will be redirected to your payment app
+                        </p>
+                      </div>
+                    ) : (
+                      // Desktop: Show QR code
+                      <div className="space-y-4">
+                        <div className="text-center">
+                          <Label className="text-sm font-semibold dark:text-white">Scan QR Code to Pay</Label>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Use any UPI app to scan and pay
+                          </p>
+                        </div>
+                        <div className="flex justify-center p-4 bg-white dark:bg-gray-800 rounded-lg">
+                          <QRCodeSVG
+                            value={generateUPIString()}
+                            size={200}
+                            level="H"
+                            includeMargin={true}
+                            className="border-4 border-gray-200 dark:border-gray-700 rounded-lg"
+                          />
+                        </div>
+                        <div className="text-center space-y-2">
+                          <div className="flex items-center justify-center gap-2 text-sm">
+                            <QrCode className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                            <span className="font-semibold dark:text-white">Amount: ₹{total.toLocaleString("en-IN")}</span>
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            UPI ID: {UPI_ID}
+                          </div>
+                        </div>
+                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                          <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                            ⚠️ After successful payment, please click "I've Paid" button below
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
