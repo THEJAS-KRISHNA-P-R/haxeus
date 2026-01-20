@@ -1,7 +1,7 @@
 -- ============================================
--- HAXEUZ E-COMMERCE COMPLETE DATABASE SETUP
+-- HAXEUS E-COMMERCE COMPLETE DATABASE SETUP
 -- ============================================
--- This single file contains the complete database schema for HAXEUZ
+-- This single file contains the complete database schema for HAXEUS
 -- Run this file once in your Supabase SQL Editor to set up everything
 -- 
 -- Includes:
@@ -882,7 +882,7 @@ BEGIN
     INSERT INTO email_queue (
       email_type, recipient_email, recipient_name, subject, template_data, status
     ) VALUES (
-      'welcome', user_email, user_name, 'Welcome to HAXEUZ!',
+      'welcome', user_email, user_name, 'Welcome to HAXEUS!',
       jsonb_build_object('name', user_name, 'email', user_email), 'pending'
     );
   EXCEPTION
@@ -951,11 +951,11 @@ INSERT INTO email_templates (template_name, subject, html_body, text_body, varia
  '<html><body><h1>Your order has been updated</h1><p>Status: {status}</p><p>Tracking: {trackingNumber}</p></body></html>',
  'Your order has been updated. Status: {status}. Tracking: {trackingNumber}',
  '["orderId", "status", "trackingNumber", "estimatedDelivery"]'::jsonb),
-('welcome', 'Welcome to HAXEUZ!',
- '<html><body><h1>Welcome to HAXEUZ!</h1><p>Hi {name}, thanks for joining us!</p></body></html>',
- 'Welcome to HAXEUZ! Hi {name}, thanks for joining us!',
+('welcome', 'Welcome to HAXEUS!',
+ '<html><body><h1>Welcome to HAXEUS!</h1><p>Hi {name}, thanks for joining us!</p></body></html>',
+ 'Welcome to HAXEUS! Hi {name}, thanks for joining us!',
  '["name"]'::jsonb),
-('newsletter_welcome', 'Welcome to HAXEUZ Newsletter!',
+('newsletter_welcome', 'Welcome to HAXEUS Newsletter!',
  '<html><body><h1>Thanks for subscribing!</h1><p>Stay tuned for exclusive deals and updates.</p></body></html>',
  'Thanks for subscribing! Stay tuned for exclusive deals and updates.',
  '["name"]'::jsonb)

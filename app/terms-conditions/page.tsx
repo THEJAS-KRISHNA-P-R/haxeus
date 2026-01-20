@@ -22,7 +22,7 @@ export default function TermsConditionsPage() {
             </CardHeader>
             <CardContent className="p-0 text-gray-700 leading-relaxed">
               <p>
-                Welcome to HAXEUZ! These Terms and Conditions ("Terms") govern your use of the HAXEUZ website and the
+                Welcome to HAXEUS! These Terms and Conditions ("Terms") govern your use of the HAXEUS website and the
                 purchase of products from us. By accessing or using our website, you agree to be bound by these Terms.
                 If you do not agree with any part of these Terms, you must not use our website.
               </p>
@@ -37,8 +37,8 @@ export default function TermsConditionsPage() {
             <CardContent className="p-0 text-gray-700 leading-relaxed">
               <p>
                 All content on this website, including text, graphics, logos, images, and software, is the property of
-                HAXEUZ or its content suppliers and protected by international copyright laws. The compilation of all
-                content on this site is the exclusive property of HAXEUZ.
+                HAXEUS or its content suppliers and protected by international copyright laws. The compilation of all
+                content on this site is the exclusive property of HAXEUS.
               </p>
             </CardContent>
           </Card>
@@ -94,7 +94,7 @@ export default function TermsConditionsPage() {
             </CardHeader>
             <CardContent className="p-0 text-gray-700 leading-relaxed">
               <p>
-                HAXEUZ will not be liable for any direct, indirect, incidental, special, consequential, or exemplary
+                HAXEUS will not be liable for any direct, indirect, incidental, special, consequential, or exemplary
                 damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other
                 intangible losses resulting from the use or the inability to use the website or products.
               </p>

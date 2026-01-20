@@ -1,6 +1,6 @@
-# HAXEUZ - Complete Documentation
+# HAXEUS - Complete Documentation
 
-Complete documentation for the HAXEUZ E-Commerce Platform - A modern, high-performance platform for premium artistic T-shirts.
+Complete documentation for the HAXEUS E-Commerce Platform - A modern, high-performance platform for premium artistic T-shirts.
 
 ---
 
@@ -62,8 +62,8 @@ Complete documentation for the HAXEUZ E-Commerce Platform - A modern, high-perfo
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/haxeuz-ecommerce.git
-cd haxeuz-ecommerce
+git clone https://github.com/yourusername/haxeus-ecommerce.git
+cd haxeus-ecommerce
 
 # Install dependencies
 npm install
@@ -689,7 +689,7 @@ npm ci
 ## Project Structure
 
 ```
-haxeuz-v26/
+haxeus-v26/
 ├── app/                          # Next.js App Router
 │   ├── about/page.tsx           # About page
 │   ├── admin/                   # Admin dashboard
@@ -838,4 +838,4 @@ npm run type-check       # TypeScript check
 
 **Last Updated:** January 2026  
 **Version:** 26  
-**Built with ❤️ for HAXEUZ**
+**Built with ❤️ for HAXEUS**

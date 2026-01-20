@@ -1,6 +1,6 @@
 {
-  "name": "HAXEUZ - Premium Streetwear",
-  "short_name": "HAXEUZ",
+  "name": "HAXEUS - Premium Streetwear",
+  "short_name": "HAXEUS",
   "description": "Premium streetwear and fashion e-commerce store featuring unique designs and quality apparel",
   "start_url": "/",
   "display": "standalone",
@@ -39,28 +39,47 @@
       "purpose": "any"
     }
   ],
-  "categories": ["shopping", "lifestyle", "fashion"],
+  "categories": [
+    "shopping",
+    "lifestyle",
+    "fashion"
+  ],
   "shortcuts": [
     {
       "name": "Shop Products",
       "short_name": "Shop",
       "description": "Browse all products",
       "url": "/products",
-      "icons": [{ "src": "/icons/shop-icon.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icons/shop-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Cart",
       "short_name": "Cart",
       "description": "View your shopping cart",
       "url": "/cart",
-      "icons": [{ "src": "/icons/cart-icon.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icons/cart-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Orders",
       "short_name": "Orders",
       "description": "Track your orders",
       "url": "/orders",
-      "icons": [{ "src": "/icons/orders-icon.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icons/orders-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "screenshots": [

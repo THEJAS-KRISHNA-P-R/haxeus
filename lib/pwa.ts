@@ -109,7 +109,7 @@ export function setupAddToHomeScreen(onPromptAvailable?: () => void) {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault()
     deferredPrompt = e
-    
+
     if (onPromptAvailable) {
       onPromptAvailable()
     }
@@ -129,7 +129,7 @@ export async function showAddToHomeScreen(): Promise<boolean> {
 
   deferredPrompt.prompt()
   const { outcome } = await deferredPrompt.userChoice
-  
+
   console.log(`User response: ${outcome}`)
   deferredPrompt = null
 
@@ -171,7 +171,7 @@ export async function queueOfflineOrder(orderData: any): Promise<void> {
     const db = await openDB()
     const transaction = db.transaction(['pending-orders'], 'readwrite')
     const store = transaction.objectStore('pending-orders')
-    
+
     await new Promise((resolve, reject) => {
       const request = store.add({
         ...orderData,
@@ -199,7 +199,7 @@ export async function queueOfflineOrder(orderData: any): Promise<void> {
 // IndexedDB helper
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('haxeuz-db', 1)
+    const request = indexedDB.open('haxeus-db', 1)
 
     request.onerror = () => reject(request.error)
     request.onsuccess = () => resolve(request.result)

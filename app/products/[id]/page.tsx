@@ -38,7 +38,7 @@ const staticProducts: Product[] = [
     front_image: "/images/busted-front.jpg",
     back_image: "/images/busted-back.jpg",
     sizes: ["S", "M", "L", "XL", "XXL"],
-    
+
   },
   {
     id: 2,
@@ -49,7 +49,7 @@ const staticProducts: Product[] = [
     front_image: "/images/save-flower-front.jpg",
     back_image: "/images/save-flower-back.jpg",
     sizes: ["S", "M", "L", "XL", "XXL"],
-    
+
   },
   {
     id: 3,
@@ -88,7 +88,7 @@ export default function ProductDetailPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { addItem } = useCart()
-  
+
   // Initialize with static product immediately to prevent loading flash
   const staticProduct = staticProducts.find((p) => p.id === Number.parseInt(params.id as string))
   const [product, setProduct] = useState<Product | null>(staticProduct || null)
@@ -170,7 +170,7 @@ export default function ProductDetailPage() {
     setAddingToCart(true)
     try {
       await addItem(product!.id, selectedSize, quantity)
-      
+
       toast({
         title: "Added to cart!",
         description: `${product!.name} has been added to your cart.`,
@@ -261,11 +261,10 @@ export default function ProductDetailPage() {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-5 h-5 ${
-                            i < Math.round(ratingSummary.averageRating)
+                          className={`w-5 h-5 ${i < Math.round(ratingSummary.averageRating)
                               ? 'fill-yellow-400 text-yellow-400'
                               : 'text-gray-300 dark:text-gray-600'
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>
@@ -286,17 +285,16 @@ export default function ProductDetailPage() {
                   const stock = inventory.find(inv => inv.size === size)
                   const available = !stock || stock.stock_quantity > 0
                   const lowStock = stock && stock.stock_quantity > 0 && stock.stock_quantity <= stock.low_stock_threshold
-                  
+
                   return (
                     <div
                       key={size}
-                      className={`relative border-2 rounded-lg p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${
-                        !available
+                      className={`relative border-2 rounded-lg p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${!available
                           ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-gray-700'
                           : selectedSize === size
-                          ? 'bg-red-600 text-white border-red-600 cursor-pointer'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600 dark:text-gray-300 cursor-pointer'
-                      }`}
+                            ? 'bg-red-600 text-white border-red-600 cursor-pointer'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600 dark:text-gray-300 cursor-pointer'
+                        }`}
                       onClick={() => available && setSelectedSize(size)}
                     >
                       {size}
@@ -349,7 +347,7 @@ export default function ProductDetailPage() {
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 {addingToCart ? 'Adding...' : 'Add to Cart'}
               </Button>
-              <WishlistButton 
+              <WishlistButton
                 productId={product.id}
                 size="lg"
                 className="h-14 px-6 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
@@ -382,7 +380,7 @@ export default function ProductDetailPage() {
                 <li>• 100% premium cotton blend</li>
                 <li>• Pre-shrunk for perfect fit</li>
                 <li>• Machine washable (cold water recommended)</li>
-                <li>• Unique HAXEUZ design</li>
+                <li>• Unique HAXEUS design</li>
                 <li>• Comfortable regular fit</li>
                 <li>• Durable construction for long-lasting wear</li>
               </ul>
@@ -395,7 +393,7 @@ export default function ProductDetailPage() {
           <div className="mt-16">
             <Card className="p-8 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Customer Reviews</h2>
-              
+
               {/* Rating Summary */}
               <div className="flex flex-col md:flex-row gap-8 mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
                 <div className="text-center md:text-left">
@@ -406,11 +404,10 @@ export default function ProductDetailPage() {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-6 h-6 ${
-                          i < Math.round(ratingSummary.averageRating)
+                        className={`w-6 h-6 ${i < Math.round(ratingSummary.averageRating)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-300 dark:text-gray-600'
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>
@@ -423,10 +420,10 @@ export default function ProductDetailPage() {
                 <div className="flex-1">
                   {[5, 4, 3, 2, 1].map((rating) => {
                     const count = ratingSummary.ratingDistribution[rating] || 0
-                    const percentage = ratingSummary.totalReviews > 0 
-                      ? (count / ratingSummary.totalReviews) * 100 
+                    const percentage = ratingSummary.totalReviews > 0
+                      ? (count / ratingSummary.totalReviews) * 100
                       : 0
-                    
+
                     return (
                       <div key={rating} className="flex items-center gap-3 mb-2">
                         <span className="text-sm w-8 text-gray-600 dark:text-gray-400">{rating} ⭐</span>
@@ -454,11 +451,10 @@ export default function ProductDetailPage() {
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating
+                                className={`w-4 h-4 ${i < review.rating
                                     ? 'fill-yellow-400 text-yellow-400'
                                     : 'text-gray-300 dark:text-gray-600'
-                                }`}
+                                  }`}
                               />
                             ))}
                           </div>

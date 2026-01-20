@@ -1,8 +1,8 @@
 // Service Worker for PWA
 // Handles offline functionality, caching, and push notifications
 
-const CACHE_NAME = 'haxeuz-v1'
-const RUNTIME_CACHE = 'haxeuz-runtime-v1'
+const CACHE_NAME = 'haxeus-v1'
+const RUNTIME_CACHE = 'haxeus-runtime-v1'
 
 // Assets to cache on install
 const PRECACHE_URLS = [
@@ -112,9 +112,9 @@ self.addEventListener('fetch', (event) => {
 // Push notification event
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {}
-  
+
   const options = {
-    body: data.body || 'New notification from HAXEUZ',
+    body: data.body || 'New notification from HAXEUS',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/badge-72x72.png',
     image: data.image,
@@ -132,7 +132,7 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'HAXEUZ', options)
+    self.registration.showNotification(data.title || 'HAXEUS', options)
   )
 })
 
@@ -175,7 +175,7 @@ async function syncOrders() {
   try {
     const db = await openDB()
     const pendingOrders = await db.getAll('pending-orders')
-    
+
     for (const order of pendingOrders) {
       try {
         const response = await fetch('/api/orders', {
@@ -183,7 +183,7 @@ async function syncOrders() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(order)
         })
-        
+
         if (response.ok) {
           await db.delete('pending-orders', order.id)
         }
@@ -199,11 +199,11 @@ async function syncOrders() {
 // IndexedDB helper
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('haxeuz-db', 1)
-    
+    const request = indexedDB.open('haxeus-db', 1)
+
     request.onerror = () => reject(request.error)
     request.onsuccess = () => resolve(request.result)
-    
+
     request.onupgradeneeded = (event) => {
       const db = event.target.result
       if (!db.objectStoreNames.contains('pending-orders')) {
@@ -226,7 +226,7 @@ async function checkForUpdates() {
     const response = await fetch('/api/updates')
     if (response.ok) {
       const updates = await response.json()
-      
+
       if (updates.priceDrops && updates.priceDrops.length > 0) {
         // Show notification for price drops on wishlisted items
         self.registration.showNotification('Price Drop Alert! 🔥', {

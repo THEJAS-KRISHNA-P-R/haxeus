@@ -295,7 +295,7 @@ async function sendAbandonedCartEmail(
   try {
     // Import email templates
     const { abandonedCartEmail1, abandonedCartEmail2 } = await import('./email-templates/enhanced-templates')
-    
+
     const resendApiKey = process.env.RESEND_API_KEY
     if (!resendApiKey) {
       console.error('RESEND_API_KEY not configured')
@@ -312,7 +312,7 @@ async function sendAbandonedCartEmail(
         quantity: itemsCount
       }
     ]
-    const checkoutUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://haxeuz.com'}/cart`
+    const checkoutUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://haxeus.com'}/cart`
 
     switch (stage) {
       case 1:
@@ -351,7 +351,7 @@ async function sendAbandonedCartEmail(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'HAXEUZ <orders@haxeuz.com>',
+        from: 'HAXEUS <orders@haxeus.com>',
         to: [email],
         subject: emailTemplate.subject,
         html: emailTemplate.html,

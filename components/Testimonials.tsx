@@ -16,7 +16,7 @@ const testimonials = [
     id: 2,
     name: "Priya Patel",
     role: "Creative Director",
-    text: "I've been wearing HAXEUZ tees for over a year now. They maintain their shape and softness even after countless washes. Worth every penny.",
+    text: "I've been wearing HAXEUS tees for over a year now. They maintain their shape and softness even after countless washes. Worth every penny.",
     rating: 5,
   },
   {
@@ -44,7 +44,7 @@ export default function Testimonials() {
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Don't just take our word for it. Here's what our community of satisfied customers has to say about their
-            HAXEUZ experience.
+            HAXEUS experience.
           </p>
         </motion.div>
 
@@ -61,12 +61,12 @@ export default function Testimonials() {
               variants={scrollReveal}
               custom={index}
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.02, y: -5 }}
                 transition={{ duration: 0.3 }}
               >
                 <Card className="p-8 shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 bg-white dark:bg-gray-800 border-0 dark:border dark:border-gray-700 h-full">
-                  <motion.div 
+                  <motion.div
                     className="flex mb-6"
                     initial={{ opacity: 0, scale: 0.5 }}
                     whileInView={{ opacity: 1, scale: 1 }}

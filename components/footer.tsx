@@ -18,12 +18,17 @@ export function Footer() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-bold mb-4">HAXEUZ</h3>
+            <h3 className="text-2xl font-bold mb-4">HAXEUS</h3>
             <p className="text-gray-700 dark:text-gray-400 mb-4">
-              Elevate your style with HAXEUZ. Premium apparel designed for the modern individual.
+              Elevate your style with HAXEUS. Premium apparel designed for the modern individual.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
+              <Link
+                href="https://www.instagram.com/haxeus.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
+              >
                 Instagram
               </Link>
               <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
@@ -94,7 +99,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-800 mt-8 pt-8 text-center text-gray-600 dark:text-gray-400">
-          <p>HAXEUZ. All rights reserved.</p>
+          <p>HAXEUS. All rights reserved.</p>
         </div>
       </div>
     </footer>

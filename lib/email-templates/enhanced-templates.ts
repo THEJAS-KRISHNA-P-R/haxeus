@@ -44,7 +44,7 @@ export function abandonedCartEmail1(data: {
           <!-- Header -->
           <tr>
             <td style="padding:40px 40px 20px;text-align:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);">
-              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;">HAXEUZ</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;">HAXEUS</h1>
             </td>
           </tr>
           
@@ -106,7 +106,7 @@ export function abandonedCartEmail1(data: {
           <!-- Footer -->
           <tr>
             <td style="padding:24px;background:#f9f9f9;text-align:center;">
-              <p style="margin:0 0 8px;color:#666;font-size:14px;">© 2024 HAXEUZ. All rights reserved.</p>
+              <p style="margin:0 0 8px;color:#666;font-size:14px;">© 2024 HAXEUS. All rights reserved.</p>
               <p style="margin:0;color:#999;font-size:12px;">
                 <a href="#" style="color:#667eea;text-decoration:none;">Unsubscribe</a>
               </p>
@@ -204,7 +204,7 @@ export function priceDropEmail(data: {
   productUrl: string
 }): EmailTemplate {
   const savingsPercent = Math.round((data.savings / data.oldPrice) * 100)
-  
+
   return {
     subject: `🔥 Price Drop Alert: ${data.productName} - ${savingsPercent}% OFF!`,
     html: `
@@ -338,7 +338,7 @@ export function newsletterTemplate(data: {
           <!-- Header -->
           <tr>
             <td style="padding:40px 40px 20px;text-align:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);">
-              <h1 style="margin:0;color:#ffffff;font-size:32px;font-weight:700;">HAXEUZ</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:32px;font-weight:700;">HAXEUS</h1>
             </td>
           </tr>
           

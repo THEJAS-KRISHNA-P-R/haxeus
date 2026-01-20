@@ -25,9 +25,9 @@ export default async (req: Request) => {
     }
 
     if (!pendingEmails || pendingEmails.length === 0) {
-      return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({
         message: 'No pending emails',
-        processed: 0 
+        processed: 0
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -67,7 +67,7 @@ export default async (req: Request) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'HAXEUZ <onboarding@resend.dev>',
+            from: 'HAXEUS <onboarding@resend.dev>',
             to: email.recipient_email,
             subject: email.subject,
             html: htmlBody,
@@ -85,7 +85,7 @@ export default async (req: Request) => {
               updated_at: new Date().toISOString()
             })
             .eq('id', email.id)
-          
+
           failCount++
           console.error(`Failed to send email ${email.id}:`, errorData)
         } else {
@@ -97,7 +97,7 @@ export default async (req: Request) => {
               updated_at: new Date().toISOString()
             })
             .eq('id', email.id)
-          
+
           successCount++
           console.log(`Sent email ${email.id} to ${email.recipient_email}`)
         }
@@ -110,7 +110,7 @@ export default async (req: Request) => {
             updated_at: new Date().toISOString()
           })
           .eq('id', email.id)
-        
+
         failCount++
         console.error(`Error processing email ${email.id}:`, emailError)
       }

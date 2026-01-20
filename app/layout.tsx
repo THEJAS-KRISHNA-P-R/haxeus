@@ -10,14 +10,14 @@ import { PWAProvider } from "@/components/PWAProvider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "HAXEUZ - Premium Artistic Expression Meets Fashion",
+  title: "HAXEUS - Premium Artistic Expression Meets Fashion",
   description: "Discover unique, artistic T-shirts that blend creative expression with premium comfort. Shop exclusive designs, track orders, and enjoy fast shipping.",
   generator: 'v0.dev',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'HAXEUZ'
+    title: 'HAXEUS'
   }
 }
 
@@ -60,7 +60,7 @@ export default function RootLayout({
         {/* PWA Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="HAXEUZ" />
+        <meta name="apple-mobile-web-app-title" content="HAXEUS" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
         
@@ -68,7 +68,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const storageKey = 'haxeuz-theme';
+                const storageKey = 'haxeus-theme';
                 const theme = localStorage.getItem(storageKey) || 'light';
                 const root = document.documentElement;
                 
@@ -84,7 +84,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="light" storageKey="haxeuz-theme">
+        <ThemeProvider defaultTheme="light" storageKey="haxeus-theme">
           <CartProvider>
             <PWAProvider />
             <Navbar />

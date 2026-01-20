@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="p-0 text-gray-700 leading-relaxed">
               <p>
-                At HAXEUZ, we are committed to protecting your privacy and ensuring the security of your personal
+                At HAXEUS, we are committed to protecting your privacy and ensuring the security of your personal
                 information. This Privacy Policy outlines how we collect, use, disclose, and safeguard your data when
                 you visit our website or make a purchase.
               </p>

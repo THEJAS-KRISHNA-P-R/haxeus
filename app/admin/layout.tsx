@@ -137,14 +137,13 @@ export default function AdminLayout({
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
       {/* Sidebar */}
       <aside
-        className={`${
-          sidebarOpen ? "w-64" : "w-20"
-        } bg-gray-900 dark:bg-gray-800 text-white flex flex-col`}
+        className={`${sidebarOpen ? "w-64" : "w-20"
+          } bg-gray-900 dark:bg-gray-800 text-white flex flex-col`}
       >
         {/* Header */}
         <div className="p-4 flex items-center justify-between border-b border-gray-800 dark:border-gray-700">
           {sidebarOpen && (
-            <h1 className="text-xl font-bold">HAXEUZ Admin</h1>
+            <h1 className="text-xl font-bold">HAXEUS Admin</h1>
           )}
           <Button
             variant="ghost"

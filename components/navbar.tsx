@@ -128,15 +128,15 @@ export function Navbar() {
               href="/"
               className="hidden md:flex items-center space-x-2 text-2xl font-bold text-red-600 hover:scale-105 transition-transform"
             >
-              <Image 
-                src="/android-chrome-192x192.png" 
-                alt="Logo" 
-                width={32} 
-                height={32} 
-                priority 
-                className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200" 
+              <Image
+                src="/android-chrome-192x192.png"
+                alt="Logo"
+                width={32}
+                height={32}
+                priority
+                className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200"
               />
-              <span>HAXEUZ</span>
+              <span>HAXEUS</span>
             </Link>
 
             {/* Logo (mobile, centered) */}
@@ -145,15 +145,15 @@ export function Navbar() {
                 href="/"
                 className="flex items-center space-x-2 text-2xl font-bold text-red-600"
               >
-                <Image 
-                  src="/android-chrome-192x192.png" 
-                  alt="Logo" 
-                  width={32} 
-                  height={32} 
-                  priority 
-                  className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200" 
+                <Image
+                  src="/android-chrome-192x192.png"
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  priority
+                  className="w-8 h-8 dark:invert dark:brightness-0 dark:contrast-200"
                 />
-                <span>HAXEUZ</span>
+                <span>HAXEUS</span>
               </Link>
             </div>
 

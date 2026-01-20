@@ -23,7 +23,7 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("signin")
   const router = useRouter()
   const { toast } = useToast()
- 
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -137,7 +137,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md border-none shadow-md dark:bg-gray-800 dark:border dark:border-gray-700">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold dark:text-white">Welcome to  <span className="text-red-600 dark:text-red-500">HAXEUZ</span></CardTitle>
+          <CardTitle className="text-2xl font-bold dark:text-white">Welcome to  <span className="text-red-600 dark:text-red-500">HAXEUS</span></CardTitle>
           <CardDescription className="dark:text-gray-400">Sign in to your account or create a new one</CardDescription>
         </CardHeader>
         <CardContent>
@@ -220,9 +220,9 @@ export default function AuthPage() {
               variant="outline"
               className="w-full mt-4 bg-white dark:bg-gray-900 text-black dark:text-white flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700"
               disabled={loading}>
-            
-             <FcGoogle size={20} />
-               {activeTab === "signup" ? "Sign up with Google" : "Sign in with Google"}
+
+              <FcGoogle size={20} />
+              {activeTab === "signup" ? "Sign up with Google" : "Sign in with Google"}
             </Button>
 
           </div>

@@ -23,7 +23,7 @@ export default function ReturnsRefundsPage() {
             </CardHeader>
             <CardContent className="p-0 space-y-4 text-gray-700 leading-relaxed">
               <p>
-                We want you to be completely happy with your HAXEUZ purchase. If for any reason you are not satisfied,
+                We want you to be completely happy with your HAXEUS purchase. If for any reason you are not satisfied,
                 we offer a straightforward return and refund policy.
               </p>
               <ul className="list-disc list-inside space-y-2">
@@ -50,8 +50,8 @@ export default function ReturnsRefundsPage() {
               <ol className="list-decimal list-inside space-y-3">
                 <li>
                   **Contact Us**: Send an email to{" "}
-                  <Link href="mailto:returns@haxeuz.com" className="text-red-600 hover:underline">
-                    returns@haxeuz.com
+                  <Link href="mailto:returns@haxeus.com" className="text-red-600 hover:underline">
+                    returns@haxeus.com
                   </Link>{" "}
                   with your order number and the reason for your return.
                 </li>
@@ -95,8 +95,8 @@ export default function ReturnsRefundsPage() {
             <CardContent className="p-0 space-y-4 text-gray-700 leading-relaxed">
               <p>
                 If you receive a damaged or defective item, please contact us immediately at{" "}
-                <Link href="mailto:support@haxeuz.com" className="text-red-600 hover:underline">
-                  support@haxeuz.com
+                <Link href="mailto:support@haxeus.com" className="text-red-600 hover:underline">
+                  support@haxeus.com
                 </Link>{" "}
                 with photos of the damage. We will arrange for a replacement or full refund.
               </p>

@@ -1,4 +1,4 @@
-# HAXEUZ - Premium T-Shirt E-Commerce Platform
+# HAXEUS - Premium T-Shirt E-Commerce Platform
 
 A modern, high-performance e-commerce platform for premium artistic T-shirts built with **Next.js 15**, **Supabase**, **TypeScript**, and **Framer Motion**.
 
@@ -30,8 +30,8 @@ This includes:
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/haxeuz-ecommerce.git
-cd haxeuz-ecommerce
+git clone https://github.com/yourusername/haxeus-ecommerce.git
+cd haxeus-ecommerce
 
 # Install dependencies
 npm install
@@ -87,7 +87,7 @@ Get these from your Supabase project dashboard at [supabase.com](https://supabas
 ## 🗂️ Project Structure
 
 ```
-haxeuz-v26/
+haxeus-v26/
 ├── app/                      # Next.js App Router pages
 ├── components/               # React components
 ├── contexts/                 # React Context providers
@@ -149,7 +149,7 @@ For detailed documentation, troubleshooting, and setup guides, see:
 
 ---
 
-**Built with ❤️ by the HAXEUZ Team**  
+**Built with ❤️ by the HAXEUS Team**  
 Powered by Next.js 15, Supabase, and Framer Motion
 - **Authentication**: Supabase Auth (email/password, OAuth)
 - **Storage**: Supabase Storage for product images
@@ -178,8 +178,8 @@ Powered by Next.js 15, Supabase, and Framer Motion
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/haxeuz-ecommerce.git
-cd haxeuz-ecommerce
+git clone https://github.com/yourusername/haxeus-ecommerce.git
+cd haxeus-ecommerce
 ```
 
 ### 2. Install Dependencies
@@ -253,7 +253,7 @@ Run `npm install` to install all dependencies.
 ## 🗂️ Project Structure
 
 ```
-haxeuz-v26/
+haxeus-v26/
 ├── app/                      # Next.js App Router pages
 │   ├── about/               # About page
 │   ├── auth/                # Authentication pages
@@ -442,5 +442,5 @@ For questions or issues:
 
 ---
 
-**Built with ❤️ by the HAXEUZ Team**  
+**Built with ❤️ by the HAXEUS Team**  
 Powered by Next.js 15, Supabase, and Framer Motion

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     // Optional: Verify cron secret if set (for security)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
-    
+
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -33,9 +33,9 @@ export async function POST(request: Request) {
     }
 
     if (!pendingEmails || pendingEmails.length === 0) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         message: 'No pending emails',
-        processed: 0 
+        processed: 0
       })
     }
 
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'HAXEUZ <onboarding@resend.dev>',
+            from: 'HAXEUS <onboarding@resend.dev>',
             to: email.recipient_email,
             subject: email.subject,
             html: htmlBody,
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
               updated_at: new Date().toISOString()
             })
             .eq('id', email.id)
-          
+
           failCount++
           console.error(`Failed to send email ${email.id}:`, errorData)
         } else {
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
               updated_at: new Date().toISOString()
             })
             .eq('id', email.id)
-          
+
           successCount++
           console.log(`Sent email ${email.id} to ${email.recipient_email}`)
         }
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString()
           })
           .eq('id', email.id)
-        
+
         failCount++
         console.error(`Error processing email ${email.id}:`, emailError)
       }
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
 
 // Allow GET for manual testing
 export async function GET() {
-  return NextResponse.json({ 
+  return NextResponse.json({
     message: 'Email processor endpoint',
     usage: 'POST with Bearer token to process emails'
   })

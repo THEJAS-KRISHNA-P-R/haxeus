@@ -159,8 +159,8 @@ export default function ContactPage() {
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Email</h3>
-                  <p className="text-gray-600 dark:text-gray-400">support@haxeuz.com</p>
-                  <p className="text-gray-600 dark:text-gray-400">orders@haxeuz.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">haxeus.is.us@gmail.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">haxeus.is.us@gmail.com</p>
                 </div>
 
                 <div>
@@ -172,7 +172,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Address</h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    HAXEUZ Fashion Pvt. Ltd.
+                    HAXEUS Fashion Pvt. Ltd.
                     <br />
                     123 Design Street
                     <br />
@@ -237,7 +237,7 @@ export default function ContactPage() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">Our customer support team is here to help you with any inquiries.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button className="bg-red-600 text-white hover:bg-red-700">Call Us Now</Button>
-            
+
           </div>
         </div>
       </div>

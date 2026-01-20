@@ -19,6 +19,8 @@ import {
   tapScale,
   cardHover,
 } from "@/lib/animations"
+import Shuffle from "@/components/Shuffle"
+import DarkVeil from "@/components/DarkVeil"
 
 // Lazy load heavy components
 const DynamicTestimonials = dynamic(() => import("../components/Testimonials"), {
@@ -49,56 +51,132 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen scroll-smooth overflow-x-hidden bg-white dark:bg-gray-950">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-16 lg:py-24 snap-start">
+      {/* Hero Section - Always Dark */}
+      <section className="relative bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 py-16 lg:py-24 snap-start overflow-hidden">
+        {/* WebGL Animated Background */}
+        <div className="absolute inset-0 opacity-30 dark:opacity-30">
+          <DarkVeil
+            hueShift={344}
+            noiseIntensity={0}
+            scanlineIntensity={0}
+            speed={0.4}
+            scanlineFrequency={0.5}
+            warpAmount={5}
+            resolutionScale={1.0}
+          />
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              initial="hidden"
+              initial="visible"
               animate="visible"
               variants={staggerContainer}
               className="space-y-8"
             >
               <motion.div variants={fadeInUp}>
-                <motion.h1 
-                  className="text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight"
+                <motion.h1
+                  className="text-5xl lg:text-7xl font-bold leading-tight"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  Artistic <motion.span 
-                    className="text-red-600 dark:text-red-500"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                  >
-                    Expression
-                  </motion.span>
-                  <br />
-                  Meets Comfort
+                  <motion.div className="relative px-4 sm:px-6 lg:px-8 py-10 overflow-visible">
+                    <motion.h1
+                      className="
+      text-5xl lg:text-7xl
+      font-semibold
+      leading-[1.15]
+      tracking-tight
+      text-white
+    "
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      {/* Line 1 */}
+                      <motion.span
+                        className="
+        block
+        bg-gradient-to-r
+        from-neutral-100 via-neutral-200 to-neutral-100
+        bg-clip-text text-transparent
+        drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]
+      "
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15, duration: 0.4 }}
+                      >
+                        For Those Who
+                      </motion.span>
+
+                      {/* Line 2 — HERO */}
+                      <motion.span
+                        className="
+        block
+        bg-gradient-to-r
+        from-red-500 via-rose-400 to-orange-300
+        bg-clip-text text-transparent
+        drop-shadow-[0_4px_18px_rgba(239,68,68,0.35)]
+      "
+                        initial={{ opacity: 0, scale: 0.99 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3, duration: 0.4 }}
+                      >
+                        Don&apos;t Change
+                      </motion.span>
+
+                      {/* Line 3 */}
+                      <motion.span
+                        className="
+        block
+        bg-gradient-to-r
+        from-neutral-300 via-rose-300 to-orange-300
+        bg-clip-text text-transparent
+        drop-shadow-[0_2px_10px_rgba(239,68,68,0.25)]
+      "
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.45, duration: 0.4 }}
+                      >
+                        To Fit In
+                      </motion.span>
+                    </motion.h1>
+                  </motion.div>
+
                 </motion.h1>
-                <motion.p 
-                  className="text-lg text-gray-600 dark:text-gray-400 mt-6 leading-relaxed"
+                <motion.p
+                  className="text-lg text-gray-300 mt-8 leading-relaxed"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5, duration: 0.6 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
                 >
-                  Discover unique, artistic T-shirts that blend creative expression with premium comfort. Each design
-                  tells a story, crafted for those who dare to stand out.
+                  Bold designs for bold individuals. Express yourself unapologetically with premium streetwear
+                  that celebrates your unique identity and refuses to blend in.
                 </motion.p>
               </motion.div>
 
-              <motion.div variants={fadeIn} className="flex gap-4 flex-wrap">
+              <motion.div
+                variants={fadeIn}
+                className="flex gap-4 flex-wrap mt-2"
+              >
                 <Link href="/products">
-                  <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                    <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-full text-lg shadow-lg hover:shadow-xl">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    <Button size="lg" className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-10 py-6 rounded-full text-lg shadow-lg hover:shadow-xl transition-shadow">
                       Shop Collection
                     </Button>
                   </motion.div>
                 </Link>
                 <Link href="/about">
-                  <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                    <Button variant="outline" size="lg" className="px-8 py-6 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-950 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white text-lg">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    <Button variant="outline" size="lg" className="px-10 py-6 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-950 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white text-lg transition-colors">
                       Our Story
                     </Button>
                   </motion.div>
@@ -106,8 +184,8 @@ export default function HomePage() {
               </motion.div>
 
               {/* Stats */}
-              <motion.div 
-                variants={staggerFast} 
+              <motion.div
+                variants={staggerFast}
                 initial="hidden"
                 animate="visible"
                 className="grid grid-cols-3 gap-8 pt-8"
@@ -137,7 +215,7 @@ export default function HomePage() {
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="relative"
             >
-              <motion.div 
+              <motion.div
                 className="bg-black from-gray-900 to-black rounded-3xl p-8 relative overflow-hidden shadow-2xl"
                 whileHover={{ scale: 1.02, rotateY: 5 }}
                 transition={{ duration: 0.4 }}
@@ -214,18 +292,18 @@ export default function HomePage() {
         />
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="text-3xl lg:text-4xl font-bold mb-6 leading-relaxed text-white"
           >
-            Join thousands of satisfied customers who've made the switch to HAXEUZ. Your perfect T-shirt is just a click
+            Join thousands of satisfied customers who've made the switch to HAXEUS. Your perfect T-shirt is just a click
             away.
           </motion.h2>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -241,7 +319,7 @@ export default function HomePage() {
             </Link>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -259,7 +337,7 @@ export default function HomePage() {
               </Button>
             </motion.div>
           </motion.div>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -323,7 +401,22 @@ export default function HomePage() {
                       </div>
                     </Link>
                     <CardContent className="p-6">
-                      <h3 className="text-xl font-semibold mb-2 hover:text-red-600 dark:hover:text-red-500 transition-colors dark:text-white">{product.name}</h3>
+                      <Shuffle
+                        text={product.name}
+                        tag="h3"
+                        className="text-xl font-semibold mb-2 dark:text-white"
+                        shuffleDirection="right"
+                        duration={0.3}
+                        animationMode="evenodd"
+                        shuffleTimes={1}
+                        ease="power3.out"
+                        stagger={0.02}
+                        threshold={0}
+                        triggerOnce={false}
+                        triggerOnHover={true}
+                        respectReducedMotion={true}
+                        textAlign="left"
+                      />
                       <p className="text-2xl font-bold text-gray-900 dark:text-white mb-4">₹{product.price.toLocaleString("en-IN")}</p>
                       <Link href={`/products/${product.id}`}>
                         <motion.div whileHover={hoverScale} whileTap={tapScale}>
@@ -362,18 +455,18 @@ export default function HomePage() {
               >
                 <Image
                   src="/images/statue-front.jpg"
-                  alt="HAXEUZ Quality"
+                  alt="HAXEUS Quality"
                   fill
                   className="object-cover rounded-2xl shadow-2xl"
                   loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.src = "/placeholder.svg?height=400&width=600&text=About+HAXEUZ"
+                    target.src = "/placeholder.svg?height=400&width=600&text=About+HAXEUS"
                   }}
                 />
               </motion.div>
             </motion.div>
-            
+
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -384,7 +477,7 @@ export default function HomePage() {
                 Crafting <span className="text-red-600 dark:text-red-500">Premium</span> Since 2019
               </motion.h2>
               <motion.p variants={fadeInRight} className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed text-lg">
-                At HAXEUZ, we believe that comfort shouldn't compromise style. Our journey began with a simple mission:
+                At HAXEUS, we believe that comfort shouldn't compromise style. Our journey began with a simple mission:
                 to create the perfect T-shirt that combines premium materials, exceptional craftsmanship, and timeless
                 design.
               </motion.p>
@@ -406,7 +499,7 @@ export default function HomePage() {
                     whileHover={{ x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <motion.div 
+                    <motion.div
                       className="w-3 h-3 bg-red-600 rounded-full mr-3"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}

@@ -47,7 +47,7 @@ interface NewsletterData {
 export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<boolean> {
   try {
     console.log("Sending order confirmation email to:", data.customerEmail)
-    
+
     // For now, we'll store the email in a queue table
     // Later, this will trigger a Supabase Edge Function
     const { error } = await supabase.from("email_queue").insert({
@@ -148,7 +148,7 @@ export async function subscribeToNewsletter(data: NewsletterData): Promise<boole
       email_type: "newsletter_welcome",
       recipient_email: data.email,
       recipient_name: data.name || "",
-      subject: "Welcome to HAXEUZ Newsletter!",
+      subject: "Welcome to HAXEUS Newsletter!",
       template_data: {
         name: data.name,
       },
@@ -195,7 +195,7 @@ export async function sendWelcomeEmail(email: string, name?: string): Promise<bo
       email_type: "welcome",
       recipient_email: email,
       recipient_name: name || "",
-      subject: "Welcome to HAXEUZ!",
+      subject: "Welcome to HAXEUS!",
       template_data: {
         name: name,
       },

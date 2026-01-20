@@ -61,7 +61,7 @@ export default function CheckoutPage() {
     }
 
     setAddresses(data || [])
-    
+
     // Select default address or first address
     const defaultAddr = data?.find((addr) => addr.is_default)
     if (defaultAddr) {
@@ -76,17 +76,17 @@ export default function CheckoutPage() {
   const total = subtotal + shipping
 
   const UPI_ID = "shahzadak735@okaxis"
-  const UPI_NAME = "HAXEUZ"
-  
+  const UPI_NAME = "HAXEUS"
+
   // Generate UPI payment string
   const generateUPIString = () => {
-    return `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`Order Payment - HAXEUZ`)}`
+    return `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`Order Payment - HAXEUS`)}`
   }
 
   // Handle UPI payment on mobile
   const handleUPIPayment = () => {
     const upiString = generateUPIString()
-    
+
     // UPI app URLs for different payment apps
     const appUrls: Record<string, string> = {
       gpay: `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
@@ -96,10 +96,10 @@ export default function CheckoutPage() {
     }
 
     const url = appUrls[selectedPaymentApp] || appUrls.default
-    
+
     // Open payment app
     window.location.href = url
-    
+
     toast({
       title: "Opening payment app",
       description: "Complete the payment in your UPI app",
@@ -262,9 +262,8 @@ export default function CheckoutPage() {
                     {addresses.map((address) => (
                       <div
                         key={address.id}
-                        className={`border rounded-lg p-4 cursor-pointer transition ${
-                          selectedAddress === address.id ? "border-red-600 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-600"
-                        }`}
+                        className={`border rounded-lg p-4 cursor-pointer transition ${selectedAddress === address.id ? "border-red-600 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-600"
+                          }`}
                         onClick={() => setSelectedAddress(address.id)}
                       >
                         <div className="flex items-start gap-3">
@@ -307,9 +306,8 @@ export default function CheckoutPage() {
               <CardContent className="space-y-4">
                 <RadioGroup value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
                   <div
-                    className={`border rounded-lg p-4 cursor-pointer transition ${
-                      paymentMethod === "cod" ? "border-red-600 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-600"
-                    }`}
+                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "cod" ? "border-red-600 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-600"
+                      }`}
                     onClick={() => setPaymentMethod("cod")}
                   >
                     <div className="flex items-center gap-3">
@@ -325,9 +323,8 @@ export default function CheckoutPage() {
                   </div>
 
                   <div
-                    className={`border rounded-lg p-4 cursor-pointer transition ${
-                      paymentMethod === "online" ? "border-red-600 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-600"
-                    }`}
+                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "online" ? "border-red-600 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-600"
+                      }`}
                     onClick={() => setPaymentMethod("online")}
                   >
                     <div className="flex items-center gap-3">
@@ -355,9 +352,8 @@ export default function CheckoutPage() {
                         <RadioGroup value={selectedPaymentApp} onValueChange={setSelectedPaymentApp}>
                           <div className="grid grid-cols-2 gap-3">
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${
-                                selectedPaymentApp === "gpay" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600"
-                              }`}
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "gpay" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600"
+                                }`}
                               onClick={() => setSelectedPaymentApp("gpay")}
                             >
                               <div className="flex items-center gap-2">
@@ -368,9 +364,8 @@ export default function CheckoutPage() {
                               </div>
                             </div>
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${
-                                selectedPaymentApp === "phonepe" ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20" : "border-gray-300 dark:border-gray-600"
-                              }`}
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "phonepe" ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20" : "border-gray-300 dark:border-gray-600"
+                                }`}
                               onClick={() => setSelectedPaymentApp("phonepe")}
                             >
                               <div className="flex items-center gap-2">
@@ -381,9 +376,8 @@ export default function CheckoutPage() {
                               </div>
                             </div>
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${
-                                selectedPaymentApp === "paytm" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600"
-                              }`}
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "paytm" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600"
+                                }`}
                               onClick={() => setSelectedPaymentApp("paytm")}
                             >
                               <div className="flex items-center gap-2">
@@ -394,9 +388,8 @@ export default function CheckoutPage() {
                               </div>
                             </div>
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${
-                                selectedPaymentApp === "default" ? "border-gray-600 bg-gray-50 dark:bg-gray-800" : "border-gray-300 dark:border-gray-600"
-                              }`}
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "default" ? "border-gray-600 bg-gray-50 dark:bg-gray-800" : "border-gray-300 dark:border-gray-600"
+                                }`}
                               onClick={() => setSelectedPaymentApp("default")}
                             >
                               <div className="flex items-center gap-2">

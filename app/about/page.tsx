@@ -49,7 +49,7 @@ export default function AboutPage() {
       name: "Arjun Mehta",
       role: "Founder & Creative Director",
       description:
-        "Passionate about merging art with fashion, Arjun founded HAXEUZ to create meaningful clothing that tells stories.",
+        "Passionate about merging art with fashion, Arjun founded HAXEUS to create meaningful clothing that tells stories.",
       image: "/placeholder.svg?height=300&width=300&text=Arjun+Mehta",
     },
     {
@@ -102,7 +102,7 @@ export default function AboutPage() {
                 Our <span className="text-red-600 dark:text-red-500">Story</span>
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                HAXEUZ was born from a simple belief: that clothing should be more than just fabric. It should be a
+                HAXEUS was born from a simple belief: that clothing should be more than just fabric. It should be a
                 medium for artistic expression, a statement of quality, and a commitment to sustainability.
               </p>
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
@@ -110,15 +110,15 @@ export default function AboutPage() {
                 unmatched comfort. Every piece in our collection is a testament to our dedication to excellence.
               </p>
               <Link href="/products">
-              <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full">
-                Shop Our Collection
-              </Button>
+                <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full">
+                  Shop Our Collection
+                </Button>
               </Link>
             </div>
             <div className="relative h-96 lg:h-[500px]">
               <Image
                 src="/images/busted-front.jpg"
-                alt="HAXEUZ Story"
+                alt="HAXEUS Story"
                 fill
                 className="object-cover rounded-lg shadow-lg"
                 onError={(e) => {
@@ -199,7 +199,7 @@ export default function AboutPage() {
               Meet Our <span className="text-red-600 dark:text-red-500">Team</span>
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              The passionate individuals behind HAXEUZ who make our vision a reality.
+              The passionate individuals behind HAXEUS who make our vision a reality.
             </p>
           </div>
 
@@ -230,18 +230,18 @@ export default function AboutPage() {
             <div className="relative h-96">
               <Image
                 src="/images/save-flower-front.jpg"
-                alt="Why Choose HAXEUZ"
+                alt="Why Choose HAXEUS"
                 fill
                 className="object-cover rounded-lg shadow-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement
-                  target.src = "/placeholder.svg?height=400&width=600&text=Why+Choose+HAXEUZ"
+                  target.src = "/placeholder.svg?height=400&width=600&text=Why+Choose+HAXEUS"
                 }}
               />
             </div>
             <div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                Why Choose <span className="text-red-600 dark:text-red-500">HAXEUZ</span>?
+                Why Choose <span className="text-red-600 dark:text-red-500">HAXEUS</span>?
               </h2>
 
               <div className="space-y-6">
@@ -296,12 +296,12 @@ export default function AboutPage() {
 
               <div className="mt-8">
                 <Link href="/products">
-                <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full mr-4">Shop Now</Button>
+                  <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full mr-4">Shop Now</Button>
                 </Link>
                 <Link href="/contact">
-                <Button className="bg-black hover:bg-red-700 text-white px-8 py-3 rounded-full mr-4">
-                  Contact Us
-                </Button></Link>
+                  <Button className="bg-black hover:bg-red-700 text-white px-8 py-3 rounded-full mr-4">
+                    Contact Us
+                  </Button></Link>
               </div>
             </div>
           </div>
