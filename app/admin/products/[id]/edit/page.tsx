@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { supabase, type Product } from "@/lib/supabase"
+import { supabase, type Product, type ProductImage, type ProductInventory } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,18 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, Save } from "lucide-react"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
+import { ImageGalleryManager } from "@/components/admin/ImageGalleryManager"
+import { SizeInventoryManager } from "@/components/admin/SizeInventoryManager"
+
+interface ProductFormData {
+  name: string
+  description: string
+  price: number
+  category: string
+  colors: string[]
+  images: ProductImage[]
+  inventory: ProductInventory[]
+}
 
 export default function EditProductPage() {
   const router = useRouter()
@@ -19,16 +30,14 @@ export default function EditProductPage() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState<Partial<Product>>({
+  const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
     price: 0,
-    front_image: "",
-    back_image: "",
-    available_sizes: ["S", "M", "L", "XL", "XXL"],
-    colors: ["Black", "White"],
-    total_stock: 100,
     category: "apparel",
+    colors: ["Black"],
+    images: [],
+    inventory: [],
   })
 
   useEffect(() => {
@@ -41,16 +50,41 @@ export default function EditProductPage() {
 
   async function loadProduct() {
     try {
-      const { data, error } = await supabase
+      // Load product details
+      const { data: product, error: productError } = await supabase
         .from("products")
         .select("*")
         .eq("id", productId)
         .single()
 
-      if (error) throw error
-      if (data) {
-        setFormData(data)
-      }
+      if (productError) throw productError
+
+      // Load product images
+      const { data: images, error: imagesError } = await supabase
+        .from("product_images")
+        .select("*")
+        .eq("product_id", productId)
+        .order("display_order")
+
+      if (imagesError) console.error("Error loading images:", imagesError)
+
+      // Load product inventory
+      const { data: inventory, error: inventoryError } = await supabase
+        .from("product_inventory")
+        .select("*")
+        .eq("product_id", productId)
+
+      if (inventoryError) console.error("Error loading inventory:", inventoryError)
+
+      setFormData({
+        name: product.name,
+        description: product.description || "",
+        price: product.price,
+        category: product.category || "apparel",
+        colors: product.colors || ["Black"],
+        images: images || [],
+        inventory: inventory || [],
+      })
     } catch (error) {
       console.error("Error loading product:", error)
       alert("Failed to load product")
@@ -62,46 +96,210 @@ export default function EditProductPage() {
   async function handleSave() {
     setSaving(true)
     try {
+      console.log("=== STARTING PRODUCT SAVE ===")
+
+      // Verify user is logged in
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        alert("You must be logged in to save products")
+        return
+      }
+
+      // Calculate total stock from inventory
+      const totalStock = formData.inventory.reduce((sum, inv) => sum + inv.stock_quantity, 0)
+      const availableSizes = formData.inventory.map(inv => inv.size)
+
       if (productId === "new") {
         // Create new product
-        const { error } = await supabase.from("products").insert([
-          {
-            ...formData,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ])
+        console.log("Creating new product...")
+        const { data: newProduct, error: productError } = await supabase
+          .from("products")
+          .insert([
+            {
+              name: formData.name,
+              description: formData.description,
+              price: formData.price,
+              category: formData.category,
+              colors: formData.colors,
+              available_sizes: availableSizes,
+              total_stock: totalStock,
+              front_image: null, // Deprecated
+              back_image: null, // Deprecated
+            },
+          ])
+          .select()
+          .single()
 
-        if (error) throw error
+        if (productError) throw productError
+        console.log("Product created:", newProduct)
+
+        // Insert images
+        if (formData.images.length > 0) {
+          const imagesWithProductId = formData.images.map((img, index) => ({
+            product_id: newProduct.id,
+            image_url: img.image_url,
+            display_order: index,
+            is_primary: img.is_primary,
+          }))
+
+          const { error: imagesError } = await supabase
+            .from("product_images")
+            .insert(imagesWithProductId)
+
+          if (imagesError) throw imagesError
+          console.log("Images inserted:", imagesWithProductId.length)
+        }
+
+        // Insert inventory
+        if (formData.inventory.length > 0) {
+          const inventoryWithProductId = formData.inventory.map(inv => ({
+            product_id: newProduct.id,
+            size: inv.size,
+            color: inv.color || "default",
+            stock_quantity: inv.stock_quantity,
+            low_stock_threshold: inv.low_stock_threshold,
+            reserved_quantity: 0,
+            sold_quantity: 0,
+          }))
+
+          const { error: inventoryError } = await supabase
+            .from("product_inventory")
+            .insert(inventoryWithProductId)
+
+          if (inventoryError) throw inventoryError
+          console.log("Inventory inserted:", inventoryWithProductId.length)
+        }
       } else {
         // Update existing product
-        const { error } = await supabase
+        console.log("Updating product with ID:", productId)
+        console.log("Data to update:", {
+          name: formData.name,
+          description: formData.description,
+          price: formData.price,
+          category: formData.category,
+          colors: formData.colors,
+          available_sizes: availableSizes,
+          total_stock: totalStock,
+        })
+
+        const { data: updateResult, error: productError } = await supabase
           .from("products")
           .update({
-            ...formData,
+            name: formData.name,
+            description: formData.description,
+            price: formData.price,
+            category: formData.category,
+            colors: formData.colors,
+            available_sizes: availableSizes,
+            total_stock: totalStock,
             updated_at: new Date().toISOString(),
           })
           .eq("id", productId)
+          .select()
 
-        if (error) throw error
+        if (productError) {
+          console.error("Product update error:", productError)
+          throw productError
+        }
+        console.log("Product update result:", updateResult)
+        console.log("Product updated successfully!")
+
+        // Update images - delete old first
+        console.log("Deleting old images for product:", productId)
+        const { error: imageDeleteError } = await supabase
+          .from("product_images")
+          .delete()
+          .eq("product_id", productId)
+
+        if (imageDeleteError) {
+          console.error("Image delete error:", imageDeleteError)
+          // Don't throw - continue with insert attempt
+        } else {
+          console.log("Old images deleted successfully")
+        }
+
+        // Insert new images
+        if (formData.images.length > 0) {
+          const imagesWithProductId = formData.images.map((img, index) => ({
+            product_id: Number(productId),
+            image_url: img.image_url,
+            display_order: index,
+            is_primary: img.is_primary,
+          }))
+          console.log("Inserting new images:", imagesWithProductId)
+
+          const { data: imageInsertResult, error: imagesError } = await supabase
+            .from("product_images")
+            .insert(imagesWithProductId)
+            .select()
+
+          if (imagesError) {
+            console.error("Image insert error:", imagesError)
+            throw imagesError
+          }
+          console.log("Images inserted:", imageInsertResult)
+        }
+
+        // Update inventory - delete old first
+        console.log("Deleting old inventory for product:", productId)
+        const { error: invDeleteError } = await supabase
+          .from("product_inventory")
+          .delete()
+          .eq("product_id", productId)
+
+        if (invDeleteError) {
+          console.error("Inventory delete error:", invDeleteError)
+          // Don't throw - continue with insert attempt
+        } else {
+          console.log("Old inventory deleted successfully")
+        }
+
+        // Insert new inventory
+        if (formData.inventory.length > 0) {
+          const inventoryWithProductId = formData.inventory.map(inv => ({
+            product_id: Number(productId),
+            size: inv.size,
+            color: inv.color || "default",
+            stock_quantity: inv.stock_quantity,
+            low_stock_threshold: inv.low_stock_threshold,
+            reserved_quantity: 0,
+            sold_quantity: 0,
+          }))
+          console.log("Inserting new inventory:", inventoryWithProductId)
+
+          const { data: invInsertResult, error: inventoryError } = await supabase
+            .from("product_inventory")
+            .insert(inventoryWithProductId)
+            .select()
+
+          if (inventoryError) {
+            console.error("Inventory insert error:", inventoryError)
+            throw inventoryError
+          }
+          console.log("Inventory inserted:", invInsertResult)
+        }
       }
 
+      console.log("Redirecting to /admin/products")
+      router.refresh()
       router.push("/admin/products")
-    } catch (error) {
-      console.error("Error saving product:", error)
-      alert("Failed to save product")
+    } catch (error: any) {
+      console.error("=== ERROR SAVING PRODUCT ===")
+      console.error("Error:", error)
+
+      const errorMsg = error.message || "Unknown error occurred"
+      alert(`Failed to save product: ${errorMsg}\n\nCheck console for details.`)
     } finally {
       setSaving(false)
+      console.log("=== SAVE PROCESS COMPLETE ===")
     }
   }
 
-  function updateSizes(sizesString: string) {
-    const sizesArray = sizesString.split(",").map((s) => s.trim())
-    setFormData({ ...formData, available_sizes: sizesArray })
-  }
-
   function updateColors(colorsString: string) {
-    const colorsArray = colorsString.split(",").map((c) => c.trim())
+    const colorsArray = colorsString.split(",").map((c) => c.trim()).filter(c => c)
     setFormData({ ...formData, colors: colorsArray })
   }
 
@@ -114,7 +312,7 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-5xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/admin/products">
@@ -128,30 +326,29 @@ export default function EditProductPage() {
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             {productId === "new"
-              ? "Create a new product for your store"
-              : "Update product details and inventory"}
+              ? "Create a new product with images and inventory tracking"
+              : "Update product details, images, and inventory"}
           </p>
         </div>
       </div>
 
-      {/* Form */}
+      {/* Basic Product Info */}
       <Card className="bg-white dark:bg-gray-900 dark:border-gray-800">
         <CardHeader>
           <CardTitle className="dark:text-white">Product Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Basic Info */}
+          {/* Name & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="name" className="dark:text-gray-300">Product Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., BUSTED Vintage Tee"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
+                required
+                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
 
@@ -160,11 +357,9 @@ export default function EditProductPage() {
               <Input
                 id="category"
                 value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 placeholder="e.g., apparel"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
+                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -175,134 +370,74 @@ export default function EditProductPage() {
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Detailed product description..."
               rows={4}
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
+              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
           </div>
 
-          {/* Price & Stock */}
+          {/* Price & Colors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="price" className="dark:text-gray-300">Price (₹) *</Label>
               <Input
                 id="price"
                 type="number"
+                min="0"
                 value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: Number(e.target.value) })
-                }
+                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                 placeholder="2999"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
+                required
+                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="stock" className="dark:text-gray-300">Total Stock *</Label>
+              <Label htmlFor="colors" className="dark:text-gray-300">Available Colors</Label>
               <Input
-                id="stock"
-                type="number"
-                value={formData.total_stock}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    total_stock: Number(e.target.value),
-                  })
-                }
-                placeholder="100"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
+                id="colors"
+                value={formData.colors.join(", ")}
+                onChange={(e) => updateColors(e.target.value)}
+                placeholder="Black, White, Navy"
+                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Separate multiple colors with commas
+              </p>
             </div>
-          </div>
-
-          {/* Images */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="front_image" className="dark:text-gray-300">Front Image URL *</Label>
-              <Input
-                id="front_image"
-                value={formData.front_image}
-                onChange={(e) =>
-                  setFormData({ ...formData, front_image: e.target.value })
-                }
-                placeholder="/images/product-front.jpg"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="back_image" className="dark:text-gray-300">Back Image URL</Label>
-              <Input
-                id="back_image"
-                value={formData.back_image}
-                onChange={(e) =>
-                  setFormData({ ...formData, back_image: e.target.value })
-                }
-                placeholder="/images/product-back.jpg"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
-              />
-            </div>
-          </div>
-
-          {/* Sizes */}
-          <div className="space-y-2">
-            <Label htmlFor="sizes" className="dark:text-gray-300">Available Sizes *</Label>
-            <Input
-              id="sizes"
-              value={formData.available_sizes?.join(", ")}
-              onChange={(e) => updateSizes(e.target.value)}
-              placeholder="S, M, L, XL, XXL"
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
-            />
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter sizes separated by commas
-            </p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.available_sizes?.map((size) => (
-                <Badge key={size} variant="secondary" className="dark:bg-gray-800 dark:text-gray-300">
-                  {size}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Colors */}
-          <div className="space-y-2">
-            <Label htmlFor="colors" className="dark:text-gray-300">Available Colors</Label>
-            <Input
-              id="colors"
-              value={formData.colors?.join(", ")}
-              onChange={(e) => updateColors(e.target.value)}
-              placeholder="Black, White, Navy"
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
-            />
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter colors separated by commas
-            </p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.colors?.map((color) => (
-                <Badge key={color} variant="secondary" className="dark:bg-gray-800 dark:text-gray-300">
-                  {color}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-6 border-t dark:border-gray-800">
-            <Link href="/admin/products">
-              <Button variant="outline" className="dark:border-gray-700 dark:hover:bg-gray-800">Cancel</Button>
-            </Link>
-            <Button onClick={handleSave} disabled={saving} className="gap-2 bg-red-600 hover:bg-red-700">
-              <Save size={16} />
-              {saving ? "Saving..." : "Save Product"}
-            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Image Gallery Manager */}
+      <ImageGalleryManager
+        images={formData.images}
+        onChange={(images) => setFormData({ ...formData, images })}
+      />
+
+      {/* Size Inventory Manager */}
+      <SizeInventoryManager
+        inventory={formData.inventory}
+        onChange={(inventory) => setFormData({ ...formData, inventory })}
+      />
+
+      {/* Actions */}
+      <div className="flex justify-end gap-3 pb-8">
+        <Link href="/admin/products">
+          <Button variant="outline" className="dark:border-gray-700 dark:hover:bg-gray-800">
+            Cancel
+          </Button>
+        </Link>
+        <Button
+          onClick={handleSave}
+          disabled={saving || !formData.name || formData.price <= 0}
+          className="gap-2 bg-red-600 hover:bg-red-700"
+        >
+          <Save size={16} />
+          {saving ? "Saving..." : "Save Product"}
+        </Button>
+      </div>
     </div>
   )
 }

@@ -13,7 +13,7 @@ import { supabase, ProductInventory } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { useCart } from "@/contexts/CartContext"
 import { WishlistButton } from "@/components/WishlistButton"
-import { Heart, ShoppingCart, Truck, Shield, RotateCcw, Star } from "lucide-react"
+import { Heart, ShoppingCart, Truck, Shield, RotateCcw, Star, Zap } from "lucide-react"
 import { getProductInventory, checkStockAvailability } from "@/lib/inventory"
 import { getProductReviews, getProductRatingsSummary } from "@/lib/reviews"
 
@@ -22,66 +22,19 @@ interface Product {
   name: string
   description: string
   price: number
-  front_image: string
-  back_image: string
+  front_image?: string
+  back_image?: string
   available_sizes?: string[]
   sizes?: string[]
 }
 
-const staticProducts: Product[] = [
-  {
-    id: 1,
-    name: "BUSTED Vintage Tee",
-    description:
-      "Make a bold statement with our BUSTED vintage wash tee. Featuring distressed tie-dye effects and striking red typography, this piece embodies rebellious spirit. Crafted from premium cotton blend for ultimate comfort and durability. Perfect for those who dare to stand out from the crowd.",
-    price: 2499.0,
-    front_image: "/images/busted-front.jpg",
-    back_image: "/images/busted-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-
-  },
-  {
-    id: 2,
-    name: "Save The Flower Tee",
-    description:
-      "Eco-conscious design featuring delicate hand and flower artwork with a meaningful environmental message. This cream-colored tee represents hope and sustainability. Made from 100% organic cotton with water-based inks. A perfect blend of style and social consciousness.",
-    price: 2799.0,
-    front_image: "/images/save-flower-front.jpg",
-    back_image: "/images/save-flower-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-
-  },
-  {
-    id: 3,
-    name: "Statue Tee",
-    description:
-      "Clean, understated design perfect for everyday wear. This minimalist tee features subtle detailing and premium construction. Crafted with the finest cotton for exceptional softness and breathability. A wardrobe essential that pairs with everything.",
-    price: 2299.0,
-    front_image: "/images/statue-front.jpg",
-    back_image: "/images/statue-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 4,
-    name: "UFO Tee",
-    description:
-      "Modern geometric pattern with unique diagonal stripes and HEX branding. This design represents the intersection of street style and contemporary art. Premium tie-dye wash creates a unique texture. Each piece is individually crafted for a one-of-a-kind look.",
-    price: 2999.0,
-    front_image: "/images/ufo-front.jpg",
-    back_image: "/images/ufo-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 5,
-    name: "Renaissance Fusion Tee",
-    description:
-      "Artistic blend of classical sculpture and contemporary sunflower elements. This unique design merges art history with modern aesthetics. Features a detailed statue bust with vibrant sunflower crown. Premium quality print on soft cotton canvas.",
-    price: 3199.0,
-    front_image: "/images/soul-front.jpg",
-    back_image: "/images/soul-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-]
+interface ProductImage {
+  id: string
+  product_id: number
+  image_url: string
+  display_order: number
+  is_primary: boolean
+}
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -89,40 +42,62 @@ export default function ProductDetailPage() {
   const { toast } = useToast()
   const { addItem } = useCart()
 
-  // Initialize with static product immediately to prevent loading flash
-  const staticProduct = staticProducts.find((p) => p.id === Number.parseInt(params.id as string))
-  const [product, setProduct] = useState<Product | null>(staticProduct || null)
-  const [loading, setLoading] = useState(false)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [productImages, setProductImages] = useState<ProductImage[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedColor, setSelectedColor] = useState("")
   const [quantity, setQuantity] = useState(1)
-  const [showBack, setShowBack] = useState(false)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [addingToCart, setAddingToCart] = useState(false)
   const [inventory, setInventory] = useState<ProductInventory[]>([])
   const [reviews, setReviews] = useState<any[]>([])
   const [ratingSummary, setRatingSummary] = useState<any>(null)
 
   useEffect(() => {
-    // Only fetch if we need to update from Supabase
     fetchProduct()
+    fetchProductImages()
     fetchInventory()
     fetchReviews()
   }, [params.id])
 
   const fetchProduct = async () => {
+    setLoading(true)
     try {
       const { data, error } = await supabase.from("products").select("*").eq("id", params.id).single()
 
-      if (!error) {
-        // Update with Supabase data if available
+      if (error) {
+        console.error("Error fetching product:", error)
+        return
+      }
+
+      if (data) {
         setProduct({
           ...data,
           sizes: data.available_sizes || data.sizes || ["S", "M", "L", "XL", "XXL"]
         })
       }
     } catch (error) {
-      // Static product already loaded, no action needed
-      console.warn("Using static product data:", error)
+      console.error("Error fetching product:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchProductImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("product_images")
+        .select("*")
+        .eq("product_id", params.id)
+        .order("display_order")
+
+      if (!error && data && data.length > 0) {
+        setProductImages(data)
+      }
+      // If no gallery images, the product page will fall back to front_image from product
+    } catch (error) {
+      console.warn("Could not fetch product images:", error)
     }
   }
 
@@ -187,6 +162,43 @@ export default function ProductDetailPage() {
     }
   }
 
+  const buyNow = async () => {
+    if (!selectedSize) {
+      toast({
+        title: "Please select a size",
+        description: "Select a size before purchasing.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setAddingToCart(true)
+    try {
+      await addItem(product!.id, selectedSize, quantity)
+      router.push("/checkout")
+    } catch (error: any) {
+      console.error('Buy now error:', error)
+      toast({
+        title: "Error",
+        description: error.message || "Could not proceed to checkout.",
+        variant: "destructive",
+      })
+      setAddingToCart(false)
+    }
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading product...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -217,36 +229,79 @@ export default function ProductDetailPage() {
       `}</style>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Images */}
-          <div className="space-y-6">
+          {/* Product Images - Scrollable Gallery */}
+          <div className="space-y-4">
+            {/* Main Image */}
             <div className="aspect-square relative bg-gradient-to-br from-gray-100 via-gray-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl overflow-hidden shadow-2xl dark:shadow-red-900/20">
-              <Image
-                src={showBack ? product.back_image : product.front_image}
-                alt={product.name}
-                fill
-                className="object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = "/placeholder.svg?height=600&width=600&text=Product+Image"
-                }}
-              />
+              {productImages.length > 0 ? (
+                <Image
+                  src={productImages[selectedImageIndex]?.image_url || "/placeholder.svg"}
+                  alt={`${product.name} - Image ${selectedImageIndex + 1}`}
+                  fill
+                  className="object-cover transition-opacity duration-300"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.src = "/placeholder.svg?height=600&width=600&text=Product+Image"
+                  }}
+                />
+              ) : (
+                <Image
+                  src={product.front_image || "/placeholder.svg"}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.src = "/placeholder.svg?height=600&width=600&text=Product+Image"
+                  }}
+                />
+              )}
             </div>
-            <div className="flex gap-3">
-              <Button
-                variant={!showBack ? "default" : "outline"}
-                onClick={() => setShowBack(false)}
-                className={`flex-1 ${!showBack ? "bg-red-600 text-white hover:bg-red-700" : "dark:border-gray-600 dark:hover:bg-gray-800"}`}
-              >
-                Front View
-              </Button>
-              <Button
-                variant={showBack ? "default" : "outline"}
-                onClick={() => setShowBack(true)}
-                className={`flex-1 ${showBack ? "bg-red-600 text-white hover:bg-red-700 hover:text-black" : "dark:border-gray-600 dark:hover:bg-gray-800"}`}
-              >
-                Back View
-              </Button>
-            </div>
+
+            {/* Thumbnail Strip - Scrollable */}
+            {productImages.length > 1 && (
+              <div className="relative">
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                  {productImages.map((img, index) => (
+                    <button
+                      key={img.id}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
+                        ? 'border-red-600 ring-2 ring-red-600/30 scale-105'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-red-400 dark:hover:border-red-500'
+                        }`}
+                    >
+                      <Image
+                        src={img.image_url}
+                        alt={`${product.name} thumbnail ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.src = "/placeholder.svg?height=80&width=80&text=Img"
+                        }}
+                      />
+                      {img.is_primary && (
+                        <span className="absolute bottom-0.5 right-0.5 bg-red-600 text-white text-[9px] px-1 rounded">
+                          Main
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {/* Scroll hint indicator */}
+                {productImages.length > 4 && (
+                  <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-gray-50 dark:from-gray-950 to-transparent pointer-events-none" />
+                )}
+              </div>
+            )}
+
+            {/* Image counter */}
+            {productImages.length > 1 && (
+              <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                {selectedImageIndex + 1} of {productImages.length} images
+              </p>
+            )}
           </div>
 
           {/* Product Details */}
@@ -262,8 +317,8 @@ export default function ProductDetailPage() {
                         <Star
                           key={i}
                           className={`w-5 h-5 ${i < Math.round(ratingSummary.averageRating)
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-gray-300 dark:text-gray-600'
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300 dark:text-gray-600'
                             }`}
                         />
                       ))}
@@ -290,10 +345,10 @@ export default function ProductDetailPage() {
                     <div
                       key={size}
                       className={`relative border-2 rounded-lg p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${!available
-                          ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-gray-700'
-                          : selectedSize === size
-                            ? 'bg-red-600 text-white border-red-600 cursor-pointer'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600 dark:text-gray-300 cursor-pointer'
+                        ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-gray-700'
+                        : selectedSize === size
+                          ? 'bg-red-600 text-white border-red-600 cursor-pointer'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600 dark:text-gray-300 cursor-pointer'
                         }`}
                       onClick={() => available && setSelectedSize(size)}
                     >
@@ -337,21 +392,33 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3">
+                <Button
+                  onClick={addToCart}
+                  disabled={addingToCart}
+                  className="flex-1 bg-white hover:bg-gray-100 text-red-600 border-2 border-red-600 h-14 text-lg disabled:opacity-50"
+                  size="lg"
+                  variant="outline"
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  {addingToCart ? 'Adding...' : 'Add to Cart'}
+                </Button>
+                <WishlistButton
+                  productId={product.id}
+                  size="lg"
+                  className="h-14 px-6 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
+                />
+              </div>
               <Button
-                onClick={addToCart}
+                onClick={buyNow}
                 disabled={addingToCart}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white h-14 text-lg disabled:opacity-50"
+                className="w-full bg-red-600 hover:bg-red-700 text-white h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                 size="lg"
               >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                {addingToCart ? 'Adding...' : 'Add to Cart'}
+                <Zap className="w-5 h-5 mr-2" />
+                Buy Now
               </Button>
-              <WishlistButton
-                productId={product.id}
-                size="lg"
-                className="h-14 px-6 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
-              />
             </div>
 
             {/* Features */}
@@ -405,8 +472,8 @@ export default function ProductDetailPage() {
                       <Star
                         key={i}
                         className={`w-6 h-6 ${i < Math.round(ratingSummary.averageRating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300 dark:text-gray-600'
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300 dark:text-gray-600'
                           }`}
                       />
                     ))}
@@ -452,8 +519,8 @@ export default function ProductDetailPage() {
                               <Star
                                 key={i}
                                 className={`w-4 h-4 ${i < review.rating
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-300 dark:text-gray-600'
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-300 dark:text-gray-600'
                                   }`}
                               />
                             ))}

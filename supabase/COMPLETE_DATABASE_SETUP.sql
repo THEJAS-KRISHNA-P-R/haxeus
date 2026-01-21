@@ -155,6 +155,20 @@ CREATE TABLE product_videos (
 
 CREATE INDEX idx_product_videos_product_id ON product_videos(product_id);
 
+-- Enable RLS on product_images
+ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for product_images
+DROP POLICY IF EXISTS "Anyone can view product images" ON product_images;
+DROP POLICY IF EXISTS "Admins can manage product images" ON product_images;
+
+CREATE POLICY "Anyone can view product images" ON product_images 
+  FOR SELECT USING (true);
+  
+CREATE POLICY "Admins can manage product images" ON product_images 
+  FOR ALL 
+  USING (EXISTS (SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND role = 'admin'));
+
 -- SIZE-SPECIFIC INVENTORY (Real-time stock tracking)
 DROP TABLE IF EXISTS product_inventory CASCADE;
 CREATE TABLE product_inventory (
@@ -963,11 +977,11 @@ ON CONFLICT (template_name) DO NOTHING;
 
 -- Sample Products
 INSERT INTO products (name, description, price, front_image, back_image, available_sizes, colors, total_stock, category) VALUES
-('BUSTED Vintage Tee', 'Make a bold statement with our BUSTED vintage wash tee. Featuring distressed tie-dye effects and striking red typography, this piece embodies rebellious spirit. Crafted from premium cotton blend for ultimate comfort and durability. Perfect for those who dare to stand out from the crowd.', 2499.00, '/images/busted-front.jpg', '/images/busted-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Vintage Wash'], 100, 'apparel'),
-('Save The Flower Tee', 'Eco-conscious design featuring delicate hand and flower artwork with a meaningful environmental message. This cream-colored tee represents hope and sustainability. Made from 100% organic cotton with water-based inks. A perfect blend of style and social consciousness.', 2799.00, '/images/save-flower-front.jpg', '/images/save-flower-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Cream', 'Natural'], 100, 'apparel'),
-('Statue Tee', 'Clean, understated design perfect for everyday wear. This minimalist tee features subtle detailing and premium construction. Crafted with the finest cotton for exceptional softness and breathability. A wardrobe essential that pairs with everything.', 2299.00, '/images/statue-front.jpg', '/images/statue-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['White', 'Black'], 100, 'apparel'),
-('UFO Tee', 'Modern geometric pattern with unique diagonal stripes and HEX branding. This design represents the intersection of street style and contemporary art. Premium tie-dye wash creates a unique texture. Each piece is individually crafted for a one-of-a-kind look.', 2999.00, '/images/ufo-front.jpg', '/images/ufo-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Tie-Dye', 'Multi'], 100, 'apparel'),
-('Renaissance Fusion Tee', 'Artistic blend of classical sculpture and contemporary sunflower elements. This unique design merges art history with modern aesthetics. Features a detailed statue bust with vibrant sunflower crown. Premium quality print on soft cotton canvas.', 3199.00, '/images/soul-front.jpg', '/images/soul-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Black', 'Dark'], 100, 'apparel')
+('BUSTED Vintage Tee', 'Make a bold statement with our BUSTED vintage wash tee. Featuring distressed tie-dye effects and striking red typography, this piece embodies rebellious spirit. Crafted from premium cotton blend for ultimate comfort and durability. Perfect for those who dare to stand out from the crowd.', 999.00, '/images/busted-front.jpg', '/images/busted-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Vintage Wash'], 100, 'apparel'),
+('Save The Flower Tee', 'Eco-conscious design featuring delicate hand and flower artwork with a meaningful environmental message. This cream-colored tee represents hope and sustainability. Made from 100% organic cotton with water-based inks. A perfect blend of style and social consciousness.', 999.00, '/images/save-flower-front.jpg', '/images/save-flower-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Cream', 'Natural'], 100, 'apparel'),
+('Statue Tee', 'Clean, understated design perfect for everyday wear. This minimalist tee features subtle detailing and premium construction. Crafted with the finest cotton for exceptional softness and breathability. A wardrobe essential that pairs with everything.', 999.00, '/images/statue-front.jpg', '/images/statue-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['White', 'Black'], 100, 'apparel'),
+('UFO Tee', 'Modern geometric pattern with unique diagonal stripes and HEX branding. This design represents the intersection of street style and contemporary art. Premium tie-dye wash creates a unique texture. Each piece is individually crafted for a one-of-a-kind look.', 999.00, '/images/ufo-front.jpg', '/images/ufo-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Tie-Dye', 'Multi'], 100, 'apparel'),
+('Renaissance Fusion Tee', 'Artistic blend of classical sculpture and contemporary sunflower elements. This unique design merges art history with modern aesthetics. Features a detailed statue bust with vibrant sunflower crown. Premium quality print on soft cotton canvas.', 999.00, '/images/soul-front.jpg', '/images/soul-back.jpg', ARRAY['S', 'M', 'L', 'XL', 'XXL'], ARRAY['Black', 'Dark'], 100, 'apparel')
 ON CONFLICT DO NOTHING;
 
 -- Insert inventory for existing products

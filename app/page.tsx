@@ -32,19 +32,19 @@ export default function HomePage() {
     {
       id: 1,
       name: "BUSTED Vintage Tee",
-      price: 2499.0,
+      price: 999.0,
       image: "/images/busted-front.jpg",
     },
     {
       id: 2,
       name: "Save the Flower Tee",
-      price: 2799.0,
+      price: 999.0,
       image: "/images/save-flower-front.jpg",
     },
     {
       id: 5,
       name: "Renaissance Fusion Tee",
-      price: 3199.0,
+      price: 999.0,
       image: "/images/statue-front.jpg",
     },
   ]
@@ -122,7 +122,7 @@ export default function HomePage() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.3, duration: 0.4 }}
                       >
-                        Don&apos;t Change
+                        Won&apos;t Change
                       </motion.span>
 
                       {/* Line 3 */}

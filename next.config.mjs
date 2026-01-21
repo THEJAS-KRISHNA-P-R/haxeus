@@ -14,6 +14,14 @@ const nextConfig = {
         hostname: 'hebbkx1anhila5yf.public.blob.vercel-storage.com',
       },
       {
+        protocol: 'https',
+        hostname: 'hexzhuaifunjowwqkxcy.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },
@@ -126,7 +134,7 @@ const nextConfig = {
 
     // Faster module resolution
     config.resolve.extensions = ['.js', '.jsx', '.ts', '.tsx', '.json']
-    
+
     return config
   },
 }

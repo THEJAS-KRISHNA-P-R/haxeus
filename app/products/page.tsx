@@ -35,95 +35,62 @@ interface Product {
   name: string
   description: string
   price: number
-  front_image: string
-  back_image: string
+  front_image?: string
+  back_image?: string
   available_sizes?: string[]
   sizes?: string[]
 }
 
-const staticProducts: Product[] = [
-  {
-    id: 1,
-    name: "BUSTED Vintage Tee",
-    description:
-      "Make a bold statement with our BUSTED vintage wash tee. Featuring distressed tie-dye effects and striking red typography, this piece embodies rebellious spirit.",
-    price: 2499.0,
-    front_image: "/images/busted-front.jpg",
-    back_image: "/images/busted-front.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 2,
-    name: "Save The Flower Tee",
-    description:
-      "Eco-conscious design featuring delicate hand and flower artwork with a meaningful environmental message. Made from 100% organic cotton.",
-    price: 2799.0,
-    front_image: "/images/save-flower-front.jpg",
-    back_image: "/images/save-flower-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 3,
-    name: "Statue Tee",
-    description:
-      "Clean, understated design perfect for everyday wear. Crafted with the finest cotton for exceptional softness and breathability.",
-    price: 2299.0,
-    front_image: "/images/statue-front.jpg",
-    back_image: "/images/statue-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 4,
-    name: "HEX Geometric Tee",
-    description:
-      "Modern geometric pattern with unique diagonal stripes and HEX branding. Premium tie-dye wash creates a unique texture.",
-    price: 2999.0,
-    front_image: "/images/ufo-front.jpg",
-    back_image: "/images/ufo-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 5,
-    name: "Renaissance Fusion Tee",
-    description:
-      "Artistic blend of classical sculpture and contemporary sunflower elements. Features a detailed statue bust with vibrant sunflower crown.",
-    price: 3199.0,
-    front_image: "/images/soul-front.jpg",
-    back_image: "/images/soul-back.jpg",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-]
-
 export default function ProductsPage() {
-  // Load static products immediately to prevent skeleton flash
-  const [products, setProducts] = useState<Product[]>(staticProducts)
-  const [loading, setLoading] = useState(false)
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState("default")
   const [priceRange, setPriceRange] = useState("all")
   const searchParams = useSearchParams()
   const searchQuery = searchParams?.get("search") || ""
 
   useEffect(() => {
-    // Quietly fetch from Supabase in background
     fetchProducts()
   }, [])
 
   const fetchProducts = async () => {
+    setLoading(true)
     try {
-      const { data, error } = await supabase.from("products").select("*").order("id")
+      // First try to get products with their primary image from product_images
+      const { data, error } = await supabase
+        .from("products")
+        .select(`
+          *,
+          product_images (
+            image_url,
+            is_primary,
+            display_order
+          )
+        `)
+        .order("id")
 
-      if (!error && data && data.length > 0) {
-        // Update with Supabase data if available
-        const mappedProducts = data.map(product => ({
-          ...product,
-          sizes: product.available_sizes || product.sizes || ["S", "M", "L", "XL", "XXL"]
-        }))
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        // Map products and set front_image from product_images if available
+        const mappedProducts = data.map(product => {
+          // Find primary image or first image from gallery
+          const primaryImg = product.product_images?.find((img: any) => img.is_primary)
+          const firstImg = product.product_images?.[0]
+          const galleryImage = primaryImg?.image_url || firstImg?.image_url
+
+          return {
+            ...product,
+            front_image: galleryImage || product.front_image || "/placeholder.svg",
+            sizes: product.available_sizes || product.sizes || ["S", "M", "L", "XL", "XXL"]
+          }
+        })
         setProducts(mappedProducts)
       }
-      // If error or no data, keep using static products (already set)
     } catch (error) {
-      // Static products already loaded, no action needed
-      console.warn("Using static product data:", error)
+      console.error("Error fetching products:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -172,13 +139,13 @@ export default function ProductsPage() {
           variants={fadeInUp}
           className="text-center mb-12"
         >
-          <motion.h1 
+          <motion.h1
             className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            Featured <motion.span 
+            Featured <motion.span
               className="text-red-600 dark:text-red-500"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -187,7 +154,7 @@ export default function ProductsPage() {
               Collection
             </motion.span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -205,14 +172,14 @@ export default function ProductsPage() {
           className="mb-10"
         >
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <motion.div 
+            <motion.div
               className="flex items-center gap-2"
               whileHover={{ scale: 1.05 }}
             >
               <SlidersHorizontal className="w-5 h-5 text-red-600 dark:text-red-500" />
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filters:</span>
             </motion.div>
-            
+
             <motion.div whileHover={hoverScale} whileTap={tapScale}>
               <Select value={priceRange} onValueChange={setPriceRange}>
                 <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-500 shadow-sm">
@@ -268,20 +235,43 @@ export default function ProductsPage() {
           </div>
 
           {/* Results count */}
-          <motion.div 
+          <motion.div
             className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            Showing <span className="font-bold text-red-600 dark:text-red-500">{filteredProducts.length}</span> {filteredProducts.length === 1 ? "product" : "products"}
+            Showing <span className="font-bold text-red-600 dark:text-red-500">{loading ? '...' : filteredProducts.length}</span> {filteredProducts.length === 1 ? "product" : "products"}
             {searchQuery && ` for "${searchQuery}"`}
           </motion.div>
         </motion.div>
 
         {/* Products Grid */}
         <AnimatePresence mode="wait">
-          {filteredProducts.length === 0 ? (
+          {loading ? (
+            // Loading skeleton
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg animate-pulse">
+                  <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                    <div className="flex justify-between items-center pt-2">
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24" />
+                      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-20" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          ) : filteredProducts.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -297,22 +287,28 @@ export default function ProductsPage() {
               >
                 😞
               </motion.div>
-              <p className="text-2xl text-gray-600 dark:text-gray-400 mb-6">No products found matching your criteria.</p>
-              <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                <Button
-                  onClick={() => {
-                    setPriceRange("all")
-                    setSortBy("default")
-                    window.history.pushState({}, "", "/products")
-                  }}
-                  className="bg-red-600 hover:bg-red-700 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg"
-                >
-                  Clear Filters
-                </Button>
-              </motion.div>
+              <p className="text-2xl text-gray-600 dark:text-gray-400 mb-6">
+                {products.length === 0
+                  ? "No products available yet. Check back soon!"
+                  : "No products found matching your criteria."}
+              </p>
+              {products.length > 0 && (
+                <motion.div whileHover={hoverScale} whileTap={tapScale}>
+                  <Button
+                    onClick={() => {
+                      setPriceRange("all")
+                      setSortBy("default")
+                      window.history.pushState({}, "", "/products")
+                    }}
+                    className="bg-red-600 hover:bg-red-700 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg"
+                  >
+                    Clear Filters
+                  </Button>
+                </motion.div>
+              )}
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerFast}
@@ -349,26 +345,26 @@ export default function ProductsPage() {
                         </motion.div>
 
                         {/* Overlay with quick actions */}
-                        <motion.div 
+                        <motion.div
                           className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"
                           initial={{ opacity: 0 }}
                           whileHover={{ opacity: 1 }}
                           transition={{ duration: 0.3 }}
                         >
                           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3">
-                            <motion.div 
+                            <motion.div
                               initial={{ y: 20, opacity: 0 }}
                               whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              <WishlistButton 
+                              <WishlistButton
                                 productId={product.id}
                                 variant="ghost"
                                 size="sm"
                                 className="bg-white text-black hover:bg-gray-100 shadow-lg"
                               />
                             </motion.div>
-                            <motion.div 
+                            <motion.div
                               initial={{ y: 20, opacity: 0 }}
                               whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
@@ -385,7 +381,7 @@ export default function ProductsPage() {
                     {/* Product Details */}
                     <CardContent className="p-6">
                       <Link href={`/products/${product.id}`}>
-                        <motion.h3 
+                        <motion.h3
                           className="text-lg font-bold text-gray-900 dark:text-white mb-2 hover:text-red-600 dark:hover:text-red-500 cursor-pointer line-clamp-1"
                           whileHover={{ x: 5 }}
                           transition={{ duration: 0.2 }}
@@ -416,7 +412,7 @@ export default function ProductsPage() {
                       {/* Price and Action */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <motion.span 
+                          <motion.span
                             className="text-2xl font-bold text-gray-900 dark:text-white"
                             whileHover={{ scale: 1.1, color: "#dc2626" }}
                           >
@@ -448,7 +444,7 @@ export default function ProductsPage() {
           transition={{ duration: 0.6 }}
           className="text-center mt-20"
         >
-          <motion.p 
+          <motion.p
             className="text-gray-600 mb-6 text-lg"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}

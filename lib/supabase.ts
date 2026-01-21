@@ -7,13 +7,29 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Database Types
+
+// Product Image (Gallery support)
+export interface ProductImage {
+  id: string
+  product_id: number
+  image_url: string
+  display_order: number
+  is_primary: boolean
+  created_at?: string
+}
+
 export interface Product {
   id: number
   name: string
   description: string
   price: number
-  front_image: string
+  // Legacy fields (deprecated - use images instead)
+  front_image?: string
   back_image?: string
+  // New gallery-based images
+  images?: ProductImage[]
+  // Size-specific inventory
+  inventory?: ProductInventory[]
   available_sizes: string[]
   colors?: string[]
   total_stock: number

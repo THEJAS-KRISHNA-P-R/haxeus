@@ -38,15 +38,35 @@ export default function ProductsManagementPage() {
     loadProducts()
   }, [])
 
+  // Also reload when the page regains focus (after returning from edit page)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadProducts()
+    }
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [])
+
   async function loadProducts() {
     try {
-      const { data, error } = await supabase
+      // Load products with their images
+      const { data: productsData, error } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          images:product_images(id, image_url, is_primary, display_order)
+        `)
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      setProducts(data || [])
+
+      // Type cast and add computed properties
+      const productsWithImages = (productsData || []).map(p => ({
+        ...p,
+        images: p.images || []
+      }))
+
+      setProducts(productsWithImages as any)
     } catch (error) {
       console.error("Error loading products:", error)
     } finally {

@@ -8,8 +8,6 @@ import { isAdmin } from "@/lib/admin"
 import {
   LayoutDashboard,
   Package,
-  ShoppingCart,
-  Users,
   Settings,
   LogOut,
   Menu,
@@ -128,8 +126,6 @@ export default function AdminLayout({
   const navItems = [
     { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/admin/products", icon: Package, label: "Products" },
-    { href: "/admin/orders", icon: ShoppingCart, label: "Orders" },
-    { href: "/admin/users", icon: Users, label: "Users" },
     { href: "/admin/settings", icon: Settings, label: "Settings" },
   ]
 
