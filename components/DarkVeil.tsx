@@ -100,8 +100,12 @@ export default function DarkVeil({
         const canvas = ref.current as HTMLCanvasElement;
         const parent = canvas.parentElement as HTMLElement;
 
+        // Detect mobile for performance optimization
+        const isMobile = window.innerWidth <= 768;
+        const effectiveResolution = isMobile ? Math.min(resolutionScale, 0.5) : resolutionScale;
+
         const renderer = new Renderer({
-            dpr: Math.min(window.devicePixelRatio, 2),
+            dpr: Math.min(window.devicePixelRatio, isMobile ? 1 : 2),
             canvas
         });
 
@@ -125,13 +129,23 @@ export default function DarkVeil({
         const mesh = new Mesh(gl, { geometry, program });
 
         const resize = () => {
-            const w = parent.clientWidth,
-                h = parent.clientHeight;
-            renderer.setSize(w * resolutionScale, h * resolutionScale);
-            program.uniforms.uResolution.value.set(w, h);
+            // Use viewport dimensions for full coverage
+            const rect = parent.getBoundingClientRect();
+            const w = rect.width > 0 ? rect.width : window.innerWidth;
+            const h = rect.height > 0 ? rect.height : window.innerHeight;
+            const currentMobile = window.innerWidth <= 768;
+            const currentResolution = currentMobile ? Math.min(resolutionScale, 0.5) : resolutionScale;
+
+            // Set renderer size (actual render resolution)
+            renderer.setSize(w * currentResolution, h * currentResolution);
+            program.uniforms.uResolution.value.set(w * currentResolution, h * currentResolution);
         };
 
         window.addEventListener('resize', resize);
+        // Initial resize with a small delay to ensure layout is complete
+        requestAnimationFrame(() => {
+            resize();
+        });
         resize();
 
         const start = performance.now();

@@ -425,32 +425,82 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="p-4 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <Truck className="w-8 h-8 mx-auto mb-2 text-red-600 dark:text-red-500" />
-                <div className="font-semibold dark:text-white">Free Shipping</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">On orders above ₹2000</div>
+                <div className="font-semibold dark:text-white">Shipping</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">1-2 weeks delivery</div>
               </Card>
               <Card className="p-4 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <Shield className="w-8 h-8 mx-auto mb-2 text-red-600 dark:text-red-500" />
-                <div className="font-semibold dark:text-white">Quality Guarantee</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Premium materials</div>
+                <div className="font-semibold dark:text-white">Premium Quality</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">100% Bio-Washed Cotton</div>
               </Card>
               <Card className="p-4 text-center bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <RotateCcw className="w-8 h-8 mx-auto mb-2 text-red-600 dark:text-red-500" />
                 <div className="font-semibold dark:text-white">Easy Returns</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">30-day return policy</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">5-day return policy</div>
               </Card>
             </div>
 
             {/* Product Features */}
             <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <h3 className="font-bold text-lg mb-4 dark:text-white">Product Features</h3>
+              <h3 className="font-bold text-lg mb-4 dark:text-white">Product Details</h3>
               <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                <li>• 100% premium cotton blend</li>
+                <li>• <strong>Material:</strong> 100% Bio-Washed Cotton (Raised)</li>
                 <li>• Pre-shrunk for perfect fit</li>
                 <li>• Machine washable (cold water recommended)</li>
                 <li>• Unique HAXEUS design</li>
-                <li>• Comfortable regular fit</li>
+                <li>• Comfortable relaxed fit</li>
                 <li>• Durable construction for long-lasting wear</li>
               </ul>
+
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="font-semibold mb-3 dark:text-white">Shipping & Returns</h4>
+                <ul className="space-y-2 text-gray-600 dark:text-gray-400 text-sm">
+                  <li>• <strong>Domestic Shipping:</strong> 1-2 weeks</li>
+                  <li>• <strong>International:</strong> Product price + shipping charges</li>
+                  <li>• <strong>Returns:</strong> Easy returns within 5 days of delivery</li>
+                </ul>
+              </div>
+            </Card>
+
+            {/* Size Chart */}
+            <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <h3 className="font-bold text-lg mb-4 dark:text-white">Men's Relaxed Fit T-Shirt Size Chart</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="py-3 px-4 text-left font-semibold dark:text-white">Size</th>
+                      <th className="py-3 px-4 text-center font-semibold dark:text-white">Chest (in)</th>
+                      <th className="py-3 px-4 text-center font-semibold dark:text-white">Length (in)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-600 dark:text-gray-300">
+                    <tr className="border-b border-gray-100 dark:border-gray-700/50">
+                      <td className="py-3 px-4 font-medium">S</td>
+                      <td className="py-3 px-4 text-center">40</td>
+                      <td className="py-3 px-4 text-center">27.5</td>
+                    </tr>
+                    <tr className="border-b border-gray-100 dark:border-gray-700/50">
+                      <td className="py-3 px-4 font-medium">M</td>
+                      <td className="py-3 px-4 text-center">42</td>
+                      <td className="py-3 px-4 text-center">28.5</td>
+                    </tr>
+                    <tr className="border-b border-gray-100 dark:border-gray-700/50">
+                      <td className="py-3 px-4 font-medium">L</td>
+                      <td className="py-3 px-4 text-center">44</td>
+                      <td className="py-3 px-4 text-center">29.5</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-medium">XL</td>
+                      <td className="py-3 px-4 text-center">46</td>
+                      <td className="py-3 px-4 text-center">30.5</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                * Measurements are in inches. For best fit, measure a similar garment you already own.
+              </p>
             </Card>
           </div>
         </div>

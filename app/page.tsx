@@ -54,18 +54,18 @@ export default function HomePage() {
       {/* Hero Section - Always Dark */}
       <section className="relative bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 py-16 lg:py-24 snap-start overflow-hidden">
         {/* WebGL Animated Background */}
-        <div className="absolute inset-0 opacity-30 dark:opacity-30">
+        <div className="absolute inset-0 z-0 opacity-70 dark:opacity-100 pointer-events-none">
           <DarkVeil
             hueShift={344}
             noiseIntensity={0}
             scanlineIntensity={0}
             speed={0.4}
-            scanlineFrequency={0.5}
+            scanlineFrequency={0.1}
             warpAmount={5}
-            resolutionScale={1.0}
+            resolutionScale={1}
           />
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial="visible"
