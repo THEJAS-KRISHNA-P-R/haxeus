@@ -241,8 +241,22 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Mobile - Empty div for spacing (menu button is in StaggeredMenu) */}
-            <div className="md:hidden w-16"></div>
+            {/* Mobile - Login/User icon on left */}
+            <div className="md:hidden w-16 flex items-center">
+              {user ? (
+                <Link href="/profile">
+                  <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/auth">
+                  <Button variant="ghost" size="sm" className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </nav>

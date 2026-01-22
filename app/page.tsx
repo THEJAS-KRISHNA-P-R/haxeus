@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import dynamic from "next/dynamic"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
@@ -21,33 +22,71 @@ import {
 } from "@/lib/animations"
 import Shuffle from "@/components/Shuffle"
 import DarkVeil from "@/components/DarkVeil"
+import { supabase } from "@/lib/supabase"
 
 // Lazy load heavy components
 const DynamicTestimonials = dynamic(() => import("../components/Testimonials"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
 })
 
+interface FeaturedProduct {
+  id: number
+  name: string
+  price: number
+  image: string
+}
+
 export default function HomePage() {
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "BUSTED Vintage Tee",
-      price: 999.0,
-      image: "/images/busted-front.jpg",
-    },
-    {
-      id: 2,
-      name: "Save the Flower Tee",
-      price: 999.0,
-      image: "/images/save-flower-front.jpg",
-    },
-    {
-      id: 5,
-      name: "Renaissance Fusion Tee",
-      price: 999.0,
-      image: "/images/statue-front.jpg",
-    },
-  ]
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchFeaturedProducts() {
+      try {
+        // Fetch top 3 products from Supabase (ordered by id or sales if available)
+        const { data, error } = await supabase
+          .from("products")
+          .select(`
+            id,
+            name,
+            price,
+            front_image,
+            product_images (
+              image_url,
+              is_primary,
+              display_order
+            )
+          `)
+          .order("id")
+          .limit(3)
+
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          const mapped = data.map((product: any) => {
+            // Find primary image or first image from gallery
+            const primaryImg = product.product_images?.find((img: any) => img.is_primary)
+            const firstImg = product.product_images?.[0]
+            const galleryImage = primaryImg?.image_url || firstImg?.image_url
+
+            return {
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              image: galleryImage || product.front_image || "/placeholder.svg"
+            }
+          })
+          setFeaturedProducts(mapped)
+        }
+      } catch (error) {
+        console.error("Error fetching featured products:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFeaturedProducts()
+  }, [])
 
   return (
     <div className="min-h-screen scroll-smooth overflow-x-hidden bg-white dark:bg-gray-950">
@@ -191,7 +230,7 @@ export default function HomePage() {
                 className="grid grid-cols-3 gap-8 pt-8"
               >
                 {[
-                  { value: "10K+", label: "Happy Customers" },
+                  { value: "10+", label: "Happy Customers" },
                   { value: "99%", label: "Satisfaction Rate" },
                   { value: "24/7", label: "Support" }
                 ].map((stat, index) => (
@@ -324,15 +363,15 @@ export default function HomePage() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex max-w-md mx-auto shadow-2xl rounded-full overflow-hidden"
+            className="flex max-w-md mx-auto shadow-2xl rounded-full overflow-hidden bg-white"
           >
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-6 py-4 text-gray-900 dark:text-gray-900 focus:outline-none text-lg"
+              className="flex-1 px-6 py-4 bg-white text-gray-900 focus:outline-none text-lg min-w-0"
             />
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button className="bg-gray-800 hover:bg-gray-900 dark:bg-gray-900 dark:hover:bg-black text-white px-8 py-8 font-semibold">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button className="bg-gray-800 hover:bg-gray-900 text-white px-8 h-full rounded-none rounded-r-full font-semibold whitespace-nowrap">
                 Subscribe
               </Button>
             </motion.div>
@@ -367,70 +406,113 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredProducts.map((product, index) => (
+          {/* Loading State */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg animate-pulse">
+                  <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                    <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            /* Coming Soon State */
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-16"
+            >
               <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: index * 0.15 }}
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-6xl mb-6"
               >
-                <motion.div whileHover={cardHover} whileTap={{ scale: 0.98 }}>
-                  <Card className="overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 border-0 dark:border dark:border-gray-700 bg-white dark:bg-gray-800">
-                    <Link href={`/products/${product.id}`}>
-                      <div className="aspect-square relative bg-gradient-to-br from-gray-900 to-black group cursor-pointer overflow-hidden">
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          transition={{ duration: 0.6 }}
-                        >
-                          <Image
-                            src={product.image || "/placeholder.svg"}
-                            alt={product.name}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                            className="object-cover"
-                            loading={index === 0 ? "eager" : "lazy"}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.src = "/placeholder.svg?height=400&width=400&text=Product+Image"
-                            }}
-                          />
-                        </motion.div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-                    </Link>
-                    <CardContent className="p-6">
-                      <Shuffle
-                        text={product.name}
-                        tag="h3"
-                        className="text-xl font-semibold mb-2 dark:text-white"
-                        shuffleDirection="right"
-                        duration={0.3}
-                        animationMode="evenodd"
-                        shuffleTimes={1}
-                        ease="power3.out"
-                        stagger={0.02}
-                        threshold={0}
-                        triggerOnce={false}
-                        triggerOnHover={true}
-                        respectReducedMotion={true}
-                        textAlign="left"
-                      />
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white mb-4">₹{product.price.toLocaleString("en-IN")}</p>
-                      <Link href={`/products/${product.id}`}>
-                        <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                          <Button className="w-full bg-red-600 text-white hover:bg-red-700 py-6 text-lg font-semibold rounded-xl shadow-md hover:shadow-lg">
-                            View Details
-                          </Button>
-                        </motion.div>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                🚀
               </motion.div>
-            ))}
-          </div>
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Coming Soon!</h3>
+              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8">
+                We're working on bringing you amazing products. Stay tuned for our upcoming collection!
+              </p>
+              <Link href="/contact">
+                <motion.div whileHover={hoverScale} whileTap={tapScale}>
+                  <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-full text-lg font-semibold shadow-lg">
+                    Get Notified
+                  </Button>
+                </motion.div>
+              </Link>
+            </motion.div>
+          ) : (
+            /* Products Grid */
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, delay: index * 0.15 }}
+                >
+                  <motion.div whileHover={cardHover} whileTap={{ scale: 0.98 }}>
+                    <Card className="overflow-hidden shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 border-0 dark:border dark:border-gray-700 bg-white dark:bg-gray-800">
+                      <Link href={`/products/${product.id}`}>
+                        <div className="aspect-square relative bg-gradient-to-br from-gray-900 to-black group cursor-pointer overflow-hidden">
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ duration: 0.6 }}
+                          >
+                            <Image
+                              src={product.image || "/placeholder.svg"}
+                              alt={product.name}
+                              fill
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                              className="object-cover"
+                              loading={index === 0 ? "eager" : "lazy"}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.src = "/placeholder.svg?height=400&width=400&text=Product+Image"
+                              }}
+                            />
+                          </motion.div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                      </Link>
+                      <CardContent className="p-6">
+                        <Shuffle
+                          text={product.name}
+                          tag="h3"
+                          className="text-xl font-semibold mb-2 dark:text-white"
+                          shuffleDirection="right"
+                          duration={0.3}
+                          animationMode="evenodd"
+                          shuffleTimes={1}
+                          ease="power3.out"
+                          stagger={0.02}
+                          threshold={0}
+                          triggerOnce={false}
+                          triggerOnHover={true}
+                          respectReducedMotion={true}
+                          textAlign="left"
+                        />
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white mb-4">₹{product.price.toLocaleString("en-IN")}</p>
+                        <Link href={`/products/${product.id}`}>
+                          <motion.div whileHover={hoverScale} whileTap={tapScale}>
+                            <Button className="w-full bg-red-600 text-white hover:bg-red-700 py-6 text-lg font-semibold rounded-xl shadow-md hover:shadow-lg">
+                              View Details
+                            </Button>
+                          </motion.div>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -510,11 +592,13 @@ export default function HomePage() {
               </motion.div>
 
               <motion.div variants={fadeInRight}>
-                <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl">
-                    Learn More About Us
-                  </Button>
-                </motion.div>
+                <Link href="/about">
+                  <motion.div whileHover={hoverScale} whileTap={tapScale}>
+                    <Button className="bg-red-600 hover:bg-red-700 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl">
+                      Learn More About Us
+                    </Button>
+                  </motion.div>
+                </Link>
               </motion.div>
             </motion.div>
           </div>

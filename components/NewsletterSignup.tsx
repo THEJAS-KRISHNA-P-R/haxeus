@@ -14,7 +14,7 @@ export function NewsletterSignup() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    
+
     if (!email) {
       setStatus("error")
       setMessage("Please enter your email address")
@@ -49,7 +49,7 @@ export function NewsletterSignup() {
       setMessage("Failed to subscribe. Please try again.")
     } finally {
       setLoading(false)
-      
+
       // Clear message after 5 seconds
       setTimeout(() => {
         setStatus("idle")
@@ -93,11 +93,10 @@ export function NewsletterSignup() {
       {/* Status Message */}
       {message && (
         <div
-          className={`mt-3 p-3 rounded-lg flex items-start gap-2 text-sm ${
-            status === "success"
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
-          }`}
+          className={`mt-3 p-3 rounded-lg flex items-start gap-2 text-sm ${status === "success"
+              ? "bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/50 dark:text-green-200 dark:border-green-800"
+              : "bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/50 dark:text-red-200 dark:border-red-800"
+            }`}
         >
           {status === "success" ? (
             <Check className="w-5 h-5 flex-shrink-0 mt-0.5" />

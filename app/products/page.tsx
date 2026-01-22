@@ -453,13 +453,15 @@ export default function ProductsPage() {
             Can't find what you're looking for?
           </motion.p>
           <motion.div whileHover={hoverScale} whileTap={tapScale}>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent px-10 py-6 rounded-full text-lg font-semibold shadow-lg"
-            >
-              Contact Us for Custom Designs
-            </Button>
+            <a href="https://www.instagram.com/haxeus.in/" target="_blank" rel="noopener noreferrer">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent px-10 py-6 rounded-full text-lg font-semibold shadow-lg"
+              >
+                Contact Us for Custom Designs
+              </Button>
+            </a>
           </motion.div>
         </motion.div>
       </div>
