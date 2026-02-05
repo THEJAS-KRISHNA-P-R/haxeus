@@ -75,7 +75,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
+                <Link href="/size-guide" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
                   Size Guide
                 </Link>
               </li>
