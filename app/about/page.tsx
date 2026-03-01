@@ -1,312 +1,299 @@
-"use client"
+"use client";
+import dynamic from 'next/dynamic';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import {
+  Palette, Shirt, Truck, Recycle, Heart, Users, Sparkles, ArrowDown
+} from 'lucide-react';
 
-import Link from "next/link"
+const SparklesCore = dynamic(
+  () => import('@/components/ui/sparkles').then(m => m.SparklesCore),
+  { ssr: false }
+);
 
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+const values = [
+  {
+    icon: Palette,
+    title: 'Artist First',
+    desc: 'We collaborate with underground artists and pay 30% royalty on every sale. No exceptions.',
+  },
+  {
+    icon: Shirt,
+    title: '300gsm Heavyweight',
+    desc: 'Premium bio-washed cotton that feels incredible on day 1 and day 100. Pre-shrunk. Built to last.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Limited Drops',
+    desc: 'Every piece is numbered. Once a drop sells out, it\'s gone forever. No restocks.',
+  },
+  {
+    icon: Truck,
+    title: 'Ships in 48h',
+    desc: 'Order today, we ship within 48 hours. Pan-India delivery in 5-7 days.',
+  },
+  {
+    icon: Recycle,
+    title: 'Conscious Craft',
+    desc: 'Eco-friendly inks, plastic-free packaging, and sustainable sourcing wherever possible.',
+  },
+  {
+    icon: Heart,
+    title: 'Community Driven',
+    desc: 'Built by the people who wear it. Your style shapes our next drop.',
+  },
+];
+
+const timeline = [
+  { year: '2024', event: 'The idea is born — art meets streetwear.' },
+  { year: '2025', event: 'First collection drops. First 100 customers.' },
+  { year: '2026', event: 'HAXEUS goes live. The movement begins.' },
+];
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
 
 export default function AboutPage() {
-  const timeline = [
-    {
-      year: "2019",
-      title: "The Beginning",
-      description:
-        "Founded with a vision to create the perfect T-shirt that combines comfort, style, and artistic expression.",
-    },
-    {
-      year: "2020",
-      title: "First Collection",
-      description:
-        "Launched our debut collection featuring 5 unique designs, focusing on premium cotton and sustainable practices.",
-    },
-    {
-      year: "2021",
-      title: "Community Growth",
-      description:
-        "Reached 1,000+ satisfied customers and established our commitment to quality and customer satisfaction.",
-    },
-    {
-      year: "2022",
-      title: "Expansion",
-      description:
-        "Expanded our product line and introduced eco-friendly packaging, reinforcing our sustainability commitment.",
-    },
-    {
-      year: "2023",
-      title: "Recognition",
-      description: "Received industry recognition for design excellence and sustainable business practices.",
-    },
-    {
-      year: "2024",
-      title: "Innovation",
-      description: "Launched our online platform and introduced new artistic collaborations with local artists.",
-    },
-  ]
-
-  const team = [
-    {
-      name: "Arjun Mehta",
-      role: "Founder & Creative Director",
-      description:
-        "Passionate about merging art with fashion, Arjun founded HAXEUS to create meaningful clothing that tells stories.",
-      image: "/placeholder.svg?height=300&width=300&text=Arjun+Mehta",
-    },
-    {
-      name: "Priya Sharma",
-      role: "Head of Design",
-      description:
-        "With 8+ years in fashion design, Priya ensures every piece meets our high standards of comfort and style.",
-      image: "/placeholder.svg?height=300&width=300&text=Priya+Sharma",
-    },
-    {
-      name: "Rohit Kumar",
-      role: "Operations Manager",
-      description: "Rohit oversees our sustainable production processes and ensures timely delivery to our customers.",
-      image: "/placeholder.svg?height=300&width=300&text=Rohit+Kumar",
-    },
-  ]
-
-  const values = [
-    {
-      title: "Quality First",
-      description:
-        "We never compromise on the quality of our materials or craftsmanship. Every T-shirt is made to last.",
-      icon: "⭐",
-    },
-    {
-      title: "Artistic Expression",
-      description: "We believe clothing should be a canvas for creativity and self-expression.",
-      icon: "🎨",
-    },
-    {
-      title: "Sustainability",
-      description: "We're committed to environmentally responsible practices in every aspect of our business.",
-      icon: "🌱",
-    },
-    {
-      title: "Community",
-      description: "We build lasting relationships with our customers and support local artists and communities.",
-      icon: "🤝",
-    },
-  ]
-
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      {/* Hero Section */}
-      <section className="bg-white dark:bg-gray-950 py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
-                Our <span className="text-red-600 dark:text-red-500">Story</span>
-              </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                HAXEUS was born from a simple belief: that clothing should be more than just fabric. It should be a
-                medium for artistic expression, a statement of quality, and a commitment to sustainability.
-              </p>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                Since 2019, we've been crafting premium T-shirts that tell stories, inspire creativity, and provide
-                unmatched comfort. Every piece in our collection is a testament to our dedication to excellence.
-              </p>
-              <Link href="/products">
-                <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full">
-                  Shop Our Collection
-                </Button>
-              </Link>
-            </div>
-            <div className="relative h-96 lg:h-[500px]">
-              <Image
-                src="/images/busted-front.jpg"
-                alt="HAXEUS Story"
-                fill
-                className="object-cover rounded-lg shadow-lg"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = "/placeholder.svg?height=500&width=600&text=Our+Story"
-                }}
-              />
-            </div>
-          </div>
+    <main className="bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors">
+
+      {/* ───── HERO ───── */}
+      <section className="relative min-h-[80vh] w-full flex flex-col items-center justify-center overflow-hidden">
+        {/* Sparkles background */}
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-gray-100 to-white dark:from-gray-950 dark:to-black">
+          <SparklesCore
+            id="haxeus-about-hero"
+            background="transparent"
+            minSize={0.4}
+            maxSize={1.2}
+            particleDensity={60}
+            className="w-full h-full"
+            particleColor="#ef4444"
+            speed={1}
+          />
+        </div>
+
+        {/* Radial mask for soft edges */}
+        <div className="absolute inset-0 w-full h-full [mask-image:radial-gradient(700px_500px_at_center,transparent_20%,white)] dark:[mask-image:radial-gradient(700px_500px_at_center,transparent_20%,black)]" />
+
+        {/* Content */}
+        <div className="relative z-10 text-center px-4">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="text-sm uppercase tracking-[0.3em] text-red-500 dark:text-red-400 font-semibold mb-4"
+          >
+            Our Story
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: 'easeOut' }}
+            className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter select-none bg-gradient-to-b from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent"
+          >
+            HAXEUS
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="mt-4 text-lg text-gray-500 dark:text-gray-400 tracking-widest uppercase"
+          >
+            Art · Identity · Culture
+          </motion.p>
+        </div>
+
+        {/* Scroll cue */}
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="absolute bottom-8 z-10 text-gray-400 dark:text-gray-500 flex flex-col items-center gap-2"
+        >
+          <span className="text-xs tracking-wider uppercase">Scroll</span>
+          <ArrowDown className="w-4 h-4" />
+        </motion.div>
+      </section>
+
+      {/* ───── BRAND STORY ───── */}
+      <section className="py-24 px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
+            className="space-y-6"
+          >
+            <motion.h2
+              variants={fadeUp}
+              className="text-4xl md:text-5xl font-black leading-tight"
+            >
+              Born from a <span className="text-red-500">rebellion</span> against boring merch.
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"
+            >
+              HAXEUS started with a simple belief: your clothes should say something about you.
+              Not a logo someone else chose. Not a trend everyone follows. Something real.
+            </motion.p>
+            <motion.p
+              variants={fadeUp}
+              className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"
+            >
+              We partner with underground artists from across India to create limited-edition drops
+              you'll never find in a mall. Every tee is a canvas. Every purchase supports an independent creator.
+            </motion.p>
+          </motion.div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Our <span className="text-red-600 dark:text-red-500">Values</span>
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              These core values guide everything we do, from design and production to customer service and community
-              engagement.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <div className="text-4xl mb-4">{value.icon}</div>
-                <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{value.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{value.description}</p>
-              </Card>
+      {/* ───── TIMELINE ───── */}
+      <section className="py-20 px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/50">
+        <div className="max-w-3xl mx-auto">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-black mb-12 text-center"
+          >
+            The Journey
+          </motion.h2>
+          <div className="relative border-l-2 border-red-200 dark:border-red-900/50 ml-4 space-y-12">
+            {timeline.map((t, i) => (
+              <motion.div
+                key={t.year}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className="relative pl-8"
+              >
+                <div className="absolute left-[-9px] top-1 w-4 h-4 rounded-full bg-red-500 border-4 border-white dark:border-gray-950" />
+                <span className="text-sm font-bold text-red-500 uppercase tracking-wider">{t.year}</span>
+                <p className="mt-1 text-lg text-gray-700 dark:text-gray-300">{t.event}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Timeline Section */}
-      <section className="py-16 bg-white dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Our <span className="text-red-600 dark:text-red-500">Journey</span>
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              From a small startup to a recognized brand, here's how we've grown over the years.
-            </p>
-          </div>
+      {/* ───── VALUES GRID ───── */}
+      <section className="py-24 px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-black mb-4 text-center"
+          >
+            What We Stand For
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center text-gray-500 dark:text-gray-400 mb-14 max-w-xl mx-auto"
+          >
+            Every decision we make is driven by these principles.
+          </motion.p>
 
-          <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-red-600 dark:bg-red-500"></div>
-            <div className="space-y-12">
-              {timeline.map((item, index) => (
-                <div key={index} className={`flex items-center ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}>
-                  <div className={`w-1/2 ${index % 2 === 0 ? "pr-8 text-right" : "pl-8 text-left"}`}>
-                    <Card className="p-6 shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                      <div className="text-2xl font-bold text-red-600 dark:text-red-500 mb-2">{item.year}</div>
-                      <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{item.title}</h3>
-                      <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
-                    </Card>
-                  </div>
-                  <div className="relative z-10">
-                    <div className="w-4 h-4 bg-red-600 dark:bg-red-500 rounded-full border-4 border-white dark:border-gray-950 shadow-lg"></div>
-                  </div>
-                  <div className="w-1/2"></div>
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {values.map((v) => (
+              <motion.div
+                key={v.title}
+                variants={fadeUp}
+                className="group rounded-2xl border border-gray-200 dark:border-gray-800 p-8 hover:border-red-300 dark:hover:border-red-800 hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-5 group-hover:bg-red-100 dark:group-hover:bg-red-900/40 transition-colors">
+                  <v.icon className="w-6 h-6 text-red-500" />
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Meet Our <span className="text-red-600 dark:text-red-500">Team</span>
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              The passionate individuals behind HAXEUS who make our vision a reality.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.map((member, index) => (
-              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <div className="relative w-32 h-32 mx-auto mb-4">
-                  <Image
-                    src={member.image || "/placeholder.svg"}
-                    alt={member.name}
-                    fill
-                    className="object-cover rounded-full"
-                  />
-                </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{member.name}</h3>
-                <p className="text-red-600 dark:text-red-500 font-medium mb-3">{member.role}</p>
-                <p className="text-gray-600 dark:text-gray-400">{member.description}</p>
-              </Card>
+                <h3 className="text-xl font-bold mb-2">{v.title}</h3>
+                <p className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">{v.desc}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
-      <section className="py-16 bg-white dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="relative h-96">
-              <Image
-                src="/images/save-flower-front.jpg"
-                alt="Why Choose HAXEUS"
-                fill
-                className="object-cover rounded-lg shadow-lg"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = "/placeholder.svg?height=400&width=600&text=Why+Choose+HAXEUS"
-                }}
-              />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                Why Choose <span className="text-red-600 dark:text-red-500">HAXEUS</span>?
-              </h2>
-
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-white text-sm font-bold">✓</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Premium Quality Materials</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      We use only the finest 100% cotton, pre-shrunk and tested for durability and comfort.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-white text-sm font-bold">✓</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Unique Artistic Designs</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Original artwork and designs you won't find anywhere else, created by talented artists.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-white text-sm font-bold">✓</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Sustainable Practices</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Eco-friendly production processes and packaging that minimize environmental impact.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-600 dark:bg-red-500 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-white text-sm font-bold">✓</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2 dark:text-white">Customer Satisfaction</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      99% customer satisfaction rate with hassle-free returns and dedicated support.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <Link href="/products">
-                  <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full mr-4">Shop Now</Button>
-                </Link>
-                <Link href="/contact">
-                  <Button className="bg-black hover:bg-red-700 text-white px-8 py-3 rounded-full mr-4">
-                    Contact Us
-                  </Button></Link>
-              </div>
-            </div>
-          </div>
+      {/* ───── NUMBERS ───── */}
+      <section className="py-20 px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/50">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            {[
+              { value: '300gsm', label: 'Premium Cotton' },
+              { value: '48h', label: 'Ship Time' },
+              { value: '30%', label: 'Artist Royalty' },
+              { value: '∞', label: 'Creativity' },
+            ].map((s) => (
+              <motion.div
+                key={s.label}
+                variants={fadeUp}
+                className="text-center"
+              >
+                <div className="text-4xl md:text-5xl font-black text-red-500">{s.value}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 uppercase tracking-widest">{s.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
-    </div>
-  )
+
+      {/* ───── CTA ───── */}
+      <section className="py-28 px-6 lg:px-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-2xl mx-auto space-y-8"
+        >
+          <h2 className="text-4xl md:text-6xl font-black leading-tight">
+            Ready to <span className="text-red-500">wear art</span>?
+          </h2>
+          <p className="text-lg text-gray-500 dark:text-gray-400">
+            Every drop is limited. Once it's gone, it's gone.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/products">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-10 py-4 bg-red-600 text-white font-bold text-lg rounded-full hover:bg-red-700 transition-colors shadow-lg shadow-red-500/25"
+              >
+                Shop the Drop
+              </motion.button>
+            </Link>
+            <Link href="/contact">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-10 py-4 border-2 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-bold text-lg rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Get in Touch
+              </motion.button>
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+    </main>
+  );
 }

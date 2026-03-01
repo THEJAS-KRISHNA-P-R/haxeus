@@ -25,6 +25,10 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'localhost',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
     unoptimized: false,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
@@ -49,6 +53,8 @@ const nextConfig = {
       '@radix-ui/react-select',
       '@radix-ui/react-dialog',
       '@radix-ui/react-popover',
+      '@radix-ui/react-icons',
+      '@supabase/supabase-js',
     ],
     turbo: {
       rules: {

@@ -114,7 +114,7 @@ export default function ProductsManagementPage() {
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your product inventory</p>
         </div>
         <Link href="/admin/products/new">
-          <Button className="gap-2 bg-red-600 hover:bg-red-700">
+          <Button data-testid="add-product-btn" className="gap-2 bg-red-600 hover:bg-red-700">
             <Plus size={20} />
             Add Product
           </Button>

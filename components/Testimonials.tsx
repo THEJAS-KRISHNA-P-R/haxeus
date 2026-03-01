@@ -1,109 +1,42 @@
-"use client"
-
-import { Card } from "@/components/ui/card"
-import { motion } from "framer-motion"
-import { scrollReveal, staggerFast, cardHover } from "@/lib/animations"
+"use client";
+import { cn } from "@/lib/utils";
 
 const testimonials = [
-  {
-    id: 1,
-    name: "Arjun Sharma",
-    role: "Fashion Enthusiast",
-    text: "The quality is absolutely incredible. These are hands down the most comfortable T-shirts I've ever owned. The fabric feels luxurious and the fit is perfect.",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "Priya Patel",
-    role: "Creative Director",
-    text: "I've been wearing HAXEUS tees for over a year now. They maintain their shape and softness even after countless washes. Worth every penny.",
-    rating: 5,
-  },
-  {
-    id: 3,
-    name: "Rohit Kumar",
-    role: "Software Engineer",
-    text: "Finally found T-shirts that look professional enough for work but comfortable enough for weekend lounging. The attention to detail is remarkable.",
-    rating: 5,
-  },
-]
+  { name: "Arjun Sharma",  role: "Fashion Enthusiast", text: "The quality is absolutely incredible. Most comfortable T-shirts I\'ve ever owned.", rating: 5, initial: "A" },
+  { name: "Priya Patel",   role: "Creative Director",  text: "They maintain their shape and softness even after countless washes. Worth every penny.", rating: 5, initial: "P" },
+  { name: "Rohit Kumar",   role: "Software Engineer",  text: "Professional enough for work, comfortable enough for weekends. Remarkable detail.", rating: 5, initial: "R" },
+];
 
-export default function Testimonials() {
+export function TestimonialsSection() {
   return (
-    <section className="py-20 bg-white dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={scrollReveal}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            What Our <span className="text-red-600 dark:text-red-500">Customers</span> Say
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Don't just take our word for it. Here's what our community of satisfied customers has to say about their
-            HAXEUS experience.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={staggerFast}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
-        >
-          {testimonials.map((testimonial, index) => (
-            <motion.div
-              key={testimonial.id}
-              variants={scrollReveal}
-              custom={index}
-            >
-              <motion.div
-                whileHover={{ scale: 1.02, y: -5 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="p-8 shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 bg-white dark:bg-gray-800 border-0 dark:border dark:border-gray-700 h-full">
-                  <motion.div
-                    className="flex mb-6"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.1 + 0.3 }}
-                  >
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <motion.span
-                        key={i}
-                        className="text-yellow-400 text-2xl"
-                        initial={{ opacity: 0, rotate: -180 }}
-                        whileInView={{ opacity: 1, rotate: 0 }}
-                        transition={{ delay: index * 0.1 + 0.4 + i * 0.05 }}
-                      >
-                        ⭐
-                      </motion.span>
-                    ))}
-                  </motion.div>
-                  <p className="text-gray-700 dark:text-gray-300 mb-6 italic text-lg leading-relaxed">"{testimonial.text}"</p>
-                  <div className="flex items-center">
-                    <motion.div
-                      className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-full mr-4 flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.1, rotate: 360 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <span className="text-white font-bold text-xl">{testimonial.name.charAt(0)}</span>
-                    </motion.div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white text-lg">{testimonial.name}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{testimonial.role}</p>
-                    </div>
+    <section className="relative py-24 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-hx-black via-hx-zinc/50 to-hx-black" />
+      <div className="relative z-10 max-w-7xl mx-auto px-4">
+        <div className="text-center mb-16">
+          <span className="text-xs font-bold text-white/30 uppercase tracking-[0.3em]">What people say</span>
+          <h2 className="font-display text-5xl md:text-7xl text-white mt-3 tracking-tight">LOVED BY MANY</h2>
+        </div>
+        <div className="flex gap-6 overflow-hidden">
+          <div className="flex gap-6 animate-marquee will-change-transform">
+            {[...testimonials, ...testimonials].map((t, i) => (
+              <div key={i} className={cn("flex-shrink-0 w-80 p-6 rounded-2xl bg-hx-zinc border border-hx-border hover:border-white/15 transition-colors relative overflow-hidden group")}>
+                <div className="absolute inset-0 bg-[radial-gradient(300px_at_50%_50%,rgba(255,255,255,0.03),transparent)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex gap-1 mb-4">{Array.from({ length: t.rating }).map((_, j) => <span key={j} className="text-hx-accent text-sm">★</span>)}</div>
+                <p className="text-white/70 text-sm leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center text-xs font-bold text-white border border-white/10">{t.initial}</div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">{t.name}</div>
+                    <div className="text-xs text-white/30">{t.role}</div>
                   </div>
-                </Card>
-              </motion.div>
-            </motion.div>
-          ))}
-        </motion.div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
-  )
+  );
 }
+
+export default TestimonialsSection;
