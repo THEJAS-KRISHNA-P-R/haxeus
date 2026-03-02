@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Button } from "./ui/button"
@@ -62,20 +62,20 @@ export function NewsletterSignup() {
     <div className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/30" />
           <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading || status === "success"}
-            className="pl-10 h-12 border-gray-300 focus:border-red-500 focus:ring-red-500"
+            className="pl-10 h-12 border-white/[0.06] focus:border-[#e93a3a] focus:ring-red-500"
           />
         </div>
         <Button
           type="submit"
           disabled={loading || status === "success"}
-          className="h-12 px-8 bg-red-600 hover:bg-red-700 text-white"
+          className="h-12 px-8 bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white"
         >
           {loading ? (
             "Subscribing..."
@@ -94,8 +94,8 @@ export function NewsletterSignup() {
       {message && (
         <div
           className={`mt-3 p-3 rounded-lg flex items-start gap-2 text-sm ${status === "success"
-              ? "bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/50 dark:text-green-200 dark:border-green-800"
-              : "bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/50 dark:text-red-200 dark:border-red-800"
+              ? "border bg-green-900/50 text-green-200 border-green-800/30"
+              : "bg-red-900/50 text-red-200 border-red-800/30"
             }`}
         >
           {status === "success" ? (

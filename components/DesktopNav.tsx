@@ -26,11 +26,11 @@ export default function DesktopNav({ items }: DesktopNavProps) {
           key={item.href}
           href={item.href}
           className={`
-            px-4 py-2 rounded-md text-sm font-medium
+            px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
             ${
               isActive(item.href)
-                ? 'text-red-600 dark:text-red-500 font-semibold'
-                : 'text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500'
+                ? 'text-[#e93a3a] font-semibold'
+                : 'text-white/60 hover:text-white hover:bg-white/5'
             }
           `}
         >

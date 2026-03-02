@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -78,16 +78,16 @@ export default function OrdersPage() {
       case "processing":
         return <Package className="w-5 h-5 text-orange-600" />
       case "cancelled":
-        return <XCircle className="w-5 h-5 text-red-600" />
+        return <XCircle className="w-5 h-5 text-[#e93a3a]" />
       default:
-        return <Clock className="w-5 h-5 text-gray-600" />
+        return <Clock className="w-5 h-5 text-white/50" />
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "delivered":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "border-green-200"
       case "shipped":
         return "bg-blue-100 text-blue-800 border-blue-200"
       case "processing":
@@ -95,50 +95,50 @@ export default function OrdersPage() {
       case "cancelled":
         return "bg-red-100 text-red-800 border-red-200"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-white border-white/[0.06]"
     }
   }
 
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case "paid":
-        return "bg-green-100 text-green-800"
+        return "text-green-800"
       case "pending":
         return "bg-yellow-100 text-yellow-800"
       case "failed":
         return "bg-red-100 text-red-800"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-white"
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your orders...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#e93a3a] mx-auto"></div>
+          <p className="mt-4 text-white/50">Loading your orders...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-[#0a0a0a] py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Order History</h1>
-          <p className="text-gray-600">Track and manage your orders</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Order History</h1>
+          <p className="text-white/50">Track and manage your orders</p>
         </div>
 
         {orders.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
-              <Package className="w-20 h-20 mx-auto text-gray-400 mb-6" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">No orders yet</h2>
-              <p className="text-gray-600 mb-6">You haven't placed any orders yet.</p>
+              <Package className="w-20 h-20 mx-auto text-white/30 mb-6" />
+              <h2 className="text-2xl font-bold text-white mb-2">No orders yet</h2>
+              <p className="text-white/50 mb-6">You haven't placed any orders yet.</p>
               <Link href="/products">
-                <Button className="bg-red-600 hover:bg-red-700">
+                <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80">
                   Start Shopping
                 </Button>
               </Link>
@@ -147,7 +147,7 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <Card key={order.id} className="hover:shadow-lg transition-shadow">
+              <Card key={order.id} className="hover:shadow-md shadow-black/10 transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     {/* Order Info */}
@@ -158,7 +158,7 @@ export default function OrdersPage() {
                           <h3 className="font-bold text-lg">
                             Order #{order.order_number}
                           </h3>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-white/50">
                             Placed {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                           </p>
                         </div>
@@ -177,8 +177,8 @@ export default function OrdersPage() {
                     {/* Order Total & Action */}
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-sm text-gray-600">Total</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                        <p className="text-sm text-white/50">Total</p>
+                        <p className="text-2xl font-bold text-white">
                           ₹{order.total.toLocaleString("en-IN")}
                         </p>
                       </div>

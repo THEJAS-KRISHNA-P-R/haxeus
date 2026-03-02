@@ -1,26 +1,26 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function TermsConditionsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-[#0a0a0a] py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Terms & <span className="text-red-600">Conditions</span>
+          <h1 className="text-5xl font-bold text-white mb-6">
+            Terms & <span className="text-[#e93a3a]">Conditions</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-white/50 max-w-2xl mx-auto">
             Please read these terms carefully before using our website.
           </p>
         </div>
 
         <div className="space-y-12">
           {/* Introduction */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">1. Introduction</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">1. Introduction</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 Welcome to HAXEUS! These Terms and Conditions ("Terms") govern your use of the HAXEUS website and the
                 purchase of products from us. By accessing or using our website, you agree to be bound by these Terms.
@@ -30,11 +30,11 @@ export default function TermsConditionsPage() {
           </Card>
 
           {/* Intellectual Property */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">2. Intellectual Property</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">2. Intellectual Property</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 All content on this website, including text, graphics, logos, images, and software, is the property of
                 HAXEUS or its content suppliers and protected by international copyright laws. The compilation of all
@@ -44,11 +44,11 @@ export default function TermsConditionsPage() {
           </Card>
 
           {/* Use of Website */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">3. Use of Website</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">3. Use of Website</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 You agree to use the website only for lawful purposes and in a way that does not infringe the rights of,
                 restrict, or inhibit anyone else's use and enjoyment of the website. Prohibited behavior includes
@@ -59,11 +59,11 @@ export default function TermsConditionsPage() {
           </Card>
 
           {/* Product Information and Pricing */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">4. Product Information and Pricing</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">4. Product Information and Pricing</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 We strive to ensure that all information on our website, including product descriptions and pricing, is
                 accurate. However, errors may occur. If we discover an error in the price of any goods you have ordered,
@@ -74,11 +74,11 @@ export default function TermsConditionsPage() {
           </Card>
 
           {/* Orders and Payment */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">5. Orders and Payment</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">5. Orders and Payment</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 All orders placed through our website are subject to acceptance and availability. We reserve the right
                 to refuse any order. Payment must be received in full before dispatch of goods. We accept various
@@ -88,11 +88,11 @@ export default function TermsConditionsPage() {
           </Card>
 
           {/* Limitation of Liability */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">6. Limitation of Liability</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">6. Limitation of Liability</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 HAXEUS will not be liable for any direct, indirect, incidental, special, consequential, or exemplary
                 damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other
@@ -102,11 +102,11 @@ export default function TermsConditionsPage() {
           </Card>
 
           {/* Governing Law */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">7. Governing Law</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">7. Governing Law</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 These Terms shall be governed by and construed in accordance with the laws of India, without regard to
                 its conflict of law provisions. Any dispute arising under these Terms shall be subject to the exclusive
@@ -116,11 +116,11 @@ export default function TermsConditionsPage() {
           </Card>
 
           {/* Changes to Terms */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">8. Changes to Terms</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">8. Changes to Terms</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 We reserve the right to modify these Terms at any time. Any changes will be effective immediately upon
                 posting on the website. Your continued use of the website after any such changes constitutes your
@@ -131,9 +131,9 @@ export default function TermsConditionsPage() {
 
           {/* Contact Us */}
           <div className="text-center mt-12">
-            <p className="text-lg text-gray-700 mb-6">
+            <p className="text-lg text-white/70 mb-6">
               If you have any questions about these Terms, please{" "}
-              <Link href="/contact" className="text-red-600 hover:underline">
+              <Link href="/contact" className="text-[#e93a3a] hover:underline">
                 contact us
               </Link>
               .

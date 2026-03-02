@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -58,25 +58,25 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
     }
 
     const getStockStatus = (item: ProductInventory) => {
-        if (item.stock_quantity === 0) return { label: "Out of Stock", color: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300" }
-        if (item.stock_quantity <= item.low_stock_threshold) return { label: "Low Stock", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300" }
-        return { label: "In Stock", color: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300" }
+        if (item.stock_quantity === 0) return { label: "Out of Stock", color: "bg-red-100 text-red-800-950-300" }
+        if (item.stock_quantity <= item.low_stock_threshold) return { label: "Low Stock", color: "bg-yellow-100 text-yellow-800-950-300" }
+        return { label: "In Stock", color: "bg-green-100 text-green-800-950-300" }
     }
 
     const totalStock = inventory.reduce((sum, inv) => sum + inv.stock_quantity, 0)
 
     return (
-        <Card className="bg-white dark:bg-gray-900 dark:border-gray-800">
+        <Card className="bg-[#111]-800">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="dark:text-white">Size Inventory</CardTitle>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <CardTitle className="text-white">Size Inventory</CardTitle>
+                        <p className="text-sm text-white/40 mt-1">
                             Manage stock for each size variant
                         </p>
                     </div>
                     {inventory.length > 0 && (
-                        <Badge variant="secondary" className="text-lg px-4 py-2 dark:bg-gray-800 dark:text-gray-300">
+                        <Badge variant="secondary" className="text-lg px-4 py-2 bg-[#111] text-white/60">
                             <Package size={16} className="mr-2" />
                             Total: {totalStock}
                         </Badge>
@@ -91,7 +91,7 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                             value={newSize}
                             onChange={(e) => setNewSize(e.target.value)}
                             placeholder="Enter size (e.g., S, M, L, XL, XXL)"
-                            className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                            className="bg-[#111] border-white/[0.06] text-white"
                             onKeyDown={(e) => e.key === 'Enter' && addSize()}
                         />
                     </div>
@@ -107,10 +107,10 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
 
                 {/* Size Inventory List */}
                 {inventory.length === 0 ? (
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-12 text-center">
-                        <Package className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-3" />
-                        <p className="text-gray-500 dark:text-gray-400">No sizes added yet</p>
-                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                    <div className="border-2 border-dashed border-white/[0.06] border-white/[0.06] rounded-lg p-12 text-center">
+                        <Package className="mx-auto h-12 w-12 text-white/30 mb-3" />
+                        <p className="text-white/40">No sizes added yet</p>
+                        <p className="text-sm text-white/30 mt-1">
                             Add size variants to track inventory
                         </p>
                     </div>
@@ -121,16 +121,16 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                             return (
                                 <div
                                     key={item.id}
-                                    className="border dark:border-gray-700 rounded-lg p-4 space-y-3"
+                                    className="border border-white/[0.06] rounded-lg p-4 space-y-3"
                                 >
                                     {/* Size Header */}
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg font-bold text-lg">
+                                            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 bg-[#111] rounded-lg font-bold text-lg">
                                                 {item.size}
                                             </div>
                                             <div>
-                                                <p className="font-semibold dark:text-white">Size {item.size}</p>
+                                                <p className="font-semibold text-white">Size {item.size}</p>
                                                 <Badge className={status.color}>
                                                     {status.label}
                                                 </Badge>
@@ -141,7 +141,7 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => removeSize(index)}
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                            className="text-red-500 hover:text-red-700 hover:bg-[#e93a3a]/10k:hover:bg-red-950"
                                         >
                                             <X size={16} />
                                         </Button>
@@ -150,7 +150,7 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                                     {/* Stock Controls */}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor={`stock-${index}`} className="text-sm dark:text-gray-300">
+                                            <Label htmlFor={`stock-${index}`} className="text-sm text-white/60">
                                                 Stock Quantity *
                                             </Label>
                                             <Input
@@ -159,11 +159,11 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                                                 min="0"
                                                 value={item.stock_quantity}
                                                 onChange={(e) => updateStock(index, Number(e.target.value))}
-                                                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                                className="bg-[#111] border-white/[0.06] text-white"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor={`threshold-${index}`} className="text-sm dark:text-gray-300">
+                                            <Label htmlFor={`threshold-${index}`} className="text-sm text-white/60">
                                                 Low Stock Alert
                                             </Label>
                                             <Input
@@ -172,16 +172,16 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                                                 min="0"
                                                 value={item.low_stock_threshold}
                                                 onChange={(e) => updateThreshold(index, Number(e.target.value))}
-                                                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                                className="bg-[#111] border-white/[0.06] text-white"
                                             />
                                         </div>
                                     </div>
 
                                     {/* Warning for Low/Out of Stock */}
                                     {item.stock_quantity <= item.low_stock_threshold && (
-                                        <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                                            <AlertCircle size={16} className="text-yellow-600 dark:text-yellow-500 mt-0.5" />
-                                            <div className="text-sm text-yellow-800 dark:text-yellow-300">
+                                        <div className="flex items-start gap-2 p-3 bg-yellow-50-950/20 border border-yellow-200-800 rounded-lg">
+                                            <AlertCircle size={16} className="text-yellow-600-500 mt-0.5" />
+                                            <div className="text-sm text-yellow-800-300">
                                                 {item.stock_quantity === 0
                                                     ? `Size ${item.size} is out of stock. Customers won't be able to purchase this size.`
                                                     : `Size ${item.size} has low stock (${item.stock_quantity} remaining). Consider restocking.`
@@ -195,9 +195,9 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                     </div>
                 )}
 
-                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <AlertCircle size={16} className="text-blue-600 dark:text-blue-400 mt-0.5" />
-                    <p className="text-xs text-blue-800 dark:text-blue-300">
+                <div className="flex items-start gap-2 p-3 bg-blue-50-950/20 border border-blue-200-800 rounded-lg">
+                    <AlertCircle size={16} className="text-blue-600-400 mt-0.5" />
+                    <p className="text-xs text-blue-800-300">
                         <strong>Tip:</strong> Set "Low Stock Alert" to receive warnings when inventory gets low.
                         The default threshold is 10 units.
                     </p>

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo, lazy, Suspense } from "react"
 import Image from "next/image"
@@ -41,7 +41,7 @@ interface Product {
   sizes?: string[]
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState("default")
@@ -130,7 +130,7 @@ export default function ProductsPage() {
   }, [products, searchQuery, sortBy, priceRange])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-12 overflow-x-hidden">
+    <div className="min-h-screen bg-[#080808] py-12 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -140,13 +140,13 @@ export default function ProductsPage() {
           className="text-center mb-12"
         >
           <motion.h1
-            className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6"
+            className="text-5xl lg:text-6xl font-bold text-white mb-6"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             Featured <motion.span
-              className="text-red-600 dark:text-red-500"
+              className="text-[#e93a3a]"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
@@ -155,7 +155,7 @@ export default function ProductsPage() {
             </motion.span>
           </motion.h1>
           <motion.p
-            className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+            className="text-xl text-white/40 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -176,16 +176,16 @@ export default function ProductsPage() {
               className="flex items-center gap-2"
               whileHover={{ scale: 1.05 }}
             >
-              <SlidersHorizontal className="w-5 h-5 text-red-600 dark:text-red-500" />
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filters:</span>
+              <SlidersHorizontal className="w-5 h-5 text-[#e93a3a]" />
+              <span className="text-sm font-semibold text-white/60">Filters:</span>
             </motion.div>
 
             <motion.div whileHover={hoverScale} whileTap={tapScale}>
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-500 shadow-sm">
+                <SelectTrigger className="w-[200px] bg-[#111] border-2 border-white/[0.06] hover:border-[#e93a3a] shadow-sm">
                   <SelectValue placeholder="Price Range" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-[#111]">
                   <SelectItem value="all">All Prices</SelectItem>
                   <SelectItem value="under-2000">Under ₹2,000</SelectItem>
                   <SelectItem value="2000-3000">₹2,000 - ₹3,000</SelectItem>
@@ -196,14 +196,14 @@ export default function ProductsPage() {
 
             <motion.div whileHover={hoverScale} whileTap={tapScale}>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-500 shadow-sm">
+                <SelectTrigger className="w-[200px] bg-[#111] border-2 border-white/[0.06] hover:border-[#e93a3a] shadow-sm">
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <SelectItem value="default" className="dark:text-gray-300 dark:hover:bg-gray-700">Default</SelectItem>
-                  <SelectItem value="price-low" className="dark:text-gray-300 dark:hover:bg-gray-700">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high" className="dark:text-gray-300 dark:hover:bg-gray-700">Price: High to Low</SelectItem>
-                  <SelectItem value="name" className="dark:text-gray-300 dark:hover:bg-gray-700">Name: A to Z</SelectItem>
+                <SelectContent className="bg-[#111] border-white/[0.06]">
+                  <SelectItem value="default" className="text-white/60 hover:bg-[#111]/5">Default</SelectItem>
+                  <SelectItem value="price-low" className="text-white/60 hover:bg-[#111]/5">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high" className="text-white/60 hover:bg-[#111]/5">Price: High to Low</SelectItem>
+                  <SelectItem value="name" className="text-white/60 hover:bg-[#111]/5">Name: A to Z</SelectItem>
                 </SelectContent>
               </Select>
             </motion.div>
@@ -224,7 +224,7 @@ export default function ProductsPage() {
                         setSortBy("default")
                         window.history.pushState({}, "", "/products")
                       }}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 font-semibold"
+                      className="text-[#e93a3a] hover:text-[#e93a3a] hover:bg-[#e93a3a]/10 font-semibold"
                     >
                       Clear Filters
                     </Button>
@@ -236,12 +236,12 @@ export default function ProductsPage() {
 
           {/* Results count */}
           <motion.div
-            className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6"
+            className="text-center text-sm text-white/40 mt-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            Showing <span className="font-bold text-red-600 dark:text-red-500">{loading ? '...' : filteredProducts.length}</span> {filteredProducts.length === 1 ? "product" : "products"}
+            Showing <span className="font-bold text-[#e93a3a]">{loading ? '...' : filteredProducts.length}</span> {filteredProducts.length === 1 ? "product" : "products"}
             {searchQuery && ` for "${searchQuery}"`}
           </motion.div>
         </motion.div>
@@ -257,15 +257,15 @@ export default function ProductsPage() {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg animate-pulse">
-                  <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
+                <div key={i} className="bg-[#111] rounded-lg overflow-hidden shadow-md shadow-black/10 animate-pulse">
+                  <div className="aspect-square bg-[#111]/5" />
                   <div className="p-6 space-y-3">
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                    <div className="h-6 bg-[#111]/5 rounded w-3/4" />
+                    <div className="h-4 bg-[#111]/5 rounded w-full" />
+                    <div className="h-4 bg-[#111]/5 rounded w-2/3" />
                     <div className="flex justify-between items-center pt-2">
-                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24" />
-                      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-20" />
+                      <div className="h-8 bg-[#111]/5 rounded w-24" />
+                      <div className="h-10 bg-[#111]/5 rounded w-20" />
                     </div>
                   </div>
                 </div>
@@ -287,7 +287,7 @@ export default function ProductsPage() {
               >
                 😞
               </motion.div>
-              <p className="text-2xl text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-2xl text-white/40 mb-6">
                 {products.length === 0
                   ? "No products available yet. Check back soon!"
                   : "No products found matching your criteria."}
@@ -300,7 +300,7 @@ export default function ProductsPage() {
                       setSortBy("default")
                       window.history.pushState({}, "", "/products")
                     }}
-                    className="bg-red-600 hover:bg-red-700 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg"
+                    className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 px-8 py-6 text-lg font-semibold rounded-xl shadow-md shadow-black/10"
                   >
                     Clear Filters
                   </Button>
@@ -322,10 +322,10 @@ export default function ProductsPage() {
                   transition={{ duration: 0.3 }}
                   className="snap-start"
                 >
-                  <Card className="group overflow-hidden bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl dark:hover:shadow-red-900/20 border-0 dark:border dark:border-gray-700 h-full">
+                  <Card className="group overflow-hidden bg-[#111] shadow-none hover:shadow-md shadow-black/10 hover:shadow-[#e93a3a]/5 border-0 border-white/[0.06] h-full">
                     {/* Product Image */}
                     <Link href={`/products/${product.id}`}>
-                      <div className="aspect-square relative bg-gradient-to-br from-gray-900 to-black overflow-hidden cursor-pointer">
+                      <div className="aspect-square relative bg-black overflow-hidden cursor-pointer">
                         <motion.div
                           whileHover={{ scale: 1.1, rotate: 2 }}
                           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -361,7 +361,7 @@ export default function ProductsPage() {
                                 productId={product.id}
                                 variant="ghost"
                                 size="sm"
-                                className="bg-white text-black hover:bg-gray-100 shadow-lg"
+                                className="bg-[#111] text-black hover:bg-white/5 shadow-md shadow-black/10"
                               />
                             </motion.div>
                             <motion.div
@@ -369,7 +369,7 @@ export default function ProductsPage() {
                               whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              <Button size="sm" className="bg-red-600 hover:bg-red-700 shadow-lg">
+                              <Button size="sm" className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 shadow-md shadow-black/10">
                                 <ShoppingCart className="w-4 h-4" />
                               </Button>
                             </motion.div>
@@ -382,7 +382,7 @@ export default function ProductsPage() {
                     <CardContent className="p-6">
                       <Link href={`/products/${product.id}`}>
                         <motion.h3
-                          className="text-lg font-bold text-gray-900 dark:text-white mb-2 hover:text-red-600 dark:hover:text-red-500 cursor-pointer line-clamp-1"
+                          className="text-lg font-bold text-white mb-2 hover:text-[#e93a3a] cursor-pointer line-clamp-1"
                           whileHover={{ x: 5 }}
                           transition={{ duration: 0.2 }}
                         >
@@ -390,7 +390,7 @@ export default function ProductsPage() {
                         </motion.h3>
                       </Link>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <p className="text-sm text-white/40 mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
 
                       {/* Size Options */}
                       <div className="flex gap-1 mb-4 flex-wrap">
@@ -402,7 +402,7 @@ export default function ProductsPage() {
                             transition={{ delay: index * 0.05 + sizeIndex * 0.05 }}
                             whileHover={{ scale: 1.1, backgroundColor: "#dc2626", color: "#ffffff" }}
                           >
-                            <Badge variant="outline" className="text-xs px-2 py-1 cursor-pointer dark:border-gray-600 dark:text-gray-300 dark:hover:bg-red-600 dark:hover:border-red-600">
+                            <Badge variant="outline" className="text-xs px-2 py-1 cursor-pointer border-white/[0.06] text-white/60 hover:bg-[#e93a3a]">
                               {size}
                             </Badge>
                           </motion.div>
@@ -413,16 +413,16 @@ export default function ProductsPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <motion.span
-                            className="text-2xl font-bold text-gray-900 dark:text-white"
+                            className="text-2xl font-bold text-white"
                             whileHover={{ scale: 1.1, color: "#dc2626" }}
                           >
                             ₹{product.price.toLocaleString("en-IN")}
                           </motion.span>
-                          <div className="text-xs text-green-600 dark:text-green-500 font-medium">✓ Free shipping</div>
+                          <div className="text-xs text-green-500 font-medium">✓ Free shipping</div>
                         </div>
                         <Link href={`/products/${product.id}`}>
                           <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                            <Button className="bg-red-600 hover:bg-red-700 text-white px-6 py-6 rounded-xl font-semibold shadow-md">
+                            <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white px-6 py-6 rounded-full font-semibold shadow-md">
                               View
                             </Button>
                           </motion.div>
@@ -445,7 +445,7 @@ export default function ProductsPage() {
           className="text-center mt-20"
         >
           <motion.p
-            className="text-gray-600 mb-6 text-lg"
+            className="text-white/50 mb-6 text-lg"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -457,7 +457,7 @@ export default function ProductsPage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent px-10 py-6 rounded-full text-lg font-semibold shadow-lg"
+                className="border-2 border-[#e93a3a] text-[#e93a3a] hover:bg-[#e93a3a] hover:text-white bg-transparent px-10 py-6 rounded-full text-lg font-semibold shadow-md shadow-black/10"
               >
                 Contact Us for Custom Designs
               </Button>
@@ -466,5 +466,13 @@ export default function ProductsPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#080808]" />}>
+      <ProductsContent />
+    </Suspense>
   )
 }

@@ -30,6 +30,7 @@ export interface StaggeredMenuProps {
   onMenuClose?: () => void;
   isFixed?: boolean;
   customFooter?: React.ReactNode;
+  hideToggle?: boolean;
 }
 
 export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
@@ -48,7 +49,8 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   isFixed = false,
   customFooter,
   onMenuOpen,
-  onMenuClose
+  onMenuClose,
+  hideToggle = false
 }: StaggeredMenuProps) => {
   const [open, setOpen] = useState(false);
   const openRef = useRef(false);
@@ -374,23 +376,37 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
           return arr.map((c, i) => <div key={i} className="sm-prelayer" style={{ background: c }} />);
         })()}
       </div>
-      <header className="staggered-menu-header" aria-label="Main navigation header">
+      {!hideToggle && (
+        <header className="staggered-menu-header" aria-label="Main navigation header">
+          <button
+            ref={toggleBtnRef}
+            className="sm-toggle sm-hamburger"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            aria-controls="staggered-menu-panel"
+            onClick={toggleMenu}
+            type="button"
+          >
+            <span ref={iconRef} className="sm-hamburger-icon" aria-hidden="true">
+              <span ref={line1Ref} className="sm-hamburger-line" />
+              <span ref={line2Ref} className="sm-hamburger-line" />
+              <span ref={line3Ref} className="sm-hamburger-line" />
+            </span>
+          </button>
+        </header>
+      )}
+      {hideToggle && (
         <button
           ref={toggleBtnRef}
-          className="sm-toggle sm-hamburger"
+          className="sm-toggle sr-only"
           aria-label={open ? 'Close menu' : 'Open menu'}
           aria-expanded={open}
           aria-controls="staggered-menu-panel"
           onClick={toggleMenu}
           type="button"
-        >
-          <span ref={iconRef} className="sm-hamburger-icon" aria-hidden="true">
-            <span ref={line1Ref} className="sm-hamburger-line" />
-            <span ref={line2Ref} className="sm-hamburger-line" />
-            <span ref={line3Ref} className="sm-hamburger-line" />
-          </span>
-        </button>
-      </header>
+          tabIndex={-1}
+        />
+      )}
 
       <aside id="staggered-menu-panel" ref={panelRef} className="staggered-menu-panel" aria-hidden={!open}>
         <div className="sm-panel-inner">

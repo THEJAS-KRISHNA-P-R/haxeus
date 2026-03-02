@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Heart } from "lucide-react"
@@ -104,7 +104,7 @@ export function WishlistButton({
       <Heart
         size={20}
         className={`transition-all ${
-          inWishlist ? "fill-red-500 text-red-500" : "text-gray-600"
+          inWishlist ? "fill-red-500 text-red-500" : "text-white/50"
         }`}
       />
       {showText && (

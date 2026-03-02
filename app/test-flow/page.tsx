@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -117,17 +117,17 @@ export default function TestFlowPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            System <span className="text-red-600">Test</span> Dashboard
+          <h1 className="text-4xl font-bold text-white mb-4">
+            System <span className="text-[#e93a3a]">Test</span> Dashboard
           </h1>
-          <p className="text-lg text-gray-600">Test all system components to ensure everything is working correctly.</p>
+          <p className="text-lg text-white/50">Test all system components to ensure everything is working correctly.</p>
         </div>
 
         {/* Test Controls */}
         <div className="mb-8 text-center">
           <Button
             onClick={runTests}
-            className="bg-red-600 hover:bg-red-700 px-8 py-3"
+            className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 px-8 py-3"
             disabled={Object.values(tests).some((status) => status === "running")}
           >
             {Object.values(tests).some((status) => status === "running") ? "Running Tests..." : "Run All Tests"}
@@ -135,17 +135,17 @@ export default function TestFlowPage() {
         </div>
 
         {/* Test Results */}
-        <Card className="mb-8 shadow-lg">
+        <Card className="mb-8 shadow-md shadow-black/10">
           <CardHeader>
-            <CardTitle className="text-2xl text-gray-900">Test Results</CardTitle>
+            <CardTitle className="text-2xl text-white">Test Results</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {testItems.map((item) => (
                 <div key={item.key} className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                    <p className="text-sm text-gray-600">{item.description}</p>
+                    <h3 className="font-semibold text-white">{item.name}</h3>
+                    <p className="text-sm text-white/50">{item.description}</p>
                   </div>
                   {getStatusBadge(tests[item.key as keyof typeof tests])}
                 </div>
@@ -155,9 +155,9 @@ export default function TestFlowPage() {
         </Card>
 
         {/* Quick Navigation */}
-        <Card className="mb-8 shadow-lg">
+        <Card className="mb-8 shadow-md shadow-black/10">
           <CardHeader>
-            <CardTitle className="text-2xl text-gray-900">Quick Navigation</CardTitle>
+            <CardTitle className="text-2xl text-white">Quick Navigation</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -196,16 +196,16 @@ export default function TestFlowPage() {
         </Card>
 
         {/* User Flow Testing */}
-        <Card className="shadow-lg">
+        <Card className="shadow-md shadow-black/10">
           <CardHeader>
-            <CardTitle className="text-2xl text-gray-900">User Flow Testing</CardTitle>
+            <CardTitle className="text-2xl text-white">User Flow Testing</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-semibold text-gray-900 mb-2">Complete Shopping Flow</h3>
-                <p className="text-gray-600 mb-4">Test the complete user journey from browsing to checkout:</p>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600 mb-4">
+              <div className="p-4 bg-[#0a0a0a] rounded-lg">
+                <h3 className="font-semibold text-white mb-2">Complete Shopping Flow</h3>
+                <p className="text-white/50 mb-4">Test the complete user journey from browsing to checkout:</p>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-white/50 mb-4">
                   <li>Browse products on the home page</li>
                   <li>Navigate to the products page</li>
                   <li>Click on a product to view details</li>
@@ -215,19 +215,19 @@ export default function TestFlowPage() {
                   <li>Complete purchase</li>
                 </ol>
                 <Link href="/products">
-                  <Button className="bg-red-600 hover:bg-red-700">Start Shopping Flow Test</Button>
+                  <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80">Start Shopping Flow Test</Button>
                 </Link>
               </div>
 
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-semibold text-gray-900 mb-2">Database Setup</h3>
-                <p className="text-gray-600 mb-4">
+              <div className="p-4 bg-[#0a0a0a] rounded-lg">
+                <h3 className="font-semibold text-white mb-2">Database Setup</h3>
+                <p className="text-white/50 mb-4">
                   If you haven't set up the database yet, run the SQL script in your Supabase dashboard:
                 </p>
                 <div className="bg-gray-800 text-green-400 p-3 rounded text-sm font-mono mb-4">
                   scripts/run-database-setup.sql
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-white/50">
                   Copy the contents of this file and run it in your Supabase SQL editor to create all necessary tables
                   and insert product data.
                 </p>

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -166,68 +166,68 @@ export default function NewProductPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/admin/products">
-          <Button variant="ghost" size="icon" className="dark:hover:bg-gray-800">
+          <Button variant="ghost" size="icon" className="hover:bg-white/5">
             <ArrowLeft size={20} />
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-white">
             Add New Product
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-white/40 mt-1">
             Create a new product with images and inventory tracking
           </p>
         </div>
       </div>
 
       {/* Basic Product Info */}
-      <Card className="bg-white dark:bg-gray-900 dark:border-gray-800">
+      <Card className="bg-[#111] border border-white/[0.06] border-white/[0.06]">
         <CardHeader>
-          <CardTitle className="dark:text-white">Product Information</CardTitle>
+          <CardTitle className="text-white">Product Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Name & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="dark:text-gray-300">Product Name *</Label>
+              <Label htmlFor="name" className="text-white/60">Product Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., BUSTED Vintage Tee"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="bg-[#111] border-white/[0.06] text-white"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category" className="dark:text-gray-300">Category</Label>
+              <Label htmlFor="category" className="text-white/60">Category</Label>
               <Input
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 placeholder="e.g., apparel"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="bg-[#111] border-white/[0.06] text-white"
               />
             </div>
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="dark:text-gray-300">Description</Label>
+            <Label htmlFor="description" className="text-white/60">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Detailed product description..."
               rows={4}
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              className="bg-[#111] border-white/[0.06] text-white"
             />
           </div>
 
           {/* Price & Colors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="price" className="dark:text-gray-300">Price (₹) *</Label>
+              <Label htmlFor="price" className="text-white/60">Price (₹) *</Label>
               <Input
                 id="price"
                 type="number"
@@ -235,20 +235,20 @@ export default function NewProductPage() {
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                 placeholder="2999"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="bg-[#111] border-white/[0.06] text-white"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="colors" className="dark:text-gray-300">Available Colors</Label>
+              <Label htmlFor="colors" className="text-white/60">Available Colors</Label>
               <Input
                 id="colors"
                 value={formData.colors.join(", ")}
                 onChange={(e) => updateColors(e.target.value)}
                 placeholder="Black, White, Navy"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="bg-[#111] border-white/[0.06] text-white"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-white/40">
                 Separate multiple colors with commas
               </p>
             </div>
@@ -271,7 +271,7 @@ export default function NewProductPage() {
       {/* Actions */}
       <div className="flex justify-end gap-3 pb-8">
         <Link href="/admin/products">
-          <Button variant="outline" className="dark:border-gray-700 dark:hover:bg-gray-800">
+          <Button variant="outline" className="border-white/[0.06] hover:bg-white/5">
             Cancel
           </Button>
         </Link>

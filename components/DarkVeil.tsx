@@ -129,11 +129,10 @@ export default function DarkVeil({
         const mesh = new Mesh(gl, { geometry, program });
 
         const resize = () => {
-            // Use viewport dimensions for full coverage
-            const rect = parent.getBoundingClientRect();
-            const w = rect.width > 0 ? rect.width : window.innerWidth;
-            const h = rect.height > 0 ? rect.height : window.innerHeight;
-            const currentMobile = window.innerWidth <= 768;
+            // Use full viewport dimensions since canvas is position:fixed
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const currentMobile = w <= 768;
             const currentResolution = currentMobile ? Math.min(resolutionScale, 0.5) : resolutionScale;
 
             // Set renderer size (actual render resolution)
@@ -142,7 +141,6 @@ export default function DarkVeil({
         };
 
         window.addEventListener('resize', resize);
-        // Initial resize with a small delay to ensure layout is complete
         requestAnimationFrame(() => {
             resize();
         });
@@ -169,5 +167,5 @@ export default function DarkVeil({
             window.removeEventListener('resize', resize);
         };
     }, [hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale]);
-    return <canvas ref={ref} className="darkveil-canvas" />;
+    return <canvas ref={ref} className="darkveil-canvas" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />;
 }

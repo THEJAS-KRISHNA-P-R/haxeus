@@ -4,7 +4,7 @@
     min-width: 100%;
     min-height: 100%;
     display: block;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 0;
@@ -13,10 +13,9 @@
     object-fit: cover;
 }
 
-/* Optimize for mobile devices - reduce rendering strain */
+/* Optimize for mobile devices */
 @media (max-width: 768px) {
     .darkveil-canvas {
-        /* Mobile optimization through CSS */
         image-rendering: optimizeSpeed;
     }
 }

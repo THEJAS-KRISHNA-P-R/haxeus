@@ -306,7 +306,7 @@ export default function EditProductPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-gray-100"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/10 border-t-[#e93a3a]"></div>
       </div>
     )
   }
@@ -316,16 +316,15 @@ export default function EditProductPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/admin/products">
-          <Button variant="ghost" size="icon" className="dark:hover:bg-gray-800">
+          <Button variant="ghost" size="icon">
             <ArrowLeft size={20} />
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-white">
             {productId === "new" ? "Add New Product" : "Edit Product"}
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            {productId === "new"
+          <p className="text-white/40 mt-1">{productId === "new"
               ? "Create a new product with images and inventory tracking"
               : "Update product details, images, and inventory"}
           </p>
@@ -333,54 +332,51 @@ export default function EditProductPage() {
       </div>
 
       {/* Basic Product Info */}
-      <Card className="bg-white dark:bg-gray-900 dark:border-gray-800">
+      <Card>
         <CardHeader>
-          <CardTitle className="dark:text-white">Product Information</CardTitle>
+          <CardTitle className="text-white">Product Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Name & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="dark:text-gray-300">Product Name *</Label>
+              <Label htmlFor="name" className="text-white/60">Product Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., BUSTED Vintage Tee"
                 required
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category" className="dark:text-gray-300">Category</Label>
+              <Label htmlFor="category" className="text-white/60">Category</Label>
               <Input
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 placeholder="e.g., apparel"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="dark:text-gray-300">Description</Label>
+            <Label htmlFor="description" className="text-white/60">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Detailed product description..."
               rows={4}
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
           </div>
 
           {/* Price & Colors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="price" className="dark:text-gray-300">Price (₹) *</Label>
+              <Label htmlFor="price" className="text-white/60">Price (₹) *</Label>
               <Input
                 id="price"
                 type="number"
@@ -389,20 +385,18 @@ export default function EditProductPage() {
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                 placeholder="2999"
                 required
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="colors" className="dark:text-gray-300">Available Colors</Label>
+              <Label htmlFor="colors" className="text-white/60">Available Colors</Label>
               <Input
                 id="colors"
                 value={formData.colors.join(", ")}
                 onChange={(e) => updateColors(e.target.value)}
                 placeholder="Black, White, Navy"
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-white/30">
                 Separate multiple colors with commas
               </p>
             </div>
@@ -425,14 +419,14 @@ export default function EditProductPage() {
       {/* Actions */}
       <div className="flex justify-end gap-3 pb-8">
         <Link href="/admin/products">
-          <Button variant="outline" className="dark:border-gray-700 dark:hover:bg-gray-800">
+          <Button variant="outline">
             Cancel
           </Button>
         </Link>
         <Button
           onClick={handleSave}
           disabled={saving || !formData.name || formData.price <= 0}
-          className="gap-2 bg-red-600 hover:bg-red-700"
+          className="gap-2 bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white"
         >
           <Save size={16} />
           {saving ? "Saving..." : "Save Product"}

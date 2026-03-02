@@ -1,26 +1,26 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-[#0a0a0a] py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Privacy <span className="text-red-600">Policy</span>
+          <h1 className="text-5xl font-bold text-white mb-6">
+            Privacy <span className="text-[#e93a3a]">Policy</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-white/50 max-w-2xl mx-auto">
             Your privacy is important to us. This policy explains how we collect, use, and protect your personal data.
           </p>
         </div>
 
         <div className="space-y-12">
           {/* Introduction */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">1. Introduction</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">1. Introduction</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 At HAXEUS, we are committed to protecting your privacy and ensuring the security of your personal
                 information. This Privacy Policy outlines how we collect, use, disclose, and safeguard your data when
@@ -30,11 +30,11 @@ export default function PrivacyPolicyPage() {
           </Card>
 
           {/* Information We Collect */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">2. Information We Collect</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">2. Information We Collect</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p className="font-semibold mb-2">Personal Information:</p>
               <ul className="list-disc list-inside space-y-1 mb-4">
                 <li>**Contact Data**: Name, email address, phone number, shipping address, billing address.</li>
@@ -56,11 +56,11 @@ export default function PrivacyPolicyPage() {
           </Card>
 
           {/* How We Use Your Information */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">3. How We Use Your Information</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">3. How We Use Your Information</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>We use the collected information for various purposes, including:</p>
               <ul className="list-disc list-inside space-y-2">
                 <li>Processing and fulfilling your orders.</li>
@@ -75,11 +75,11 @@ export default function PrivacyPolicyPage() {
           </Card>
 
           {/* Sharing Your Information */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">4. Sharing Your Information</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">4. Sharing Your Information</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>We may share your information with:</p>
               <ul className="list-disc list-inside space-y-2">
                 <li>
@@ -96,11 +96,11 @@ export default function PrivacyPolicyPage() {
           </Card>
 
           {/* Data Security */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">5. Data Security</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">5. Data Security</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 We implement a variety of security measures to maintain the safety of your personal information. Your
                 personal data is contained behind secured networks and is only accessible by a limited number of persons
@@ -110,11 +110,11 @@ export default function PrivacyPolicyPage() {
           </Card>
 
           {/* Your Rights */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">6. Your Rights</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">6. Your Rights</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>You have the right to:</p>
               <ul className="list-disc list-inside space-y-2">
                 <li>Access and obtain a copy of your personal data.</li>
@@ -128,11 +128,11 @@ export default function PrivacyPolicyPage() {
           </Card>
 
           {/* Changes to This Policy */}
-          <Card className="p-8 shadow-lg">
+          <Card className="p-8 shadow-md shadow-black/10">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">7. Changes to This Policy</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">7. Changes to This Policy</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 text-gray-700 leading-relaxed">
+            <CardContent className="p-0 text-white/70 leading-relaxed">
               <p>
                 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new
                 Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
@@ -142,9 +142,9 @@ export default function PrivacyPolicyPage() {
 
           {/* Contact Us */}
           <div className="text-center mt-12">
-            <p className="text-lg text-gray-700 mb-6">
+            <p className="text-lg text-white/70 mb-6">
               If you have any questions about this Privacy Policy, please{" "}
-              <Link href="/contact" className="text-red-600 hover:underline">
+              <Link href="/contact" className="text-[#e93a3a] hover:underline">
                 contact us
               </Link>
               .

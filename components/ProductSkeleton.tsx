@@ -1,9 +1,9 @@
-import { Card, CardContent } from "@/components/ui/card"
+﻿import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function ProductSkeleton() {
   return (
-    <Card className="overflow-hidden bg-white shadow-lg border-0">
+    <Card className="overflow-hidden bg-[#111] shadow-md shadow-black/10 border-0">
       <Skeleton className="aspect-square w-full rounded-t-lg" />
       <CardContent className="p-6 space-y-4">
         <Skeleton className="h-6 w-3/4" />

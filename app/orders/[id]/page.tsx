@@ -132,31 +132,26 @@ export default function OrderDetailsPage() {
       case "cancelled":
         return <XCircle className="w-8 h-8 text-red-600" />
       default:
-        return <Clock className="w-8 h-8 text-gray-600" />
+        return <Clock className="w-8 h-8 text-white/40" />
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "delivered":
-        return "bg-green-100 text-green-800 border-green-200"
-      case "shipped":
-        return "bg-blue-100 text-blue-800 border-blue-200"
-      case "processing":
-        return "bg-orange-100 text-orange-800 border-orange-200"
-      case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200"
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+      case "delivered":  return "bg-green-900/30 text-green-400 border border-green-500/20"
+      case "shipped":    return "bg-[#07e4e1]/10 text-[#07e4e1] border border-[#07e4e1]/20"
+      case "processing": return "bg-[#e7bf04]/10 text-[#e7bf04] border border-[#e7bf04]/20"
+      case "cancelled":  return "bg-[#e93a3a]/10 text-[#e93a3a] border border-[#e93a3a]/20"
+      default:           return "bg-[#1a1a1a] text-white/50 border border-white/10"
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading order details...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/10 border-t-[#e93a3a] mx-auto"></div>
+          <p className="mt-4 text-white/40">Loading order details...</p>
         </div>
       </div>
     )
@@ -164,12 +159,12 @@ export default function OrderDetailsPage() {
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
-            <XCircle className="w-16 h-16 mx-auto text-red-600 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Order Not Found</h2>
-            <p className="text-gray-600 mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
+            <XCircle className="w-16 h-16 mx-auto text-[#e93a3a] mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">Order Not Found</h2>
+            <p className="text-white/40 mb-6">The order you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.</p>
             <Link href="/orders">
               <Button>Back to Orders</Button>
             </Link>
@@ -180,7 +175,7 @@ export default function OrderDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-[#080808] py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -192,11 +187,10 @@ export default function OrderDetailsPage() {
           </Link>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="text-4xl font-bold text-white mb-2">
                 Order #{order.order_number}
               </h1>
-              <p className="text-gray-600">
-                Placed on {format(new Date(order.created_at), "MMMM d, yyyy 'at' h:mm a")}
+              <p className="text-white/40"> {format(new Date(order.created_at), "MMMM d, yyyy 'at' h:mm a")}
               </p>
             </div>
             <Badge className={`${getStatusColor(order.status)} text-lg px-4 py-2`}>
@@ -229,12 +223,12 @@ export default function OrderDetailsPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{item.product?.name}</h3>
-                      <p className="text-sm text-gray-600">Size: {item.size}</p>
-                      <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                      <p className="text-sm text-white/40">Size: {item.size}</p>
+                      <p className="text-sm text-white/40">Quantity: {item.quantity}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-lg">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
-                      <p className="text-sm text-gray-600">₹{item.price.toLocaleString("en-IN")} each</p>
+                      <p className="text-sm text-white/40">₹{item.price.toLocaleString("en-IN")} each</p>
                     </div>
                   </div>
                 ))}
@@ -250,7 +244,7 @@ export default function OrderDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-gray-700">
+                <div className="text-white/60">
                   <p className="font-semibold">
                     {order.shipping_first_name} {order.shipping_last_name}
                   </p>
@@ -276,7 +270,7 @@ export default function OrderDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">{order.customer_notes}</p>
+                  <p className="text-white/60">{order.customer_notes}</p>
                 </CardContent>
               </Card>
             )}
@@ -296,15 +290,15 @@ export default function OrderDetailsPage() {
                     <p className="font-semibold">
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-white/40">
                       Last updated {format(new Date(order.updated_at), "MMM d, yyyy")}
                     </p>
                   </div>
                 </div>
                 {order.tracking_number && (
                   <div className="pt-4 border-t">
-                    <p className="text-sm font-semibold text-gray-700 mb-1">Tracking Number</p>
-                    <p className="font-mono text-sm bg-gray-100 p-2 rounded">
+                    <p className="text-sm font-semibold text-white/60 mb-1">Tracking Number</p>
+                    <p className="font-mono text-sm bg-[#1a1a1a] text-white/80 p-2 rounded-lg">
                       {order.tracking_number}
                     </p>
                   </div>
@@ -323,12 +317,12 @@ export default function OrderDetailsPage() {
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Method</span>
+                    <span className="text-white/40">Method</span>
                     <span className="font-semibold">{order.payment_method || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Status</span>
-                    <Badge className={order.payment_status === "paid" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                    <span className="text-white/40">Status</span>
+                    <Badge className={order.payment_status === "paid" ? "bg-green-900/30 text-green-400 border border-green-500/20" : "bg-[#e7bf04]/10 text-[#e7bf04] border border-[#e7bf04]/20"}>
                       {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
                     </Badge>
                   </div>

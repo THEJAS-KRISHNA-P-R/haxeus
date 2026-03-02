@@ -24,8 +24,15 @@ const config: Config = {
           border:       "#232323",
           text:         "#e8e8e8",
           dim:          "#6b6b6b",
-          accent:       "#E4FF00",
-          "accent-dim": "#b3cc00",
+          // Primary red
+          red:          "#e93a3a",
+          // Accent colors — full chroma, no hues
+          yellow:       "#e7bf04",
+          magenta:      "#c03c9d",
+          cyan:         "#07e4e1",
+          // Legacy accent (now mapped to yellow)
+          accent:       "#e7bf04",
+          "accent-dim": "#b89e03",
         },
         // keep shadcn tokens
         border:     "hsl(var(--border))",
@@ -39,8 +46,8 @@ const config: Config = {
           200: "#fecaca",
           300: "#fca5a5",
           400: "#f87171",
-          500: "#ef4444",
-          600: "#dc2626",
+          500: "#e93a3a",
+          600: "#e93a3a",
           700: "#b91c1c",
           800: "#991b1b",
           900: "#7f1d1d",
@@ -69,6 +76,8 @@ const config: Config = {
         marquee:       "marquee 30s linear infinite",
         "fade-in":     "fadeIn 0.6s ease-out",
         "slide-up":    "slideUp 0.8s ease-out",
+        "pulse-glow":  "pulseGlow 2s ease-in-out infinite",
+        "accent-spin": "accentSpin 8s linear infinite",
       },
       keyframes: {
         shimmer: {
@@ -100,14 +109,25 @@ const config: Config = {
           "0%":   { opacity: "0", transform: "translateY(30px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        pulseGlow: {
+          "0%, 100%": { boxShadow: "0 0 20px rgba(233,58,58,0.3)" },
+          "50%":      { boxShadow: "0 0 40px rgba(233,58,58,0.6)" },
+        },
+        accentSpin: {
+          from: { transform: "rotate(0deg)" },
+          to:   { transform: "rotate(360deg)" },
+        },
       },
       boxShadow: {
-        "glow-accent": "0 0 40px rgba(228,255,0,0.15), 0 0 80px rgba(228,255,0,0.05)",
-        "glow-white":  "0 0 40px rgba(255,255,255,0.1)",
-        card:          "0 1px 0 0 rgba(255,255,255,0.05), inset 0 1px 0 0 rgba(255,255,255,0.02)",
-        soft:          "0 2px 15px -3px rgba(0,0,0,0.07), 0 10px 20px -2px rgba(0,0,0,0.04)",
-        medium:        "0 4px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
-        large:         "0 10px 40px -10px rgba(0,0,0,0.15), 0 20px 25px -5px rgba(0,0,0,0.1)",
+        "glow-red":     "0 0 40px rgba(233,58,58,0.2), 0 0 80px rgba(233,58,58,0.08)",
+        "glow-yellow":  "0 0 40px rgba(231,191,4,0.2), 0 0 80px rgba(231,191,4,0.08)",
+        "glow-magenta": "0 0 40px rgba(192,60,157,0.2), 0 0 80px rgba(192,60,157,0.08)",
+        "glow-cyan":    "0 0 40px rgba(7,228,225,0.2), 0 0 80px rgba(7,228,225,0.08)",
+        "glow-white":   "0 0 40px rgba(255,255,255,0.1)",
+        card:           "0 1px 0 0 rgba(255,255,255,0.05), inset 0 1px 0 0 rgba(255,255,255,0.02)",
+        soft:           "0 2px 15px -3px rgba(0,0,0,0.07), 0 10px 20px -2px rgba(0,0,0,0.04)",
+        medium:         "0 4px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+        large:          "0 10px 40px -10px rgba(0,0,0,0.15), 0 20px 25px -5px rgba(0,0,0,0.1)",
       },
       borderRadius: {
         lg: "var(--radius)",

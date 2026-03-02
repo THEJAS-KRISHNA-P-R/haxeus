@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 
 interface Sale {
@@ -44,23 +44,23 @@ export function SocialProofToast() {
 
     return (
         <div
-            className={`fixed bottom-24 left-6 z-40 max-w-xs bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 px-4 py-3 transition-all duration-500 ${visible
+            className={`fixed bottom-24 left-6 z-40 max-w-xs bg-[#111] rounded-xl shadow-md shadow-black/10 shadow-black/20 border border-white/[0.04] border-white/[0.06] px-4 py-3 transition-all duration-500 ${visible
                     ? "translate-x-0 opacity-100"
                     : "-translate-x-full opacity-0 pointer-events-none"
                 }`}
         >
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-lg flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#e93a3a]/10 flex items-center justify-center text-lg flex-shrink-0">
                     🛒
                 </div>
                 <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <p className="text-sm font-medium text-white truncate">
                         {current.name} from {current.city}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        just bought <span className="font-semibold text-red-600 dark:text-red-400">{current.product}</span>
+                    <p className="text-xs text-white/40 truncate">
+                        just bought <span className="font-semibold text-[#e93a3a]">{current.product}</span>
                     </p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">{current.timeAgo}</p>
+                    <p className="text-xs text-white/30">{current.timeAgo}</p>
                 </div>
             </div>
         </div>

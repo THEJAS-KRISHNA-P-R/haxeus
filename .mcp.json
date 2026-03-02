@@ -10,6 +10,19 @@
         "--codegen", "typescript",
         "--output-dir", "./playwright-output"
       ]
+    },
+    "@21st-dev/magic": {
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@21st-dev/magic@latest",
+        "API_KEY=\"1666c7c8b4e0bc7e938f8d3db24c0365d52bf3e27eb54d2444ef39bf868ade2a\""
+      ],
+      "command": "cmd"
     }
+  },
+  "registries": {
+    "disabled": false
   }
 }

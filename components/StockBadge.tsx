@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -18,7 +18,7 @@ export function StockBadge({ stock, lowThreshold = 5 }: Props) {
 
     if (stock <= 0) {
         return (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#1a1a1a] text-white/40">
                 Sold Out
             </span>
         );
@@ -28,13 +28,13 @@ export function StockBadge({ stock, lowThreshold = 5 }: Props) {
         return (
             <span
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 ${pulse
-                        ? "bg-red-600 text-white shadow-lg shadow-red-500/30 scale-105"
-                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        ? "bg-[#e93a3a] text-white shadow-md shadow-[#e93a3a]/30 scale-105"
+                        : "bg-[#e93a3a]/10 text-[#e93a3a]"
                     }`}
             >
                 <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e93a3a]" />
                 </span>
                 Only {stock} left!
             </span>
@@ -42,7 +42,7 @@ export function StockBadge({ stock, lowThreshold = 5 }: Props) {
     }
 
     return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-green-400 bg-green-900/30">
             ✓ In Stock
         </span>
     );

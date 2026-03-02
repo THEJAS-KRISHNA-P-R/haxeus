@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -66,7 +66,7 @@ export default function NewAddressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-12">
+    <div className="min-h-screen bg-[#080808] pt-20 pb-12">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link href="/profile?tab=addresses">
@@ -75,7 +75,7 @@ export default function NewAddressPage() {
               Back to Profile
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Add New Address</h1>
+          <h1 className="text-3xl font-bold text-white">Add New Address</h1>
         </div>
 
         <Card>

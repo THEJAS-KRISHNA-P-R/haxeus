@@ -1,4 +1,5 @@
 import type React from "react"
+import { Suspense } from "react"
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { Navbar } from "@/components/navbar"
@@ -7,12 +8,13 @@ import { Toaster } from "@/components/ui/toaster"
 import { CartProvider } from "@/contexts/CartContext"
 import { ThemeProvider } from "@/contexts/ThemeContext"
 import { PWAProvider } from "@/components/PWAProvider"
+import type { Metadata, Viewport } from "next"
+
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "HAXEUS - Premium Artistic Expression Meets Fashion",
   description: "Discover unique, artistic T-shirts that blend creative expression with premium comfort. Shop exclusive designs, track orders, and enjoy fast shipping.",
-  generator: 'v0.dev',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -21,16 +23,13 @@ export const metadata = {
   }
 }
 
-export const viewport = {
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#667eea'
+  themeColor: '#080808'
 }
-
-// Force dynamic rendering for all pages due to navbar using useSearchParams
-export const dynamic = 'force-dynamic'
 
 export default function RootLayout({
   children,
@@ -38,11 +37,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <head>
         {/* PWA Meta Tags */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#667eea" />
+        <meta name="theme-color" content="#080808" />
         
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -68,27 +67,20 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const storageKey = 'haxeus-theme';
-                const theme = localStorage.getItem(storageKey) || 'light';
-                const root = document.documentElement;
-                
-                if (theme === 'system') {
-                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  root.classList.add(systemTheme);
-                } else {
-                  root.classList.add(theme);
-                }
+                document.documentElement.classList.add('dark');
               } catch (e) {}
             `,
           }}
         />
       </head>
-      <body className={inter.className}>
-        <ThemeProvider defaultTheme="light" storageKey="haxeus-theme">
+      <body className={`${inter.className} bg-[#080808] text-[#e8e8e8]`}>
+        <ThemeProvider defaultTheme="dark" storageKey="haxeus-theme">
           <CartProvider>
             <PWAProvider />
-            <Navbar />
-            <main className="min-h-screen">{children}</main>
+            <Suspense fallback={null}>
+              <Navbar />
+            </Suspense>
+            <main className="min-h-screen pt-16 pb-24 md:pt-20 md:pb-0">{children}</main>
             <Footer />
             <Toaster />
           </CartProvider>

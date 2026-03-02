@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -194,22 +194,22 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
     }
 
     return (
-        <Card className="bg-white dark:bg-gray-900 dark:border-gray-800" ref={containerRef}>
+        <Card className="bg-[#111]-800" ref={containerRef}>
             <CardHeader>
-                <CardTitle className="dark:text-white flex items-center gap-2">
+                <CardTitle className="text-white flex items-center gap-2">
                     Product Images
                     {uploading && <Loader2 className="h-4 w-4 animate-spin text-red-500" />}
                 </CardTitle>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-white/40">
                     Add multiple images for your product. <span className="text-red-500 font-medium">Paste images directly (Ctrl+V)</span> or use the upload button.
                 </p>
             </CardHeader>
             <CardContent className="space-y-4">
                 {/* Upload Progress */}
                 {uploading && uploadProgress && (
-                    <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-center gap-3">
+                    <div className="bg-blue-50-900/30 border border-blue-200-800 rounded-lg p-3 flex items-center gap-3">
                         <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
-                        <span className="text-blue-700 dark:text-blue-300 text-sm">{uploadProgress}</span>
+                        <span className="text-blue-700-300 text-sm">{uploadProgress}</span>
                     </div>
                 )}
 
@@ -218,24 +218,24 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                     {/* Paste/Drop Zone */}
                     <div
                         className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer ${isPasteActive
-                                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                                : 'border-gray-300 dark:border-gray-700 hover:border-red-400 dark:hover:border-red-600'
+                                ? 'border-red-500 bg-red-50-900/20'
+                                : 'border-white/[0.06] border-white/[0.06] hover:border-red-400'
                             }`}
                         onFocus={() => setIsPasteActive(true)}
                         onBlur={() => setIsPasteActive(false)}
                         tabIndex={0}
                     >
-                        <Clipboard className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" />
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <Clipboard className="mx-auto h-8 w-8 text-white/30 mb-2" />
+                        <p className="text-sm font-medium text-white/60">
                             Paste Image Here
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs text-white/40 mt-1">
                             Press Ctrl+V anywhere to paste
                         </p>
                     </div>
 
                     {/* File Upload */}
-                    <label className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center cursor-pointer hover:border-red-400 dark:hover:border-red-600 transition-all">
+                    <label className="border-2 border-dashed border-white/[0.06] border-white/[0.06] rounded-lg p-6 text-center cursor-pointer hover:border-red-400 transition-all">
                         <input
                             type="file"
                             accept="image/*"
@@ -243,11 +243,11 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                             onChange={handleFileSelect}
                             className="hidden"
                         />
-                        <Upload className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" />
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <Upload className="mx-auto h-8 w-8 text-white/30 mb-2" />
+                        <p className="text-sm font-medium text-white/60">
                             Upload from Device
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs text-white/40 mt-1">
                             Click to select files
                         </p>
                     </label>
@@ -260,7 +260,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                             value={newImageUrl}
                             onChange={(e) => setNewImageUrl(e.target.value)}
                             placeholder="Or enter image URL (e.g., /images/product.jpg)"
-                            className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                            className="bg-[#111] border-white/[0.06] text-white"
                             onKeyDown={(e) => e.key === 'Enter' && addImage()}
                         />
                     </div>
@@ -277,10 +277,10 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
 
                 {/* Image Gallery */}
                 {images.length === 0 ? (
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-12 text-center">
-                        <ImageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-3" />
-                        <p className="text-gray-500 dark:text-gray-400">No images added yet</p>
-                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                    <div className="border-2 border-dashed border-white/[0.06] border-white/[0.06] rounded-lg p-12 text-center">
+                        <ImageIcon className="mx-auto h-12 w-12 text-white/30 mb-3" />
+                        <p className="text-white/40">No images added yet</p>
+                        <p className="text-sm text-white/30 mt-1">
                             Paste an image or upload from your device
                         </p>
                     </div>
@@ -289,10 +289,10 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                         {images.map((image, index) => (
                             <div
                                 key={image.id}
-                                className="relative border dark:border-gray-700 rounded-lg p-3 group"
+                                className="relative border border-white/[0.06] rounded-lg p-3 group"
                             >
                                 {/* Image Preview */}
-                                <div className="relative h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-3">
+                                <div className="relative h-48 bg-gray-100 bg-[#111] rounded-lg overflow-hidden mb-3">
                                     <Image
                                         src={image.image_url}
                                         alt={`Product image ${index + 1}`}
@@ -316,7 +316,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                             size="sm"
                                             onClick={() => moveImage(index, 'up')}
                                             disabled={index === 0}
-                                            className="h-8 w-8 p-0 dark:hover:bg-gray-800"
+                                            className="h-8 w-8 p-0 hover:bg-[#111]/5"
                                         >
                                             <GripVertical size={16} />
                                         </Button>
@@ -326,7 +326,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                             size="sm"
                                             onClick={() => moveImage(index, 'down')}
                                             disabled={index === images.length - 1}
-                                            className="h-8 w-8 p-0 dark:hover:bg-gray-800"
+                                            className="h-8 w-8 p-0 hover:bg-[#111]/5"
                                         >
                                             <GripVertical size={16} className="rotate-180" />
                                         </Button>
@@ -339,7 +339,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => setPrimary(index)}
-                                                className="text-xs dark:border-gray-700 dark:hover:bg-gray-800"
+                                                className="text-xs border-white/[0.06] hover:bg-[#111]/5"
                                             >
                                                 Set Primary
                                             </Button>
@@ -349,7 +349,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => removeImage(index)}
-                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-[#e93a3a]/10k:hover:bg-red-950"
                                         >
                                             <X size={16} />
                                         </Button>
@@ -357,7 +357,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                 </div>
 
                                 {/* Image URL */}
-                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-2">
+                                <p className="text-xs text-white/40 truncate mt-2">
                                     {image.image_url}
                                 </p>
                             </div>
@@ -365,7 +365,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                     </div>
                 )}
 
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-white/40">
                     Tip: Use high-quality images (at least 1200x1200px) for best results
                 </p>
             </CardContent>
