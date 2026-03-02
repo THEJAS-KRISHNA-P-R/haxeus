@@ -13,6 +13,7 @@ import type { Metadata, Viewport } from "next"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://haxeuz.netlify.app"), // Replace with your actual domain
   title: "HAXEUS - Premium Artistic Expression Meets Fashion",
   description: "Discover unique, artistic T-shirts that blend creative expression with premium comfort. Shop exclusive designs, track orders, and enjoy fast shipping.",
   manifest: '/manifest.json',
@@ -42,11 +43,11 @@ export default function RootLayout({
         {/* PWA Meta Tags */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#080808" />
-        
+
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="apple-touch-icon" href="/favi/apple-touch-icon.png" />
-        
+
         {/* Favicons */}
         <link rel="icon" type="image/x-icon" href="/favi/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favi/favicon.svg" />
@@ -55,14 +56,14 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
-        
+
         {/* PWA Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="HAXEUS" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
-        
+
         <script
           dangerouslySetInnerHTML={{
             __html: `
