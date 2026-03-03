@@ -80,12 +80,27 @@
 }
 
 /* ── Fixed-position glass (navbar) ──
-   When GlassSurface is inside a fixed element, the SVG backdrop-filter
-   can fail to repaint on scroll in Chromium. Promote to its own GPU layer. */
+   SVG filter backdrop-filter (url(#id)) breaks across GPU compositor layer
+   boundaries (position:fixed + transform). Fall back to pure CSS blur. */
 .glass-surface-fixed {
   isolation: isolate;
   transform: translateZ(0);
   will-change: transform;
+}
+
+.glass-surface-fixed.glass-surface--svg,
+.glass-surface-fixed.glass-surface--fallback {
+  backdrop-filter: blur(20px) saturate(var(--glass-saturation, 1.4)) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(var(--glass-saturation, 1.4)) brightness(1.05) !important;
+  background: rgba(12, 12, 12, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 0 0.5px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  contain: layout style;
 }
 
 /* Prevent the hidden SVG filter element from creating scroll artifacts */

@@ -231,13 +231,6 @@ input[type="checkbox"]:checked {
   }
 }
 
-/* GPU acceleration */
-html,
-body {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-}
-
 /* Prevent horizontal scroll */
 html,
 body {

@@ -42,6 +42,7 @@ export interface GlassSurfaceProps {
     | 'plus-lighter';
   className?: string;
   style?: React.CSSProperties;
+  disableSvgFilter?: boolean;
 }
 
 const GlassSurface: React.FC<GlassSurfaceProps> = ({
@@ -64,7 +65,8 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   yChannel = 'G',
   mixBlendMode = 'difference',
   className = '',
-  style = {}
+  style = {},
+  disableSvgFilter = false
 }) => {
   const id = useId();
   const filterId = `glass-filter-${id.replace(/:/g, '')}`;
@@ -164,8 +166,8 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   }, [width, height]);
 
   useEffect(() => {
-    setSvgSupported(supportsSVGFilters());
-  }, []);
+    setSvgSupported(!disableSvgFilter && supportsSVGFilters());
+  }, [disableSvgFilter]);
 
   const supportsSVGFilters = () => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
