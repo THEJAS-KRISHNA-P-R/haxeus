@@ -47,6 +47,7 @@ const LightPillarMobile: React.FC<LightPillarProps> = ({
     const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
     const timeRef = useRef<number>(0);
+    const isVisibleRef = useRef<boolean>(true);
     const [webGLSupported, setWebGLSupported] = useState<boolean>(true);
 
     useEffect(() => {
@@ -61,6 +62,17 @@ const LightPillarMobile: React.FC<LightPillarProps> = ({
         const container = containerRef.current;
         const width = container.clientWidth;
         const height = container.clientHeight;
+
+        // IntersectionObserver to pause rendering when off-screen
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    isVisibleRef.current = entry.isIntersecting;
+                });
+            },
+            { threshold: 0 }
+        );
+        observer.observe(container);
 
         // Mobile-first quality settings - very conservative
         const qualitySettings = {
@@ -273,16 +285,20 @@ const LightPillarMobile: React.FC<LightPillarProps> = ({
             if (!materialRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) return;
             const deltaTime = currentTime - lastTime;
 
-            if (deltaTime >= frameTime) {
-                timeRef.current += (deltaTime / 1000) * rotationSpeed * 10.0; // Adjust for scale
-                materialRef.current.uniforms.uTime.value = timeRef.current;
+            if (isVisibleRef.current) {
+                if (deltaTime >= frameTime) {
+                    timeRef.current += (deltaTime / 1000) * rotationSpeed * 10.0; // Adjust for scale
+                    materialRef.current.uniforms.uTime.value = timeRef.current;
 
-                const rotAngle = timeRef.current * 0.3;
-                materialRef.current.uniforms.uRotCos.value = Math.cos(rotAngle);
-                materialRef.current.uniforms.uRotSin.value = Math.sin(rotAngle);
+                    const rotAngle = timeRef.current * 0.3;
+                    materialRef.current.uniforms.uRotCos.value = Math.cos(rotAngle);
+                    materialRef.current.uniforms.uRotSin.value = Math.sin(rotAngle);
 
-                rendererRef.current.render(sceneRef.current, cameraRef.current);
-                lastTime = currentTime - (deltaTime % frameTime);
+                    rendererRef.current.render(sceneRef.current, cameraRef.current);
+                    lastTime = currentTime - (deltaTime % frameTime);
+                }
+            } else {
+                lastTime = currentTime;
             }
             rafRef.current = requestAnimationFrame(animate);
         };
@@ -299,6 +315,7 @@ const LightPillarMobile: React.FC<LightPillarProps> = ({
         window.addEventListener('resize', handleResize, { passive: true });
 
         return () => {
+            observer.disconnect();
             window.removeEventListener('resize', handleResize);
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
             if (rendererRef.current) {

@@ -48,6 +48,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
     const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
     const timeRef = useRef<number>(0);
+    const isVisibleRef = useRef<boolean>(true);
     const [webGLSupported, setWebGLSupported] = useState<boolean>(true);
 
     useEffect(() => {
@@ -62,6 +63,17 @@ const LightPillar: React.FC<LightPillarProps> = ({
         if (!containerRef.current || !webGLSupported) return;
 
         const container = containerRef.current;
+
+        // IntersectionObserver to pause rendering when off-screen
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    isVisibleRef.current = entry.isIntersecting;
+                });
+            },
+            { threshold: 0 }
+        );
+        observer.observe(container);
 
         // PERFORMANCE OPTIMIZED FOR MOBILE — Force container to fill viewport if height is 0
         if (container.clientHeight === 0) {
@@ -84,9 +96,9 @@ const LightPillar: React.FC<LightPillarProps> = ({
         // PERFORMANCE OPTIMIZED FOR MOBILE — pixelRatio 0.5 hardcoded on mobile (NOT devicePixelRatio)
         // waveIterations must be >= 2 to produce visible turbulence/swirl (1 = flat blob)
         const qualitySettings = {
-            low:    { iterations: 38, waveIterations: 2, pixelRatio: 0.5,                                   precision: 'mediump', stepMultiplier: 1.3 },
-            medium: { iterations: 50, waveIterations: 3, pixelRatio: 0.65,                                  precision: 'mediump', stepMultiplier: 1.1 },
-            high:   { iterations: 90, waveIterations: 4, pixelRatio: Math.min(1.5, window.devicePixelRatio), precision: 'highp',   stepMultiplier: 1.0 }
+            low: { iterations: 38, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.3 },
+            medium: { iterations: 50, waveIterations: 3, pixelRatio: 0.65, precision: 'mediump', stepMultiplier: 1.1 },
+            high: { iterations: 90, waveIterations: 4, pixelRatio: Math.min(1.5, window.devicePixelRatio), precision: 'highp', stepMultiplier: 1.0 }
         };
 
         const settings = qualitySettings[effectiveQuality] || qualitySettings.medium;
@@ -289,17 +301,22 @@ const LightPillar: React.FC<LightPillarProps> = ({
         const animate = (currentTime: number) => {
             if (!materialRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) return;
 
-            const deltaTime = Math.min(currentTime - lastTime, 100); // Caps delta to avoid jumps
+            if (isVisibleRef.current) {
+                const deltaTime = Math.min(currentTime - lastTime, 100); // Caps delta to avoid jumps
 
-            if (deltaTime >= frameTime) {
-                // Fixed 16 ms tick keeps animation identical regardless of FPS tier
-                timeRef.current += 0.016 * rotationSpeed;
-                const t = timeRef.current;
-                materialRef.current.uniforms.uTime.value = t;
-                materialRef.current.uniforms.uRotCos.value = Math.cos(t * 0.3);
-                materialRef.current.uniforms.uRotSin.value = Math.sin(t * 0.3);
-                rendererRef.current.render(sceneRef.current, cameraRef.current);
-                lastTime = currentTime - (deltaTime % frameTime);
+                if (deltaTime >= frameTime) {
+                    // Fixed 16 ms tick keeps animation identical regardless of FPS tier
+                    timeRef.current += 0.016 * rotationSpeed;
+                    const t = timeRef.current;
+                    materialRef.current.uniforms.uTime.value = t;
+                    materialRef.current.uniforms.uRotCos.value = Math.cos(t * 0.3);
+                    materialRef.current.uniforms.uRotSin.value = Math.sin(t * 0.3);
+                    rendererRef.current.render(sceneRef.current, cameraRef.current);
+                    lastTime = currentTime - (deltaTime % frameTime);
+                }
+            } else {
+                // Keep lastTime updated so when it becomes visible again it doesn't jump
+                lastTime = currentTime;
             }
 
             rafRef.current = requestAnimationFrame(animate);
@@ -313,7 +330,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
             resizeTimeout = window.setTimeout(() => {
                 if (!rendererRef.current || !materialRef.current || !containerRef.current) return;
                 const vp = window.visualViewport;
-                const newWidth  = vp ? vp.width  : (containerRef.current.clientWidth  || window.innerWidth);
+                const newWidth = vp ? vp.width : (containerRef.current.clientWidth || window.innerWidth);
                 const newHeight = vp ? vp.height : (containerRef.current.clientHeight || window.innerHeight);
                 rendererRef.current.setSize(newWidth, newHeight);
                 materialRef.current.uniforms.uResolution.value.set(newWidth, newHeight);
@@ -324,6 +341,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
         window.visualViewport?.addEventListener('resize', handleResize, { passive: true });
 
         return () => {
+            observer.disconnect();
             window.removeEventListener('resize', handleResize);
             window.visualViewport?.removeEventListener('resize', handleResize);
             if (interactive) {
