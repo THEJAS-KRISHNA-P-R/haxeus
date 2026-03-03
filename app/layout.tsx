@@ -20,6 +20,19 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'HAXEUS'
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: '/favi/favicon.ico' },
+      { url: '/favi/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favi/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favi/apple-touch-icon.png', sizes: '180x180' }
+    ],
   }
 }
 
@@ -39,29 +52,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <head>
-        {/* PWA Meta Tags */}
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#080808" />
-
-        {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-icon" href="/favi/apple-touch-icon.png" />
-
-        {/* Favicons */}
-        <link rel="icon" type="image/x-icon" href="/favi/favicon.ico" />
-        <link rel="icon" type="image/svg+xml" href="/favi/favicon.svg" />
-        <link rel="icon" type="image/png" sizes="96x96" href="/favi/favicon-96x96.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
-
-        {/* PWA Meta Tags */}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="HAXEUS" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="format-detection" content="telephone=no" />
 
         <script
           dangerouslySetInnerHTML={{
