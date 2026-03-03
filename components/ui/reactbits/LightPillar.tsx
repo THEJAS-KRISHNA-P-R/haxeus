@@ -1,5 +1,9 @@
 "use client";
 
+// PERFORMANCE OPTIMIZED FOR MOBILE + DESKTOP
+// Based on portfolio implementation: tanh tonemapping, visualViewport,
+// denser dual-flow shader, strict quality tiers, 30 FPS mobile cap.
+
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import './LightPillar.css';
@@ -58,26 +62,31 @@ const LightPillar: React.FC<LightPillarProps> = ({
         if (!containerRef.current || !webGLSupported) return;
 
         const container = containerRef.current;
-        const width = container.clientWidth;
-        const height = container.clientHeight;
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isLowEndDevice = isMobile || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+        // PERFORMANCE OPTIMIZED FOR MOBILE — Force container to fill viewport if height is 0
+        if (container.clientHeight === 0) {
+            container.style.height = '100dvh';
+        }
+        const width = container.clientWidth || window.innerWidth;
+        const height = container.clientHeight || window.innerHeight;
+
+        // PERFORMANCE OPTIMIZED FOR MOBILE — strict detection: UA + viewport width + touch
+        const isMobile =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || window.innerWidth < 768
+            || 'ontouchstart' in window;
+        const isLowEndDevice = isMobile || (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 4);
 
         let effectiveQuality = quality;
         if (isLowEndDevice && quality === 'high') effectiveQuality = 'medium';
         if (isMobile && quality !== 'low') effectiveQuality = 'low';
 
+        // PERFORMANCE OPTIMIZED FOR MOBILE — pixelRatio 0.5 hardcoded on mobile (NOT devicePixelRatio)
+        // waveIterations must be >= 2 to produce visible turbulence/swirl (1 = flat blob)
         const qualitySettings = {
-            low: { iterations: 24, waveIterations: 1, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.6 },
-            medium: { iterations: 32, waveIterations: 2, pixelRatio: 0.7, precision: 'mediump', stepMultiplier: 1.3 },
-            high: {
-                iterations: 64,
-                waveIterations: 4,
-                pixelRatio: Math.min(window.devicePixelRatio, 1.5),
-                precision: 'highp',
-                stepMultiplier: 1.0
-            }
+            low:    { iterations: 38, waveIterations: 2, pixelRatio: 0.5,                                   precision: 'mediump', stepMultiplier: 1.3 },
+            medium: { iterations: 50, waveIterations: 3, pixelRatio: 0.65,                                  precision: 'mediump', stepMultiplier: 1.1 },
+            high:   { iterations: 90, waveIterations: 4, pixelRatio: Math.min(1.5, window.devicePixelRatio), precision: 'highp',   stepMultiplier: 1.0 }
         };
 
         const settings = qualitySettings[effectiveQuality] || qualitySettings.medium;
@@ -171,21 +180,32 @@ const LightPillar: React.FC<LightPillarProps> = ({
           vec3 q = p;
           q.y = p.y * uPillarHeight + uTime;
 
+          // DENSER — extra per-octave swirl rotation for organic smoke turbulence
           float freq = 1.0;
-          float amp = 1.0;
+          float amp  = 1.0;
           for(int j = 0; j < WAVE_ITER; j++) {
-            q.xz = vec2(uWaveCos * q.x - uWaveSin * q.z, uWaveSin * q.x + uWaveCos * q.z);
+            q.xz = vec2(uWaveCos * q.x - uWaveSin * q.z,
+                        uWaveSin * q.x + uWaveCos * q.z);
             q += cos(q.zxy * freq - uTime * float(j) * 2.0) * amp;
-            freq *= 2.0;
-            amp *= 0.5;
+            // Per-octave swirl keyed to time for extra turbulence
+            float sw = uTime * 0.06 * float(j + 1);
+            float sc = cos(sw); float ss = sin(sw);
+            q.xz = vec2(sc * q.x - ss * q.z, ss * q.x + sc * q.z);
+            freq *= 1.9;
+            amp  *= 0.55;
           }
 
-          float d = length(cos(q.xz)) - 0.2;
+          // DENSER — triple overlapping SDF flows (union fills screen with complex shape)
+          float d1 = length(cos(q.xz * 1.1)) - 0.16;
+          float d2 = length(cos(q.xz * 0.7 + vec2(0.8,  0.3))) - 0.20;
+          float d3 = length(cos(q.xz * 0.5 + vec2(-0.6, 0.9))) - 0.24;
+          float d  = min(min(d1, d2), d3);
+
           float bound = length(p.xz) - uPillarWidth;
           float k = 4.0;
           float h = max(k - abs(d - bound), 0.0);
           d = max(d, bound) + h * h * 0.0625 / k;
-          d = abs(d) * 0.15 + 0.01;
+          d = abs(d) * 0.09 + 0.006;
 
           float grad = clamp((15.0 - p.y) / 30.0, 0.0, 1.0);
           col += mix(uBottomColor, uTopColor, grad) / d;
@@ -195,11 +215,11 @@ const LightPillar: React.FC<LightPillarProps> = ({
         }
 
         float widthNorm = uPillarWidth / 3.0;
-        col *= uGlowAmount / widthNorm;
-        col = col / (1.0 + col); // Fast Reinhard tone mapping
+        // tanh tonemapping — matches portfolio exactly (smoother + denser glow than Reinhard)
+        col = tanh(col * uGlowAmount / widthNorm);
 
-        float noise = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
-        col -= noise / 15.0 * uNoiseIntensity;
+        // Dithering grain to break colour banding
+        col -= fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) / 15.0 * uNoiseIntensity;
 
         gl_FragColor = vec4(col * uIntensity, 1.0);
       }
@@ -272,7 +292,8 @@ const LightPillar: React.FC<LightPillarProps> = ({
             const deltaTime = Math.min(currentTime - lastTime, 100); // Caps delta to avoid jumps
 
             if (deltaTime >= frameTime) {
-                timeRef.current += (deltaTime / 1000) * rotationSpeed;
+                // Fixed 16 ms tick keeps animation identical regardless of FPS tier
+                timeRef.current += 0.016 * rotationSpeed;
                 const t = timeRef.current;
                 materialRef.current.uniforms.uTime.value = t;
                 materialRef.current.uniforms.uRotCos.value = Math.cos(t * 0.3);
@@ -285,25 +306,26 @@ const LightPillar: React.FC<LightPillarProps> = ({
         };
         rafRef.current = requestAnimationFrame(animate);
 
+        // PERFORMANCE OPTIMIZED FOR MOBILE — visualViewport handles iOS Safari URL-bar resize
         let resizeTimeout: number | null = null;
         const handleResize = () => {
-            if (resizeTimeout) {
-                clearTimeout(resizeTimeout);
-            }
-
+            if (resizeTimeout) clearTimeout(resizeTimeout);
             resizeTimeout = window.setTimeout(() => {
                 if (!rendererRef.current || !materialRef.current || !containerRef.current) return;
-                const newWidth = containerRef.current.clientWidth;
-                const newHeight = containerRef.current.clientHeight;
+                const vp = window.visualViewport;
+                const newWidth  = vp ? vp.width  : (containerRef.current.clientWidth  || window.innerWidth);
+                const newHeight = vp ? vp.height : (containerRef.current.clientHeight || window.innerHeight);
                 rendererRef.current.setSize(newWidth, newHeight);
                 materialRef.current.uniforms.uResolution.value.set(newWidth, newHeight);
             }, 150);
         };
 
         window.addEventListener('resize', handleResize, { passive: true });
+        window.visualViewport?.addEventListener('resize', handleResize, { passive: true });
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            window.visualViewport?.removeEventListener('resize', handleResize);
             if (interactive) {
                 container.removeEventListener('mousemove', handleMouseMove);
             }
@@ -357,4 +379,5 @@ const LightPillar: React.FC<LightPillarProps> = ({
     return <div ref={containerRef} className={`light-pillar-container ${className}`} style={{ mixBlendMode }} />;
 };
 
+export { LightPillar };
 export default LightPillar;

@@ -2,9 +2,9 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { Input } from "@/components/ui/input"
-import { ShoppingCart, User, Search, Heart, Home, Grid3X3, X, Menu } from "lucide-react"
+import { ShoppingCart, User, Search, Heart, X, Menu } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import type { Session } from "@supabase/supabase-js"
@@ -14,6 +14,16 @@ import GlassSurface from "@/components/GlassSurface"
 import { StaggeredMenu } from "@/components/StaggeredMenu"
 import type { StaggeredMenuItem } from "@/components/StaggeredMenu"
 
+// Isolated component that uses useSearchParams — wrapped in Suspense inside Navbar
+function NavbarSearchSync({ onSync }: { onSync: (q: string) => void }) {
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    const query = searchParams?.get("search") || ""
+    onSync(query)
+  }, [searchParams, onSync])
+  return null
+}
+
 export function Navbar() {
   const [user, setUser] = useState<any>(null)
   const { totalItems } = useCart()
@@ -22,11 +32,9 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
-      setUser(data.session?.user ?? null)
+    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {      setUser(data.session?.user ?? null)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null)
@@ -34,22 +42,17 @@ export function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  useEffect(() => {
-    const query = searchParams?.get("search") || ""
-    setSearchQuery(query)
-  }, [searchParams])
-
   const handleSearch = useCallback((value: string) => {
     setSearchQuery(value)
     if (pathname !== "/products") {
       router.push(`/products?search=${encodeURIComponent(value)}`)
     } else {
-      const params = new URLSearchParams(searchParams?.toString())
+      const params = new URLSearchParams(window.location.search)
       if (value) params.set("search", value)
       else params.delete("search")
       router.push(`/products?${params.toString()}`)
     }
-  }, [pathname, router, searchParams])
+  }, [pathname, router])
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname?.startsWith(href) ?? false
@@ -58,13 +61,6 @@ export function Navbar() {
     { label: "Products", href: "/products" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
-  ]
-
-  const mobileNavItems = [
-    { icon: Home, label: "Home", href: "/" },
-    { icon: Grid3X3, label: "Shop", href: "/products" },
-    { icon: ShoppingCart, label: "Cart", href: "/cart", badge: totalItems },
-    { icon: Heart, label: "Wishlist", href: "/profile?tab=wishlist" },
   ]
 
   const menuItems: StaggeredMenuItem[] = [
@@ -80,13 +76,18 @@ export function Navbar() {
     menuItems.push({ label: 'Sign In', ariaLabel: 'Sign in', link: '/auth' })
   }
 
-  // Hide navbar on admin routes
-  if (pathname?.startsWith("/admin")) return null
-
   return (
     <>
+      {/* Sync search query from URL params — Suspense boundary lives here, not in layout */}
+      <Suspense fallback={null}>
+        <NavbarSearchSync onSync={setSearchQuery} />
+      </Suspense>
+
       {/* ── DESKTOP FLOATING PILL ─────────────────────────────────── */}
-      <div className="hidden md:flex fixed top-4 left-1/2 -translate-x-1/2 z-[200] w-[780px] max-w-[calc(100vw-2rem)]">
+      <div
+        className="hidden md:flex fixed top-4 z-[200] w-[780px] max-w-[calc(100vw-2rem)]"
+        style={{ left: '50%', transform: 'translate(-50%, 0) translateZ(0)', willChange: 'transform' }}
+      >
         <GlassSurface
           width="100%"
           height={56}
@@ -101,7 +102,7 @@ export function Navbar() {
           blueOffset={18}
           backgroundOpacity={0.08}
           saturation={1.4}
-          className="w-full"
+          className="w-full glass-surface-fixed"
         >
           <div className="flex items-center justify-between w-full px-5 gap-3">
             {/* Logo */}
@@ -252,7 +253,10 @@ export function Navbar() {
       </div>
 
       {/* ── MOBILE TOP BAR ───────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-[200] px-2 pt-4">
+      <div
+        className="md:hidden fixed top-0 left-0 right-0 z-[200] px-2 pt-4"
+        style={{ willChange: 'transform', transform: 'translateZ(0)' }}
+      >
         <AnimatePresence mode="wait">
           {isSearchOpen ? (
             <motion.div
@@ -273,7 +277,7 @@ export function Navbar() {
                 distortionScale={-150}
                 backgroundOpacity={0.08}
                 saturation={1.3}
-                className="w-full"
+                className="w-full glass-surface-fixed"
               >
                 <div className="flex items-center gap-2 w-full px-4">
                   <Search className="h-4 w-4 text-white/40 shrink-0" />
@@ -314,7 +318,7 @@ export function Navbar() {
                 distortionScale={-150}
                 backgroundOpacity={0.08}
                 saturation={1.3}
-                className="w-full"
+                className="w-full glass-surface-fixed"
               >
                 <div className="flex items-center w-full px-4 gap-2">
                   {/* Logo */}
@@ -372,65 +376,6 @@ export function Navbar() {
         </AnimatePresence>
       </div>
 
-      {/* ── MOBILE BOTTOM PILL NAV ────────────────────────────────── */}
-      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
-        <GlassSurface
-          width="100%"
-          height={68}
-          borderRadius={100}
-          borderWidth={0.06}
-          brightness={16}
-          opacity={0.92}
-          blur={24}
-          distortionScale={-155}
-          redOffset={0}
-          greenOffset={8}
-          blueOffset={18}
-          backgroundOpacity={0.1}
-          saturation={1.5}
-          className="w-full"
-        >
-          <div className="flex items-center justify-around w-full px-2">
-            {mobileNavItems.map((item) => {
-              const Icon = item.icon
-              const active = isActive(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-full transition-all duration-200 min-w-[52px] ${active ? "text-[#e93a3a]" : "text-white/35 hover:text-white/70"
-                    }`}
-                  aria-label={item.label}
-                >
-                  <div className={`relative p-1.5 rounded-full transition-all duration-200 ${active ? "bg-[#e93a3a]/15" : ""}`}>
-                    <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2 : 1.5} />
-                    {item.badge != null && item.badge > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-[#e93a3a] text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-bold leading-none">
-                        {item.badge > 9 ? "9+" : item.badge}
-                      </span>
-                    )}
-                  </div>
-                  <span className={`text-[9px] font-semibold leading-none tracking-wide transition-all duration-200 ${active ? "opacity-100" : "opacity-0"}`}>
-                    {item.label.toUpperCase()}
-                  </span>
-                </Link>
-              )
-            })}
-
-            {/* Search shortcut */}
-            <button
-              onClick={() => setIsSearchOpen(true)}
-              className="relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-full transition-all duration-200 text-white/35 hover:text-white/70 min-w-[52px]"
-              aria-label="Search"
-            >
-              <div className="p-1.5 rounded-full">
-                <Search className="h-[22px] w-[22px]" strokeWidth={1.5} />
-              </div>
-              <span className="text-[9px] font-semibold leading-none tracking-wide opacity-0">SEARCH</span>
-            </button>
-          </div>
-        </GlassSurface>
-      </div>
     </>
   )
 }

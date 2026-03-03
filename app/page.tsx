@@ -26,9 +26,6 @@ import { supabase } from "@/lib/supabase"
 const LightPillar = dynamic(() => import("@/components/ui/reactbits/LightPillar"), {
   ssr: false,
 })
-const LightPillarMobile = dynamic(() => import("@/components/ui/reactbits/LightPillarMobile"), {
-  ssr: false,
-})
 const DynamicTestimonials = dynamic(() => import("../components/Testimonials"), {
   loading: () => <div className="h-96 animate-pulse bg-[#111] rounded-2xl" />,
 })
@@ -47,12 +44,13 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    const check = () => setIsMobile(
+      window.innerWidth < 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    )
+    check()
+    window.addEventListener('resize', check, { passive: true })
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   useEffect(() => {
@@ -105,53 +103,42 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ═══ FIXED BACKGROUND — full-viewport, behind all content ═══ */}
-      <div style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
-      }}>
-        {isMobile ? (
-          <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-            <LightPillarMobile
-              topColor="#e93a3a"
-              bottomColor="#000000"
-              intensity={1}
-              rotationSpeed={0.1}
-              interactive={false}
-              glowAmount={0.002}
-              pillarWidth={9}
-              pillarHeight={0.6}
-              noiseIntensity={0}
-              pillarRotation={55}
-            />
-          </div>
-        ) : (
-          <LightPillar
-            topColor="#e93a3a"
-            bottomColor="#200000"
-            intensity={1.5}
-            rotationSpeed={0.2}
-            interactive={false}
-            glowAmount={0.001}
-            pillarWidth={5.0}
-            pillarHeight={0.4}
-            noiseIntensity={0.15}
-            pillarRotation={170}
-          />
-        )}
-      </div>
 
       {/* ═══ PAGE CONTENT — window scrolls; fixed bg stays in place ═══ */}
       <div ref={containerRef} style={{ position: 'relative', zIndex: 1 }}>
 
         {/* ═══════════════════ SECTION 1: HERO ═══════════════════ */}
         <section className="relative min-h-screen flex items-center z-10">
+          {/* LightPillar — extends up to cover the main pt-16/pt-20 gap */}
+          <div className="absolute inset-0 -top-16 md:-top-20" style={{ zIndex: 0 }}>
+          {isMobile ? (
+            <LightPillar
+              topColor="#ff0000"
+              bottomColor="#000000"
+              intensity={1}
+              rotationSpeed={0.1}
+              interactive={false}
+              glowAmount={0.002}
+              pillarWidth={7.5}
+              pillarHeight={0.9}
+              noiseIntensity={0.0}
+              pillarRotation={260}
+            />
+          ) : (
+            <LightPillar
+              topColor="#b81b1b"
+              bottomColor="#000000"
+              intensity={1.3}
+              rotationSpeed={0.1}
+              interactive={false}
+              glowAmount={0.002}
+              pillarWidth={5.5}
+              pillarHeight={0.90}
+              noiseIntensity={0}
+              pillarRotation={235}
+            />
+          )}
+          </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Hero Text */}

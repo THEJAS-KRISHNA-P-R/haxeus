@@ -293,9 +293,8 @@ button,
 
 /* ═══ Z-INDEX STACKING ═══
    Ensure page content sits above the fixed background (z-index:0).
-   Exclude <nav> — nav elements inside the fixed Navbar already inherit
-   the navbar's own fixed stacking context and must not be overridden here. */
-header,
+   <header> is intentionally excluded — adding position:relative to a
+   parent of a fixed child cancels the fixed positioning in some browsers. */
 main,
 footer {
   position: relative;

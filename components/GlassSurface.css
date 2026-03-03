@@ -78,3 +78,18 @@
   outline: 2px solid #e93a3a;
   outline-offset: 2px;
 }
+
+/* ── Fixed-position glass (navbar) ──
+   When GlassSurface is inside a fixed element, the SVG backdrop-filter
+   can fail to repaint on scroll in Chromium. Promote to its own GPU layer. */
+.glass-surface-fixed {
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Prevent the hidden SVG filter element from creating scroll artifacts */
+.glass-surface__filter {
+  contain: strict;
+  overflow: hidden;
+}

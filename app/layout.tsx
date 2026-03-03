@@ -1,5 +1,4 @@
 import type React from "react"
-import { Suspense } from "react"
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { Navbar } from "@/components/navbar"
@@ -78,10 +77,8 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="dark" storageKey="haxeus-theme">
           <CartProvider>
             <PWAProvider />
-            <Suspense fallback={null}>
-              <Navbar />
-            </Suspense>
-            <main className="min-h-screen pt-16 pb-24 md:pt-20 md:pb-0">{children}</main>
+            <Navbar />
+            <main className="min-h-screen">{children}</main>
             <Footer />
             <Toaster />
           </CartProvider>
