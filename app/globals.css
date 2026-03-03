@@ -34,13 +34,14 @@ body {
   background: #111;
   border-radius: 16px;
 }
+
 .gradient-border::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(233,58,58,0.2) 0%, transparent 50%, rgba(7,228,225,0.1) 100%);
+  background: linear-gradient(135deg, rgba(233, 58, 58, 0.2) 0%, transparent 50%, rgba(7, 228, 225, 0.1) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -48,42 +49,26 @@ body {
 }
 
 .glass {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: none;
 }
 
 /* Kill all white 1px borders site-wide (consumer) */
-* { border-color: transparent; }
+* {
+  border-color: transparent;
+}
 
 /* Selection uses accent magenta */
-::selection { background: rgba(192,60,157,0.4); color: white; }
+::selection {
+  background: rgba(192, 60, 157, 0.4);
+  color: white;
+}
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
-  }
-
-  /* Smooth scroll snap */
-  .snap-scroll {
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .snap-section {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    min-height: 100vh;
-  }
-
-  .snap-start {
-    scroll-snap-align: start;
-  }
-
-  .snap-center {
-    scroll-snap-align: center;
   }
 
   /* Performance optimizations */
@@ -98,15 +83,37 @@ body {
   }
 
   /* Accent highlight utilities */
-  .accent-yellow { color: #e7bf04; }
-  .accent-magenta { color: #c03c9d; }
-  .accent-cyan { color: #07e4e1; }
-  .accent-red { color: #e93a3a; }
+  .accent-yellow {
+    color: #e7bf04;
+  }
 
-  .bg-accent-yellow { background-color: #e7bf04; }
-  .bg-accent-magenta { background-color: #c03c9d; }
-  .bg-accent-cyan { background-color: #07e4e1; }
-  .bg-accent-red { background-color: #e93a3a; }
+  .accent-magenta {
+    color: #c03c9d;
+  }
+
+  .accent-cyan {
+    color: #07e4e1;
+  }
+
+  .accent-red {
+    color: #e93a3a;
+  }
+
+  .bg-accent-yellow {
+    background-color: #e7bf04;
+  }
+
+  .bg-accent-magenta {
+    background-color: #c03c9d;
+  }
+
+  .bg-accent-cyan {
+    background-color: #07e4e1;
+  }
+
+  .bg-accent-red {
+    background-color: #e93a3a;
+  }
 }
 
 @layer base {
@@ -166,9 +173,17 @@ body {
 page {
   animation: fadePage 0.25s ease;
 }
+
 @keyframes fadePage {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Smooth rendering */
@@ -205,6 +220,7 @@ input[type="checkbox"]:checked {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -235,19 +251,11 @@ main {
   overflow-x: hidden;
 }
 
-/* Snap scroll overrides */
-.snap-mandatory {
+/* Native Scroll behavior - silky smooth */
+html,
+body {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
-}
-
-.snap-y::-webkit-scrollbar {
-  display: none;
-}
-
-.snap-y {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 /* Global button rounding */
@@ -257,23 +265,28 @@ button,
 }
 
 /* Subtle interactive transitions */
-a, button, [role="button"] {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+a,
+button,
+[role="button"] {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Accent-colored scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #080808;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #232323;
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #e93a3a;
 }
@@ -282,7 +295,9 @@ a, button, [role="button"] {
    Ensure page content sits above the fixed background (z-index:0).
    Exclude <nav> — nav elements inside the fixed Navbar already inherit
    the navbar's own fixed stacking context and must not be overridden here. */
-header, main, footer {
+header,
+main,
+footer {
   position: relative;
   z-index: 1;
 }

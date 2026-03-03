@@ -23,7 +23,10 @@ import Shuffle from "@/components/Shuffle"
 import { supabase } from "@/lib/supabase"
 
 // Lazy load heavy components
-const LightPillar = dynamic(() => import("@/components/LightPillar"), {
+const LightPillar = dynamic(() => import("@/components/ui/reactbits/LightPillar"), {
+  ssr: false,
+})
+const LightPillarMobile = dynamic(() => import("@/components/ui/reactbits/LightPillarMobile"), {
   ssr: false,
 })
 const DynamicTestimonials = dynamic(() => import("../components/Testimonials"), {
@@ -40,7 +43,17 @@ interface FeaturedProduct {
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     async function fetchFeaturedProducts() {
@@ -98,20 +111,40 @@ export default function HomePage() {
         inset: 0,
         zIndex: 0,
         pointerEvents: 'none',
-        backgroundColor: '#060010'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
-        <LightPillar
-          topColor="#e93a3a"
-          bottomColor="#000000"
-          intensity={1.4}
-          rotationSpeed={0.2}
-          interactive={false}
-          glowAmount={0.003}
-          pillarWidth={9}
-          pillarHeight={1.0}
-          noiseIntensity={0.0}
-          pillarRotation={35}
-        />
+        {isMobile ? (
+          <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+            <LightPillarMobile
+              topColor="#e93a3a"
+              bottomColor="#000000"
+              intensity={1}
+              rotationSpeed={0.1}
+              interactive={false}
+              glowAmount={0.002}
+              pillarWidth={9}
+              pillarHeight={0.6}
+              noiseIntensity={0}
+              pillarRotation={55}
+            />
+          </div>
+        ) : (
+          <LightPillar
+            topColor="#e93a3a"
+            bottomColor="#200000"
+            intensity={1.5}
+            rotationSpeed={0.2}
+            interactive={false}
+            glowAmount={0.001}
+            pillarWidth={5.0}
+            pillarHeight={0.4}
+            noiseIntensity={0.15}
+            pillarRotation={170}
+          />
+        )}
       </div>
 
       {/* ═══ PAGE CONTENT — window scrolls; fixed bg stays in place ═══ */}
