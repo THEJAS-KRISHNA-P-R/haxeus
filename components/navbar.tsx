@@ -93,15 +93,15 @@ export function Navbar() {
           height={56}
           borderRadius={100}
           borderWidth={0.06}
-          brightness={18}
-          opacity={0.92}
-          blur={14}
-          distortionScale={-160}
+          brightness={50}
+          opacity={0.82}
+          blur={10}
+          distortionScale={-18}
           redOffset={0}
-          greenOffset={8}
-          blueOffset={18}
-          backgroundOpacity={0.08}
-          saturation={1.4}
+          greenOffset={1}
+          blueOffset={3}
+          backgroundOpacity={0.18}
+          saturation={1.2}
           className="w-full glass-surface-fixed"
         >
           <div className="flex items-center justify-between w-full px-5 gap-3">
@@ -271,12 +271,12 @@ export function Navbar() {
                 height={48}
                 borderRadius={100}
                 borderWidth={0.05}
-                brightness={16}
-                opacity={0.9}
-                blur={20}
-                distortionScale={-150}
-                backgroundOpacity={0.08}
-                saturation={1.3}
+                brightness={50}
+                opacity={0.82}
+                blur={10}
+                distortionScale={-16}
+                backgroundOpacity={0.18}
+                saturation={1.2}
                 className="w-full glass-surface-fixed"
               >
                 <div className="flex items-center gap-2 w-full px-4">
@@ -312,12 +312,12 @@ export function Navbar() {
                 height={48}
                 borderRadius={100}
                 borderWidth={0.05}
-                brightness={16}
-                opacity={0.9}
-                blur={20}
-                distortionScale={-150}
-                backgroundOpacity={0.08}
-                saturation={1.3}
+                brightness={50}
+                opacity={0.82}
+                blur={10}
+                distortionScale={-16}
+                backgroundOpacity={0.18}
+                saturation={1.2}
                 className="w-full glass-surface-fixed"
               >
                 <div className="flex items-center w-full px-4 gap-2">
