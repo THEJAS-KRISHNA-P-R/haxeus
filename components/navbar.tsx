@@ -103,7 +103,6 @@ export function Navbar() {
           backgroundOpacity={0.08}
           saturation={1.4}
           className="w-full glass-surface-fixed"
-          disableSvgFilter={true}
         >
           <div className="flex items-center justify-between w-full px-5 gap-3">
             {/* Logo */}
@@ -279,7 +278,6 @@ export function Navbar() {
                 backgroundOpacity={0.08}
                 saturation={1.3}
                 className="w-full glass-surface-fixed"
-                disableSvgFilter={true}
               >
                 <div className="flex items-center gap-2 w-full px-4">
                   <Search className="h-4 w-4 text-white/40 shrink-0" />
@@ -321,7 +319,6 @@ export function Navbar() {
                 backgroundOpacity={0.08}
                 saturation={1.3}
                 className="w-full glass-surface-fixed"
-                disableSvgFilter={true}
               >
                 <div className="flex items-center w-full px-4 gap-2">
                   {/* Logo */}
