@@ -1,7 +1,14 @@
-"use client"
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
-import { Star, CheckCircle, XCircle, Trash2 } from "lucide-react"
+"use client";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { Star, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import {
+    AdminCard,
+    AdminPageHeader,
+    AdminTableHeader,
+    AdminTableRow
+} from "@/components/admin/AdminUI";
+import { cn } from "@/lib/utils";
 
 export default function ReviewsPage() {
     const [reviews, setReviews] = useState<any[]>([])
@@ -23,54 +30,86 @@ export default function ReviewsPage() {
     }, [])
 
     return (
-        <div className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-white">Reviews</h1>
-                    <p className="text-white/40 text-sm mt-1">{reviews.length} total customer reviews</p>
-                </div>
+        <div className="space-y-6">
+            <div className="mb-2">
+                <AdminPageHeader
+                    title="Reviews"
+                    subtitle={`${reviews.length} total customer reviews found in the database.`}
+                />
             </div>
 
-            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">
-                <div className="grid grid-cols-5 gap-4 px-6 py-3 text-xs font-medium text-white/30 uppercase tracking-wider border-b border-white/[0.06]">
-                    <span>Product</span>
-                    <span>Rating</span>
-                    <span className="col-span-2">Comment</span>
-                    <span className="text-right">Actions</span>
-                </div>
+            <AdminCard>
+                <AdminTableHeader cols="grid-cols-[1.5fr_1fr_2fr_0.8fr]" className="px-6 py-4">
+                    <span>Product Name</span>
+                    <span>Rating Score</span>
+                    <span>Customer Comment</span>
+                    <span className="text-right">Manage</span>
+                </AdminTableHeader>
 
-                {loading ? (
-                    [...Array(4)].map((_, i) => (
-                        <div key={i} className="h-14 mx-4 my-2 rounded-lg bg-white/[0.03] animate-pulse" />
-                    ))
-                ) : reviews.length === 0 ? (
-                    <div className="text-center py-16 text-white/30">
-                        <Star className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                        <p>No reviews yet</p>
-                    </div>
-                ) : (
-                    reviews.map(r => (
-                        <div key={r.id} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors text-sm">
-                            <span className="text-white font-medium truncate">{r.products?.name || 'Unknown Product'}</span>
-                            <span className="flex items-center gap-1 text-[#e7bf04]">
-                                {r.rating} <Star className="h-3 w-3 fill-current" />
-                            </span>
-                            <span className="col-span-2 text-white/50">{r.comment || 'No comment provided.'}</span>
-                            <div className="flex items-center justify-end gap-2">
-                                <button title="Approve" className="p-2 rounded-lg hover:bg-green-500/10 text-white/30 hover:text-green-400 transition-colors">
-                                    <CheckCircle size={14} />
-                                </button>
-                                <button title="Reject" className="p-2 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors">
-                                    <XCircle size={14} />
-                                </button>
-                                <button title="Delete" className="p-2 rounded-lg hover:bg-white/[0.05] text-white/30 hover:text-red-500 transition-colors">
-                                    <Trash2 size={14} />
-                                </button>
+                <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                    {loading ? (
+                        [...Array(5)].map((_, i) => (
+                            <div key={i} className="px-6 py-5 flex items-center justify-between gap-4">
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-32 rounded animate-pulse" />
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-16 rounded animate-pulse" />
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-48 rounded animate-pulse" />
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-6 w-20 rounded-xl animate-pulse" />
                             </div>
+                        ))
+                    ) : reviews.length === 0 ? (
+                        <div className="text-center py-20 px-6">
+                            <div
+                                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-3)" }}
+                                className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                            >
+                                <Star size={32} className="opacity-20" />
+                            </div>
+                            <p style={{ color: "var(--text)" }} className="font-bold text-lg">No reviews yet</p>
+                            <p style={{ color: "var(--text-3)" }} className="text-sm mt-1">Once customers start reviewing your products, they will appear here for moderation.</p>
                         </div>
-                    ))
-                )}
-            </div>
+                    ) : (
+                        reviews.map(r => (
+                            <AdminTableRow key={r.id} cols="grid-cols-[1.5fr_1fr_2fr_0.8fr]" className="px-6 py-5 items-center">
+                                <div className="pr-4">
+                                    <span style={{ color: "var(--text)" }} className="font-bold text-sm truncate block">
+                                        {r.products?.name || 'Unknown Product'}
+                                    </span>
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border w-fit"
+                                        style={{
+                                            background: "color-mix(in srgb, #e7bf04 10%, transparent)",
+                                            borderColor: "color-mix(in srgb, #e7bf04 20%, transparent)",
+                                            color: "#e7bf04"
+                                        }}
+                                    >
+                                        <span className="font-bold text-xs">{r.rating?.toFixed(1)}</span>
+                                        <Star className="h-3 w-3 fill-current" />
+                                    </div>
+                                </div>
+                                <div className="pr-6">
+                                    <p style={{ color: "var(--text-2)" }} className="text-xs font-medium leading-relaxed italic line-clamp-2">
+                                        "{r.comment || 'No comment provided.'}"
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="flex items-center justify-end gap-1">
+                                        <button title="Approve" className="p-2 rounded-xl hover:bg-emerald-500/10 text-[var(--text-3)] hover:text-emerald-500 transition-all">
+                                            <CheckCircle size={16} />
+                                        </button>
+                                        <button title="Reject" className="p-2 rounded-xl hover:bg-rose-500/10 text-[var(--text-3)] hover:text-rose-500 transition-all">
+                                            <XCircle size={16} />
+                                        </button>
+                                        <button title="Delete" className="p-2 rounded-xl hover:bg-[var(--bg-elevated)] text-[var(--text-3)] hover:text-[var(--text)] transition-all">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </AdminTableRow>
+                        ))
+                    )}
+                </div>
+            </AdminCard>
         </div>
     )
 }

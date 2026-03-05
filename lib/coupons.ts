@@ -97,7 +97,7 @@ export async function applyCoupon(couponId: string, userId: string, orderId: str
     })
 
   // Increment used count
-  await supabase.rpc('increment_coupon_usage', { coupon_id: couponId })
+  await supabase.rpc('increment_coupon_usage', { p_coupon_id: couponId })
 }
 
 export async function getActiveCoupons(): Promise<Coupon[]> {

@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  /* overflow: hidden; -- Removed to allow displacement bleed */
   transition: opacity 0.26s ease-out;
 }
 

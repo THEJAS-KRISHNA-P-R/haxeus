@@ -102,7 +102,7 @@ export default function HomePage() {
     <>
 
       {/* ═══ PAGE CONTENT — window scrolls; fixed bg stays in place ═══ */}
-      <div ref={containerRef} className="bg-theme" style={{ position: 'relative', zIndex: 1 }}>
+      <div ref={containerRef} style={{ position: 'relative', zIndex: 1 }}>
 
         {/* ═══════════════════ SECTION 1: HERO ═══════════════════ */}
         <section className="relative min-h-screen flex items-center z-10">
@@ -272,33 +272,7 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 2: NEWSLETTER ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 bg-[var(--accent)]/10 backdrop-blur-2xl border-t border-theme">
-          {/* Animated background shapes */}
-          <motion.div
-            className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full"
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, 50, 0],
-              y: [0, 30, 0],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-0 left-0 w-96 h-96 bg-black opacity-10 rounded-full"
-            animate={{
-              scale: [1, 1.3, 1],
-              x: [0, -30, 0],
-              y: [0, -50, 0],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
-          {/* Accent accent shape */}
-          <motion.div
-            className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full opacity-20"
-            style={{ background: '#e7bf04' }}
-            animate={{ scale: [1, 1.5, 1], rotate: [0, 180, 360] }}
-            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          />
+        <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
 
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <motion.h2
@@ -358,7 +332,7 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 3: FEATURED PRODUCTS ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 bg-theme backdrop-blur-2xl border-t border-theme">
+        <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <motion.div
               initial="hidden"
@@ -488,12 +462,12 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 4: TESTIMONIALS ═══════════════════ */}
-        <section className="relative z-10 bg-theme backdrop-blur-2xl border-t border-theme">
+        <section className="relative z-10 border-t border-theme">
           <DynamicTestimonials />
         </section>
 
         {/* ═══════════════════ SECTION 5: ABOUT ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 bg-theme backdrop-blur-2xl border-t border-theme">
+        <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <motion.div

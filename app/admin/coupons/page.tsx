@@ -1,7 +1,14 @@
-"use client"
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
-import { Ticket, Plus, Trash2, Edit } from "lucide-react"
+"use client";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { Ticket, Plus, Trash2, Edit } from "lucide-react";
+import {
+    AdminCard,
+    AdminPageHeader,
+    AdminTableHeader,
+    AdminTableRow
+} from "@/components/admin/AdminUI";
+import { cn } from "@/lib/utils";
 
 export default function CouponsPage() {
     const [coupons, setCoupons] = useState<any[]>([])
@@ -23,58 +30,103 @@ export default function CouponsPage() {
     }, [])
 
     return (
-        <div className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-white">Coupons</h1>
-                    <p className="text-white/40 text-sm mt-1">{coupons.length} active promotions</p>
-                </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white text-sm font-bold rounded-xl transition-all">
+        <div className="space-y-6">
+            <div className="flex items-center justify-between mb-2">
+                <AdminPageHeader
+                    title="Coupons"
+                    subtitle={`${coupons.length} active promotion codes found in the system.`}
+                />
+                <button className="flex items-center gap-2 bg-[var(--accent)] text-white px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:brightness-110 transition-all shadow-lg shadow-red-500/20">
                     <Plus size={16} /> Create Coupon
                 </button>
             </div>
 
-            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">
-                <div className="grid grid-cols-5 gap-4 px-6 py-3 text-xs font-medium text-white/30 uppercase tracking-wider border-b border-white/[0.06]">
-                    <span>Code</span>
-                    <span>Discount</span>
+            <AdminCard>
+                <AdminTableHeader cols="grid-cols-[1.5fr_1.5fr_1fr_1fr_0.8fr]" className="px-6 py-4">
+                    <span>Coupon Code</span>
+                    <span>Discount Value</span>
                     <span>Status</span>
-                    <span>Usage</span>
+                    <span>Usage Count</span>
                     <span className="text-right">Actions</span>
-                </div>
+                </AdminTableHeader>
 
-                {loading ? (
-                    [...Array(3)].map((_, i) => (
-                        <div key={i} className="h-14 mx-4 my-2 rounded-lg bg-white/[0.03] animate-pulse" />
-                    ))
-                ) : coupons.length === 0 ? (
-                    <div className="text-center py-16 text-white/30">
-                        <Ticket className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                        <p>No coupons created yet</p>
-                    </div>
-                ) : (
-                    coupons.map(c => (
-                        <div key={c.id} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors text-sm">
-                            <span className="text-white font-mono font-bold tracking-wider">{c.code}</span>
-                            <span className="text-white/70">{c.discount_type === 'percentage' ? `${c.discount_value}%` : `₹${c.discount_value}`} OFF</span>
-                            <span>
-                                <span className={`text-xs px-2 py-1 rounded-full ${c.active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                                    {c.active ? 'Active' : 'Inactive'}
-                                </span>
-                            </span>
-                            <span className="text-white/40">{c.usage_count || 0} / {c.max_usage || '∞'}</span>
-                            <div className="flex items-center justify-end gap-2">
-                                <button className="p-2 rounded-lg hover:bg-white/[0.05] text-white/40 hover:text-white transition-colors">
-                                    <Edit size={14} />
-                                </button>
-                                <button className="p-2 rounded-lg hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-colors">
-                                    <Trash2 size={14} />
-                                </button>
+                <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                    {loading ? (
+                        [...Array(4)].map((_, i) => (
+                            <div key={i} className="px-6 py-5 flex items-center justify-between gap-4">
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-24 rounded animate-pulse" />
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-32 rounded animate-pulse" />
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-6 w-16 rounded-full animate-pulse" />
+                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-20 rounded animate-pulse" />
                             </div>
+                        ))
+                    ) : coupons.length === 0 ? (
+                        <div className="text-center py-20 px-6">
+                            <div
+                                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-3)" }}
+                                className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                            >
+                                <Ticket size={32} className="opacity-20" />
+                            </div>
+                            <p style={{ color: "var(--text)" }} className="font-bold text-lg">No active coupons</p>
+                            <p style={{ color: "var(--text-3)" }} className="text-sm mt-1">Create your first promotion code to start attracting more customers.</p>
                         </div>
-                    ))
-                )}
-            </div>
+                    ) : (
+                        coupons.map(c => (
+                            <AdminTableRow key={c.id} cols="grid-cols-[1.5fr_1.5fr_1fr_1fr_0.8fr]" className="px-6 py-5 items-center">
+                                <div>
+                                    <span style={{ color: "var(--text)", background: "var(--bg-elevated)", borderColor: "var(--border)" }} className="font-mono font-bold tracking-widest text-xs px-2 py-1 border rounded-lg">
+                                        {c.code}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span style={{ color: "var(--text)" }} className="font-bold text-sm">
+                                        {c.discount_type === 'percentage' ? `${c.discount_value}%` : `₹${c.discount_value}`} OFF
+                                    </span>
+                                </div>
+                                <div>
+                                    <span
+                                        className={cn(
+                                            "inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border",
+                                            c.active ? "text-emerald-500" : "text-rose-500"
+                                        )}
+                                        style={{
+                                            background: c.active
+                                                ? "color-mix(in srgb, #10b981 10%, transparent)"
+                                                : "color-mix(in srgb, #f43f5e 10%, transparent)",
+                                            borderColor: c.active
+                                                ? "color-mix(in srgb, #10b981 20%, transparent)"
+                                                : "color-mix(in srgb, #f43f5e 20%, transparent)"
+                                        }}
+                                    >
+                                        {c.active ? 'Active' : 'Paused'}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span style={{ color: "var(--text-2)" }} className="text-xs font-bold tabular-nums">
+                                        {c.usage_count || 0} <span style={{ color: "var(--text-3)" }} className="font-medium">/ {c.max_usage || '∞'}</span>
+                                    </span>
+                                </div>
+                                <div className="text-right">
+                                    <div className="flex items-center justify-end gap-1">
+                                        <button
+                                            style={{ color: "var(--text-3)" }}
+                                            className="p-2 hover:bg-[var(--bg-elevated)] hover:text-[var(--text)] transition-all rounded-xl"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button
+                                            className="p-2 hover:bg-rose-500/10 text-[var(--accent)] transition-all rounded-xl"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </AdminTableRow>
+                        ))
+                    )}
+                </div>
+            </AdminCard>
         </div>
     )
 }

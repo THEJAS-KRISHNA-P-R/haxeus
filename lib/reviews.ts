@@ -191,22 +191,18 @@ export async function voteOnReview(
     .single()
 
   if (existingVote) {
-    // Update existing vote
+    // Update existing vote record
     await supabase
       .from('review_votes')
       .update({ is_helpful: isHelpful })
       .eq('id', existingVote.id)
 
-    // Update counts
-    if (existingVote.is_helpful !== isHelpful) {
-      if (isHelpful) {
-        await supabase.rpc('increment_helpful_count', { review_id: reviewId })
-        await supabase.rpc('decrement_not_helpful_count', { review_id: reviewId })
-      } else {
-        await supabase.rpc('decrement_helpful_count', { review_id: reviewId })
-        await supabase.rpc('increment_not_helpful_count', { review_id: reviewId })
-      }
-    }
+    // Update counts using atomic RPC
+    await supabase.rpc('update_review_helpful_count', {
+      p_review_id: reviewId,
+      p_is_helpful: isHelpful,
+      p_delta: 1
+    })
   } else {
     // Insert new vote
     const { error } = await supabase
@@ -219,12 +215,12 @@ export async function voteOnReview(
 
     if (error) return false
 
-    // Update counts
-    if (isHelpful) {
-      await supabase.rpc('increment_helpful_count', { review_id: reviewId })
-    } else {
-      await supabase.rpc('increment_not_helpful_count', { review_id: reviewId })
-    }
+    // Update counts using atomic RPC
+    await supabase.rpc('update_review_helpful_count', {
+      p_review_id: reviewId,
+      p_is_helpful: isHelpful,
+      p_delta: 1
+    })
   }
 
   return true

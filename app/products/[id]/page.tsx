@@ -291,7 +291,7 @@ export default function ProductDetailPage() {
                 </div>
                 {/* Scroll hint indicator */}
                 {productImages.length > 4 && (
-                  <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-theme to-transparent pointer-events-none" />
+                  <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[var(--bg)] to-transparent pointer-events-none" />
                 )}
               </div>
             )}

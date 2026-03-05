@@ -1,11 +1,11 @@
 import type React from "react"
 import "./globals.css"
 import { Inter } from "next/font/google"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
+import { ConditionalNavbar } from "@/components/ConditionalNavbar"
+import { ConditionalFooter } from "@/components/ConditionalFooter"
 import { Toaster } from "@/components/ui/toaster"
 import { CartProvider } from "@/contexts/CartContext"
-import { ThemeProvider } from "@/contexts/ThemeContext"
+import { ThemeProvider } from "@/components/ThemeProvider"
 import { PWAProvider } from "@/components/PWAProvider"
 import { LightPillarBackground } from "@/components/LightPillarBackground"
 import type { Metadata, Viewport } from "next"
@@ -61,14 +61,14 @@ export default function RootLayout({
             <LightPillarBackground />
 
             {/* Fixed navbar — above everything */}
-            <Navbar />
+            <ConditionalNavbar />
 
             {/* Scrollable content — sits above the fixed background */}
             <main className="relative min-h-screen" style={{ zIndex: 1 }}>
               {children}
             </main>
 
-            <Footer />
+            <ConditionalFooter /> {/* Changed from Footer */}
             <Toaster />
           </CartProvider>
         </ThemeProvider>

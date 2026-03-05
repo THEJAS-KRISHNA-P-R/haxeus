@@ -7,11 +7,7 @@ const ThemeContext = createContext<{
     theme: Theme
     toggle: () => void
     setTheme: (t: Theme) => void
-}>({
-    theme: "dark",
-    toggle: () => { },
-    setTheme: () => { },
-})
+}>({ theme: "dark", toggle: () => { }, setTheme: () => { } })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setThemeState] = useState<Theme>("dark")
@@ -34,10 +30,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const toggle = () => setTheme(theme === "dark" ? "light" : "dark")
 
-    // Prevent flash — render children only after mount
-    if (!mounted) return (
-        <div style={{ visibility: "hidden" }}>{children}</div>
-    )
+    if (!mounted) return <div style={{ visibility: "hidden" }}>{children}</div>
 
     return (
         <ThemeContext.Provider value={{ theme, toggle, setTheme }}>

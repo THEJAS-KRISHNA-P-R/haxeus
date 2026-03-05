@@ -117,7 +117,7 @@ void main() {
 
         // Fragment shader — optimized for mobile
         const fsSource = `
-precision ${s.precision} float;
+precision ${gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT)?.precision ? 'highp' : 'mediump'} float;
 uniform float uTime;
 uniform vec2 uResolution;
 uniform vec3 uTopColor;
@@ -138,6 +138,13 @@ varying vec2 vUv;
 const int MAX_ITER  = ${s.iterations};
 const int WAVE_ITER = ${s.waveIterations};
 const float STEP    = ${s.stepMult.toFixed(1)};
+
+// Tanh approximation for WebGL 1.0 (mobile)
+// tanh(x) = (exp(2x) - 1) / (exp(2x) + 1)
+vec3 fast_tanh(vec3 x) {
+    vec3 e = exp(2.0 * x);
+    return (e - 1.0) / (e + 1.0);
+}
 
 void main() {
     vec2 uv = vUv * 2.0 - 1.0;
@@ -189,9 +196,10 @@ void main() {
     }
 
     float widthNorm = uPillarWidth / 3.0;
-    // tanh tonemapping
-    col = col * uGlowAmount / widthNorm;
-    col = col / (1.0 + col);
+    
+    // PC alignment: use tanh instead of simplistic division
+    // This preserves color balance better (teal stays teal)
+    col = fast_tanh(col * uGlowAmount / widthNorm);
 
     gl_FragColor = vec4(col * uIntensity, 1.0);
 }`;

@@ -68,21 +68,28 @@
   --foreground: 0 0% 3.9%;
 }
 
-/* Transition ALL color changes smoothly */
 *,
 *::before,
 *::after {
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    color 0.2s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+}
+
+/* Prevent CSS transitions from killing WebGL canvas rendering */
+canvas,
+canvas *,
+.light-pillar-container,
+.light-pillar-container *,
+[class*="light-pillar"] {
+  transition: none !important;
+  animation: none !important;
+  will-change: auto !important;
 }
 
 body {
   font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
   background-color: var(--bg);
   color: var(--text);
+  transition: background-color 0.3s ease, color 0.2s ease;
 }
 
 /* ── Theme-aware utilities ── */

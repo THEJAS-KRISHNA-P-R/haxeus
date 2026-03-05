@@ -1,34 +1,39 @@
-﻿"use client"
-import { useState } from "react"
-import { Settings, Store, CreditCard, Truck, Bell } from "lucide-react"
+﻿"use client";
+import { useState } from "react";
+import { Settings, Store, CreditCard, Truck, Bell } from "lucide-react";
+import {
+  AdminCard,
+  AdminPageHeader
+} from "@/components/admin/AdminUI";
+import { cn } from "@/lib/utils";
 
 const sections = [
   {
     icon: Store,
     title: "Store Settings",
-    description: "Store name, currency, contact email",
+    description: "Global store configuration including name, currency, and contact email.",
     fields: [
       { label: "Store Name", key: "storeName", value: "HAXEUS", type: "text" },
       { label: "Contact Email", key: "contactEmail", value: "admin@haxeus.com", type: "email" },
-      { label: "Currency", key: "currency", value: "INR", type: "text" },
+      { label: "Currency Display", key: "currency", value: "INR (₹)", type: "text" },
     ]
   },
   {
     icon: Truck,
-    title: "Shipping Settings",
-    description: "Default shipping rates and zones",
+    title: "Shipping Logistics",
+    description: "Manage your default shipping rates, thresholds, and delivery zones.",
     fields: [
-      { label: "Free Shipping Above (₹)", key: "freeShippingThreshold", value: "999", type: "number" },
-      { label: "Default Shipping Rate (₹)", key: "defaultShipping", value: "79", type: "number" },
+      { label: "Free Shipping Threshold (₹)", key: "freeShippingThreshold", value: "999", type: "number" },
+      { label: "Standard Shipping Rate (₹)", key: "defaultShipping", value: "79", type: "number" },
     ]
   },
   {
     icon: Bell,
-    title: "Notification Settings",
-    description: "Email alerts for new orders and low stock",
+    title: "System Notifications",
+    description: "Configure automated email alerts for orders and inventory management.",
     fields: [
-      { label: "Order Alert Email", key: "orderAlertEmail", value: "admin@haxeus.com", type: "email" },
-      { label: "Low Stock Threshold", key: "lowStockThreshold", value: "5", type: "number" },
+      { label: "Alert Recipient Email", key: "orderAlertEmail", value: "admin@haxeus.com", type: "email" },
+      { label: "Low Stock Alert Level", key: "lowStockThreshold", value: "5", type: "number" },
     ]
   }
 ]
@@ -36,47 +41,81 @@ const sections = [
 export default function SettingsPage() {
   const [saved, setSaved] = useState(false)
 
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
   return (
-    <div className="p-6 max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-white/40 text-sm mt-1">Configure your store settings</p>
+    <div className="space-y-6 max-w-3xl">
+      <div className="mb-2">
+        <AdminPageHeader
+          title="Settings"
+          subtitle="Configure your store's global parameters, shipping, and notifications."
+        />
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {sections.map(section => (
-          <div key={section.title} className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">
-            <div className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06]">
-              <div className="p-2 rounded-lg bg-[#e93a3a]/10">
-                <section.icon className="h-4 w-4 text-[#e93a3a]" />
+          <AdminCard key={section.title} className="overflow-hidden">
+            <div
+              style={{ borderBottom: "1px solid var(--border)" }}
+              className="flex items-center gap-4 px-6 py-5 bg-[var(--bg-elevated)]/30"
+            >
+              <div
+                style={{
+                  background: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                  borderColor: "color-mix(in srgb, var(--accent) 20%, transparent)"
+                }}
+                className="p-3 rounded-xl border shrink-0"
+              >
+                <section.icon size={18} style={{ color: "var(--accent)" }} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">{section.title}</p>
-                <p className="text-xs text-white/40">{section.description}</p>
+                <p style={{ color: "var(--text)" }} className="text-sm font-bold">{section.title}</p>
+                <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase tracking-wider mt-0.5">{section.description}</p>
               </div>
             </div>
-            <div className="p-6 space-y-4">
+
+            <div className="p-8 space-y-6">
               {section.fields.map(field => (
-                <div key={field.key}>
-                  <label className="block text-xs text-white/40 mb-1.5">{field.label}</label>
+                <div key={field.key} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                  <label
+                    style={{ color: "var(--text-2)" }}
+                    className="text-[11px] font-bold uppercase tracking-widest"
+                  >
+                    {field.label}
+                  </label>
                   <input
                     type={field.type}
                     defaultValue={field.value}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#e93a3a]/50 transition-colors"
+                    style={{
+                      background: "var(--bg-elevated)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text)",
+                    }}
+                    className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl focus:outline-none focus:border-[var(--accent)] transition-all"
                   />
                 </div>
               ))}
             </div>
-          </div>
+          </AdminCard>
         ))}
       </div>
 
-      <button
-        onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000) }}
-        className="mt-6 px-6 py-2.5 bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white text-sm font-bold rounded-full transition-all"
-      >
-        {saved ? '✓ Saved' : 'Save Changes'}
-      </button>
+      <div className="flex justify-end pt-4 pb-8">
+        <button
+          onClick={handleSave}
+          className={cn(
+            "px-8 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all shadow-lg",
+            saved
+              ? "bg-emerald-500 text-white shadow-emerald-500/20"
+              : "bg-[var(--accent)] text-white hover:brightness-110 shadow-red-500/20"
+          )}
+        >
+          {saved ? '✓ Changes Saved' : 'Update Settings'}
+        </button>
+      </div>
     </div>
   )
 }

@@ -1,9 +1,5 @@
 "use client";
 
-// PERFORMANCE OPTIMIZED FOR MOBILE + DESKTOP
-// Based on portfolio implementation: tanh tonemapping, visualViewport,
-// denser dual-flow shader, strict quality tiers, 30 FPS mobile cap.
-
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import './LightPillar.css';
@@ -25,18 +21,18 @@ interface LightPillarProps {
 }
 
 const LightPillar: React.FC<LightPillarProps> = ({
-    topColor = '#5227FF',
-    bottomColor = '#FF9FFC',
+    topColor = '#b0b0b0',
+    bottomColor = '#000000',
     intensity = 1.0,
-    rotationSpeed = 0.3,
+    rotationSpeed = 0.1,
     interactive = false,
     className = '',
-    glowAmount = 0.01,
-    pillarWidth = 3.0,
-    pillarHeight = 0.4,
-    noiseIntensity = 0.5,
+    glowAmount = 0.004,
+    pillarWidth = 7.5,
+    pillarHeight = 0.6,
+    noiseIntensity = 0.0,
     mixBlendMode = 'screen',
-    pillarRotation = 0,
+    pillarRotation = 235,
     quality = 'high'
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -52,66 +48,44 @@ const LightPillar: React.FC<LightPillarProps> = ({
     const [webGLSupported, setWebGLSupported] = useState<boolean>(true);
 
     useEffect(() => {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) {
-            setWebGLSupported(false);
-        }
+        try {
+            const c = document.createElement('canvas');
+            if (!c.getContext('webgl') && !c.getContext('experimental-webgl')) setWebGLSupported(false);
+        } catch { setWebGLSupported(false); }
     }, []);
 
     useEffect(() => {
         if (!containerRef.current || !webGLSupported) return;
-
         const container = containerRef.current;
 
-        // IntersectionObserver to pause rendering when off-screen
+        // CRITICAL: read from visualViewport — container.clientWidth is 0 inside position:fixed at mount
+        const vp = window.visualViewport;
+        const width = vp ? Math.floor(vp.width) : window.innerWidth;
+        const height = vp ? Math.floor(vp.height) : window.innerHeight;
+
+        // Pause when tab hidden
+        const handleVisibility = () => { isVisibleRef.current = !document.hidden; };
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        // Pause when off-screen
         const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    isVisibleRef.current = entry.isIntersecting;
-                });
-            },
+            ([e]) => { isVisibleRef.current = e.isIntersecting && !document.hidden; },
             { threshold: 0 }
         );
         observer.observe(container);
 
-        // Pause when browser tab is hidden
-        const handleVisibilityChange = () => {
-            if (document.hidden) {
-                isVisibleRef.current = false;
-            } else {
-                isVisibleRef.current = true;
-            }
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        // PERFORMANCE OPTIMIZED FOR MOBILE — Force container to fill viewport if height is 0
-        if (container.clientHeight === 0) {
-            container.style.height = '100dvh';
-        }
-        const width = container.clientWidth || window.innerWidth;
-        const height = container.clientHeight || window.innerHeight;
-
-        // PERFORMANCE OPTIMIZED FOR MOBILE — strict detection: UA + viewport width + touch
-        const isMobile =
-            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-            || window.innerWidth < 768
-            || 'ontouchstart' in window;
-        const isLowEndDevice = isMobile || (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 4);
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || window.innerWidth < 768;
 
         let effectiveQuality = quality;
-        if (isLowEndDevice && quality === 'high') effectiveQuality = 'medium';
         if (isMobile && quality !== 'low') effectiveQuality = 'low';
 
-        // PERFORMANCE OPTIMIZED FOR MOBILE — pixelRatio 0.5 hardcoded on mobile (NOT devicePixelRatio)
-        // waveIterations must be >= 2 to produce visible turbulence/swirl (1 = flat blob)
         const qualitySettings = {
-            low: { iterations: 38, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.3 },
-            medium: { iterations: 50, waveIterations: 3, pixelRatio: 0.65, precision: 'mediump', stepMultiplier: 1.1 },
-            high: { iterations: 65, waveIterations: 5, pixelRatio: Math.min(1.2, window.devicePixelRatio), precision: 'highp', stepMultiplier: 1.0 }
+            low: { iterations: 28, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.5 },
+            medium: { iterations: 50, waveIterations: 3, pixelRatio: 0.65, precision: 'mediump', stepMultiplier: 1.2 },
+            high: { iterations: 80, waveIterations: 4, pixelRatio: Math.min(window.devicePixelRatio, 1.5), precision: 'highp', stepMultiplier: 1.0 },
         };
-
-        const settings = qualitySettings[effectiveQuality] || qualitySettings.medium;
+        const s = qualitySettings[effectiveQuality] || qualitySettings.medium;
 
         const scene = new THREE.Scene();
         sceneRef.current = scene;
@@ -121,46 +95,39 @@ const LightPillar: React.FC<LightPillarProps> = ({
         let renderer: THREE.WebGLRenderer;
         try {
             renderer = new THREE.WebGLRenderer({
-                antialias: false,
-                alpha: true,
-                powerPreference: effectiveQuality === 'high' ? 'high-performance' : 'low-power',
-                precision: settings.precision as 'highp' | 'mediump' | 'lowp',
-                stencil: false,
-                depth: false
+                antialias: false, alpha: true,
+                powerPreference: effectiveQuality === 'low' ? 'low-power' : 'high-performance',
+                precision: s.precision as 'highp' | 'mediump' | 'lowp',
+                stencil: false, depth: false,
             });
-        } catch {
-            setWebGLSupported(false);
-            return;
-        }
+        } catch { setWebGLSupported(false); return; }
 
         renderer.setSize(width, height);
-        renderer.setPixelRatio(settings.pixelRatio);
+        renderer.setPixelRatio(s.pixelRatio);
         container.appendChild(renderer.domElement);
         rendererRef.current = renderer;
 
-        const parseColor = (hex: string): THREE.Vector3 => {
-            const color = new THREE.Color(hex);
-            return new THREE.Vector3(color.r, color.g, color.b);
+        const parseColor = (hex: string) => {
+            // Handle 8-digit hex strings (RGBA) by stripping the alpha
+            const cleanHex = hex.length === 9 ? hex.slice(0, 7) : hex;
+            const c = new THREE.Color(cleanHex);
+            return new THREE.Vector3(c.r, c.g, c.b);
         };
 
         const vertexShader = `
       varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = vec4(position, 1.0);
-      }
+      void main() { vUv = uv; gl_Position = vec4(position, 1.0); }
     `;
 
         const fragmentShader = `
-      precision ${settings.precision} float;
-
+      precision ${s.precision} float;
       uniform float uTime;
-      uniform vec2 uResolution;
-      uniform vec2 uMouse;
-      uniform vec3 uTopColor;
-      uniform vec3 uBottomColor;
+      uniform vec2  uResolution;
+      uniform vec2  uMouse;
+      uniform vec3  uTopColor;
+      uniform vec3  uBottomColor;
       uniform float uIntensity;
-      uniform bool uInteractive;
+      uniform bool  uInteractive;
       uniform float uGlowAmount;
       uniform float uPillarWidth;
       uniform float uPillarHeight;
@@ -169,90 +136,93 @@ const LightPillar: React.FC<LightPillarProps> = ({
       uniform float uRotSin;
       uniform float uPillarRotCos;
       uniform float uPillarRotSin;
-      uniform float uWaveSin;
-      uniform float uWaveCos;
+      uniform float uWaveSin[4];
+      uniform float uWaveCos[4];
       varying vec2 vUv;
 
-      const float STEP_MULT = ${settings.stepMultiplier.toFixed(1)};
-      const int MAX_ITER = ${settings.iterations};
-      const int WAVE_ITER = ${settings.waveIterations};
+      const float PI      = 3.141592653589793;
+      const float EPSILON = 0.001;
+      const float E       = 2.71828182845904523536;
+
+      float noise(vec2 coord) {
+        vec2 r = (E * sin(E * coord));
+        return fract(r.x * r.y * (1.0 + coord.x));
+      }
+
+      const int   ITERATIONS      = ${s.iterations};
+      const int   WAVE_ITERATIONS = ${s.waveIterations};
+      const float STEP_MULT       = ${s.stepMultiplier.toFixed(1)};
 
       void main() {
-        vec2 uv = (vUv * 2.0 - 1.0) * vec2(uResolution.x / uResolution.y, 1.0);
-        uv = vec2(uPillarRotCos * uv.x - uPillarRotSin * uv.y, uPillarRotSin * uv.x + uPillarRotCos * uv.y);
+        vec2 fragCoord = vUv * uResolution;
+        vec2 uv = (fragCoord * 2.0 - uResolution) / uResolution.y;
 
-        vec3 ro = vec3(0.0, 0.0, -10.0);
-        vec3 rd = normalize(vec3(uv, 1.0));
+        uv = vec2(
+          uv.x * uPillarRotCos - uv.y * uPillarRotSin,
+          uv.x * uPillarRotSin + uv.y * uPillarRotCos
+        );
 
-        float rotC = uRotCos;
-        float rotS = uRotSin;
-        if(uInteractive && (uMouse.x != 0.0 || uMouse.y != 0.0)) {
-          float a = uMouse.x * 6.283185;
-          rotC = cos(a);
-          rotS = sin(a);
+        vec3  origin    = vec3(0.0, 0.0, -10.0);
+        vec3  direction = normalize(vec3(uv, 1.0));
+        float rotCos    = uRotCos;
+        float rotSin    = uRotSin;
+
+        if (uInteractive && length(uMouse) > 0.0) {
+          float a = uMouse.x * PI * 2.0;
+          rotCos = cos(a); rotSin = sin(a);
         }
 
-        vec3 col = vec3(0.0);
-        float t = 0.1;
+        vec3  color = vec3(0.0);
+        float depth = 0.1;
 
-        for(int i = 0; i < MAX_ITER; i++) {
-          vec3 p = ro + rd * t;
-          p.xz = vec2(rotC * p.x - rotS * p.z, rotS * p.x + rotC * p.z);
+        for (int i = 0; i < ITERATIONS; i++) {
+          vec3 pos = origin + direction * depth;
+          float nx = pos.x * rotCos - pos.z * rotSin;
+          float nz = pos.x * rotSin + pos.z * rotCos;
+          pos.x = nx; pos.z = nz;
 
-          vec3 q = p;
-          q.y = p.y * uPillarHeight + uTime;
+          vec3  deformed = pos;
+          deformed.y     = deformed.y * uPillarHeight + uTime;
 
-          // DENSER — extra per-octave swirl rotation for organic smoke turbulence
           float freq = 1.0;
           float amp  = 1.0;
-          for(int j = 0; j < WAVE_ITER; j++) {
-            q.xz = vec2(uWaveCos * q.x - uWaveSin * q.z,
-                        uWaveSin * q.x + uWaveCos * q.z);
-            q += cos(q.zxy * freq - uTime * float(j) * 1.2) * amp;
-            // Per-octave swirl keyed to time for extra turbulence
-            float sw = uTime * 0.06 * float(j + 1);
-            float sc = cos(sw); float ss = sin(sw);
-            q.xz = vec2(sc * q.x - ss * q.z, ss * q.x + sc * q.z);
-            freq *= 2.1;
-            amp  *= 0.5;
+          for (int j = 0; j < WAVE_ITERATIONS; j++) {
+            float wx = deformed.x * uWaveCos[j] - deformed.z * uWaveSin[j];
+            float wz = deformed.x * uWaveSin[j] + deformed.z * uWaveCos[j];
+            deformed.x = wx; deformed.z = wz;
+            deformed += cos(deformed.zxy * freq - uTime * float(j) * 2.0) * amp;
+            freq *= 2.0; amp *= 0.5;
           }
 
-          // DENSER — triple overlapping SDF flows (union fills screen with complex shape)
-          float d1 = length(cos(q.xz * 1.0)) - 0.18;
-          float d2 = length(cos(q.xz * 0.65 + vec2(0.75, 0.4))) - 0.22;
-          float d  = min(d1, d2);
-
-          float bound = length(p.xz) - uPillarWidth;
+          float fieldDistance = length(cos(deformed.xz)) - 0.2;
+          float radialBound   = length(pos.xz) - uPillarWidth;
           float k = 4.0;
-          float h = max(k - abs(d - bound), 0.0);
-          d = max(d, bound) + h * h * 0.0625 / k;
-          d = abs(d) * 0.09 + 0.006;
+          float h = max(k - abs(-radialBound - (-fieldDistance)), 0.0);
+          fieldDistance = -(min(-radialBound, -fieldDistance) - h * h * 0.25 / k);
+          fieldDistance = abs(fieldDistance) * 0.15 + 0.01;
 
-          float grad = clamp((15.0 - p.y) / 30.0, 0.0, 1.0);
-          col += mix(uBottomColor, uTopColor, grad) / d;
+          vec3 gradient = mix(uBottomColor, uTopColor, smoothstep(15.0, -15.0, pos.y));
+          color += gradient / fieldDistance;
 
-          t += d * STEP_MULT;
-          if(t > 50.0) break;
+          if (fieldDistance < EPSILON || depth > 50.0) break;
+          depth += fieldDistance * STEP_MULT;
         }
 
         float widthNorm = uPillarWidth / 3.0;
-        // tanh tonemapping — matches portfolio exactly (smoother + denser glow than Reinhard)
-        col = tanh(col * uGlowAmount / widthNorm);
-
-        // Dithering grain to break colour banding
-        col -= fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) / 15.0 * uNoiseIntensity;
-
-        gl_FragColor = vec4(col * uIntensity, 1.0);
+        color = tanh(color * uGlowAmount / widthNorm);
+        float rnd = noise(gl_FragCoord.xy);
+        color -= rnd / 15.0 * uNoiseIntensity;
+        gl_FragColor = vec4(color * uIntensity, 1.0);
       }
     `;
 
+        const waveAngle = 0.4;
+        const waveSinVals = new Float32Array(4).fill(Math.sin(waveAngle));
+        const waveCosVals = new Float32Array(4).fill(Math.cos(waveAngle));
         const pillarRotRad = (pillarRotation * Math.PI) / 180;
-        const waveSin = Math.sin(0.4);
-        const waveCos = Math.cos(0.4);
 
         const material = new THREE.ShaderMaterial({
-            vertexShader,
-            fragmentShader,
+            vertexShader, fragmentShader,
             uniforms: {
                 uTime: { value: 0 },
                 uResolution: { value: new THREE.Vector2(width, height) },
@@ -269,142 +239,94 @@ const LightPillar: React.FC<LightPillarProps> = ({
                 uRotSin: { value: 0.0 },
                 uPillarRotCos: { value: Math.cos(pillarRotRad) },
                 uPillarRotSin: { value: Math.sin(pillarRotRad) },
-                uWaveSin: { value: waveSin },
-                uWaveCos: { value: waveCos }
+                uWaveSin: { value: waveSinVals },
+                uWaveCos: { value: waveCosVals },
             },
-            transparent: true,
-            depthWrite: false,
-            depthTest: false
+            transparent: true, depthWrite: false, depthTest: false,
         });
         materialRef.current = material;
 
         const geometry = new THREE.PlaneGeometry(2, 2);
         geometryRef.current = geometry;
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-
-        let mouseMoveTimeout: number | null = null;
-        const handleMouseMove = (event: MouseEvent) => {
-            if (!interactive) return;
-
-            if (mouseMoveTimeout) return;
-
-            mouseMoveTimeout = window.setTimeout(() => {
-                mouseMoveTimeout = null;
-            }, 16);
-
-            const rect = container.getBoundingClientRect();
-            const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-            const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-            mouseRef.current.set(x, y);
-        };
+        scene.add(new THREE.Mesh(geometry, material));
 
         if (interactive) {
-            container.addEventListener('mousemove', handleMouseMove, { passive: true });
+            container.addEventListener('mousemove', (e: MouseEvent) => {
+                const rect = container.getBoundingClientRect();
+                mouseRef.current.set(
+                    ((e.clientX - rect.left) / rect.width) * 2 - 1,
+                    -((e.clientY - rect.top) / rect.height) * 2 + 1
+                );
+            }, { passive: true });
         }
 
         let lastTime = performance.now();
-        const targetFPS = effectiveQuality === 'low' ? 30 : 60;
-        const frameTime = 1000 / targetFPS;
+        const fps = effectiveQuality === 'low' ? 30 : 60;
+        const frame = 1000 / fps;
 
-        const animate = (currentTime: number) => {
-            if (!materialRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) return;
-
-            if (isVisibleRef.current) {
-                const deltaTime = Math.min(currentTime - lastTime, 100); // Caps delta to avoid jumps
-
-                if (deltaTime >= frameTime) {
-                    // Fixed 16 ms tick keeps animation identical regardless of FPS tier
-                    timeRef.current += 0.016 * rotationSpeed;
-                    const t = timeRef.current;
-                    materialRef.current.uniforms.uTime.value = t;
-                    materialRef.current.uniforms.uRotCos.value = Math.cos(t * 0.3);
-                    materialRef.current.uniforms.uRotSin.value = Math.sin(t * 0.3);
-                    rendererRef.current.render(sceneRef.current, cameraRef.current);
-                    lastTime = currentTime - (deltaTime % frameTime);
-                }
-            } else {
-                // Keep lastTime updated so when it becomes visible again it doesn't jump
-                lastTime = currentTime;
-            }
-
+        const animate = (now: number) => {
             rafRef.current = requestAnimationFrame(animate);
+            if (!isVisibleRef.current) { lastTime = now; return; }
+            const delta = now - lastTime;
+            if (delta < frame) return;
+            lastTime = now - (delta % frame);
+            timeRef.current += 0.016 * rotationSpeed;
+            const t = timeRef.current;
+            material.uniforms.uTime.value = t;
+            material.uniforms.uRotCos.value = Math.cos(t * 0.3);
+            material.uniforms.uRotSin.value = Math.sin(t * 0.3);
+            renderer.render(scene, camera);
         };
         rafRef.current = requestAnimationFrame(animate);
 
-        // PERFORMANCE OPTIMIZED FOR MOBILE — visualViewport handles iOS Safari URL-bar resize
-        let resizeTimeout: number | null = null;
+        let resizeTimer: ReturnType<typeof setTimeout> | null = null;
         const handleResize = () => {
-            if (resizeTimeout) clearTimeout(resizeTimeout);
-            resizeTimeout = window.setTimeout(() => {
-                if (!rendererRef.current || !materialRef.current || !containerRef.current) return;
-                const vp = window.visualViewport;
-                const newWidth = vp ? vp.width : (containerRef.current.clientWidth || window.innerWidth);
-                const newHeight = vp ? vp.height : (containerRef.current.clientHeight || window.innerHeight);
-                rendererRef.current.setSize(newWidth, newHeight);
-                materialRef.current.uniforms.uResolution.value.set(newWidth, newHeight);
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (!rendererRef.current || !materialRef.current) return;
+                const v = window.visualViewport;
+                const newW = v ? Math.floor(v.width) : window.innerWidth;
+                const newH = v ? Math.floor(v.height) : window.innerHeight;
+                rendererRef.current.setSize(newW, newH);
+                materialRef.current.uniforms.uResolution.value.set(newW, newH);
             }, 150);
         };
-
         window.addEventListener('resize', handleResize, { passive: true });
         window.visualViewport?.addEventListener('resize', handleResize, { passive: true });
 
         return () => {
+            document.removeEventListener('visibilitychange', handleVisibility);
             observer.disconnect();
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('resize', handleResize);
             window.visualViewport?.removeEventListener('resize', handleResize);
-            if (interactive) {
-                container.removeEventListener('mousemove', handleMouseMove);
-            }
-            if (rafRef.current) {
-                cancelAnimationFrame(rafRef.current);
-            }
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
             if (rendererRef.current) {
                 rendererRef.current.dispose();
                 rendererRef.current.forceContextLoss();
-                if (container.contains(rendererRef.current.domElement)) {
+                if (container.contains(rendererRef.current.domElement))
                     container.removeChild(rendererRef.current.domElement);
-                }
             }
-            if (materialRef.current) {
-                materialRef.current.dispose();
-            }
-            if (geometryRef.current) {
-                geometryRef.current.dispose();
-            }
-
-            rendererRef.current = null;
-            materialRef.current = null;
-            sceneRef.current = null;
-            cameraRef.current = null;
-            geometryRef.current = null;
-            rafRef.current = null;
+            material.dispose();
+            geometry.dispose();
+            rendererRef.current = null; materialRef.current = null;
+            sceneRef.current = null; cameraRef.current = null;
+            geometryRef.current = null; rafRef.current = null;
         };
-    }, [
-        topColor,
-        bottomColor,
-        intensity,
-        rotationSpeed,
-        interactive,
-        glowAmount,
-        pillarWidth,
-        pillarHeight,
-        noiseIntensity,
-        pillarRotation,
-        webGLSupported,
-        quality
-    ]);
+    }, [topColor, bottomColor, intensity, rotationSpeed, interactive,
+        glowAmount, pillarWidth, pillarHeight, noiseIntensity,
+        pillarRotation, webGLSupported, quality]);
 
     if (!webGLSupported) {
-        return (
-            <div className={`light-pillar-fallback ${className}`} style={{ mixBlendMode }}>
-                WebGL not supported
-            </div>
-        );
+        return <div className={`light-pillar-fallback ${className}`} style={{ mixBlendMode }} />;
     }
 
-    return <div ref={containerRef} className={`light-pillar-container ${className}`} style={{ mixBlendMode }} />;
+    return (
+        <div
+            ref={containerRef}
+            className={`light-pillar-container ${className}`}
+            style={{ mixBlendMode }}
+        />
+    );
 };
 
 export { LightPillar };

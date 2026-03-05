@@ -92,6 +92,25 @@ export async function getLowStockProducts(): Promise<any[]> {
   return data || []
 }
 
+export async function decrementInventory(
+  productId: number,
+  size: string,
+  quantity: number
+): Promise<boolean> {
+  const { error } = await supabase.rpc('decrement_inventory_rpc', {
+    p_product_id: productId,
+    p_size: size,
+    p_quantity: quantity
+  })
+
+  if (error) {
+    console.error('Error decrementing inventory:', error)
+    return false
+  }
+
+  return true
+}
+
 export async function updateInventoryQuantity(
   productId: number,
   size: string,
@@ -99,7 +118,7 @@ export async function updateInventoryQuantity(
 ): Promise<boolean> {
   const { error } = await supabase
     .from('product_inventory')
-    .update({ 
+    .update({
       stock_quantity: newQuantity,
       updated_at: new Date().toISOString()
     })

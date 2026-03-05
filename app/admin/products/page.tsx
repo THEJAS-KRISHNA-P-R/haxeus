@@ -1,22 +1,9 @@
-﻿"use client"
-
-import { useEffect, useState } from "react"
-import { supabase, type Product } from "@/lib/supabase"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2, AlertCircle } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
+﻿"use client";
+import { useState, useEffect } from "react";
+import { supabase, type Product } from "@/lib/supabase";
+import { Plus, Search, Edit, Trash2, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +13,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import {
+  AdminCard,
+  AdminPageHeader,
+  AdminTableHeader,
+  AdminTableRow
+} from "@/components/admin/AdminUI";
+import { cn } from "@/lib/utils";
 
 export default function ProductsManagementPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -97,175 +91,208 @@ export default function ProductsManagementPage() {
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Products</h1>
-          <p className="text-white/40 mt-1">Manage your product inventory</p>
-        </div>
+      <div className="flex items-center justify-between mb-2">
+        <AdminPageHeader
+          title="Products"
+          subtitle="Manage your product inventory and stock levels."
+        />
         <Link href="/admin/products/new">
-          <Button data-testid="add-product-btn" className="gap-2 bg-red-600 hover:bg-red-700">
-            <Plus size={20} />
+          <button
+            data-testid="add-product-btn"
+            className="flex items-center gap-2 bg-[var(--accent)] text-white px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:brightness-110 transition-all shadow-lg shadow-red-500/20"
+          >
+            <Plus size={16} />
             Add Product
-          </Button>
+          </button>
         </Link>
       </div>
 
-      {/* Search Bar */}
-      <Card className="bg-[#111] border border-white/[0.06] border-white/[0.06]">
-        <CardContent className="pt-6">
-          <div className="relative">
+      <AdminCard>
+        {/* Search Bar */}
+        <div
+          style={{ borderBottom: "1px solid var(--border)" }}
+          className="px-6 py-4"
+        >
+          <div className="relative max-w-sm">
             <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/30 text-white/40"
-              size={20}
+              style={{ color: "var(--text-3)" }}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2"
+              size={16}
             />
-            <Input
+            <input
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-[#111] border-white/[0.06] text-white placeholder:text-white/30"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border)",
+                color: "var(--text)",
+              }}
+              className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl focus:outline-none focus:border-[var(--accent)] transition-all placeholder:opacity-30"
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Products Table */}
-      <Card className="bg-[#111] border border-white/[0.06] border-white/[0.06]">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-white/[0.06]">
-                <TableHead className="text-white/60">Image</TableHead>
-                <TableHead className="text-white/60">Name</TableHead>
-                <TableHead className="text-white/60">Price</TableHead>
-                <TableHead className="text-white/60">Stock</TableHead>
-                <TableHead className="text-white/60">Sizes</TableHead>
-                <TableHead className="text-white/60">Status</TableHead>
-                <TableHead className="text-right text-white/60">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.length === 0 ? (
-                <TableRow className="border-white/[0.06]">
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <p className="text-white/40">No products found</p>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredProducts.map((product) => (
-                  <TableRow key={product.id} className="border-white/[0.06]">
-                    <TableCell>
-                      <div className="relative h-16 w-16 rounded-md overflow-hidden bg-[#111] bg-[#111]">
-                        <Image
-                          src={product.front_image || "/placeholder.jpg"}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell>
+        {/* Products Table Content */}
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="py-24 flex flex-col items-center justify-center gap-4">
+              <div
+                style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }}
+                className="w-8 h-8 rounded-full border-2 animate-spin"
+              />
+              <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase tracking-widest">Loading Inventory...</p>
+            </div>
+          ) : (
+            <div className="min-w-[900px]">
+              <AdminTableHeader cols="grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_0.8fr] !py-4">
+                <div>Image</div>
+                <div>Product Info</div>
+                <div>Price</div>
+                <div>Inventory</div>
+                <div>Sizes</div>
+                <div>Status</div>
+                <div className="text-right">Actions</div>
+              </AdminTableHeader>
+
+              <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+                {filteredProducts.length === 0 ? (
+                  <div style={{ color: "var(--text-3)" }} className="px-6 py-16 text-center text-sm font-medium">
+                    No products matching your search.
+                  </div>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <AdminTableRow key={product.id} cols="grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_0.8fr]" className="items-center py-4">
                       <div>
-                        <p className="font-medium text-white">{product.name}</p>
-                        <p className="text-sm text-white/40">
+                        <div
+                          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
+                          className="relative h-14 w-14 rounded-xl overflow-hidden p-1"
+                        >
+                          <Image
+                            src={product.front_image || "/placeholder.jpg"}
+                            alt={product.name}
+                            fill
+                            className="object-contain p-1"
+                          />
+                        </div>
+                      </div>
+                      <div className="pr-4">
+                        <p style={{ color: "var(--text)" }} className="font-bold text-xs truncate">{product.name}</p>
+                        <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase tracking-wider mt-0.5">
                           {product.category || "Apparel"}
                         </p>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <p className="font-semibold text-white">
-                        ₹{product.price.toLocaleString("en-IN")}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-white">{product.total_stock}</span>
-                        {product.total_stock < 20 && (
-                          <span title="Low stock">
-                            <AlertCircle
-                              size={16}
-                              className="text-orange-500"
-                            />
-                          </span>
-                        )}
+                      <div>
+                        <p style={{ color: "var(--text)" }} className="font-bold text-xs tabular-nums">
+                          ₹{product.price.toLocaleString("en-IN")}
+                        </p>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {product.available_sizes?.slice(0, 3).map((size) => (
-                          <Badge key={size} variant="outline" className="text-xs bg-[#111] text-white/60 border-white/[0.06]">
-                            {size}
-                          </Badge>
-                        ))}
-                        {product.available_sizes?.length > 3 && (
-                          <Badge variant="outline" className="text-xs bg-[#111] text-white/60 border-white/[0.06]">
-                            +{product.available_sizes.length - 3}
-                          </Badge>
-                        )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span style={{ color: "var(--text)" }} className="text-xs font-bold">{product.total_stock}</span>
+                          {product.total_stock < 20 && (
+                            <span title="Low stock">
+                              <AlertCircle
+                                size={12}
+                                className="text-orange-500"
+                              />
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          product.total_stock > 0 ? "default" : "destructive"
-                        }
-                        className={product.total_stock > 0 ? "bg-green-600" : ""}
-                      >
-                        {product.total_stock > 0 ? "In Stock" : "Out of Stock"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link href={`/admin/products/${product.id}/edit`}>
-                          <Button variant="ghost" size="icon" className="hover:bg-white/5 text-white/60">
-                            <Edit size={16} />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteProductId(product.id)}
-                          className="hover:bg-white/5"
+                      <div>
+                        <div className="flex flex-wrap gap-1">
+                          {product.available_sizes?.slice(0, 3).map((size) => (
+                            <span
+                              key={size}
+                              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-2)" }}
+                              className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border"
+                            >
+                              {size}
+                            </span>
+                          ))}
+                          {product.available_sizes?.length > 3 && (
+                            <span
+                              style={{ color: "var(--text-3)" }}
+                              className="text-[9px] font-bold"
+                            >
+                              +{product.available_sizes.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border",
+                            product.total_stock > 0 ? "text-emerald-500" : "text-rose-500"
+                          )}
+                          style={{
+                            background: product.total_stock > 0
+                              ? "color-mix(in srgb, #10b981 10%, transparent)"
+                              : "color-mix(in srgb, #f43f5e 10%, transparent)",
+                            borderColor: product.total_stock > 0
+                              ? "color-mix(in srgb, #10b981 20%, transparent)"
+                              : "color-mix(in srgb, #f43f5e 20%, transparent)"
+                          }}
                         >
-                          <Trash2 size={16} className="text-red-500 text-[#e93a3a]" />
-                        </Button>
+                          {product.total_stock > 0 ? "Active" : "OOS"}
+                        </span>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                      <div className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Link href={`/admin/products/${product.id}/edit`}>
+                            <button
+                              style={{ color: "var(--text-3)" }}
+                              className="p-2 hover:bg-[var(--bg-elevated)] hover:text-[var(--text)] transition-all rounded-xl"
+                            >
+                              <Edit size={16} />
+                            </button>
+                          </Link>
+                          <button
+                            onClick={() => setDeleteProductId(product.id)}
+                            className="p-2 hover:bg-rose-500/10 text-[var(--accent)] transition-all rounded-xl"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </AdminTableRow>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </AdminCard>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={deleteProductId !== null}
         onOpenChange={(open) => !open && setDeleteProductId(null)}
       >
-        <AlertDialogContent className="bg-[#111] border-white/[0.06]">
+        <AlertDialogContent style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }} className="rounded-2xl shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription className="text-white/40">
-              This action cannot be undone. This will permanently delete the
-              product from your inventory.
+            <AlertDialogTitle style={{ color: "var(--text)" }} className="font-bold">Permanently delete product?</AlertDialogTitle>
+            <AlertDialogDescription style={{ color: "var(--text-3)" }}>
+              This action cannot be undone. This will remove the product and all its history from the database.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-[#111] text-white/60 border-white/[0.06] hover:bg-white/5">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteProduct} className="bg-red-600 hover:bg-red-700">
-              Delete
+          <AlertDialogFooter className="gap-2 mt-4">
+            <AlertDialogCancel
+              style={{ background: "var(--bg-elevated)", color: "var(--text-3)", border: "1px solid var(--border)" }}
+              className="rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[var(--bg-card)] transition-all"
+            >
+              Wait, Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProduct}
+              className="bg-[var(--accent)] text-white hover:brightness-110 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+            >
+              Yes, Delete Product
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

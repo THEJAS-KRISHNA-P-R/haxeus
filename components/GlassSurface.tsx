@@ -22,24 +22,24 @@ export interface GlassSurfaceProps {
   xChannel?: 'R' | 'G' | 'B';
   yChannel?: 'R' | 'G' | 'B';
   mixBlendMode?:
-    | 'normal'
-    | 'multiply'
-    | 'screen'
-    | 'overlay'
-    | 'darken'
-    | 'lighten'
-    | 'color-dodge'
-    | 'color-burn'
-    | 'hard-light'
-    | 'soft-light'
-    | 'difference'
-    | 'exclusion'
-    | 'hue'
-    | 'saturation'
-    | 'color'
-    | 'luminosity'
-    | 'plus-darker'
-    | 'plus-lighter';
+  | 'normal'
+  | 'multiply'
+  | 'screen'
+  | 'overlay'
+  | 'darken'
+  | 'lighten'
+  | 'color-dodge'
+  | 'color-burn'
+  | 'hard-light'
+  | 'soft-light'
+  | 'difference'
+  | 'exclusion'
+  | 'hue'
+  | 'saturation'
+  | 'color'
+  | 'luminosity'
+  | 'plus-darker'
+  | 'plus-lighter';
   className?: string;
   style?: React.CSSProperties;
   disableSvgFilter?: boolean;
@@ -84,12 +84,20 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
 
   const generateDisplacementMap = () => {
     const rect = containerRef.current?.getBoundingClientRect();
-    const actualWidth = rect?.width || 400;
-    const actualHeight = rect?.height || 200;
-    const edgeSize = Math.min(actualWidth, actualHeight) * (borderWidth * 0.5);
+    const width = rect?.width || 400;
+    const height = rect?.height || 200;
+
+    // We use a 10% margin expansion for the filter region.
+    // The displacement map must match this coordinate system.
+    const marginX = width * 0.1;
+    const marginY = height * 0.1;
+    const viewWidth = width + marginX * 2;
+    const viewHeight = height + marginY * 2;
+
+    const edgeSize = Math.min(width, height) * (borderWidth * 0.5);
 
     const svgContent = `
-      <svg viewBox="0 0 ${actualWidth} ${actualHeight}" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 ${viewWidth} ${viewHeight}" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${redGradId}" x1="100%" y1="0%" x2="0%" y2="0%">
             <stop offset="0%" stop-color="#0000"/>
@@ -100,10 +108,15 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
             <stop offset="100%" stop-color="blue"/>
           </linearGradient>
         </defs>
-        <rect x="0" y="0" width="${actualWidth}" height="${actualHeight}" fill="black"></rect>
-        <rect x="0" y="0" width="${actualWidth}" height="${actualHeight}" rx="${borderRadius}" fill="url(#${redGradId})" />
-        <rect x="0" y="0" width="${actualWidth}" height="${actualHeight}" rx="${borderRadius}" fill="url(#${blueGradId})" style="mix-blend-mode: ${mixBlendMode}" />
-        <rect x="${edgeSize}" y="${edgeSize}" width="${actualWidth - edgeSize * 2}" height="${actualHeight - edgeSize * 2}" rx="${borderRadius}" fill="hsl(0 0% ${brightness}% / ${opacity})" style="filter:blur(${blur}px)" />
+        <!-- Background: Neutral (no displacement) -->
+        <rect x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="#808080"></rect>
+
+        <!-- Element-aligned gradients: centered within the viewWidth/Height -->
+        <rect x="${marginX}" y="${marginY}" width="${width}" height="${height}" rx="${borderRadius}" fill="url(#${redGradId})" />
+        <rect x="${marginX}" y="${marginY}" width="${width}" height="${height}" rx="${borderRadius}" fill="url(#${blueGradId})" style="mix-blend-mode: ${mixBlendMode}" />
+
+        <!-- Inner frost area: also aligned -->
+        <rect x="${marginX + edgeSize}" y="${marginY + edgeSize}" width="${width - edgeSize * 2}" height="${height - edgeSize * 2}" rx="${borderRadius}" fill="hsl(0 0% ${brightness}% / ${opacity})" style="filter:blur(${blur}px)" />
       </svg>
     `;
 
@@ -206,8 +219,8 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     >
       <svg className="glass-surface__filter" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <filter id={filterId} colorInterpolationFilters="sRGB" x="0%" y="0%" width="100%" height="100%">
-            <feImage ref={feImageRef} x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" />
+          <filter id={filterId} colorInterpolationFilters="sRGB" x="-10%" y="-10%" width="120%" height="120%">
+            <feImage ref={feImageRef} x="-10%" y="-10%" width="120%" height="120%" preserveAspectRatio="none" result="map" />
 
             <feDisplacementMap ref={redChannelRef} in="SourceGraphic" in2="map" id="redchannel" result="dispRed" />
             <feColorMatrix

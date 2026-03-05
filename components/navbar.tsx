@@ -11,7 +11,7 @@ import type { Session } from "@supabase/supabase-js"
 import { useCart } from "@/contexts/CartContext"
 import { motion, AnimatePresence } from "framer-motion"
 import GlassSurface from "@/components/GlassSurface"
-import { DarkModeToggle } from "@/contexts/ThemeContext"
+
 import { StaggeredMenu } from "@/components/StaggeredMenu"
 import type { StaggeredMenuItem } from "@/components/StaggeredMenu"
 import { cn } from "@/lib/utils"
@@ -26,7 +26,8 @@ function NavbarSearchSync({ onSync }: { onSync: (q: string) => void }) {
   return null
 }
 
-import { useTheme } from "@/contexts/ThemeContext"
+import { useTheme } from "@/components/ThemeProvider"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 export function Navbar() {
   const { theme } = useTheme()
@@ -155,7 +156,7 @@ export function Navbar() {
             </nav>
 
             <div className="flex items-center gap-0.5 shrink-0">
-              <DarkModeToggle />
+              <ThemeToggle />
 
               <AnimatePresence mode="wait">
                 {isSearchOpen ? (
@@ -380,7 +381,7 @@ export function Navbar() {
 
                   <div className="flex-1" />
 
-                  <DarkModeToggle />
+                  <ThemeToggle />
 
                   <button
                     onClick={() => setIsSearchOpen(true)}

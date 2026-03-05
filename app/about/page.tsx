@@ -65,8 +65,8 @@ export default function AboutPage() {
 
       {/* ───── HERO ───── */}
       <section
-        className="relative w-full flex flex-col items-center justify-center overflow-hidden"
-        style={{ minHeight: '100dvh', paddingTop: '80px' }}
+        className="relative w-full flex flex-col items-center justify-center overflow-hidden pt-16 md:pt-20"
+        style={{ minHeight: '90dvh' }}
       >
         {/* Sparkles background */}
         <div className="absolute inset-0 w-full h-full bg-theme">
@@ -99,7 +99,7 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: 'easeOut' }}
-            className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter select-none bg-gradient-to-b from-theme to-theme-2 bg-clip-text text-transparent"
+            className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight select-none bg-gradient-to-b from-[var(--text)] to-[var(--text-2)] bg-clip-text text-transparent px-4 pb-2"
           >
             HAXEUS
           </motion.h1>
