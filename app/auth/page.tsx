@@ -134,24 +134,24 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#080808] py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md border-none shadow-md bg-[#111] border-white/[0.06]">
+    <div className="min-h-screen flex items-center justify-center bg-theme py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      <Card className="w-full max-w-md border border-theme shadow-md bg-card">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-white">Welcome to  <span className="text-[#e93a3a]">HAXEUS</span></CardTitle>
-          <CardDescription className="text-white/40">Sign in to your account or create a new one</CardDescription>
+          <CardTitle className="text-2xl font-bold text-theme">Welcome to  <span className="text-[var(--accent)]">HAXEUS</span></CardTitle>
+          <CardDescription className="text-theme-2">Sign in to your account or create a new one</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-[#111]/5">
-              <TabsTrigger value="signin" className="text-white/60 data-[state=active]:bg-white/10 data-[state=active]:text-white">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="text-white/60 data-[state=active]:bg-white/10 data-[state=active]:text-white">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-theme opacity-10">
+              <TabsTrigger value="signin" className="text-theme-2 data-[state=active]:bg-theme data-[state=active]:text-theme">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-theme-2 data-[state=active]:bg-theme data-[state=active]:text-theme">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
-                  <Label htmlFor="email" className="text-white/60">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-[#111] border-white/[0.06] text-white" />
+                  <Label htmlFor="email" className="text-theme-2">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-card border-theme text-theme" />
                 </div>
                 <div>
                   <Label htmlFor="password" className="text-white/60">Password</Label>
@@ -161,10 +161,10 @@ export default function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-[#111] border-white/[0.06] text-white"
+                    className="bg-card border-theme text-theme"
                   />
                 </div>
-                <Button type="submit" className="w-full bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white" disabled={loading}>
+                <Button type="submit" className="w-full bg-[var(--accent)] hover:opacity-90 text-white font-bold" disabled={loading}>
                   {loading ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
@@ -173,19 +173,19 @@ export default function AuthPage() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
-                  <Label htmlFor="fullName" className="text-white/60">Full Name</Label>
+                  <Label htmlFor="fullName" className="text-theme-2">Full Name</Label>
                   <Input
                     id="fullName"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    className="bg-[#111] border-white/[0.06] text-white"
+                    className="bg-card border-theme text-theme"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email" className="text-white/60">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-[#111] border-white/[0.06] text-white" />
+                  <Label htmlFor="email" className="text-theme-2">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-card border-theme text-theme" />
                 </div>
                 <div>
                   <Label htmlFor="password" className="text-white/60">Password</Label>
@@ -195,10 +195,10 @@ export default function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-[#111] border-white/[0.06] text-white"
+                    className="bg-card border-theme text-theme"
                   />
                 </div>
-                <Button type="submit" className="w-full bg-red-500 hover:bg-[#e93a3a]/80 text-white" disabled={loading}>
+                <Button type="submit" className="w-full bg-[var(--accent)] hover:opacity-90 text-white font-bold" disabled={loading}>
                   {loading ? "Creating Account..." : "Sign Up"}
                 </Button>
               </form>
@@ -208,17 +208,17 @@ export default function AuthPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/[0.06]" />
+                <div className="w-full border-t border-theme" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-[#0a0a0a] bg-[#111] text-white/40">Or continue with</span>
+                <span className="px-2 bg-card text-theme-2">Or continue with</span>
               </div>
             </div>
 
             <Button
               onClick={handleGoogleSignIn}
               variant="outline"
-              className="w-full mt-4 bg-[#111] text-black text-white flex items-center justify-center gap-2 border border-white/[0.06] shadow-sm hover:bg-white/5 hover:bg-[#111]/5"
+              className="w-full mt-4 bg-card text-theme flex items-center justify-center gap-2 border border-theme shadow-sm hover:bg-theme hover:bg-opacity-5"
               disabled={loading}>
 
               <FcGoogle size={20} />

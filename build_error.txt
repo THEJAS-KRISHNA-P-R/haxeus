@@ -1,0 +1,178 @@
+﻿
+> our-hax-project@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  Ô£ô optimizeCss
+  ┬À optimizePackageImports
+
+  Creating an optimized production build ...
+node.exe : 
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (:St  
+  ring) [], RemoteExcept   
+ ion
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+> Build error occurred
+Error: Turbopack build 
+failed with 1 errors:
+./app/contact/page.tsx:10:4
+5
+Module not found: Can't 
+resolve 
+'@/components/ui/accordion'
+[0m [90m  8 |[39m 
+[36mimport[39m { 
+[33mInput[39m } 
+[36mfrom[39m [32m"@/comp
+onents/ui/input"[39m
+ [90m  9 |[39m 
+[36mimport[39m { 
+[33mTextarea[39m } 
+[36mfrom[39m [32m"@/comp
+onents/ui/textarea"[39m
+[31m[1m>[22m[39m[90m 
+10 |[39m [36mimport[39m 
+{ [33mLabel[39m } 
+[36mfrom[39m [32m"@/comp
+onents/ui/label"[39m
+ [90m    |[39m           
+                           
+       [31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 
+11 |[39m [36mimport[39m 
+{ [33mAccordion[39m[33m,
+[39m [33mAccordionContent
+[39m[33m,[39m [33mAccor
+dionItem[39m[33m,[39m 
+[33mAccordionTrigger[39m 
+} [36mfrom[39m [32m"@/co
+mponents/ui/accordion"[39m
+ [90m    |[39m [31m[1m^
+[22m[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^[22m
+[39m
+ [90m 12 |[39m
+ [90m 13 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m 
+[33mContactPage[39m() {
+ [90m 14 |[39m   
+[36mconst[39m 
+[formData[33m,[39m 
+setFormData] [33m=[39m 
+useState({[0m
+
+Import map: aliased to 
+relative './components/ui/a
+ccordion' inside of 
+[project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/contact/page.tsx 
+[Client Component Browser]
+    ./app/contact/page.tsx 
+[Server Component]
+
+  Client Component SSR:
+    ./app/contact/page.tsx 
+[Client Component SSR]
+    ./app/contact/page.tsx 
+[Server Component]
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+
+    at <unknown> (./app/con
+tact/page.tsx:10:45)
+    at <unknown> (https://n
+extjs.org/docs/messages/mod
+ule-not-found)

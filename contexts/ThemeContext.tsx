@@ -42,8 +42,10 @@ export function ThemeProvider({
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
       root.classList.add(systemTheme)
+      root.setAttribute("data-theme", systemTheme)
     } else {
       root.classList.add(theme)
+      root.setAttribute("data-theme", theme)
     }
   }, [theme])
 
@@ -84,7 +86,7 @@ export function DarkModeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+      <div className="w-8 h-8 rounded-full bg-white/[0.06] animate-pulse" />
     )
   }
 
@@ -93,29 +95,31 @@ export function DarkModeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="relative w-9 h-9 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 group overflow-hidden"
+      className={`relative p-2 rounded-full flex items-center justify-center transition-all overflow-hidden ${isDark
+          ? "text-white/45 hover:text-white hover:bg-white/[0.07]"
+          : "text-black/45 hover:text-black hover:bg-black/[0.05]"
+        }`}
       aria-label="Toggle dark mode"
-      style={{ transition: 'background-color 500ms cubic-bezier(0.4, 0, 0.2, 1)' }}
     >
       {/* Sun Icon */}
       <Sun
-        className={`absolute w-5 h-5 text-yellow-500 ${isDark
-            ? "rotate-90 scale-0 opacity-0"
-            : "rotate-0 scale-100 opacity-100"
+        className={`absolute h-4 w-4 text-[#e7bf04] ${isDark
+          ? "rotate-90 scale-0 opacity-0"
+          : "rotate-0 scale-100 opacity-100"
           }`}
         style={{
-          transition: 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1), opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       />
 
       {/* Moon Icon */}
       <Moon
-        className={`absolute w-5 h-5 text-blue-400 ${isDark
-            ? "rotate-0 scale-100 opacity-100"
-            : "-rotate-90 scale-0 opacity-0"
+        className={`absolute h-4 w-4 text-theme-accent ${isDark
+          ? "rotate-0 scale-100 opacity-100"
+          : "-rotate-90 scale-0 opacity-0"
           }`}
         style={{
-          transition: 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1), opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       />
     </button>

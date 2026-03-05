@@ -130,7 +130,7 @@ function ProductsContent() {
   }, [products, searchQuery, sortBy, priceRange])
 
   return (
-    <div className="min-h-screen bg-[#080808] py-12 overflow-x-hidden">
+    <div className="min-h-screen bg-theme pt-20 pb-12 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -140,13 +140,13 @@ function ProductsContent() {
           className="text-center mb-12"
         >
           <motion.h1
-            className="text-5xl lg:text-6xl font-bold text-white mb-6"
+            className="text-5xl lg:text-6xl font-bold text-theme mb-6"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             Featured <motion.span
-              className="text-[#e93a3a]"
+              style={{ color: "var(--accent)" }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
@@ -155,7 +155,7 @@ function ProductsContent() {
             </motion.span>
           </motion.h1>
           <motion.p
-            className="text-xl text-white/40 max-w-2xl mx-auto"
+            className="text-xl text-theme-2 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -176,16 +176,16 @@ function ProductsContent() {
               className="flex items-center gap-2"
               whileHover={{ scale: 1.05 }}
             >
-              <SlidersHorizontal className="w-5 h-5 text-[#e93a3a]" />
-              <span className="text-sm font-semibold text-white/60">Filters:</span>
+              <SlidersHorizontal className="w-5 h-5 text-[var(--accent)]" />
+              <span className="text-sm font-semibold text-theme-2">Filters:</span>
             </motion.div>
 
             <motion.div whileHover={hoverScale} whileTap={tapScale}>
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-[200px] bg-[#111] border-2 border-white/[0.06] hover:border-[#e93a3a] shadow-sm">
+                <SelectTrigger className="w-[200px] bg-card border border-theme hover:border-[var(--accent)] shadow-sm text-theme">
                   <SelectValue placeholder="Price Range" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111]">
+                <SelectContent className="bg-card border-theme text-theme">
                   <SelectItem value="all">All Prices</SelectItem>
                   <SelectItem value="under-2000">Under ₹2,000</SelectItem>
                   <SelectItem value="2000-3000">₹2,000 - ₹3,000</SelectItem>
@@ -196,10 +196,10 @@ function ProductsContent() {
 
             <motion.div whileHover={hoverScale} whileTap={tapScale}>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[200px] bg-[#111] border-2 border-white/[0.06] hover:border-[#e93a3a] shadow-sm">
+                <SelectTrigger className="w-[200px] bg-card border border-theme hover:border-[var(--accent)] shadow-sm text-theme">
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111] border-white/[0.06]">
+                <SelectContent className="bg-card border-theme text-theme">
                   <SelectItem value="default" className="text-white/60 hover:bg-[#111]/5">Default</SelectItem>
                   <SelectItem value="price-low" className="text-white/60 hover:bg-[#111]/5">Price: Low to High</SelectItem>
                   <SelectItem value="price-high" className="text-white/60 hover:bg-[#111]/5">Price: High to Low</SelectItem>
@@ -224,7 +224,7 @@ function ProductsContent() {
                         setSortBy("default")
                         window.history.pushState({}, "", "/products")
                       }}
-                      className="text-[#e93a3a] hover:text-[#e93a3a] hover:bg-[#e93a3a]/10 font-semibold"
+                      className="text-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 font-semibold"
                     >
                       Clear Filters
                     </Button>
@@ -236,12 +236,12 @@ function ProductsContent() {
 
           {/* Results count */}
           <motion.div
-            className="text-center text-sm text-white/40 mt-6"
+            className="text-center text-sm text-theme-2 mt-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            Showing <span className="font-bold text-[#e93a3a]">{loading ? '...' : filteredProducts.length}</span> {filteredProducts.length === 1 ? "product" : "products"}
+            Showing <span className="font-bold text-[var(--accent)]">{loading ? '...' : filteredProducts.length}</span> {filteredProducts.length === 1 ? "product" : "products"}
             {searchQuery && ` for "${searchQuery}"`}
           </motion.div>
         </motion.div>
@@ -257,7 +257,7 @@ function ProductsContent() {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="bg-[#111] rounded-lg overflow-hidden shadow-md shadow-black/10 animate-pulse">
+                <div key={i} className="bg-card rounded-lg overflow-hidden shadow-md shadow-black/10 animate-pulse">
                   <div className="aspect-square bg-[#111]/5" />
                   <div className="p-6 space-y-3">
                     <div className="h-6 bg-[#111]/5 rounded w-3/4" />
@@ -287,7 +287,7 @@ function ProductsContent() {
               >
                 😞
               </motion.div>
-              <p className="text-2xl text-white/40 mb-6">
+              <p className="text-2xl text-theme-2 mb-6">
                 {products.length === 0
                   ? "No products available yet. Check back soon!"
                   : "No products found matching your criteria."}
@@ -300,7 +300,7 @@ function ProductsContent() {
                       setSortBy("default")
                       window.history.pushState({}, "", "/products")
                     }}
-                    className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 px-8 py-6 text-lg font-semibold rounded-xl shadow-md shadow-black/10"
+                    className="bg-[var(--accent)] hover:opacity-90 px-8 py-6 text-lg font-semibold rounded-xl shadow-md"
                   >
                     Clear Filters
                   </Button>
@@ -317,12 +317,14 @@ function ProductsContent() {
               {filteredProducts.map((product, index) => (
                 <motion.div
                   key={product.id}
-                  variants={scrollReveal}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut", delay: index * 0.05 }}
                   whileHover={{ y: -10 }}
-                  transition={{ duration: 0.3 }}
                   className="snap-start"
                 >
-                  <Card className="group overflow-hidden bg-[#111] shadow-none hover:shadow-md shadow-black/10 hover:shadow-[#e93a3a]/5 border-0 border-white/[0.06] h-full">
+                  <Card className="group overflow-hidden bg-card shadow-none hover:shadow-md border border-theme h-full transition-all">
                     {/* Product Image */}
                     <Link href={`/products/${product.id}`}>
                       <div className="aspect-square relative bg-black overflow-hidden cursor-pointer">
@@ -347,7 +349,7 @@ function ProductsContent() {
                         {/* Overlay with quick actions */}
                         <motion.div
                           className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"
-                          initial={{ opacity: 0 }}
+                          initial={{ opacity: 0.4 }}
                           whileHover={{ opacity: 1 }}
                           transition={{ duration: 0.3 }}
                         >
@@ -361,7 +363,7 @@ function ProductsContent() {
                                 productId={product.id}
                                 variant="ghost"
                                 size="sm"
-                                className="bg-[#111] text-black hover:bg-white/5 shadow-md shadow-black/10"
+                                className="bg-card text-theme hover:bg-theme shadow-md"
                               />
                             </motion.div>
                             <motion.div
@@ -369,7 +371,7 @@ function ProductsContent() {
                               whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              <Button size="sm" className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 shadow-md shadow-black/10">
+                              <Button size="sm" className="bg-[var(--accent)] hover:opacity-90 shadow-md">
                                 <ShoppingCart className="w-4 h-4" />
                               </Button>
                             </motion.div>
@@ -382,7 +384,7 @@ function ProductsContent() {
                     <CardContent className="p-6">
                       <Link href={`/products/${product.id}`}>
                         <motion.h3
-                          className="text-lg font-bold text-white mb-2 hover:text-[#e93a3a] cursor-pointer line-clamp-1"
+                          className="text-lg font-bold text-theme mb-2 hover:text-[var(--accent)] cursor-pointer line-clamp-1"
                           whileHover={{ x: 5 }}
                           transition={{ duration: 0.2 }}
                         >
@@ -390,7 +392,7 @@ function ProductsContent() {
                         </motion.h3>
                       </Link>
 
-                      <p className="text-sm text-white/40 mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <p className="text-sm text-theme-2 mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
 
                       {/* Size Options */}
                       <div className="flex gap-1 mb-4 flex-wrap">
@@ -400,9 +402,9 @@ function ProductsContent() {
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: index * 0.05 + sizeIndex * 0.05 }}
-                            whileHover={{ scale: 1.1, backgroundColor: "#dc2626", color: "#ffffff" }}
+                            whileHover={{ scale: 1.1, backgroundColor: "var(--accent)", color: "#ffffff" }}
                           >
-                            <Badge variant="outline" className="text-xs px-2 py-1 cursor-pointer border-white/[0.06] text-white/60 hover:bg-[#e93a3a]">
+                            <Badge variant="outline" className="text-xs px-2 py-1 cursor-pointer border-theme text-theme-2 hover:bg-[var(--accent)]">
                               {size}
                             </Badge>
                           </motion.div>
@@ -413,8 +415,8 @@ function ProductsContent() {
                       <div className="flex items-center justify-between">
                         <div>
                           <motion.span
-                            className="text-2xl font-bold text-white"
-                            whileHover={{ scale: 1.1, color: "#dc2626" }}
+                            className="text-2xl font-bold text-theme"
+                            whileHover={{ scale: 1.1, color: "var(--accent)" }}
                           >
                             ₹{product.price.toLocaleString("en-IN")}
                           </motion.span>
@@ -422,7 +424,7 @@ function ProductsContent() {
                         </div>
                         <Link href={`/products/${product.id}`}>
                           <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                            <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white px-6 py-6 rounded-full font-semibold shadow-md">
+                            <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-6 py-6 rounded-full font-semibold shadow-md">
                               View
                             </Button>
                           </motion.div>
@@ -445,7 +447,7 @@ function ProductsContent() {
           className="text-center mt-20"
         >
           <motion.p
-            className="text-white/50 mb-6 text-lg"
+            className="text-theme-2 mb-6 text-lg"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -457,7 +459,7 @@ function ProductsContent() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-[#e93a3a] text-[#e93a3a] hover:bg-[#e93a3a] hover:text-white bg-transparent px-10 py-6 rounded-full text-lg font-semibold shadow-md shadow-black/10"
+                className="border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white bg-transparent px-10 py-6 rounded-full text-lg font-semibold shadow-md"
               >
                 Contact Us for Custom Designs
               </Button>

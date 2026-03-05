@@ -2,24 +2,23 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Download, Eye } from "lucide-react";
-import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  paid:      { label: "Paid",      color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" },
-  pending:   { label: "Pending",   color: "bg-orange-500/15  text-orange-400  border-orange-500/20"  },
-  shipped:   { label: "Shipped",   color: "bg-blue-500/15    text-blue-400    border-blue-500/20"    },
+  paid: { label: "Paid", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" },
+  pending: { label: "Pending", color: "bg-orange-500/15  text-orange-400  border-orange-500/20" },
+  shipped: { label: "Shipped", color: "bg-blue-500/15    text-blue-400    border-blue-500/20" },
   delivered: { label: "Delivered", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" },
-  cancelled: { label: "Cancelled", color: "bg-red-500/15     text-red-400     border-red-500/20"     },
+  cancelled: { label: "Cancelled", color: "bg-red-500/15     text-red-400     border-red-500/20" },
 };
 
 export default function AdminOrdersPage() {
-  const [orders,  setOrders]  = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search,  setSearch]  = useState("");
-  const [filter,  setFilter]  = useState("all");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => { loadOrders(); }, []);
 
@@ -81,7 +80,7 @@ export default function AdminOrdersPage() {
         </button>
       </div>
 
-      <SpotlightCard className="p-0 overflow-hidden">
+      <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">
         {/* Search + filter bar */}
         <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
           <div className="relative flex-1 min-w-[200px] max-w-xs">
@@ -204,7 +203,7 @@ export default function AdminOrdersPage() {
             );
           })}
         </div>
-      </SpotlightCard>
+      </div>
     </div>
   );
 }

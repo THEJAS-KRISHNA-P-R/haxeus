@@ -1,13 +1,13 @@
-/* LightPillar — HAXEUS */
+/* LightPillar — used as fixed viewport background via LightPillarBackground.tsx */
+
 .light-pillar-container {
+    /* Fill whatever container it's placed in */
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    min-height: 100dvh; /* CRITICAL: ensures mobile fills viewport */
     overflow: hidden;
     pointer-events: none;
-    z-index: 0;
 }
 
 .light-pillar-container canvas {
@@ -17,7 +17,6 @@
     image-rendering: auto;
 }
 
-/* Mobile: pixelated rendering for speed */
 @media (max-width: 768px) {
     .light-pillar-container canvas {
         image-rendering: pixelated;
@@ -25,19 +24,13 @@
     }
 }
 
-/* CSS fallback if WebGL fails — red gradient so it doesn't go black */
+/* CSS fallback — red glow gradient if WebGL fails */
 .light-pillar-fallback {
     position: absolute;
     inset: 0;
-    width: 100%;
-    min-height: 100dvh;
-    background: radial-gradient(
-        ellipse 80% 60% at 60% 40%,
-        rgba(180, 0, 0, 0.55) 0%,
-        rgba(120, 0, 0, 0.35) 30%,
-        rgba(60,  0, 0, 0.25) 60%,
-        rgba(0,   0, 0, 0.95) 100%
-    );
-    z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 60% 40%,
+            rgba(180, 0, 0, 0.55) 0%,
+            rgba(120, 0, 0, 0.35) 30%,
+            rgba(60, 0, 0, 0.25) 60%,
+            rgba(0, 0, 0, 0.95) 100%);
 }
-

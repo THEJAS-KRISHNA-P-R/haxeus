@@ -5,12 +5,11 @@ import {
   ShoppingBag, Users, DollarSign, Clock,
   CheckCircle, XCircle, ArrowUpRight,
 } from "lucide-react";
-import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
 async function fetchDashboardStats(period: "7d" | "30d" | "90d") {
-  const days  = period === "7d" ? 7 : period === "30d" ? 30 : 90;
+  const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
   const since = new Date(Date.now() - days * 86_400_000).toISOString();
 
   const [ordersRes, customersRes, recentRes, topRes] = await Promise.all([
@@ -37,17 +36,17 @@ async function fetchDashboardStats(period: "7d" | "30d" | "90d") {
   const topProducts = Object.values(tally).sort((a, b) => b.sales - a.sales).slice(0, 5);
 
   return {
-    totalRevenue:   orders.reduce((s: number, o: any) => s + Number(o.total_amount), 0),
-    totalOrders:    orders.length,
+    totalRevenue: orders.reduce((s: number, o: any) => s + Number(o.total_amount), 0),
+    totalOrders: orders.length,
     totalCustomers: unique.size,
-    pendingOrders:  orders.filter((o: any) => o.payment_status === "pending").length,
-    recentOrders:   recentRes.data ?? [],
+    pendingOrders: orders.filter((o: any) => o.payment_status === "pending").length,
+    recentOrders: recentRes.data ?? [],
     topProducts,
   };
 }
 
 export default function AdminDashboard() {
-  const [stats,  setStats]  = useState<any>(null);
+  const [stats, setStats] = useState<any>(null);
   const [period, setPeriod] = useState<"7d" | "30d" | "90d">("30d");
 
   useEffect(() => {
@@ -55,10 +54,10 @@ export default function AdminDashboard() {
   }, [period]);
 
   const statCards = [
-    { label: "Total Revenue",  value: stats?.totalRevenue   ?? 0, prefix: "₹", icon: DollarSign, delta: "+12%", color: "text-emerald-400", bg: "from-emerald-500/10" },
-    { label: "Total Orders",   value: stats?.totalOrders    ?? 0, prefix: "",  icon: ShoppingBag, delta: "+8%",  color: "text-blue-400",    bg: "from-blue-500/10"   },
-    { label: "Customers",      value: stats?.totalCustomers ?? 0, prefix: "",  icon: Users,       delta: "+23%", color: "text-violet-400",  bg: "from-violet-500/10" },
-    { label: "Pending Orders", value: stats?.pendingOrders  ?? 0, prefix: "",  icon: Clock,       delta: null,   color: "text-orange-400",  bg: "from-orange-500/10" },
+    { label: "Total Revenue", value: stats?.totalRevenue ?? 0, prefix: "₹", icon: DollarSign, delta: "+12%", color: "text-emerald-400", bg: "from-emerald-500/10" },
+    { label: "Total Orders", value: stats?.totalOrders ?? 0, prefix: "", icon: ShoppingBag, delta: "+8%", color: "text-blue-400", bg: "from-blue-500/10" },
+    { label: "Customers", value: stats?.totalCustomers ?? 0, prefix: "", icon: Users, delta: "+23%", color: "text-violet-400", bg: "from-violet-500/10" },
+    { label: "Pending Orders", value: stats?.pendingOrders ?? 0, prefix: "", icon: Clock, delta: null, color: "text-orange-400", bg: "from-orange-500/10" },
   ];
 
   return (
@@ -84,7 +83,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
           <motion.div key={card.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
-            <SpotlightCard className="p-5" spotlightColor="rgba(255,255,255,0.05)">
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
               <div className="flex items-start justify-between mb-4">
                 <div className={cn("p-2.5 rounded-xl bg-gradient-to-br to-transparent border border-white/[0.06]", card.bg)}>
                   <card.icon size={16} className={card.color} />
@@ -103,7 +102,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-xs text-white/35 font-medium">{card.label}</div>
               </div>
-            </SpotlightCard>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -111,7 +110,7 @@ export default function AdminDashboard() {
       {/* Recent orders + top products */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
-          <SpotlightCard className="p-0 overflow-hidden">
+          <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
               <h2 className="font-semibold text-white">Recent Orders</h2>
               <a href="/admin/orders" className="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1">
@@ -123,10 +122,10 @@ export default function AdminDashboard() {
                 <OrderRow key={order?.id ?? i} order={order} loading={!stats} />
               ))}
             </div>
-          </SpotlightCard>
+          </div>
         </div>
 
-        <SpotlightCard className="p-0 overflow-hidden">
+        <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
             <h2 className="font-semibold text-white">Top Products</h2>
             <a href="/admin/products" className="text-xs text-white/40 hover:text-white transition-colors">Manage</a>
@@ -136,7 +135,7 @@ export default function AdminDashboard() {
               <TopProductRow key={product?.id ?? i} product={product} rank={i + 1} loading={!stats} />
             ))}
           </div>
-        </SpotlightCard>
+        </div>
       </div>
     </div>
   );
@@ -154,9 +153,9 @@ function OrderRow({ order, loading }: { order: any; loading: boolean }) {
     </div>
   );
   const statusMap: Record<string, { color: string; Icon: any }> = {
-    paid:      { color: "text-emerald-400", Icon: CheckCircle },
-    pending:   { color: "text-orange-400",  Icon: Clock       },
-    cancelled: { color: "text-red-400",     Icon: XCircle     },
+    paid: { color: "text-emerald-400", Icon: CheckCircle },
+    pending: { color: "text-orange-400", Icon: Clock },
+    cancelled: { color: "text-red-400", Icon: XCircle },
   };
   const s = statusMap[order.payment_status] ?? statusMap.pending;
   return (

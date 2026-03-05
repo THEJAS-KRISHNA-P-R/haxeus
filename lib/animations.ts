@@ -2,12 +2,12 @@ import { Variants } from "framer-motion"
 
 // Optimized animation variants for better performance
 export const fadeIn: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 20,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: {
       duration: 0.4,
@@ -17,12 +17,12 @@ export const fadeIn: Variants = {
 }
 
 export const fadeInUp: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 60,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: {
       duration: 0.6,
@@ -32,12 +32,12 @@ export const fadeInUp: Variants = {
 }
 
 export const fadeInDown: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: -60,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: {
       duration: 0.6,
@@ -47,12 +47,12 @@ export const fadeInDown: Variants = {
 }
 
 export const fadeInLeft: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     x: -60,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     x: 0,
     transition: {
       duration: 0.6,
@@ -62,12 +62,12 @@ export const fadeInLeft: Variants = {
 }
 
 export const fadeInRight: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     x: 60,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     x: 0,
     transition: {
       duration: 0.6,
@@ -77,12 +77,12 @@ export const fadeInRight: Variants = {
 }
 
 export const scaleIn: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     scale: 0.8,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     scale: 1,
     transition: {
       duration: 0.5,
@@ -114,12 +114,12 @@ export const staggerFast: Variants = {
 }
 
 export const slideInFromBottom: Variants = {
-  hidden: { 
-    y: 100, 
-    opacity: 0 
+  hidden: {
+    y: 100,
+    opacity: 0
   },
-  visible: { 
-    y: 0, 
+  visible: {
+    y: 0,
     opacity: 1,
     transition: {
       duration: 0.7,
@@ -129,12 +129,12 @@ export const slideInFromBottom: Variants = {
 }
 
 export const slideInFromTop: Variants = {
-  hidden: { 
-    y: -100, 
-    opacity: 0 
+  hidden: {
+    y: -100,
+    opacity: 0
   },
-  visible: { 
-    y: 0, 
+  visible: {
+    y: 0,
     opacity: 1,
     transition: {
       duration: 0.7,
@@ -144,13 +144,13 @@ export const slideInFromTop: Variants = {
 }
 
 export const rotateIn: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     rotate: -180,
     scale: 0.5,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     rotate: 0,
     scale: 1,
     transition: {
@@ -190,11 +190,11 @@ export const tapScale = {
 
 // Page transition
 export const pageTransition: Variants = {
-  hidden: { 
+  hidden: {
     opacity: 0,
     x: -20,
   },
-  visible: { 
+  visible: {
     opacity: 1,
     x: 0,
     transition: {
@@ -202,7 +202,7 @@ export const pageTransition: Variants = {
       ease: "easeOut",
     }
   },
-  exit: { 
+  exit: {
     opacity: 0,
     x: 20,
     transition: {
@@ -214,15 +214,15 @@ export const pageTransition: Variants = {
 
 // Smooth scroll reveal
 export const scrollReveal: Variants = {
-  hidden: { 
-    opacity: 0, 
-    y: 50,
+  hidden: {
+    opacity: 0,
+    y: 20,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.4,
       ease: [0.25, 0.1, 0.25, 1],
     }
   }

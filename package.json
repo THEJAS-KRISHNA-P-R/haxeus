@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "postbuild": "xcopy /E /I /Y public .next\\standalone\\public & xcopy /E /I /Y .next\\static .next\\standalone\\.next\\static",
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "analyze": "cross-env ANALYZE=true next build"

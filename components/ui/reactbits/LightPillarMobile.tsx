@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
-import * as THREE from 'three';
 
 interface LightPillarProps {
     topColor?: string;
@@ -19,10 +18,6 @@ interface LightPillarProps {
     quality?: 'low' | 'medium' | 'high';
 }
 
-/**
- * Mobile-specific LightPillar implementation.
- * Extremely optimized for low-end mobile GPUs.
- */
 const LightPillarMobile: React.FC<LightPillarProps> = ({
     topColor = '#e93a3a',
     bottomColor = '#000000',
@@ -30,316 +25,359 @@ const LightPillarMobile: React.FC<LightPillarProps> = ({
     rotationSpeed = 0.1,
     interactive = false,
     className = '',
-    glowAmount = 0.002,
+    glowAmount = 0.004,
     pillarWidth = 9.0,
     pillarHeight = 0.6,
     noiseIntensity = 0.0,
     mixBlendMode = 'screen',
     pillarRotation = 55,
-    quality = 'low'
+    quality = 'high'
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const rafRef = useRef<number | null>(null);
-    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-    const materialRef = useRef<THREE.ShaderMaterial | null>(null);
-    const sceneRef = useRef<THREE.Scene | null>(null);
-    const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
-    const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
-    const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
-    const timeRef = useRef<number>(0);
     const isVisibleRef = useRef<boolean>(true);
+    const cleanupRef = useRef<(() => void) | null>(null);
     const [webGLSupported, setWebGLSupported] = useState<boolean>(true);
 
     useEffect(() => {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) setWebGLSupported(false);
-    }, []);
+        // Test WebGL support
+        try {
+            const testCanvas = document.createElement('canvas');
+            const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
+            if (!gl) { setWebGLSupported(false); return; }
+        } catch { setWebGLSupported(false); return; }
 
-    useEffect(() => {
-        if (!containerRef.current || !webGLSupported) return;
+        // CRITICAL: Get dimensions from visualViewport, never from container
+        // Container may report 0x0 at mount time inside a fixed wrapper
+        const vp = window.visualViewport;
+        const width = Math.floor(vp ? vp.width : window.innerWidth);
+        const height = Math.floor(vp ? vp.height : window.innerHeight);
+
+        if (width === 0 || height === 0) {
+            // Retry after browser paint
+            const retryId = window.setTimeout(() => {
+                setWebGLSupported(prev => prev); // force re-render to retry
+            }, 100);
+            return () => window.clearTimeout(retryId);
+        }
 
         const container = containerRef.current;
-        const width = container.clientWidth;
-        const height = container.clientHeight;
+        if (!container) return;
 
-        // IntersectionObserver to pause rendering when off-screen
+        // Quality settings — mobile is always low/medium, never high
+        const qualityMap = {
+            low: { iterations: 20, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMult: 2.0 },
+            medium: { iterations: 30, waveIterations: 2, pixelRatio: 0.6, precision: 'mediump', stepMult: 1.5 },
+            high: { iterations: 38, waveIterations: 5, pixelRatio: 0.75, precision: 'mediump', stepMult: 1.2 },
+        };
+        const s = qualityMap[quality] || qualityMap.low;
+
+        // ----- THREE.JS setup (imported dynamically to avoid SSR issues) -----
+        // We use raw WebGL here to avoid Three.js bundle size on mobile
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.floor(width * s.pixelRatio);
+        canvas.height = Math.floor(height * s.pixelRatio);
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.display = 'block';
+        canvas.style.position = 'absolute';
+        canvas.style.inset = '0';
+        if (window.innerWidth <= 768) {
+            canvas.style.imageRendering = 'pixelated';
+        }
+        container.appendChild(canvas);
+
+        const gl = canvas.getContext('webgl', {
+            alpha: true,
+            antialias: false,
+            powerPreference: 'low-power',
+            depth: false,
+            stencil: false,
+            premultipliedAlpha: false,
+        }) as WebGLRenderingContext | null;
+
+        if (!gl) {
+            setWebGLSupported(false);
+            container.removeChild(canvas);
+            return;
+        }
+
+        const pillarRotRad = (pillarRotation * Math.PI) / 180;
+        const waveSin = Math.sin(0.4);
+        const waveCos = Math.cos(0.4);
+
+        // Vertex shader
+        const vsSource = `
+attribute vec2 aPosition;
+varying vec2 vUv;
+void main() {
+    vUv = aPosition * 0.5 + 0.5;
+    gl_Position = vec4(aPosition, 0.0, 1.0);
+}`;
+
+        // Fragment shader — optimized for mobile
+        const fsSource = `
+precision ${s.precision} float;
+uniform float uTime;
+uniform vec2 uResolution;
+uniform vec3 uTopColor;
+uniform vec3 uBottomColor;
+uniform float uIntensity;
+uniform float uGlowAmount;
+uniform float uPillarWidth;
+uniform float uPillarHeight;
+uniform float uPillarRotCos;
+uniform float uPillarRotSin;
+uniform float uWaveSin;
+uniform float uWaveCos;
+uniform float uRotCos;
+uniform float uRotSin;
+uniform float uAspect;
+varying vec2 vUv;
+
+const int MAX_ITER  = ${s.iterations};
+const int WAVE_ITER = ${s.waveIterations};
+const float STEP    = ${s.stepMult.toFixed(1)};
+
+void main() {
+    vec2 uv = vUv * 2.0 - 1.0;
+    uv = uAspect < 1.0
+        ? uv * vec2(1.0, 1.0 / uAspect)
+        : uv * vec2(uAspect, 1.0);
+    uv = vec2(uPillarRotCos * uv.x - uPillarRotSin * uv.y,
+              uPillarRotSin * uv.x + uPillarRotCos * uv.y);
+
+    vec3 ro = vec3(0.0, 0.0, -10.0);
+    vec3 rd = normalize(vec3(uv, 1.0));
+
+    vec3 col = vec3(0.0);
+    float t = 0.1;
+
+    for (int i = 0; i < MAX_ITER; i++) {
+        vec3 p = ro + rd * t;
+        p.xz = vec2(uRotCos * p.x - uRotSin * p.z,
+                    uRotSin * p.x + uRotCos * p.z);
+
+        vec3 q = p;
+        q.y = p.y * uPillarHeight + uTime;
+
+        float freq = 1.0;
+        float amp  = 1.0;
+        for (int j = 0; j < WAVE_ITER; j++) {
+            q.xz = vec2(uWaveCos * q.x - uWaveSin * q.z,
+                        uWaveSin * q.x + uWaveCos * q.z);
+            q += cos(q.zxy * freq - uTime * float(j) * 1.2) * amp;
+            freq *= 2.1;
+            amp  *= 0.5;
+        }
+
+        float d1 = length(cos(q.xz * 1.0)) - 0.18;
+        float d2 = length(cos(q.xz * 0.65 + vec2(0.75, 0.4))) - 0.22;
+        float d  = min(d1, d2);
+
+        float bound = length(p.xz) - uPillarWidth;
+        float k = 4.0;
+        float h = max(k - abs(d - bound), 0.0);
+        d = max(d, bound) + h * h * 0.0625 / k;
+        d = abs(d) * 0.09 + 0.006;
+
+        float grad = clamp((15.0 - p.y) / 30.0, 0.0, 1.0);
+        col += mix(uBottomColor, uTopColor, grad) / d;
+
+        t += d * STEP;
+        if (t > 50.0) break;
+    }
+
+    float widthNorm = uPillarWidth / 3.0;
+    // tanh tonemapping
+    col = col * uGlowAmount / widthNorm;
+    col = col / (1.0 + col);
+
+    gl_FragColor = vec4(col * uIntensity, 1.0);
+}`;
+
+        // Compile shader helper
+        const compileShader = (type: number, src: string): WebGLShader | null => {
+            const shader = gl.createShader(type);
+            if (!shader) return null;
+            gl.shaderSource(shader, src);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        };
+
+        const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+        const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+        if (!vs || !fs) { setWebGLSupported(false); return; }
+
+        const program = gl.createProgram()!;
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error('Program link error:', gl.getProgramInfoLog(program));
+            setWebGLSupported(false);
+            return;
+        }
+        gl.useProgram(program);
+
+        // Fullscreen quad
+        const quadBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1, 1, -1, -1, 1,
+            1, -1, 1, 1, -1, 1,
+        ]), gl.STATIC_DRAW);
+        const aPos = gl.getAttribLocation(program, 'aPosition');
+        gl.enableVertexAttribArray(aPos);
+        gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+        // Uniforms
+        const uTime = gl.getUniformLocation(program, 'uTime');
+        const uResolution = gl.getUniformLocation(program, 'uResolution');
+        const uTopColor = gl.getUniformLocation(program, 'uTopColor');
+        const uBottomColor = gl.getUniformLocation(program, 'uBottomColor');
+        const uIntensity = gl.getUniformLocation(program, 'uIntensity');
+        const uGlowAmount = gl.getUniformLocation(program, 'uGlowAmount');
+        const uPillarWidth = gl.getUniformLocation(program, 'uPillarWidth');
+        const uPillarHeight = gl.getUniformLocation(program, 'uPillarHeight');
+        const uPillarRotCos = gl.getUniformLocation(program, 'uPillarRotCos');
+        const uPillarRotSin = gl.getUniformLocation(program, 'uPillarRotSin');
+        const uWaveSin = gl.getUniformLocation(program, 'uWaveSin');
+        const uWaveCos = gl.getUniformLocation(program, 'uWaveCos');
+        const uRotCos = gl.getUniformLocation(program, 'uRotCos');
+        const uRotSin = gl.getUniformLocation(program, 'uRotSin');
+        const uAspect = gl.getUniformLocation(program, 'uAspect');
+
+        // Parse color hex → [r, g, b] 0..1
+        const hexToRgb = (hex: string): [number, number, number] => {
+            const r = parseInt(hex.slice(1, 3), 16) / 255;
+            const g = parseInt(hex.slice(3, 5), 16) / 255;
+            const b = parseInt(hex.slice(5, 7), 16) / 255;
+            return [r, g, b];
+        };
+
+        const [tr, tg, tb] = hexToRgb(topColor);
+        const [br, bg, bb] = hexToRgb(bottomColor);
+
+        gl.uniform2f(uResolution, width, height);
+        gl.uniform3f(uTopColor, tr, tg, tb);
+        gl.uniform3f(uBottomColor, br, bg, bb);
+        gl.uniform1f(uIntensity, intensity);
+        gl.uniform1f(uGlowAmount, glowAmount);
+        gl.uniform1f(uPillarWidth, pillarWidth);
+        gl.uniform1f(uPillarHeight, pillarHeight);
+        gl.uniform1f(uPillarRotCos, Math.cos(pillarRotRad));
+        gl.uniform1f(uPillarRotSin, Math.sin(pillarRotRad));
+        gl.uniform1f(uWaveSin, waveSin);
+        gl.uniform1f(uWaveCos, waveCos);
+        gl.uniform1f(uAspect, width / height);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        let time = 0;
+        let lastTimestamp = performance.now();
+        const frameTime = 1000 / 30; // 30 FPS on mobile
+
+        // Visibility / tab pause
+        const handleVisibility = () => { isVisibleRef.current = !document.hidden; };
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        const animate = (now: number) => {
+            rafRef.current = requestAnimationFrame(animate);
+            if (!isVisibleRef.current) { lastTimestamp = now; return; }
+
+            const delta = Math.min(now - lastTimestamp, 100);
+            if (delta < frameTime) return;
+            lastTimestamp = now - (delta % frameTime);
+
+            time += 0.016 * rotationSpeed;
+            gl.uniform1f(uTime, time);
+            gl.uniform1f(uRotCos, Math.cos(time * 0.3));
+            gl.uniform1f(uRotSin, Math.sin(time * 0.3));
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        };
+        rafRef.current = requestAnimationFrame(animate);
+
+        // Resize — re-read from visualViewport
+        let resizeTimer: number | null = null;
+        const handleResize = () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = window.setTimeout(() => {
+                const vp2 = window.visualViewport;
+                const cssW = Math.floor(vp2 ? vp2.width : window.innerWidth);
+                const cssH = Math.floor(vp2 ? vp2.height : window.innerHeight);
+                const w = Math.floor(cssW * s.pixelRatio);
+                const h = Math.floor(cssH * s.pixelRatio);
+                canvas.width = w;
+                canvas.height = h;
+                gl.viewport(0, 0, w, h);
+                gl.uniform2f(uResolution, cssW, cssH);
+                gl.uniform1f(uAspect, cssW / cssH);
+            }, 150);
+        };
+        window.addEventListener('resize', handleResize, { passive: true });
+        window.visualViewport?.addEventListener('resize', handleResize, { passive: true });
+
+        // IntersectionObserver — pause when scrolled off screen
         const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    isVisibleRef.current = entry.isIntersecting;
-                });
-            },
+            ([e]) => { isVisibleRef.current = e.isIntersecting && !document.hidden; },
             { threshold: 0 }
         );
         observer.observe(container);
 
-        // Mobile-first quality settings - very conservative
-        const qualitySettings = {
-            low: { iterations: 12, waveIterations: 1, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 2.0 },
-            medium: { iterations: 20, waveIterations: 2, pixelRatio: 0.6, precision: 'mediump', stepMultiplier: 1.5 },
-            high: { iterations: 32, waveIterations: 3, pixelRatio: 0.75, precision: 'mediump', stepMultiplier: 1.2 }
-        };
-
-        const settings = qualitySettings[quality] || qualitySettings.low;
-
-        const scene = new THREE.Scene();
-        sceneRef.current = scene;
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-        cameraRef.current = camera;
-
-        let renderer: THREE.WebGLRenderer;
-        try {
-            renderer = new THREE.WebGLRenderer({
-                antialias: false,
-                alpha: true,
-                powerPreference: 'low-power',
-                precision: settings.precision,
-                stencil: false,
-                depth: false
-            });
-        } catch (error) {
-            console.error('Failed to create WebGL renderer:', error);
-            setWebGLSupported(false);
-            return;
-        }
-
-        renderer.setSize(width, height);
-        renderer.setPixelRatio(settings.pixelRatio);
-        container.appendChild(renderer.domElement);
-        rendererRef.current = renderer;
-
-        const parseColor = (hex: string): THREE.Vector3 => {
-            const color = new THREE.Color(hex);
-            return new THREE.Vector3(color.r, color.g, color.b);
-        };
-
-        const vertexShader = `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = vec4(position, 1.0);
-      }
-    `;
-
-        const fragmentShader = `
-      precision ${settings.precision} float;
-      uniform float uTime;
-      uniform vec2 uResolution;
-      uniform vec2 uMouse;
-      uniform vec3 uTopColor;
-      uniform vec3 uBottomColor;
-      uniform float uIntensity;
-      uniform bool uInteractive;
-      uniform float uGlowAmount;
-      uniform float uPillarWidth;
-      uniform float uPillarHeight;
-      uniform float uNoiseIntensity;
-      uniform float uPillarRotation;
-      uniform float uRotCos;
-      uniform float uRotSin;
-      uniform float uPillarRotCos;
-      uniform float uPillarRotSin;
-      uniform float uWaveSin[4];
-      uniform float uWaveCos[4];
-      varying vec2 vUv;
-
-      const float PI = 3.14159265;
-      const float EPSILON = 0.01;
-
-      float noise(vec2 coord) {
-        return fract(sin(dot(coord, vec2(12.9898, 78.233))) * 43758.5453);
-      }
-
-      void main() {
-        vec2 fragCoord = vUv * uResolution;
-        vec2 uv = (fragCoord * 2.0 - uResolution) / uResolution.y;
-        
-        uv = vec2(
-          uv.x * uPillarRotCos - uv.y * uPillarRotSin,
-          uv.x * uPillarRotSin + uv.y * uPillarRotCos
-        );
-
-        vec3 origin = vec3(0.0, 0.0, -10.0);
-        vec3 direction = normalize(vec3(uv, 1.0));
-
-        float maxDepth = 40.0;
-        float depth = 0.1;
-
-        float rotCos = uRotCos;
-        float rotSin = uRotSin;
-
-        vec3 color = vec3(0.0);
-        
-        const int ITERATIONS = ${settings.iterations};
-        const int WAVE_ITERATIONS = ${settings.waveIterations};
-        const float STEP_MULT = ${settings.stepMultiplier.toFixed(1)};
-        
-        for(int i = 0; i < ITERATIONS; i++) {
-          vec3 pos = origin + direction * depth;
-          
-          float newX = pos.x * rotCos - pos.z * rotSin;
-          float newZ = pos.x * rotSin + pos.z * rotCos;
-          pos.x = newX;
-          pos.z = newZ;
-
-          vec3 deformed = pos;
-          deformed.y *= uPillarHeight;
-          deformed = deformed + vec3(0.0, uTime, 0.0);
-          
-          float frequency = 1.0;
-          float amplitude = 1.0;
-          for(int j = 0; j < WAVE_ITERATIONS; j++) {
-            float wx = deformed.x * uWaveCos[j] - deformed.z * uWaveSin[j];
-            float wz = deformed.x * uWaveSin[j] + deformed.z * uWaveCos[j];
-            deformed.x = wx;
-            deformed.z = wz;
-            
-            float phase = uTime * float(j) * 1.5;
-            vec3 oscillation = cos(deformed.zxy * frequency - phase);
-            deformed += oscillation * amplitude;
-            frequency *= 2.1;
-            amplitude *= 0.45;
-          }
-          
-          vec2 cosinePair = cos(deformed.xz);
-          float fieldDistance = length(cosinePair) - 0.2;
-          
-          float radialBound = length(pos.xz) - uPillarWidth;
-          float k = 4.0;
-          float h = max(k - abs(-radialBound + fieldDistance), 0.0);
-          fieldDistance = (min(radialBound, fieldDistance) + h * h * 0.25 / k);
-          
-          fieldDistance = abs(fieldDistance) * 0.15 + 0.01;
-
-          vec3 gradient = mix(uBottomColor, uTopColor, smoothstep(15.0, -15.0, pos.y));
-          color += gradient / fieldDistance;
-
-          if(depth > maxDepth) break;
-          depth += fieldDistance * STEP_MULT;
-        }
-
-        float widthNormalization = uPillarWidth / 3.0;
-        vec3 finalCol = color * uGlowAmount / widthNormalization;
-        finalCol = finalCol / (1.0 + finalCol); // Fast tone mapping
-        
-        if (uNoiseIntensity > 0.0) {
-          finalCol -= noise(gl_FragCoord.xy) / 15.0 * uNoiseIntensity;
-        }
-        
-        gl_FragColor = vec4(finalCol * uIntensity, 1.0);
-      }
-    `;
-
-        const waveAngle = 0.4;
-        const waveSinValues = new Float32Array(4);
-        const waveCosValues = new Float32Array(4);
-        for (let i = 0; i < 4; i++) {
-            waveSinValues[i] = Math.sin(waveAngle);
-            waveCosValues[i] = Math.cos(waveAngle);
-        }
-
-        const pillarRotRad = (pillarRotation * Math.PI) / 180.0;
-        const pillarRotCos = Math.cos(pillarRotRad);
-        const pillarRotSin = Math.sin(pillarRotRad);
-
-        const material = new THREE.ShaderMaterial({
-            vertexShader,
-            fragmentShader,
-            uniforms: {
-                uTime: { value: 0 },
-                uResolution: { value: new THREE.Vector2(width, height) },
-                uMouse: { value: mouseRef.current },
-                uTopColor: { value: parseColor(topColor) },
-                uBottomColor: { value: parseColor(bottomColor) },
-                uIntensity: { value: intensity },
-                uInteractive: { value: interactive },
-                uGlowAmount: { value: glowAmount },
-                uPillarWidth: { value: pillarWidth },
-                uPillarHeight: { value: pillarHeight },
-                uNoiseIntensity: { value: noiseIntensity },
-                uPillarRotation: { value: pillarRotation },
-                uRotCos: { value: 1.0 },
-                uRotSin: { value: 0.0 },
-                uPillarRotCos: { value: pillarRotCos },
-                uPillarRotSin: { value: pillarRotSin },
-                uWaveSin: { value: waveSinValues },
-                uWaveCos: { value: waveCosValues }
-            },
-            transparent: true,
-            depthWrite: false,
-            depthTest: false,
-            blending: THREE.AdditiveBlending
-        });
-        materialRef.current = material;
-
-        const geometry = new THREE.PlaneGeometry(2, 2);
-        geometryRef.current = geometry;
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-
-        let lastTime = performance.now();
-        const frameTime = 1000 / 30; // Force 30fps for mobile stability
-
-        const animate = (currentTime: number) => {
-            if (!materialRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) return;
-            const deltaTime = currentTime - lastTime;
-
-            if (isVisibleRef.current) {
-                if (deltaTime >= frameTime) {
-                    timeRef.current += (deltaTime / 1000) * rotationSpeed * 10.0; // Adjust for scale
-                    materialRef.current.uniforms.uTime.value = timeRef.current;
-
-                    const rotAngle = timeRef.current * 0.3;
-                    materialRef.current.uniforms.uRotCos.value = Math.cos(rotAngle);
-                    materialRef.current.uniforms.uRotSin.value = Math.sin(rotAngle);
-
-                    rendererRef.current.render(sceneRef.current, cameraRef.current);
-                    lastTime = currentTime - (deltaTime % frameTime);
-                }
-            } else {
-                lastTime = currentTime;
-            }
-            rafRef.current = requestAnimationFrame(animate);
-        };
-        rafRef.current = requestAnimationFrame(animate);
-
-        const handleResize = () => {
-            if (!rendererRef.current || !materialRef.current || !containerRef.current) return;
-            const newWidth = containerRef.current.clientWidth;
-            const newHeight = containerRef.current.clientHeight;
-            rendererRef.current.setSize(newWidth, newHeight);
-            materialRef.current.uniforms.uResolution.value.set(newWidth, newHeight);
-        };
-
-        window.addEventListener('resize', handleResize, { passive: true });
-
-        return () => {
-            observer.disconnect();
+        cleanupRef.current = () => {
+            document.removeEventListener('visibilitychange', handleVisibility);
             window.removeEventListener('resize', handleResize);
+            window.visualViewport?.removeEventListener('resize', handleResize);
+            observer.disconnect();
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
-            if (rendererRef.current) {
-                rendererRef.current.dispose();
-                if (container.contains(rendererRef.current.domElement)) {
-                    container.removeChild(rendererRef.current.domElement);
-                }
-            }
-            if (materialRef.current) materialRef.current.dispose();
-            if (geometryRef.current) geometryRef.current.dispose();
+            gl.deleteProgram(program);
+            gl.deleteShader(vs);
+            gl.deleteShader(fs);
+            gl.deleteBuffer(quadBuffer);
+            if (container.contains(canvas)) container.removeChild(canvas);
         };
-    }, [
-        topColor, bottomColor, intensity, rotationSpeed, interactive,
-        glowAmount, pillarWidth, pillarHeight, noiseIntensity, pillarRotation,
-        webGLSupported, quality
-    ]);
 
-    if (!webGLSupported) return null;
+        return () => { cleanupRef.current?.(); };
+    }, [topColor, bottomColor, intensity, rotationSpeed, glowAmount,
+        pillarWidth, pillarHeight, pillarRotation, quality, webGLSupported]);
+
+    if (!webGLSupported) {
+        return (
+            <div
+                className={className}
+                style={{
+                    mixBlendMode,
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(ellipse 80% 60% at 55% 40%,
+                        rgba(180,0,0,0.6) 0%, rgba(100,0,0,0.35) 40%,
+                        rgba(30,0,0,0.2) 70%, transparent 100%)`,
+                }}
+            />
+        );
+    }
 
     return (
         <div
             ref={containerRef}
-            className={`w-full h-full absolute top-0 left-0 ${className}`}
-            style={{ mixBlendMode }}
+            className={className}
+            style={{
+                mixBlendMode,
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden',
+                pointerEvents: 'none',
+            }}
         />
     );
 };

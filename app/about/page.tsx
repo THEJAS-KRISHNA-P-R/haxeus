@@ -61,12 +61,15 @@ const fadeUp = {
 
 export default function AboutPage() {
   return (
-    <main className="bg-white dark:bg-gray-950 text-gray-900 dark:text-white transition-colors">
+    <main className="bg-theme text-theme transition-colors duration-300">
 
       {/* ───── HERO ───── */}
-      <section className="relative min-h-[80vh] w-full flex flex-col items-center justify-center overflow-hidden">
+      <section
+        className="relative w-full flex flex-col items-center justify-center overflow-hidden"
+        style={{ minHeight: '100dvh', paddingTop: '80px' }}
+      >
         {/* Sparkles background */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-gray-100 to-white dark:from-gray-950 dark:to-black">
+        <div className="absolute inset-0 w-full h-full bg-theme">
           <SparklesCore
             id="haxeus-about-hero"
             background="transparent"
@@ -74,13 +77,13 @@ export default function AboutPage() {
             maxSize={1.2}
             particleDensity={60}
             className="w-full h-full"
-            particleColor="#ef4444"
+            particleColor="#e93a3a"
             speed={1}
           />
         </div>
 
         {/* Radial mask for soft edges */}
-        <div className="absolute inset-0 w-full h-full [mask-image:radial-gradient(700px_500px_at_center,transparent_20%,white)] dark:[mask-image:radial-gradient(700px_500px_at_center,transparent_20%,black)]" />
+        <div className="absolute inset-0 w-full h-full [mask-image:radial-gradient(700px_500px_at_center,transparent_20%,black)]" />
 
         {/* Content */}
         <div className="relative z-10 text-center px-4">
@@ -88,7 +91,7 @@ export default function AboutPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="text-sm uppercase tracking-[0.3em] text-red-500 dark:text-red-400 font-semibold mb-4"
+            className="text-sm uppercase tracking-[0.3em] text-[var(--accent)] font-semibold mb-4"
           >
             Our Story
           </motion.p>
@@ -96,7 +99,7 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: 'easeOut' }}
-            className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter select-none bg-gradient-to-b from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent"
+            className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter select-none bg-gradient-to-b from-theme to-theme-2 bg-clip-text text-transparent"
           >
             HAXEUS
           </motion.h1>
@@ -104,7 +107,7 @@ export default function AboutPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="mt-4 text-lg text-gray-500 dark:text-gray-400 tracking-widest uppercase"
+            className="mt-4 text-lg text-theme-2 tracking-widest uppercase"
           >
             Art · Identity · Culture
           </motion.p>
@@ -114,7 +117,7 @@ export default function AboutPage() {
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-8 z-10 text-gray-400 dark:text-gray-500 flex flex-col items-center gap-2"
+          className="absolute bottom-8 z-10 text-theme-2 flex flex-col items-center gap-2"
         >
           <span className="text-xs tracking-wider uppercase">Scroll</span>
           <ArrowDown className="w-4 h-4" />
@@ -135,18 +138,18 @@ export default function AboutPage() {
               variants={fadeUp}
               className="text-4xl md:text-5xl font-black leading-tight"
             >
-              Born from a <span className="text-red-500">rebellion</span> against boring merch.
+              Born from a <span className="text-[var(--accent)]">rebellion</span> against boring merch.
             </motion.h2>
             <motion.p
               variants={fadeUp}
-              className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"
+              className="text-lg text-theme-2 leading-relaxed"
             >
               HAXEUS started with a simple belief: your clothes should say something about you.
               Not a logo someone else chose. Not a trend everyone follows. Something real.
             </motion.p>
             <motion.p
               variants={fadeUp}
-              className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed"
+              className="text-lg text-theme-2 leading-relaxed"
             >
               We partner with underground artists from across India to create limited-edition drops
               you'll never find in a mall. Every tee is a canvas. Every purchase supports an independent creator.
@@ -156,7 +159,7 @@ export default function AboutPage() {
       </section>
 
       {/* ───── TIMELINE ───── */}
-      <section className="py-20 px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/50">
+      <section className="py-20 px-6 lg:px-8 bg-card transition-colors duration-300">
         <div className="max-w-3xl mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -166,7 +169,7 @@ export default function AboutPage() {
           >
             The Journey
           </motion.h2>
-          <div className="relative border-l-2 border-red-200 dark:border-red-900/50 ml-4 space-y-12">
+          <div className="relative border-l-2 border-[var(--accent)]/20 ml-4 space-y-12">
             {timeline.map((t, i) => (
               <motion.div
                 key={t.year}
@@ -176,9 +179,9 @@ export default function AboutPage() {
                 transition={{ delay: i * 0.15 }}
                 className="relative pl-8"
               >
-                <div className="absolute left-[-9px] top-1 w-4 h-4 rounded-full bg-red-500 border-4 border-white dark:border-gray-950" />
-                <span className="text-sm font-bold text-red-500 uppercase tracking-wider">{t.year}</span>
-                <p className="mt-1 text-lg text-gray-700 dark:text-gray-300">{t.event}</p>
+                <div className="absolute left-[-9px] top-1 w-4 h-4 rounded-full bg-[var(--accent)] border-4 border-theme" />
+                <span className="text-sm font-bold text-[var(--accent)] uppercase tracking-wider">{t.year}</span>
+                <p className="mt-1 text-lg text-theme-2">{t.event}</p>
               </motion.div>
             ))}
           </div>
@@ -200,7 +203,7 @@ export default function AboutPage() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center text-gray-500 dark:text-gray-400 mb-14 max-w-xl mx-auto"
+            className="text-center text-theme-2 mb-14 max-w-xl mx-auto"
           >
             Every decision we make is driven by these principles.
           </motion.p>
@@ -216,13 +219,13 @@ export default function AboutPage() {
               <motion.div
                 key={v.title}
                 variants={fadeUp}
-                className="group rounded-2xl border border-gray-200 dark:border-gray-800 p-8 hover:border-red-300 dark:hover:border-red-800 hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300"
+                className="group rounded-2xl border border-theme p-8 hover:border-[var(--accent)] hover:shadow-lg hover:shadow-[var(--accent)]/5 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-5 group-hover:bg-red-100 dark:group-hover:bg-red-900/40 transition-colors">
-                  <v.icon className="w-6 h-6 text-red-500" />
+                <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center mb-5 group-hover:bg-[var(--accent)]/20 transition-colors">
+                  <v.icon className="w-6 h-6 text-[var(--accent)]" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">{v.title}</h3>
-                <p className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">{v.desc}</p>
+                <p className="text-theme-2 leading-relaxed text-sm">{v.desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -230,7 +233,7 @@ export default function AboutPage() {
       </section>
 
       {/* ───── NUMBERS ───── */}
-      <section className="py-20 px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/50">
+      <section className="py-20 px-6 lg:px-8 bg-card transition-colors duration-300">
         <div className="max-w-4xl mx-auto">
           <motion.div
             variants={stagger}
@@ -250,8 +253,8 @@ export default function AboutPage() {
                 variants={fadeUp}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-black text-red-500">{s.value}</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 uppercase tracking-widest">{s.label}</div>
+                <div className="text-4xl md:text-5xl font-black text-[var(--accent)]">{s.value}</div>
+                <div className="text-sm text-theme-2 mt-2 uppercase tracking-widest">{s.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -267,9 +270,9 @@ export default function AboutPage() {
           className="max-w-2xl mx-auto space-y-8"
         >
           <h2 className="text-4xl md:text-6xl font-black leading-tight">
-            Ready to <span className="text-red-500">wear art</span>?
+            Ready to <span className="text-[var(--accent)]">wear art</span>?
           </h2>
-          <p className="text-lg text-gray-500 dark:text-gray-400">
+          <p className="text-lg text-theme-2">
             Every drop is limited. Once it's gone, it's gone.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -286,7 +289,7 @@ export default function AboutPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
-                className="px-10 py-4 border-2 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-bold text-lg rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="px-10 py-4 border-2 border-theme text-theme font-bold text-lg rounded-full hover:bg-card transition-colors"
               >
                 Get in Touch
               </motion.button>

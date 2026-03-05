@@ -190,10 +190,10 @@ export default function ProductDetailPage() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#080808]">
+      <div className="min-h-screen flex items-center justify-center bg-theme">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-white/40">Loading product...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)] mx-auto mb-4"></div>
+          <p className="text-theme-2">Loading product...</p>
         </div>
       </div>
     )
@@ -203,8 +203,8 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#080808]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Product not found</h1>
-          <Button onClick={() => router.push("/products")} className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white">
+          <h1 className="text-2xl font-bold text-theme mb-4">Product not found</h1>
+          <Button onClick={() => router.push("/products")} className="bg-[var(--accent)] hover:opacity-90 text-white">
             Back to Products
           </Button>
         </div>
@@ -213,7 +213,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] py-8 opacity-0 animate-fadeIn">
+    <div className="min-h-screen bg-theme py-8 opacity-0 animate-fadeIn transition-colors duration-300">
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -232,7 +232,7 @@ export default function ProductDetailPage() {
           {/* Product Images - Scrollable Gallery */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="aspect-square relative bg-gradient-to-br from-[#111] via-[#0a0a0a] to-black rounded-2xl overflow-hidden shadow-2xl">
+            <div className="aspect-square relative bg-card rounded-2xl overflow-hidden shadow-2xl border border-theme">
               {productImages.length > 0 ? (
                 <Image
                   src={productImages[selectedImageIndex]?.image_url || "/placeholder.svg"}
@@ -267,8 +267,8 @@ export default function ProductDetailPage() {
                       key={img.id}
                       onClick={() => setSelectedImageIndex(index)}
                       className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
-                        ? 'border-[#e93a3a] ring-2 ring-[#e93a3a]/30 scale-105'
-                        : 'border-white/[0.06] hover:border-[#e93a3a]/60'
+                        ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-105'
+                        : 'border-theme hover:border-[var(--accent)]/60'
                         }`}
                     >
                       <Image
@@ -291,7 +291,7 @@ export default function ProductDetailPage() {
                 </div>
                 {/* Scroll hint indicator */}
                 {productImages.length > 4 && (
-                  <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#080808] to-transparent pointer-events-none" />
+                  <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-theme to-transparent pointer-events-none" />
                 )}
               </div>
             )}
@@ -307,9 +307,9 @@ export default function ProductDetailPage() {
           {/* Product Details */}
           <div className="space-y-8">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-4">{product.name}</h1>
+              <h1 className="text-4xl font-bold text-theme mb-4">{product.name}</h1>
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-3xl font-bold text-[#e93a3a]">₹{product.price.toLocaleString("en-IN")}</span>
+                <span className="text-3xl font-bold text-[var(--accent)]">₹{product.price.toLocaleString("en-IN")}</span>
                 {ratingSummary && ratingSummary.totalReviews > 0 && (
                   <div className="flex items-center gap-2">
                     <div className="flex">
@@ -318,23 +318,23 @@ export default function ProductDetailPage() {
                           key={i}
                           className={`w-5 h-5 ${i < Math.round(ratingSummary.averageRating)
                             ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-white/20'
+                            : 'text-theme-3'
                             }`}
                         />
                       ))}
                     </div>
-                    <span className="text-white/40">
+                    <span className="text-theme-2">
                       {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.totalReviews} reviews)
                     </span>
                   </div>
                 )}
               </div>
-              <p className="text-white/60 leading-relaxed text-lg">{product.description}</p>
+              <p className="text-theme-2 leading-relaxed text-lg">{product.description}</p>
             </div>
 
             {/* Size Selection */}
             <div>
-              <Label className="text-lg font-semibold mb-4 block text-white">Size</Label>
+              <Label className="text-lg font-semibold mb-4 block text-theme">Size</Label>
               <div className="flex gap-3 flex-wrap">
                 {(product.sizes || product.available_sizes || []).map((size) => {
                   const stock = inventory.find(inv => inv.size === size)
@@ -345,10 +345,10 @@ export default function ProductDetailPage() {
                     <div
                       key={size}
                       className={`relative border-2 rounded-xl p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${!available
-                        ? 'opacity-40 cursor-not-allowed border-white/[0.06] text-white/30'
+                        ? 'opacity-40 cursor-not-allowed border-theme text-theme-3'
                         : selectedSize === size
-                          ? 'bg-[#e93a3a] text-white border-[#e93a3a] cursor-pointer shadow-lg shadow-[#e93a3a]/20'
-                          : 'hover:bg-white/5 border-white/[0.08] text-white/70 cursor-pointer hover:border-white/20'
+                          ? 'bg-[var(--accent)] text-white border-[var(--accent)] cursor-pointer shadow-lg shadow-[var(--accent)]/20'
+                          : 'hover:bg-card border-theme text-theme-2 cursor-pointer hover:border-[var(--accent)]'
                         }`}
                       onClick={() => available && setSelectedSize(size)}
                     >
@@ -374,14 +374,14 @@ export default function ProductDetailPage() {
 
             {/* Quantity */}
             <div>
-              <Label htmlFor="quantity" className="text-lg font-semibold mb-4 block text-white">
+              <Label htmlFor="quantity" className="text-lg font-semibold mb-4 block text-theme">
                 Quantity
               </Label>
               <Select value={quantity.toString()} onValueChange={(value) => setQuantity(Number.parseInt(value))}>
-                <SelectTrigger className="w-32 h-12 bg-[#111] border-white/[0.08] text-white">
+                <SelectTrigger className="w-32 h-12 bg-card border-theme text-theme">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111] border-white/10">
+                <SelectContent className="bg-card border-theme text-theme">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <SelectItem key={num} value={num.toString()} className="text-white/70 hover:bg-white/5">
                       {num}
@@ -397,7 +397,7 @@ export default function ProductDetailPage() {
                 <Button
                   onClick={addToCart}
                   disabled={addingToCart}
-                  className="flex-1 bg-transparent hover:bg-[#e93a3a]/10 text-[#e93a3a] border-2 border-[#e93a3a] h-14 text-lg disabled:opacity-50"
+                  className="flex-1 bg-transparent hover:bg-[var(--accent)]/10 text-[var(--accent)] border-2 border-[var(--accent)] h-14 text-lg disabled:opacity-50 transition-all"
                   size="lg"
                   variant="outline"
                 >
@@ -413,7 +413,7 @@ export default function ProductDetailPage() {
               <Button
                 onClick={buyNow}
                 disabled={addingToCart}
-                className="w-full bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white h-14 text-lg font-bold shadow-lg shadow-[#e93a3a]/20 hover:shadow-xl transition-all disabled:opacity-50"
+                className="w-full bg-[var(--accent)] hover:opacity-90 text-white h-14 text-lg font-bold shadow-lg shadow-[var(--accent)]/20 hover:shadow-xl transition-all disabled:opacity-50"
                 size="lg"
               >
                 <Zap className="w-5 h-5 mr-2" />
@@ -423,27 +423,27 @@ export default function ProductDetailPage() {
 
             {/* Features */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-4 text-center">
-                <Truck className="w-8 h-8 mx-auto mb-2 text-[#07e4e1]" />
-                <div className="font-semibold text-white">Shipping</div>
-                <div className="text-sm text-white/40">1-2 weeks delivery</div>
+              <Card className="p-4 text-center bg-card border-theme">
+                <Truck className="w-8 h-8 mx-auto mb-2 text-[var(--accent-cyan)]" />
+                <div className="font-semibold text-theme">Shipping</div>
+                <div className="text-sm text-theme-3">1-2 weeks delivery</div>
               </Card>
-              <Card className="p-4 text-center">
-                <Shield className="w-8 h-8 mx-auto mb-2 text-[#e7bf04]" />
-                <div className="font-semibold text-white">Premium Quality</div>
-                <div className="text-sm text-white/40">100% Bio-Washed Cotton</div>
+              <Card className="p-4 text-center bg-card border-theme">
+                <Shield className="w-8 h-8 mx-auto mb-2 text-[var(--accent-yellow)]" />
+                <div className="font-semibold text-theme">Premium Quality</div>
+                <div className="text-sm text-theme-3">100% Bio-Washed Cotton</div>
               </Card>
-              <Card className="p-4 text-center">
-                <RotateCcw className="w-8 h-8 mx-auto mb-2 text-[#c03c9d]" />
-                <div className="font-semibold text-white">Easy Returns</div>
-                <div className="text-sm text-white/40">5-day return policy</div>
+              <Card className="p-4 text-center bg-card border-theme">
+                <RotateCcw className="w-8 h-8 mx-auto mb-2 text-[var(--accent-pink)]" />
+                <div className="font-semibold text-theme">Easy Returns</div>
+                <div className="text-sm text-theme-3">5-day return policy</div>
               </Card>
             </div>
 
             {/* Product Features */}
-            <Card className="p-6">
-              <h3 className="font-bold text-lg mb-4 text-white">Product Details</h3>
-              <ul className="space-y-2 text-white/60">
+            <Card className="p-6 bg-card border-theme">
+              <h3 className="font-bold text-lg mb-4 text-theme">Product Details</h3>
+              <ul className="space-y-2 text-theme-2">
                 <li>• <strong>Material:</strong> 100% Bio-Washed Cotton (Raised)</li>
                 <li>• Pre-shrunk for perfect fit</li>
                 <li>• Machine washable (cold water recommended)</li>
@@ -452,9 +452,9 @@ export default function ProductDetailPage() {
                 <li>• Durable construction for long-lasting wear</li>
               </ul>
 
-              <div className="mt-6 pt-4 border-t border-white/[0.06]">
-                <h4 className="font-semibold mb-3 text-white">Shipping &amp; Returns</h4>
-                <ul className="space-y-2 text-white/40 text-sm">
+              <div className="mt-6 pt-4 border-t border-theme">
+                <h4 className="font-semibold mb-3 text-theme">Shipping &amp; Returns</h4>
+                <ul className="space-y-2 text-theme-3 text-sm">
                   <li>• <strong>Domestic Shipping:</strong> 1-2 weeks</li>
                   <li>• <strong>International:</strong> Product price + shipping charges</li>
                   <li>• <strong>Returns:</strong> Easy returns within 5 days of delivery</li>
@@ -463,18 +463,18 @@ export default function ProductDetailPage() {
             </Card>
 
             {/* Size Chart */}
-            <Card className="p-6">
-              <h3 className="font-bold text-lg mb-4 text-white">Men's Relaxed Fit T-Shirt Size Chart</h3>
+            <Card className="p-6 bg-card border-theme">
+              <h3 className="font-bold text-lg mb-4 text-theme">Men's Relaxed Fit T-Shirt Size Chart</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/[0.06]">
-                      <th className="py-3 px-4 text-left font-semibold text-white">Size</th>
-                      <th className="py-3 px-4 text-center font-semibold text-white">Chest (in)</th>
-                      <th className="py-3 px-4 text-center font-semibold text-white">Length (in)</th>
+                    <tr className="border-b border-theme">
+                      <th className="py-3 px-4 text-left font-semibold text-theme">Size</th>
+                      <th className="py-3 px-4 text-center font-semibold text-theme">Chest (in)</th>
+                      <th className="py-3 px-4 text-center font-semibold text-theme">Length (in)</th>
                     </tr>
                   </thead>
-                  <tbody className="text-white/60">
+                  <tbody className="text-theme-2">
                     <tr className="border-b border-white/[0.04]">
                       <td className="py-3 px-4 font-medium">S</td>
                       <td className="py-3 px-4 text-center">40</td>
@@ -485,7 +485,7 @@ export default function ProductDetailPage() {
                       <td className="py-3 px-4 text-center">42</td>
                       <td className="py-3 px-4 text-center">28.5</td>
                     </tr>
-                    <tr className="border-b border-white/[0.04]">
+                    <tr className="border-b border-theme/50">
                       <td className="py-3 px-4 font-medium">L</td>
                       <td className="py-3 px-4 text-center">44</td>
                       <td className="py-3 px-4 text-center">29.5</td>
@@ -498,7 +498,7 @@ export default function ProductDetailPage() {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-4 text-xs text-white/30">
+              <p className="mt-4 text-xs text-theme-3">
                 * Measurements are in inches. For best fit, measure a similar garment you already own.
               </p>
             </Card>
@@ -508,13 +508,13 @@ export default function ProductDetailPage() {
         {/* Reviews Section */}
         {ratingSummary && ratingSummary.totalReviews > 0 && (
           <div className="mt-16">
-            <Card className="p-8">
-              <h2 className="text-3xl font-bold text-white mb-6">Customer Reviews</h2>
+            <Card className="p-8 bg-card border-theme">
+              <h2 className="text-3xl font-bold text-theme mb-6">Customer Reviews</h2>
 
               {/* Rating Summary */}
-              <div className="flex flex-col md:flex-row gap-8 mb-8 pb-8 border-b border-white/[0.06]">
+              <div className="flex flex-col md:flex-row gap-8 mb-8 pb-8 border-b border-theme">
                 <div className="text-center md:text-left">
-                  <div className="text-5xl font-bold text-white mb-2">
+                  <div className="text-5xl font-bold text-theme mb-2">
                     {ratingSummary.averageRating.toFixed(1)}
                   </div>
                   <div className="flex justify-center md:justify-start mb-2">
@@ -523,12 +523,12 @@ export default function ProductDetailPage() {
                         key={i}
                         className={`w-6 h-6 ${i < Math.round(ratingSummary.averageRating)
                           ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-white/20'
+                          : 'text-theme-3'
                           }`}
                       />
                     ))}
                   </div>
-                  <div className="text-white/40">
+                  <div className="text-theme-2">
                     Based on {ratingSummary.totalReviews} reviews
                   </div>
                 </div>
@@ -543,14 +543,14 @@ export default function ProductDetailPage() {
 
                     return (
                       <div key={rating} className="flex items-center gap-3 mb-2">
-                        <span className="text-sm w-8 text-white/40">{rating} ⭐</span>
-                        <div className="flex-1 h-3 bg-[#1a1a1a] rounded-full overflow-hidden">
+                        <span className="text-sm w-8 text-theme-2">{rating} ⭐</span>
+                        <div className="flex-1 h-3 bg-card-2 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-yellow-400"
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
-                        <span className="text-sm w-12 text-right text-white/40">{count}</span>
+                        <span className="text-sm w-12 text-right text-theme-2">{count}</span>
                       </div>
                     )
                   })}
@@ -560,7 +560,7 @@ export default function ProductDetailPage() {
               {/* Individual Reviews */}
               <div className="space-y-6">
                 {reviews.map((review) => (
-                  <div key={review.id} className="border-b border-white/[0.06] pb-6 last:border-0">
+                  <div key={review.id} className="border-b border-theme pb-6 last:border-0">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -570,7 +570,7 @@ export default function ProductDetailPage() {
                                 key={i}
                                 className={`w-4 h-4 ${i < review.rating
                                   ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-white/20'
+                                  : 'text-theme-3'
                                   }`}
                               />
                             ))}
@@ -580,15 +580,15 @@ export default function ProductDetailPage() {
                           )}
                         </div>
                         {review.title && (
-                          <h4 className="font-semibold text-white mb-1">{review.title}</h4>
+                          <h4 className="font-semibold text-theme mb-1">{review.title}</h4>
                         )}
                       </div>
-                      <span className="text-sm text-white/30">
+                      <span className="text-sm text-theme-3">
                         {new Date(review.created_at).toLocaleDateString()}
                       </span>
                     </div>
                     {review.comment && (
-                      <p className="text-white/60 mb-3">{review.comment}</p>
+                      <p className="text-theme-2 mb-3">{review.comment}</p>
                     )}
                     {review.images && review.images.length > 0 && (
                       <div className="flex gap-2 mb-3">
@@ -600,7 +600,7 @@ export default function ProductDetailPage() {
                       </div>
                     )}
                     <div className="flex items-center gap-4 text-sm">
-                      <button className="text-white/30 hover:text-white transition-colors">
+                      <button className="text-theme-2 hover:text-theme transition-colors">
                         Helpful ({review.helpful_count})
                       </button>
                     </div>

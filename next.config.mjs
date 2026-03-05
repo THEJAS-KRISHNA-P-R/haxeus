@@ -54,6 +54,9 @@ const nextConfig = {
       '@supabase/supabase-js',
     ],
   },
+  outputFileTracingIncludes: {
+    '/**': ['./node_modules/@img/**/*', './node_modules/sharp/**/*'],
+  },
   // Empty turbopack config — signals intentional use of Turbopack (Next.js 16 default)
   turbopack: {},
 }

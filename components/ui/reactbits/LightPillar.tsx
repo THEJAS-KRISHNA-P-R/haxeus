@@ -75,6 +75,16 @@ const LightPillar: React.FC<LightPillarProps> = ({
         );
         observer.observe(container);
 
+        // Pause when browser tab is hidden
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                isVisibleRef.current = false;
+            } else {
+                isVisibleRef.current = true;
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         // PERFORMANCE OPTIMIZED FOR MOBILE — Force container to fill viewport if height is 0
         if (container.clientHeight === 0) {
             container.style.height = '100dvh';
@@ -98,7 +108,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
         const qualitySettings = {
             low: { iterations: 38, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.3 },
             medium: { iterations: 50, waveIterations: 3, pixelRatio: 0.65, precision: 'mediump', stepMultiplier: 1.1 },
-            high: { iterations: 90, waveIterations: 4, pixelRatio: Math.min(1.5, window.devicePixelRatio), precision: 'highp', stepMultiplier: 1.0 }
+            high: { iterations: 65, waveIterations: 5, pixelRatio: Math.min(1.2, window.devicePixelRatio), precision: 'highp', stepMultiplier: 1.0 }
         };
 
         const settings = qualitySettings[effectiveQuality] || qualitySettings.medium;
@@ -198,20 +208,19 @@ const LightPillar: React.FC<LightPillarProps> = ({
           for(int j = 0; j < WAVE_ITER; j++) {
             q.xz = vec2(uWaveCos * q.x - uWaveSin * q.z,
                         uWaveSin * q.x + uWaveCos * q.z);
-            q += cos(q.zxy * freq - uTime * float(j) * 2.0) * amp;
+            q += cos(q.zxy * freq - uTime * float(j) * 1.2) * amp;
             // Per-octave swirl keyed to time for extra turbulence
             float sw = uTime * 0.06 * float(j + 1);
             float sc = cos(sw); float ss = sin(sw);
             q.xz = vec2(sc * q.x - ss * q.z, ss * q.x + sc * q.z);
-            freq *= 1.9;
-            amp  *= 0.55;
+            freq *= 2.1;
+            amp  *= 0.5;
           }
 
           // DENSER — triple overlapping SDF flows (union fills screen with complex shape)
-          float d1 = length(cos(q.xz * 1.1)) - 0.16;
-          float d2 = length(cos(q.xz * 0.7 + vec2(0.8,  0.3))) - 0.20;
-          float d3 = length(cos(q.xz * 0.5 + vec2(-0.6, 0.9))) - 0.24;
-          float d  = min(min(d1, d2), d3);
+          float d1 = length(cos(q.xz * 1.0)) - 0.18;
+          float d2 = length(cos(q.xz * 0.65 + vec2(0.75, 0.4))) - 0.22;
+          float d  = min(d1, d2);
 
           float bound = length(p.xz) - uPillarWidth;
           float k = 4.0;
@@ -342,6 +351,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
 
         return () => {
             observer.disconnect();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('resize', handleResize);
             window.visualViewport?.removeEventListener('resize', handleResize);
             if (interactive) {

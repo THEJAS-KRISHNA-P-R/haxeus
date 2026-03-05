@@ -22,10 +22,7 @@ import {
 import Shuffle from "@/components/Shuffle"
 import { supabase } from "@/lib/supabase"
 
-// Lazy load heavy components
-const LightPillar = dynamic(() => import("@/components/ui/reactbits/LightPillar"), {
-  ssr: false,
-})
+
 const DynamicTestimonials = dynamic(() => import("../components/Testimonials"), {
   loading: () => <div className="h-96 animate-pulse bg-[#111] rounded-2xl" />,
 })
@@ -105,40 +102,11 @@ export default function HomePage() {
     <>
 
       {/* ═══ PAGE CONTENT — window scrolls; fixed bg stays in place ═══ */}
-      <div ref={containerRef} style={{ position: 'relative', zIndex: 1 }}>
+      <div ref={containerRef} className="bg-theme" style={{ position: 'relative', zIndex: 1 }}>
 
         {/* ═══════════════════ SECTION 1: HERO ═══════════════════ */}
         <section className="relative min-h-screen flex items-center z-10">
-          {/* LightPillar — extends up to cover the main pt-16/pt-20 gap */}
-          <div className="absolute inset-0 -top-16 md:-top-20" style={{ zIndex: 0 }}>
-          {isMobile ? (
-            <LightPillar
-              topColor="#ff0000"
-              bottomColor="#000000"
-              intensity={1}
-              rotationSpeed={0.1}
-              interactive={false}
-              glowAmount={0.002}
-              pillarWidth={7.5}
-              pillarHeight={0.9}
-              noiseIntensity={0.0}
-              pillarRotation={260}
-            />
-          ) : (
-            <LightPillar
-              topColor="#b81b1b"
-              bottomColor="#000000"
-              intensity={1.3}
-              rotationSpeed={0.1}
-              interactive={false}
-              glowAmount={0.002}
-              pillarWidth={5.5}
-              pillarHeight={0.90}
-              noiseIntensity={0}
-              pillarRotation={235}
-            />
-          )}
-          </div>
+          {/* No LightPillar here — it's in layout.tsx now, fixed behind everything */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Hero Text */}
@@ -151,13 +119,13 @@ export default function HomePage() {
                 <motion.div variants={fadeInUp}>
                   <div className="relative py-10 overflow-visible">
                     <motion.h1
-                      className="text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-white"
+                      className="text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-theme"
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <motion.span
-                        className="block text-white drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]"
+                        className="block text-theme drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15, duration: 0.4 }}
@@ -166,7 +134,8 @@ export default function HomePage() {
                       </motion.span>
 
                       <motion.span
-                        className="block text-[#e93a3a] drop-shadow-[0_4px_18px_rgba(233,58,58,0.4)]"
+                        className="block drop-shadow-[0_4px_18px_rgba(233,58,58,0.4)]"
+                        style={{ color: "var(--accent)" }}
                         initial={{ opacity: 0, scale: 0.99 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.3, duration: 0.4 }}
@@ -175,7 +144,7 @@ export default function HomePage() {
                       </motion.span>
 
                       <motion.span
-                        className="block text-white/80 drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]"
+                        className="block text-theme-2 drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.45, duration: 0.4 }}
@@ -186,7 +155,7 @@ export default function HomePage() {
                   </div>
 
                   <motion.p
-                    className="text-lg text-white/50 mt-4 leading-relaxed max-w-lg"
+                    className="text-lg text-theme-2 mt-4 leading-relaxed max-w-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
@@ -206,7 +175,7 @@ export default function HomePage() {
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
                     >
-                      <Button size="lg" className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white px-10 py-6 rounded-full text-lg shadow-lg shadow-[#e93a3a]/20 hover:shadow-[#e93a3a]/40 transition-all duration-300">
+                      <Button size="lg" className="bg-[var(--accent)] hover:opacity-90 text-white px-10 py-6 rounded-full text-lg shadow-lg shadow-[var(--accent)]/20 transition-all duration-300">
                         Shop Collection
                       </Button>
                     </motion.div>
@@ -217,7 +186,7 @@ export default function HomePage() {
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
                     >
-                      <Button variant="outline" size="lg" className="px-10 py-6 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 text-white text-lg transition-all duration-300">
+                      <Button variant="outline" size="lg" className="px-10 py-6 rounded-full border border-theme bg-white/5 backdrop-blur-sm hover:bg-white/10 text-theme text-lg transition-all duration-300">
                         Our Story
                       </Button>
                     </motion.div>
@@ -243,7 +212,7 @@ export default function HomePage() {
                       className="cursor-default"
                     >
                       <div className="text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                      <div className="text-sm text-white/40 mt-1">{stat.label}</div>
+                      <div className="text-sm text-theme-3 mt-1">{stat.label}</div>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -257,7 +226,7 @@ export default function HomePage() {
                 className="relative"
               >
                 <motion.div
-                  className="bg-black/60 backdrop-blur-sm rounded-3xl p-8 relative overflow-hidden"
+                  className="bg-card/60 backdrop-blur-sm rounded-3xl p-8 relative overflow-hidden border border-theme"
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.4 }}
                 >
@@ -303,7 +272,7 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 2: NEWSLETTER ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 bg-[#e93a3a]/20 backdrop-blur-2xl border-t border-[#e93a3a]/15">
+        <section className="relative min-h-screen flex items-center z-10 bg-[var(--accent)]/10 backdrop-blur-2xl border-t border-theme">
           {/* Animated background shapes */}
           <motion.div
             className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full"
@@ -337,7 +306,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl lg:text-5xl font-bold mb-6 leading-relaxed text-white"
+              className="text-3xl lg:text-5xl font-bold mb-6 leading-relaxed text-theme"
             >
               Join the movement. Your perfect T-shirt is just a click away.
             </motion.h2>
@@ -351,7 +320,7 @@ export default function HomePage() {
             >
               <Link href="/products">
                 <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                  <Button size="lg" className="bg-black text-white hover:bg-black/80 px-10 py-6 rounded-full text-lg font-semibold shadow-lg">
+                  <Button size="lg" className="bg-theme text-theme border border-theme hover:bg-card-2 px-10 py-6 rounded-full text-lg font-semibold shadow-lg">
                     Shop Now
                   </Button>
                 </motion.div>
@@ -368,10 +337,10 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-6 py-4 bg-transparent text-white placeholder:text-white/50 focus:outline-none text-lg min-w-0"
+                className="flex-1 px-6 py-4 bg-transparent text-theme placeholder:text-theme-3 focus:outline-none text-lg min-w-0"
               />
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-black hover:bg-black/80 text-white px-8 h-full rounded-full font-semibold whitespace-nowrap">
+                <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-8 h-full rounded-full font-semibold whitespace-nowrap">
                   Subscribe
                 </Button>
               </motion.div>
@@ -381,7 +350,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="text-sm mt-4 text-white/70"
+              className="text-sm mt-4 text-theme-2"
             >
               Get exclusive offers and updates. Unsubscribe anytime.
             </motion.p>
@@ -389,7 +358,7 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 3: FEATURED PRODUCTS ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 bg-black/55 backdrop-blur-2xl border-t border-white/[0.04]">
+        <section className="relative min-h-screen flex items-center z-10 bg-theme backdrop-blur-2xl border-t border-theme">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <motion.div
               initial="hidden"
@@ -398,10 +367,10 @@ export default function HomePage() {
               variants={scrollReveal}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-                Featured <span className="text-[#e93a3a]">Collection</span>
+              <h2 className="text-4xl lg:text-5xl font-bold text-theme mb-4">
+                Featured <span style={{ color: "var(--accent)" }}>Collection</span>
               </h2>
-              <p className="text-xl text-white/40 max-w-2xl mx-auto">
+              <p className="text-xl text-theme-2 max-w-2xl mx-auto">
                 Discover our most popular premium T-shirts, carefully crafted for ultimate comfort and style.
               </p>
             </motion.div>
@@ -432,13 +401,13 @@ export default function HomePage() {
                 >
                   🚀
                 </motion.div>
-                <h3 className="text-3xl font-bold text-white mb-4">Coming Soon!</h3>
-                <p className="text-lg text-white/40 max-w-md mx-auto mb-8">
+                <h3 className="text-3xl font-bold text-theme mb-4">Coming Soon!</h3>
+                <p className="text-lg text-theme-2 max-w-md mx-auto mb-8">
                   We&apos;re working on bringing you amazing products. Stay tuned!
                 </p>
                 <Link href="/contact">
                   <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                    <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white px-8 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[#e93a3a]/20">
+                    <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-8 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[var(--accent)]/20">
                       Get Notified
                     </Button>
                   </motion.div>
@@ -455,7 +424,7 @@ export default function HomePage() {
                     transition={{ duration: 0.6, delay: index * 0.15 }}
                   >
                     <motion.div whileHover={cardHover} whileTap={{ scale: 0.98 }}>
-                      <Card className="overflow-hidden bg-[#111] border-0 rounded-2xl group">
+                      <Card className="overflow-hidden bg-card border border-theme rounded-2xl group hover:border-theme-hover transition-all">
                         <Link href={`/products/${product.id}`}>
                           <div className="aspect-square relative bg-black overflow-hidden">
                             <motion.div
@@ -487,7 +456,7 @@ export default function HomePage() {
                           <Shuffle
                             text={product.name}
                             tag="h3"
-                            className="text-xl font-semibold mb-2 text-white"
+                            className="text-xl font-semibold mb-2 text-theme"
                             shuffleDirection="right"
                             duration={0.3}
                             animationMode="evenodd"
@@ -500,10 +469,10 @@ export default function HomePage() {
                             respectReducedMotion={true}
                             textAlign="left"
                           />
-                          <p className="text-2xl font-bold text-white mb-4">₹{product.price.toLocaleString("en-IN")}</p>
+                          <p className="text-2xl font-bold text-theme mb-4">₹{product.price.toLocaleString("en-IN")}</p>
                           <Link href={`/products/${product.id}`}>
                             <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                              <Button className="w-full bg-[#e93a3a] text-white hover:bg-[#e93a3a]/80 py-6 text-lg font-semibold rounded-full shadow-md shadow-[#e93a3a]/10 hover:shadow-[#e93a3a]/30 transition-all duration-300">
+                              <Button className="w-full bg-[var(--accent)] text-white hover:opacity-90 py-6 text-lg font-semibold rounded-full shadow-md shadow-[var(--accent)]/10 transition-all duration-300">
                                 View Details
                               </Button>
                             </motion.div>
@@ -519,12 +488,12 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 4: TESTIMONIALS ═══════════════════ */}
-        <section className="relative z-10 bg-black/55 backdrop-blur-2xl border-t border-white/[0.04]">
+        <section className="relative z-10 bg-theme backdrop-blur-2xl border-t border-theme">
           <DynamicTestimonials />
         </section>
 
         {/* ═══════════════════ SECTION 5: ABOUT ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 bg-black/60 backdrop-blur-2xl border-t border-white/[0.04]">
+        <section className="relative min-h-screen flex items-center z-10 bg-theme backdrop-blur-2xl border-t border-theme">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <motion.div
@@ -561,15 +530,15 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 variants={staggerContainer}
               >
-                <motion.h2 variants={fadeInRight} className="text-4xl lg:text-5xl font-bold text-white mb-6">
-                  Crafting <span className="text-[#e93a3a]">Premium</span> Since 2019
+                <motion.h2 variants={fadeInRight} className="text-4xl lg:text-5xl font-bold text-theme mb-6">
+                  Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2019
                 </motion.h2>
-                <motion.p variants={fadeInRight} className="text-white/40 mb-6 leading-relaxed text-lg">
+                <motion.p variants={fadeInRight} className="text-theme-2 mb-6 leading-relaxed text-lg">
                   At HAXEUS, we believe that comfort shouldn&apos;t compromise style. Our journey began with a simple mission:
                   to create the perfect T-shirt that combines premium materials, exceptional craftsmanship, and timeless
                   design.
                 </motion.p>
-                <motion.p variants={fadeInRight} className="text-white/40 mb-8 leading-relaxed text-lg">
+                <motion.p variants={fadeInRight} className="text-theme-2 mb-8 leading-relaxed text-lg">
                   Every piece in our collection is meticulously crafted using the finest cotton blends, ensuring
                   durability, breathability, and that luxurious feel against your skin.
                 </motion.p>
@@ -593,7 +562,7 @@ export default function HomePage() {
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
                       />
-                      <span className="font-semibold text-white/70">{feature.label}</span>
+                      <span className="font-semibold text-theme-2">{feature.label}</span>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -601,7 +570,7 @@ export default function HomePage() {
                 <motion.div variants={fadeInRight}>
                   <Link href="/about">
                     <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                      <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[#e93a3a]/20 hover:shadow-[#e93a3a]/40 transition-all duration-300">
+                      <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[var(--accent)]/20 transition-all duration-300">
                         Learn More About Us
                       </Button>
                     </motion.div>

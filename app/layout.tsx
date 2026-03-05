@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { CartProvider } from "@/contexts/CartContext"
 import { ThemeProvider } from "@/contexts/ThemeContext"
 import { PWAProvider } from "@/components/PWAProvider"
+import { LightPillarBackground } from "@/components/LightPillarBackground"
 import type { Metadata, Viewport } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -50,25 +51,23 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
-      <head>
-
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                document.documentElement.classList.add('dark');
-              } catch (e) {}
-            `,
-          }}
-        />
-      </head>
-      <body className={`${inter.className} bg-[#080808] text-[#e8e8e8]`}>
-        <ThemeProvider defaultTheme="dark" storageKey="haxeus-theme">
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider>
           <CartProvider>
             <PWAProvider />
+
+            {/* Fixed viewport background — behind everything */}
+            <LightPillarBackground />
+
+            {/* Fixed navbar — above everything */}
             <Navbar />
-            <main className="min-h-screen">{children}</main>
+
+            {/* Scrollable content — sits above the fixed background */}
+            <main className="relative min-h-screen" style={{ zIndex: 1 }}>
+              {children}
+            </main>
+
             <Footer />
             <Toaster />
           </CartProvider>

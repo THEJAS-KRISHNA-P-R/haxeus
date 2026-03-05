@@ -16,152 +16,119 @@
   --font-clash: 'Clash Display';
   --font-dm-sans: 'DM Sans';
   scroll-behavior: smooth;
-  --hx-red: #e93a3a;
-  --hx-yellow: #e7bf04;
-  --hx-magenta: #c03c9d;
-  --hx-cyan: #07e4e1;
+
+  /* Default = dark theme */
+  --bg: #060606;
+  --bg-card: #0f0f0f;
+  --bg-card-2: #111111;
+  --bg-elevated: #161616;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
+  --text: #f5f5f5;
+  --text-2: #a1a1aa;
+  --text-3: rgba(255, 255, 255, 0.3);
+  --accent: #e93a3a;
+  --accent-hover: #ff4a4a;
+  --accent-yellow: #e7bf04;
+  --accent-pink: #c03c9d;
+  --accent-cyan: #07e4e1;
+  --glass-bg: rgba(10, 10, 10, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  --invert-icon: 0;
+
+  /* Shadcn variables - map to theme vars */
+  --background: 0 0% 3.1%;
+  --foreground: 0 0% 96%;
+  --primary: 0 72% 57%;
+}
+
+[data-theme="light"] {
+  --bg: #f5f4f0;
+  --bg-card: #ffffff;
+  --bg-card-2: #fafaf9;
+  --bg-elevated: #efefec;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.16);
+  --text: #0a0a0a;
+  --text-2: #52525b;
+  --text-3: rgba(0, 0, 0, 0.35);
+  --accent: #d42b2b;
+  --accent-hover: #b82020;
+  --accent-yellow: #c49b00;
+  --accent-pink: #a0308a;
+  --accent-cyan: #059e9b;
+  --glass-bg: rgba(245, 244, 240, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  --invert-icon: 1;
+
+  /* Shadcn light overrides */
+  --background: 48 20% 95.3%;
+  --foreground: 0 0% 3.9%;
+}
+
+/* Transition ALL color changes smoothly */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.2s ease,
+    box-shadow 0.3s ease;
 }
 
 body {
   font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
-  background: #080808;
-  color: #e8e8e8;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
-/* ── Design System Utilities ── */
-.gradient-border {
-  position: relative;
-  background: #111;
-  border-radius: 16px;
+/* ── Theme-aware utilities ── */
+.bg-theme {
+  background-color: var(--bg);
 }
 
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(233, 58, 58, 0.2) 0%, transparent 50%, rgba(7, 228, 225, 0.1) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+.bg-card {
+  background-color: var(--bg-card);
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: none;
+.bg-card-2 {
+  background-color: var(--bg-card-2);
 }
 
-/* Kill all white 1px borders site-wide (consumer) */
-* {
-  border-color: transparent;
+.bg-elevated {
+  background-color: var(--bg-elevated);
 }
 
-/* Selection uses accent magenta */
-::selection {
-  background: rgba(192, 60, 157, 0.4);
-  color: white;
+.text-theme {
+  color: var(--text);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  /* Performance optimizations */
-  .gpu-accelerated {
-    transform: translateZ(0);
-    will-change: transform;
-  }
-
-  /* Smooth animations */
-  .smooth-transition {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Accent highlight utilities */
-  .accent-yellow {
-    color: #e7bf04;
-  }
-
-  .accent-magenta {
-    color: #c03c9d;
-  }
-
-  .accent-cyan {
-    color: #07e4e1;
-  }
-
-  .accent-red {
-    color: #e93a3a;
-  }
-
-  .bg-accent-yellow {
-    background-color: #e7bf04;
-  }
-
-  .bg-accent-magenta {
-    background-color: #c03c9d;
-  }
-
-  .bg-accent-cyan {
-    background-color: #07e4e1;
-  }
-
-  .bg-accent-red {
-    background-color: #e93a3a;
-  }
+.text-theme-2 {
+  color: var(--text-2);
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 3.1%;
-    --foreground: 0 0% 91%;
-    --card: 0 0% 6.7%;
-    --card-foreground: 0 0% 91%;
-    --popover: 0 0% 6.7%;
-    --popover-foreground: 0 0% 91%;
-    --primary: 0 72% 57%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 91%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 50%;
-    --accent: 0 0% 10%;
-    --accent-foreground: 0 0% 91%;
-    --destructive: 0 72% 57%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 10%;
-    --input: 0 0% 8%;
-    --ring: 0 72% 57%;
-    --chart-1: 43 97% 46%;
-    --chart-2: 183 95% 46%;
-    --chart-3: 316 52% 48%;
-    --chart-4: 0 72% 57%;
-    --chart-5: 0 0% 91%;
-    --radius: 0.75rem;
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 91%;
-    --sidebar-primary: 0 72% 57%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 9%;
-    --sidebar-accent-foreground: 0 0% 91%;
-    --sidebar-border: 0 0% 12%;
-    --sidebar-ring: 0 72% 57%;
-  }
+.text-theme-3 {
+  color: var(--text-3);
 }
 
-@layer base {
-  * {
-    @apply border-transparent;
-  }
+.border-theme {
+  border-color: var(--border);
+}
 
-  body {
-    @apply bg-background text-foreground;
-  }
+.accent {
+  color: var(--accent);
+}
+
+.bg-accent {
+  background-color: var(--accent);
+}
+
+/* interactive elements */
+.border-theme-hover:hover {
+  border-color: var(--border-hover);
 }
 
 /* Interactive glow on focus */
@@ -266,22 +233,46 @@ button,
     box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Accent-colored scrollbar */
+/* Shadcn dialog, sheet, dropdown — use theme vars */
+[data-radix-popper-content-wrapper]>div,
+[role="dialog"],
+[data-state="open"] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+/* Select dropdowns */
+[data-radix-select-viewport] {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background-color: var(--bg-elevated);
+  color: var(--text);
+}
+
+/* Toaster */
+[data-sonner-toast] {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+/* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #080808;
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #232323;
+  background: var(--border-hover);
   border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #e93a3a;
 }
 
 /* ═══ Z-INDEX STACKING ═══
@@ -292,4 +283,11 @@ main,
 footer {
   position: relative;
   z-index: 1;
+}
+
+/* LightPillar is position:fixed at z-index:0 — all content scrolls above it */
+/* main already has z-index:1 from layout.tsx inline style */
+/* Ensure hero sections are transparent so the fixed bg shows through */
+section {
+  background: transparent;
 }

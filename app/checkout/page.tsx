@@ -217,11 +217,11 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
+      <div className="min-h-screen bg-theme pt-20 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4 text-white">Your cart is empty</h1>
+          <h1 className="text-2xl font-bold mb-4 text-theme">Your cart is empty</h1>
           <Link href="/products">
-            <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80">Shop Now</Button>
+            <Button className="bg-[var(--accent)] hover:opacity-90">Shop Now</Button>
           </Link>
         </div>
       </div>
@@ -229,32 +229,32 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] py-8">
+    <div className="min-h-screen bg-theme pt-20 pb-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="hover:bg-[#111]/5">
+            <Button variant="ghost" size="icon" className="hover:bg-card">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-white">Checkout</h1>
+          <h1 className="text-3xl font-bold text-theme">Checkout</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Address & Payment */}
           <div className="lg:col-span-2 space-y-6">
             {/* Delivery Address */}
-            <Card className="bg-[#111] border-white/[0.06]">
+            <Card className="bg-card border-theme text-theme">
               <CardHeader>
-                <CardTitle className="text-white">Delivery Address</CardTitle>
+                <CardTitle className="text-theme">Delivery Address</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {addresses.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-white/40 mb-4">No saved addresses</p>
+                    <p className="text-theme-2 mb-4">No saved addresses</p>
                     <Link href="/profile/addresses/new">
-                      <Button>Add Address</Button>
+                      <Button className="bg-[var(--accent)] text-white hover:opacity-90">Add Address</Button>
                     </Link>
                   </div>
                 ) : (
@@ -262,24 +262,24 @@ export default function CheckoutPage() {
                     {addresses.map((address) => (
                       <div
                         key={address.id}
-                        className={`border rounded-lg p-4 cursor-pointer transition ${selectedAddress === address.id ? "border-[#e93a3a] bg-[#e93a3a]/10" : "border-white/[0.06]"
+                        className={`border rounded-lg p-4 cursor-pointer transition ${selectedAddress === address.id ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-theme"
                           }`}
                         onClick={() => setSelectedAddress(address.id)}
                       >
                         <div className="flex items-start gap-3">
                           <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
                           <label htmlFor={address.id} className="flex-1 cursor-pointer">
-                            <div className="font-semibold text-white">{address.full_name}</div>
-                            <div className="text-sm text-white/40 mt-1">
+                            <div className="font-semibold text-theme">{address.full_name}</div>
+                            <div className="text-sm text-theme-2 mt-1">
                               {address.address_line1}
                               {address.address_line2 && `, ${address.address_line2}`}
                             </div>
-                            <div className="text-sm text-white/40">
+                            <div className="text-sm text-theme-2">
                               {address.city}, {address.state} {address.pincode}
                             </div>
-                            <div className="text-sm text-white/40 mt-1">Phone: {address.phone}</div>
+                            <div className="text-sm text-theme-2 mt-1">Phone: {address.phone}</div>
                             {address.is_default && (
-                              <div className="text-xs text-[#e93a3a] font-semibold mt-2">DEFAULT</div>
+                              <div className="text-xs text-[var(--accent)] font-semibold mt-2">DEFAULT</div>
                             )}
                           </label>
                         </div>
@@ -290,7 +290,7 @@ export default function CheckoutPage() {
 
                 {addresses.length > 0 && (
                   <Link href="/profile/addresses/new">
-                    <Button variant="outline" className="w-full border-white/[0.06] hover:bg-[#111]/5">
+                    <Button variant="outline" className="w-full border-theme hover:bg-card">
                       Add New Address
                     </Button>
                   </Link>
@@ -299,41 +299,41 @@ export default function CheckoutPage() {
             </Card>
 
             {/* Payment Method */}
-            <Card className="bg-[#111] border-white/[0.06]">
+            <Card className="bg-card border-theme text-theme">
               <CardHeader>
-                <CardTitle className="text-white">Payment Method</CardTitle>
+                <CardTitle className="text-theme">Payment Method</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <RadioGroup value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
                   <div
-                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "cod" ? "border-[#e93a3a] bg-[#e93a3a]/10" : "border-white/[0.06]"
+                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "cod" ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-theme"
                       }`}
                     onClick={() => setPaymentMethod("cod")}
                   >
                     <div className="flex items-center gap-3">
                       <RadioGroupItem value="cod" id="cod" />
                       <label htmlFor="cod" className="flex-1 cursor-pointer flex items-center gap-3">
-                        <Wallet className="w-5 h-5 text-white/60" />
+                        <Wallet className="w-5 h-5 text-theme-2" />
                         <div>
-                          <div className="font-semibold text-white">Cash on Delivery</div>
-                          <div className="text-sm text-white/40">Pay when you receive</div>
+                          <div className="font-semibold text-theme">Cash on Delivery</div>
+                          <div className="text-sm text-theme-2">Pay when you receive</div>
                         </div>
                       </label>
                     </div>
                   </div>
 
                   <div
-                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "online" ? "border-[#e93a3a] bg-[#e93a3a]/10" : "border-white/[0.06]"
+                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "online" ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-theme"
                       }`}
                     onClick={() => setPaymentMethod("online")}
                   >
                     <div className="flex items-center gap-3">
                       <RadioGroupItem value="online" id="online" />
                       <label htmlFor="online" className="flex-1 cursor-pointer flex items-center gap-3">
-                        <Smartphone className="w-5 h-5 text-white/60" />
+                        <Smartphone className="w-5 h-5 text-theme-2" />
                         <div>
-                          <div className="font-semibold text-white">UPI Payment</div>
-                          <div className="text-sm text-white/40">
+                          <div className="font-semibold text-theme">UPI Payment</div>
+                          <div className="text-sm text-theme-2">
                             {isMobile ? "Pay via UPI app" : "Scan QR code to pay"}
                           </div>
                         </div>
@@ -344,57 +344,57 @@ export default function CheckoutPage() {
 
                 {/* UPI Payment Details */}
                 {paymentMethod === "online" && (
-                  <div className="mt-4 p-4 border border-white/[0.06] rounded-lg bg-[#080808]/50">
+                  <div className="mt-4 p-4 border border-theme rounded-lg bg-background/50">
                     {isMobile ? (
                       // Mobile: Show payment app selection
                       <div className="space-y-4">
-                        <Label className="text-sm font-semibold text-white">Select Payment App</Label>
+                        <Label className="text-sm font-semibold text-theme">Select Payment App</Label>
                         <RadioGroup value={selectedPaymentApp} onValueChange={setSelectedPaymentApp}>
                           <div className="grid grid-cols-2 gap-3">
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "gpay" ? "border-blue-600 bg-blue-900/20" : "border-white/[0.06]"
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "gpay" ? "border-blue-600 bg-blue-900/20" : "border-theme"
                                 }`}
                               onClick={() => setSelectedPaymentApp("gpay")}
                             >
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value="gpay" id="gpay" />
-                                <label htmlFor="gpay" className="cursor-pointer text-sm font-medium text-white">
+                                <label htmlFor="gpay" className="cursor-pointer text-sm font-medium text-theme">
                                   Google Pay
                                 </label>
                               </div>
                             </div>
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "phonepe" ? "border-purple-600 bg-purple-50 bg-purple-900/20" : "border-white/[0.06]"
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "phonepe" ? "border-purple-600 bg-purple-900/20" : "border-theme"
                                 }`}
                               onClick={() => setSelectedPaymentApp("phonepe")}
                             >
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value="phonepe" id="phonepe" />
-                                <label htmlFor="phonepe" className="cursor-pointer text-sm font-medium text-white">
+                                <label htmlFor="phonepe" className="cursor-pointer text-sm font-medium text-theme">
                                   PhonePe
                                 </label>
                               </div>
                             </div>
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "paytm" ? "border-blue-600 bg-blue-900/20" : "border-white/[0.06]"
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "paytm" ? "border-blue-600 bg-blue-900/20" : "border-theme"
                                 }`}
                               onClick={() => setSelectedPaymentApp("paytm")}
                             >
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value="paytm" id="paytm" />
-                                <label htmlFor="paytm" className="cursor-pointer text-sm font-medium text-white">
+                                <label htmlFor="paytm" className="cursor-pointer text-sm font-medium text-theme">
                                   Paytm
                                 </label>
                               </div>
                             </div>
                             <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "default" ? "border-gray-600 bg-[#0a0a0a] bg-[#111]" : "border-white/[0.06]"
+                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "default" ? "border-theme-3 bg-card" : "border-theme"
                                 }`}
                               onClick={() => setSelectedPaymentApp("default")}
                             >
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value="default" id="default" />
-                                <label htmlFor="default" className="cursor-pointer text-sm font-medium text-white">
+                                <label htmlFor="default" className="cursor-pointer text-sm font-medium text-theme">
                                   Other UPI
                                 </label>
                               </div>
@@ -408,7 +408,7 @@ export default function CheckoutPage() {
                           <Smartphone className="w-4 h-4 mr-2" />
                           Pay ₹{total.toLocaleString("en-IN")} via UPI
                         </Button>
-                        <p className="text-xs text-white/40 text-center">
+                        <p className="text-xs text-theme-3 text-center">
                           You will be redirected to your payment app
                         </p>
                       </div>
@@ -416,26 +416,26 @@ export default function CheckoutPage() {
                       // Desktop: Show QR code
                       <div className="space-y-4">
                         <div className="text-center">
-                          <Label className="text-sm font-semibold text-white">Scan QR Code to Pay</Label>
-                          <p className="text-xs text-white/40 mt-1">
+                          <Label className="text-sm font-semibold text-theme">Scan QR Code to Pay</Label>
+                          <p className="text-xs text-theme-3 mt-1">
                             Use any UPI app to scan and pay
                           </p>
                         </div>
-                        <div className="flex justify-center p-4 bg-[#111] rounded-lg">
+                        <div className="flex justify-center p-4 bg-white dark:bg-[#111] rounded-lg">
                           <QRCodeSVG
                             value={generateUPIString()}
                             size={200}
                             level="H"
                             includeMargin={true}
-                            className="border-4 border-white/[0.06] rounded-lg"
+                            className="border-4 border-theme rounded-lg"
                           />
                         </div>
                         <div className="text-center space-y-2">
                           <div className="flex items-center justify-center gap-2 text-sm">
-                            <QrCode className="w-4 h-4 text-white/40" />
-                            <span className="font-semibold text-white">Amount: ₹{total.toLocaleString("en-IN")}</span>
+                            <QrCode className="w-4 h-4 text-theme-3" />
+                            <span className="font-semibold text-theme">Amount: ₹{total.toLocaleString("en-IN")}</span>
                           </div>
-                          <div className="text-xs text-white/40">
+                          <div className="text-xs text-theme-3">
                             UPI ID: {UPI_ID}
                           </div>
                         </div>
@@ -454,9 +454,9 @@ export default function CheckoutPage() {
 
           {/* Right Column - Order Summary */}
           <div>
-            <Card className="sticky top-24 bg-[#111] border-white/[0.06]">
+            <Card className="sticky top-24 bg-card border-theme">
               <CardHeader>
-                <CardTitle className="text-white">Order Summary</CardTitle>
+                <CardTitle className="text-theme">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Items */}
@@ -472,11 +472,11 @@ export default function CheckoutPage() {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate text-white">{item.product.name}</p>
-                        <p className="text-xs text-white/40">
+                        <p className="text-sm font-medium truncate text-theme">{item.product.name}</p>
+                        <p className="text-xs text-theme-3">
                           Size: {item.size} • Qty: {item.quantity}
                         </p>
-                        <p className="text-sm font-semibold mt-1 text-white">
+                        <p className="text-sm font-semibold mt-1 text-theme">
                           ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
                         </p>
                       </div>
@@ -489,29 +489,29 @@ export default function CheckoutPage() {
                 {/* Price Breakdown */}
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-white/40">Subtotal</span>
-                    <span className="font-medium text-white">₹{subtotal.toLocaleString("en-IN")}</span>
+                    <span className="text-theme-3">Subtotal</span>
+                    <span className="font-medium text-theme">₹{subtotal.toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/40">Shipping</span>
-                    <span className="font-medium text-white">{shipping === 0 ? "Free" : `₹${shipping}`}</span>
+                    <span className="text-theme-3">Shipping</span>
+                    <span className="font-medium text-theme">{shipping === 0 ? "Free" : `₹${shipping}`}</span>
                   </div>
-                  <Separator className="bg-[#111]/5" />
+                  <Separator className="bg-theme opacity-10" />
                   <div className="flex justify-between text-lg font-bold">
-                    <span className="text-white">Total</span>
-                    <span className="text-white">₹{total.toLocaleString("en-IN")}</span>
+                    <span className="text-theme">Total</span>
+                    <span className="text-theme">₹{total.toLocaleString("en-IN")}</span>
                   </div>
                 </div>
 
                 <Button
                   onClick={handlePlaceOrder}
                   disabled={loading || !selectedAddress}
-                  className="w-full bg-[#e93a3a] hover:bg-[#e93a3a]/80 h-12"
+                  className="w-full bg-[var(--accent)] hover:opacity-90 h-12 text-white font-bold"
                 >
                   {loading ? "Placing Order..." : "Place Order"}
                 </Button>
 
-                <p className="text-xs text-white/40 text-center">
+                <p className="text-xs text-theme-3 text-center">
                   By placing your order, you agree to our terms and conditions
                 </p>
               </CardContent>

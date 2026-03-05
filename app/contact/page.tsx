@@ -66,14 +66,14 @@ export default function ContactPage() {
   ]
 
   return (
-    <div className="min-h-screen py-16 bg-[#080808]">
+    <div className="min-h-screen pt-20 pb-16 bg-theme transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Get in <span className="text-[#e93a3a]">Touch</span>
+          <h1 className="text-4xl font-bold text-theme mb-4">
+            Get in <span className="text-[var(--accent)]">Touch</span>
           </h1>
-          <p className="text-lg text-white/40 max-w-2xl mx-auto">
+          <p className="text-lg text-theme-2 max-w-2xl mx-auto">
             Have a question, suggestion, or just want to say hello? We'd love to hear from you. Reach out to us using
             any of the methods below.
           </p>
@@ -82,15 +82,15 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <Card className="shadow-md shadow-black/10 bg-[#111] border-white/[0.06]">
+            <Card className="shadow-md shadow-black/10 bg-card border-theme">
               <CardHeader>
-                <CardTitle className="text-2xl text-white">Send us a Message</CardTitle>
+                <CardTitle className="text-2xl text-theme">Send us a Message</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name" className="text-white/60">Full Name</Label>
+                      <Label htmlFor="name" className="text-theme-2">Full Name</Label>
                       <Input
                         id="name"
                         name="name"
@@ -98,11 +98,11 @@ export default function ContactPage() {
                         value={formData.name}
                         onChange={handleChange}
                         required
-                        className="mt-1 bg-[#111] border-white/[0.06] text-white"
+                        className="mt-1 bg-card border-theme text-theme"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email" className="text-white/60">Email Address</Label>
+                      <Label htmlFor="email" className="text-theme-2">Email Address</Label>
                       <Input
                         id="email"
                         name="email"
@@ -110,13 +110,13 @@ export default function ContactPage() {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="mt-1 bg-[#111] border-white/[0.06] text-white"
+                        className="mt-1 bg-card border-theme text-theme"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="subject" className="text-white/60">Subject</Label>
+                    <Label htmlFor="subject" className="text-theme-2">Subject</Label>
                     <Input
                       id="subject"
                       name="subject"
@@ -124,12 +124,12 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="mt-1 bg-[#111] border-white/[0.06] text-white"
+                      className="mt-1 bg-card border-theme text-theme"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="message" className="text-white/60">Message</Label>
+                    <Label htmlFor="message" className="text-theme-2">Message</Label>
                     <Textarea
                       id="message"
                       name="message"
@@ -137,12 +137,12 @@ export default function ContactPage() {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      className="mt-1 bg-[#111] border-white/[0.06] text-white"
+                      className="mt-1 bg-card border-theme text-theme"
                       placeholder="Tell us how we can help you..."
                     />
                   </div>
 
-                  <Button type="submit" className="w-full bg-[#e93a3a] text-white hover:bg-[#e93a3a]/80">
+                  <Button type="submit" className="w-full bg-[var(--accent)] text-white hover:opacity-90 font-bold">
                     Send Message
                   </Button>
                 </form>
@@ -152,26 +152,26 @@ export default function ContactPage() {
 
           {/* Contact Information */}
           <div className="space-y-6">
-            <Card className="shadow-md shadow-black/10 bg-[#111] border-white/[0.06]">
+            <Card className="shadow-md shadow-black/10 bg-card border-theme">
               <CardHeader>
-                <CardTitle className="text-xl text-white">Contact Information</CardTitle>
+                <CardTitle className="text-xl text-theme">Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Email</h3>
-                  <p className="text-white/40">haxeus.is.us@gmail.com</p>
-                  <p className="text-white/40">haxeus.is.us@gmail.com</p>
+                  <h3 className="font-semibold text-theme mb-1">Email</h3>
+                  <p className="text-theme-2">haxeus.is.us@gmail.com</p>
+                  <p className="text-theme-2">haxeus.is.us@gmail.com</p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Phone</h3>
-                  <p className="text-white/40">+91 98765 43210</p>
-                  <p className="text-sm text-white/40">Mon-Fri, 9 AM - 6 PM IST</p>
+                  <h3 className="font-semibold text-theme mb-1">Phone</h3>
+                  <p className="text-theme-2">+91 98765 43210</p>
+                  <p className="text-sm text-theme-2">Mon-Fri, 9 AM - 6 PM IST</p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Address</h3>
-                  <p className="text-white/40">
+                  <h3 className="font-semibold text-theme mb-1">Address</h3>
+                  <p className="text-theme-2">
                     HAXEUS Fashion Pvt. Ltd.
                     <br />
                     123 Design Street
@@ -184,23 +184,23 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md shadow-black/10 bg-[#111] border-white/[0.06]">
+            <Card className="shadow-md shadow-black/10 bg-card border-theme">
               <CardHeader>
-                <CardTitle className="text-xl text-white">Business Hours</CardTitle>
+                <CardTitle className="text-xl text-theme">Business Hours</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-white/40">Monday - Friday</span>
-                    <span className="text-white font-medium">9:00 AM - 6:00 PM</span>
+                    <span className="text-theme-2">Monday - Friday</span>
+                    <span className="text-theme font-medium">9:00 AM - 6:00 PM</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/40">Saturday</span>
-                    <span className="text-white font-medium">10:00 AM - 4:00 PM</span>
+                    <span className="text-theme-2">Saturday</span>
+                    <span className="text-theme font-medium">10:00 AM - 4:00 PM</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/40">Sunday</span>
-                    <span className="text-white font-medium">Closed</span>
+                    <span className="text-theme-2">Sunday</span>
+                    <span className="text-theme font-medium">Closed</span>
                   </div>
                 </div>
               </CardContent>
@@ -211,10 +211,10 @@ export default function ContactPage() {
         {/* FAQ Section */}
         <div className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Frequently Asked <span className="text-[#e93a3a]">Questions</span>
+            <h2 className="text-3xl font-bold text-theme mb-4">
+              Frequently Asked <span className="text-[var(--accent)]">Questions</span>
             </h2>
-            <p className="text-lg text-white/40">
+            <p className="text-lg text-theme-2">
               Find quick answers to common questions about our products and services.
             </p>
           </div>
@@ -222,9 +222,9 @@ export default function ContactPage() {
           <div className="max-w-4xl mx-auto">
             <Accordion type="single" collapsible className="space-y-4">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="border border-white/[0.06] rounded-lg px-6 bg-[#111]">
-                  <AccordionTrigger className="text-left font-semibold text-white">{faq.question}</AccordionTrigger>
-                  <AccordionContent className="text-white/40 pb-4">{faq.answer}</AccordionContent>
+                <AccordionItem key={index} value={`item-${index}`} className="border border-theme rounded-lg px-6 bg-card">
+                  <AccordionTrigger className="text-left font-semibold text-theme hover:no-underline">{faq.question}</AccordionTrigger>
+                  <AccordionContent className="text-theme-2 pb-4">{faq.answer}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
@@ -232,12 +232,11 @@ export default function ContactPage() {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center bg-[#0a0a0a] bg-[#111] rounded-lg p-8">
-          <h3 className="text-2xl font-bold text-white mb-4">Still have questions?</h3>
-          <p className="text-white/40 mb-6">Our customer support team is here to help you with any inquiries.</p>
+        <div className="text-center bg-card border border-theme rounded-lg p-8">
+          <h3 className="text-2xl font-bold text-theme mb-4">Still have questions?</h3>
+          <p className="text-theme-2 mb-6">Our customer support team is here to help you with any inquiries.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-[#e93a3a] text-white hover:bg-[#e93a3a]/80">Call Us Now</Button>
-
+            <Button className="bg-[var(--accent)] text-white hover:opacity-90 font-bold px-8">Call Us Now</Button>
           </div>
         </div>
       </div>
