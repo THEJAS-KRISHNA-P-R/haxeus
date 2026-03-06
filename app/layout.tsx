@@ -52,6 +52,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Inline script runs before any React hydration — prevents theme flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var t = localStorage.getItem('haxeus-theme');
+                  var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var theme = t || (dark ? 'dark' : 'light');
+                  document.documentElement.setAttribute('data-theme', theme);
+                  document.documentElement.classList.add(theme);
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider>
           <CartProvider>

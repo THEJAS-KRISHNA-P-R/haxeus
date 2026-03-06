@@ -125,6 +125,21 @@ export default function CheckoutPage() {
         throw new Error("Address not found")
       }
 
+      // 1. Pre-validation: Check stock again before placing order
+      for (const item of items) {
+        const { data: inventory } = await supabase
+          .from("product_inventory")
+          .select("stock_quantity")
+          .eq("product_id", item.product.id)
+          .eq("size", item.size)
+          .single()
+
+        const available = inventory?.stock_quantity ?? 0
+        if (available < item.quantity) {
+          throw new Error(`Insufficient stock for ${item.product.name} (Size: ${item.size}). Only ${available} units left.`)
+        }
+      }
+
       // Create order
       const { data: order, error: orderError } = await supabase
         .from("orders")

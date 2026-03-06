@@ -10,6 +10,7 @@
 playwright-output/
 tests/report/
 test-results/
+tests/.auth/admin.json
 
 # next.js
 /.next/

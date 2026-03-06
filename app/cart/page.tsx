@@ -21,6 +21,10 @@ export default function CartPage() {
   const [discount, setDiscount] = useState(0)
   const router = useRouter()
   const { toast } = useToast()
+  const [stockMap, setStockMap] = useState<Record<string, number>>({})
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null)
+  const [couponError, setCouponError] = useState<string | null>(null)
 
   useEffect(() => {
     // Check auth state
@@ -37,27 +41,80 @@ export default function CartPage() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const applyPromoCode = () => {
-    const validCodes = {
-      WELCOME10: 10,
-      SAVE20: 20,
-      FIRST15: 15,
+  useEffect(() => {
+    const fetchStock = async () => {
+      if (!items.length) return
+      const stockData: Record<string, number> = {}
+      await Promise.all(
+        items.map(async (item) => {
+          const { data } = await supabase
+            .from("product_inventory")
+            .select("stock_quantity")
+            .eq("product_id", item.product_id)
+            .eq("size", item.size)
+            .single()
+          stockData[`${item.product_id}_${item.size}`] = data?.stock_quantity ?? 0
+        })
+      )
+      setStockMap(stockData)
     }
+    fetchStock()
+  }, [items])
 
-    if (validCodes[promoCode as keyof typeof validCodes]) {
-      setDiscount(validCodes[promoCode as keyof typeof validCodes])
-      toast({
-        title: "Promo code applied!",
-        description: `You saved ${validCodes[promoCode as keyof typeof validCodes]}% on your order.`,
-        className: "bg-[#111]",
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return
+    setCouponLoading(true)
+    setCouponError(null)
+    setCouponSuccess(null)
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: promoCode.trim().toUpperCase(),
+          cartTotal: subtotal,
+        }),
       })
-    } else {
+
+      const data = await res.json()
+
+      if (!res.ok || !data.valid) {
+        setCouponError(data.error || "Invalid promo code")
+        setDiscount(0)
+        toast({
+          title: "Coupon Error",
+          description: data.error || "Invalid promo code",
+          variant: "destructive",
+        })
+      } else {
+        setDiscount(data.coupon.discount_type === "percentage" ? data.coupon.discount_value : (data.discount / subtotal) * 100)
+        setCouponSuccess(`${data.coupon.discount_type === "percentage" ? data.coupon.discount_value + "%" : "₹" + data.coupon.discount_value} discount applied!`)
+        toast({
+          title: "Coupon Applied",
+          description: "Your discount has been added.",
+        })
+      }
+    } catch (error) {
+      setCouponError("Could not validate coupon")
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  const getAvailableStock = (item: any) => stockMap[`${item.product_id}_${item.size}`] ?? 99
+
+  const handleIncrease = (item: any) => {
+    const available = getAvailableStock(item)
+    if (item.quantity >= available) {
       toast({
-        title: "Invalid promo code",
-        description: "Please check your promo code and try again.",
+        title: "Limited Stock",
+        description: `Only ${available} units available in this size.`,
         variant: "destructive",
       })
+      return
     }
+    updateQuantity(item.id, item.quantity + 1)
   }
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
@@ -160,14 +217,17 @@ export default function CartPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={item.quantity >= 10}
+                            onClick={() => handleIncrease(item)}
+                            disabled={item.quantity >= getAvailableStock(item)}
                             className="w-8 h-8 p-0 border-theme hover:bg-card"
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
                         </div>
                         <div className="text-right">
+                          {item.quantity >= getAvailableStock(item) && (
+                            <div className="text-[10px] text-[var(--accent)] font-medium mb-1">Max Stock Reached</div>
+                          )}
                           <div className="text-lg font-bold text-theme">
                             ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
                           </div>
@@ -195,12 +255,19 @@ export default function CartPage() {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                     className="bg-card border-theme text-theme"
+                    disabled={couponLoading}
                   />
-                  <Button onClick={applyPromoCode} variant="outline" className="border-theme hover:bg-card">
-                    Apply
+                  <Button
+                    onClick={applyPromoCode}
+                    variant="outline"
+                    className="border-theme hover:bg-card"
+                    disabled={couponLoading}
+                  >
+                    {couponLoading ? "..." : "Apply"}
                   </Button>
                 </div>
-                {discount > 0 && <div className="mt-2 text-sm text-green-500">✓ {discount}% discount applied</div>}
+                {couponSuccess && <div className="mt-2 text-sm text-green-500">✓ {couponSuccess}</div>}
+                {couponError && <div className="mt-2 text-sm text-red-500">✗ {couponError}</div>}
               </CardContent>
             </Card>
 

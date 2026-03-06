@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, Download, Eye, Clock, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,10 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string 
 };
 
 export default function AdminOrdersPage() {
+  const searchParams = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("id") || "");
   const [filter, setFilter] = useState("all");
 
   useEffect(() => { loadOrders(); }, []);
@@ -109,18 +111,21 @@ export default function AdminOrdersPage() {
             />
           </div>
           <div
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
-            className="flex gap-1 p-1 rounded-xl"
+            style={{
+              background: "rgba(0,0,0,0.025)",
+              border: "1px solid var(--border)",
+            }}
+            className="flex gap-1 p-1 rounded-full w-fit"
           >
             {["all", "pending", "paid", "shipped", "delivered", "cancelled"].map((s) => (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
                 className={cn(
-                  "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
+                  "px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-200",
                   filter === s
-                    ? "bg-[var(--text)] text-[var(--bg)]"
-                    : "text-[var(--text-3)] hover:text-[var(--text)]"
+                    ? "bg-[#000000] text-white"
+                    : "text-[#a1a1aa] hover:text-[#18181b] hover:bg-black/5"
                 )}
               >
                 {s}

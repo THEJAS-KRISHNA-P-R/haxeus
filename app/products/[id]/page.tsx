@@ -161,7 +161,6 @@ export default function ProductDetailPage() {
       setAddingToCart(false)
     }
   }
-
   const buyNow = async () => {
     if (!selectedSize) {
       toast({
@@ -177,7 +176,7 @@ export default function ProductDetailPage() {
       await addItem(product!.id, selectedSize, quantity)
       router.push("/checkout")
     } catch (error: any) {
-      console.error('Buy now error:', error)
+      console.error("Buy now error:", error)
       toast({
         title: "Error",
         description: error.message || "Could not proceed to checkout.",
@@ -186,6 +185,9 @@ export default function ProductDetailPage() {
       setAddingToCart(false)
     }
   }
+
+  const selectedStock = inventory.find((inv) => inv.size === selectedSize)
+  const isOutOfStock = selectedStock && selectedStock.stock_quantity <= 0
 
   // Show loading state
   if (loading) {
@@ -396,13 +398,13 @@ export default function ProductDetailPage() {
               <div className="flex gap-3">
                 <Button
                   onClick={addToCart}
-                  disabled={addingToCart}
+                  disabled={addingToCart || isOutOfStock}
                   className="flex-1 bg-transparent hover:bg-[var(--accent)]/10 text-[var(--accent)] border-2 border-[var(--accent)] h-14 text-lg disabled:opacity-50 transition-all"
                   size="lg"
                   variant="outline"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  {addingToCart ? 'Adding...' : 'Add to Cart'}
+                  {isOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Add to Cart"}
                 </Button>
                 <WishlistButton
                   productId={product.id}
@@ -412,12 +414,12 @@ export default function ProductDetailPage() {
               </div>
               <Button
                 onClick={buyNow}
-                disabled={addingToCart}
+                disabled={addingToCart || isOutOfStock}
                 className="w-full bg-[var(--accent)] hover:opacity-90 text-white h-14 text-lg font-bold shadow-lg shadow-[var(--accent)]/20 hover:shadow-xl transition-all disabled:opacity-50"
                 size="lg"
               >
                 <Zap className="w-5 h-5 mr-2" />
-                Buy Now
+                {isOutOfStock ? "Out of Stock" : "Buy Now"}
               </Button>
             </div>
 

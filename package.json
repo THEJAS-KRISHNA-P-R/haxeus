@@ -8,7 +8,13 @@
     "postbuild": "node scripts/postbuild.mjs",
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
-    "analyze": "cross-env ANALYZE=true next build"
+    "analyze": "cross-env ANALYZE=true next build",
+    "test": "playwright test",
+    "test:admin": "playwright test --project=admin",
+    "test:public": "playwright test --project=public",
+    "test:setup": "playwright test --project=setup",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report playwright-output/report"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -46,6 +52,7 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
     "@types/three": "^0.181.0",
+    "@upstash/redis": "^1.36.3",
     "autoprefixer": "^10.4.20",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
@@ -57,6 +64,7 @@
     "framer-motion": "^12.23.24",
     "gsap": "^3.14.2",
     "input-otp": "1.4.1",
+    "ioredis": "^5.10.0",
     "lucide-react": "^0.454.0",
     "next": "^16.1.6",
     "next-themes": "^0.4.4",

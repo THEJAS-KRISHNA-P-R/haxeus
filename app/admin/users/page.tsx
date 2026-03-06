@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { User, Mail, Calendar } from "lucide-react";
+import { User, Mail, Calendar, Search, X } from "lucide-react";
 import {
   AdminCard,
   AdminPageHeader,
@@ -11,8 +12,10 @@ import {
 import { cn } from "@/lib/utils";
 
 export default function CustomersPage() {
+  const searchParams = useSearchParams();
   const [customers, setCustomers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("email") || "")
 
   useEffect(() => {
     async function fetchCustomers() {
@@ -29,6 +32,11 @@ export default function CustomersPage() {
     fetchCustomers()
   }, [])
 
+  const filteredCustomers = customers.filter(c =>
+    (c.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.email.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
     <div className="space-y-6">
       <div className="mb-2">
@@ -39,6 +47,38 @@ export default function CustomersPage() {
       </div>
 
       <AdminCard>
+        {/* Search Bar */}
+        <div
+          style={{ borderBottom: "1px solid var(--border)" }}
+          className="px-6 py-4"
+        >
+          <div className="relative max-w-sm">
+            <Search
+              style={{ color: "var(--text-3)" }}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2"
+              size={14}
+            />
+            <input
+              placeholder="Search customers by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border)",
+                color: "var(--text)",
+              }}
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl focus:outline-none focus:border-[var(--accent)] transition-all placeholder:opacity-30"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+        </div>
         <AdminTableHeader cols="grid-cols-[2fr_2fr_1fr_1fr] px-6 py-4">
           <span>Customer</span>
           <span>Email Address</span>
@@ -67,8 +107,12 @@ export default function CustomersPage() {
               <p style={{ color: "var(--text)" }} className="font-bold text-lg">No customers registered yet</p>
               <p style={{ color: "var(--text-3)" }} className="text-sm mt-1 max-w-[280px] mx-auto">Once users sign up or place orders, they will appear here in this management list.</p>
             </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="text-center py-20 px-6">
+              <p style={{ color: "var(--text-3)" }} className="text-sm font-medium">No results matching "{searchQuery}"</p>
+            </div>
           ) : (
-            customers.map(c => (
+            filteredCustomers.map(c => (
               <AdminTableRow key={c.id} cols="grid-cols-[2fr_2fr_1fr_1fr]" className="px-6 py-5 items-center">
                 <div className="flex items-center gap-3">
                   <div

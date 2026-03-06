@@ -736,8 +736,7 @@ haxeus-v26/
 │   └── theme-provider.tsx       # Theme context
 │
 ├── contexts/                     # React contexts
-│   ├── CartContext.tsx          # Cart state
-│   └── ThemeContext.tsx         # Theme state
+│   └── CartContext.tsx          # Cart state
 │
 ├── hooks/                        # Custom hooks
 │   ├── use-mobile.tsx           # Mobile detection

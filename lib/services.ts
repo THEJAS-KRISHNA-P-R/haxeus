@@ -8,6 +8,8 @@
  */
 
 import { supabase } from "@/lib/supabase"
+import { invalidate } from "@/lib/redis"
+import { CK } from "@/lib/cache-keys"
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -590,6 +592,9 @@ export const OrderService = {
             items: items.length,
         }).catch(() => { })
 
+        // Invalidate analytics cache so admin sees fresh data
+        await invalidate(CK.analytics(7), CK.analytics(30), CK.analytics(90)).catch(() => { })
+
         return newOrder as Order
     },
 
@@ -683,6 +688,8 @@ export const CouponService = {
             .single()
 
         if (error) throw error
+        // Invalidate anything cached for this coupon code
+        await invalidate(CK.coupon(coupon.code)).catch(() => { })
         return data
     },
 

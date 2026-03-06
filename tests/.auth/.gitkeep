@@ -1,0 +1,2 @@
+# This directory holds Playwright saved authentication state.
+# The JSON files MUST NOT be committed — they contain session tokens.
