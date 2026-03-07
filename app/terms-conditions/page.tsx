@@ -1,146 +1,121 @@
-﻿import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+﻿"use client"
+
+import { useTheme } from "@/components/ThemeProvider"
+import { useEffect, useState } from "react"
+import { cn } from "@/lib/utils"
+
+const sections = [
+  {
+    title: "Acceptance of Terms",
+    content: "By accessing or using haxeus.com, placing an order, or creating an account, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our site. We reserve the right to update these terms at any time; continued use of the site after changes constitutes acceptance.",
+  },
+  {
+    title: "Products & Pricing",
+    content: "All products are subject to availability. We reserve the right to discontinue any product at any time. Prices are listed in Indian Rupees (INR) and include applicable taxes unless otherwise stated. We reserve the right to change prices without prior notice. In the event of a pricing error, we will contact you before processing your order.",
+  },
+  {
+    title: "Orders & Payment",
+    content: "An order confirmation email does not constitute acceptance of your order. We reserve the right to refuse or cancel any order at our discretion — for example in cases of suspected fraud, payment failure, or stock unavailability. Payment is processed securely by Razorpay. By providing payment details you confirm you are authorised to use the payment method. All transactions are subject to Razorpay's Terms of Service.",
+  },
+  {
+    title: "Shipping & Delivery",
+    content: "We aim to dispatch orders within 2–3 business days. Delivery timelines are estimates and not guaranteed. HAXEUS is not responsible for delays caused by logistics partners, customs, natural events, or other circumstances beyond our control. Risk of loss or damage passes to you upon delivery. If your order arrives damaged, contact us within 48 hours with photographic evidence.",
+  },
+  {
+    title: "Returns & Refunds",
+    content: "Returns are governed by our Returns & Refunds Policy, which forms part of these Terms. By placing an order, you agree to the conditions described in that policy. Please review it before purchasing.",
+  },
+  {
+    title: "Intellectual Property",
+    content: "All content on haxeus.com — including but not limited to text, graphics, logos, images, product designs, and software — is the exclusive property of HAXEUS or its licensors and is protected by applicable intellectual property laws. You may not reproduce, distribute, modify, or create derivative works without our prior written consent. Unauthorised use will be pursued legally.",
+  },
+  {
+    title: "User Accounts",
+    content: "You are responsible for maintaining the confidentiality of your account credentials. You are liable for all activity that occurs under your account. You must notify us immediately of any unauthorised access. We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or abuse our services.",
+  },
+  {
+    title: "Prohibited Conduct",
+    content: "You agree not to: use our site for any unlawful purpose; submit false or misleading information; attempt to circumvent any security measure; scrape, harvest, or collect user data; upload viruses or malicious code; interfere with the proper operation of the site; or use automated tools to access the site without our permission.",
+  },
+  {
+    title: "Limitation of Liability",
+    content: "To the maximum extent permitted by law, HAXEUS and its affiliates, directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of our site or products. Our total liability for any claim arising from a purchase shall not exceed the amount you paid for the relevant order.",
+  },
+  {
+    title: "Disclaimer of Warranties",
+    content: "Our site and products are provided on an 'as is' and 'as available' basis without warranties of any kind, either express or implied. We do not warrant that the site will be uninterrupted, error-free, or free of viruses. Product colours may vary slightly from what is displayed on screen due to monitor calibration differences.",
+  },
+  {
+    title: "Governing Law",
+    content: "These Terms are governed by the laws of India. Any disputes arising from these Terms or your use of our services shall be subject to the exclusive jurisdiction of the courts of Kerala, India.",
+  },
+  {
+    title: "Contact",
+    content: "For any questions about these Terms, contact us at legal@haxeus.com or through our Contact page.",
+  },
+]
 
 export default function TermsConditionsPage() {
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const isDark = mounted && (
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  )
+
   return (
-    <div className="min-h-screen bg-theme py-12 transition-colors duration-300">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-theme mb-6">
-            Terms & <span className="text-[var(--accent)]">Conditions</span>
+    <main
+      className={cn(
+        "min-h-screen pt-[88px] pb-20 px-4 md:px-8 transition-colors duration-300",
+        isDark ? "bg-[#0a0a0a] text-white" : "bg-[#f5f4f0] text-black"
+      )}
+    >
+      <div className="max-w-3xl mx-auto">
+
+        {/* Header */}
+        <div className="mb-12 pt-4">
+          <p className={cn("text-xs tracking-[0.25em] font-medium mb-3 uppercase",
+            isDark ? "text-white/30" : "text-black/35"
+          )}>
+            HAXEUS — Legal
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+            Terms & Conditions
           </h1>
-          <p className="text-xl text-theme-2 max-w-2xl mx-auto">
-            Please read these terms carefully before using our website.
+          <p className={cn("text-xs", isDark ? "text-white/30" : "text-black/35")}>
+            Last updated: {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
 
-        <div className="space-y-12">
-          {/* Introduction */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">1. Introduction</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                Welcome to HAXEUS! These Terms and Conditions ("Terms") govern your use of the HAXEUS website and the
-                purchase of products from us. By accessing or using our website, you agree to be bound by these Terms.
-                If you do not agree with any part of these Terms, you must not use our website.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Intellectual Property */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">2. Intellectual Property</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                All content on this website, including text, graphics, logos, images, and software, is the property of
-                HAXEUS or its content suppliers and protected by international copyright laws. The compilation of all
-                content on this site is the exclusive property of HAXEUS.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Use of Website */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">3. Use of Website</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                You agree to use the website only for lawful purposes and in a way that does not infringe the rights of,
-                restrict, or inhibit anyone else's use and enjoyment of the website. Prohibited behavior includes
-                harassing or causing distress or inconvenience to any other user, transmitting obscene or offensive
-                content, or disrupting the normal flow of dialogue within our website.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Product Information and Pricing */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">4. Product Information and Pricing</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                We strive to ensure that all information on our website, including product descriptions and pricing, is
-                accurate. However, errors may occur. If we discover an error in the price of any goods you have ordered,
-                we will inform you as soon as possible and give you the option of reconfirming your order at the correct
-                price or canceling it.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Orders and Payment */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">5. Orders and Payment</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                All orders placed through our website are subject to acceptance and availability. We reserve the right
-                to refuse any order. Payment must be received in full before dispatch of goods. We accept various
-                payment methods as indicated on our checkout page.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Limitation of Liability */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">6. Limitation of Liability</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                HAXEUS will not be liable for any direct, indirect, incidental, special, consequential, or exemplary
-                damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other
-                intangible losses resulting from the use or the inability to use the website or products.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Governing Law */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">7. Governing Law</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                These Terms shall be governed by and construed in accordance with the laws of India, without regard to
-                its conflict of law provisions. Any dispute arising under these Terms shall be subject to the exclusive
-                jurisdiction of the courts in Mumbai, Maharashtra, India.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Changes to Terms */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">8. Changes to Terms</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                We reserve the right to modify these Terms at any time. Any changes will be effective immediately upon
-                posting on the website. Your continued use of the website after any such changes constitutes your
-                acceptance of the new Terms.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Contact Us */}
-          <div className="text-center mt-12">
-            <p className="text-lg text-theme-2 mb-6">
-              If you have any questions about these Terms, please{" "}
-              <Link href="/contact" className="text-[var(--accent)] hover:underline font-bold">
-                contact us
-              </Link>
-              .
-            </p>
-          </div>
+        {/* Intro */}
+        <div className={cn(
+          "rounded-2xl p-6 border mb-10",
+          isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-black/[0.02] border-black/[0.07]"
+        )}>
+          <p className={cn("text-sm leading-relaxed", isDark ? "text-white/65" : "text-black/65")}>
+            Please read these Terms and Conditions carefully before using our website or making a purchase. These terms constitute a legally binding agreement between you and HAXEUS.
+          </p>
         </div>
+
+        {/* Sections */}
+        <div className="space-y-8">
+          {sections.map((section, i) => (
+            <section key={i}>
+              <h2 className={cn(
+                "text-base font-bold tracking-tight mb-3 pb-2.5 border-b",
+                isDark ? "border-white/[0.07]" : "border-black/[0.07]"
+              )}>
+                {i + 1}. {section.title}
+              </h2>
+              <p className={cn("text-sm leading-relaxed", isDark ? "text-white/60" : "text-black/65")}>
+                {section.content}
+              </p>
+            </section>
+          ))}
+        </div>
+
       </div>
-    </div>
+    </main>
   )
 }

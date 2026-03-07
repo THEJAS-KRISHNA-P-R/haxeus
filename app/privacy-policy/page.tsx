@@ -1,157 +1,198 @@
-﻿import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+﻿"use client"
+
+import { useTheme } from "@/components/ThemeProvider"
+import { useEffect, useState } from "react"
+import { cn } from "@/lib/utils"
+
+const sections = [
+  {
+    title: "Information We Collect",
+    content: [
+      {
+        subtitle: "Account & Order Data",
+        text: "When you create an account or place an order, we collect your name, email address, shipping address, phone number, and payment information. Payment data is processed by Razorpay and never stored on our servers.",
+      },
+      {
+        subtitle: "Usage Data",
+        text: "We automatically collect information about how you interact with our site — pages viewed, time spent, referring URLs, browser type, and device information. This is collected via anonymised analytics.",
+      },
+      {
+        subtitle: "Cookies",
+        text: "We use essential cookies to keep you logged in and maintain your cart. We use analytics cookies (which you can opt out of) to understand how our store is used. We do not use advertising or third-party tracking cookies.",
+      },
+    ],
+  },
+  {
+    title: "How We Use Your Information",
+    content: [
+      {
+        subtitle: "Order Fulfilment",
+        text: "Your name, address, and contact details are used solely to process and ship your order, send order confirmations, and handle returns or exchanges.",
+      },
+      {
+        subtitle: "Communication",
+        text: "We may email you about your order status. If you opt in, we will send you updates about new drops and restocks. You can unsubscribe at any time via the link in any email.",
+      },
+      {
+        subtitle: "Improvement",
+        text: "Aggregated, anonymised usage data helps us improve the site experience — fixing broken flows, improving page performance, and understanding which products interest you.",
+      },
+    ],
+  },
+  {
+    title: "Data Sharing",
+    content: [
+      {
+        subtitle: "We Do Not Sell Your Data",
+        text: "HAXEUS does not sell, rent, or trade your personal information to any third party for marketing purposes. Period.",
+      },
+      {
+        subtitle: "Service Providers",
+        text: "We share minimum necessary data with: Razorpay (payment processing), our logistics partner (shipping fulfilment), and Supabase (secure database hosting). Each provider is bound by their own privacy policy and data processing agreements.",
+      },
+      {
+        subtitle: "Legal Requirements",
+        text: "We may disclose your information if required to do so by law, court order, or governmental authority.",
+      },
+    ],
+  },
+  {
+    title: "Data Security",
+    content: [
+      {
+        subtitle: "How We Protect Your Data",
+        text: "All data is transmitted over HTTPS/TLS encryption. Passwords are hashed using bcrypt and never stored in plain text. Payment information is handled entirely by Razorpay's PCI-DSS compliant infrastructure — we never see or store your card details.",
+      },
+      {
+        subtitle: "Data Retention",
+        text: "Order and account data is retained for 7 years to comply with Indian accounting regulations. You may request deletion of your account and personal data at any time — we will delete all data not required for legal compliance within 30 days.",
+      },
+    ],
+  },
+  {
+    title: "Your Rights",
+    content: [
+      {
+        subtitle: "Access & Portability",
+        text: "You have the right to request a copy of all personal data we hold about you. We will provide this in a machine-readable format within 14 days of your request.",
+      },
+      {
+        subtitle: "Correction & Deletion",
+        text: "You may update your account information at any time from your profile page. To delete your account and associated data, contact us at privacy@haxeus.com.",
+      },
+      {
+        subtitle: "Opt-Out",
+        text: "You can opt out of marketing emails at any time. To opt out of analytics cookies, you can clear cookies and enable Do Not Track in your browser settings.",
+      },
+    ],
+  },
+  {
+    title: "Children's Privacy",
+    content: [
+      {
+        subtitle: "",
+        text: "HAXEUS is not directed at children under 13 years of age. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, contact us immediately and we will delete it.",
+      },
+    ],
+  },
+  {
+    title: "Changes to This Policy",
+    content: [
+      {
+        subtitle: "",
+        text: "We may update this Privacy Policy from time to time. We will notify registered users by email of any material changes. Continued use of the site after changes constitutes acceptance of the revised policy. The date at the top of this page reflects when it was last updated.",
+      },
+    ],
+  },
+  {
+    title: "Contact",
+    content: [
+      {
+        subtitle: "",
+        text: "For any privacy-related questions or requests, contact us at privacy@haxeus.com or through our Contact page. We aim to respond within 2 business days.",
+      },
+    ],
+  },
+]
 
 export default function PrivacyPolicyPage() {
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const isDark = mounted && (
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  )
+
   return (
-    <div className="min-h-screen bg-theme py-12 transition-colors duration-300">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-theme mb-6">
-            Privacy <span className="text-[var(--accent)]">Policy</span>
+    <main
+      className={cn(
+        "min-h-screen pt-[88px] pb-20 px-4 md:px-8 transition-colors duration-300",
+        isDark ? "bg-[#0a0a0a] text-white" : "bg-[#f5f4f0] text-black"
+      )}
+    >
+      <div className="max-w-3xl mx-auto">
+
+        {/* Header */}
+        <div className="mb-12 pt-4">
+          <p className={cn("text-xs tracking-[0.25em] font-medium mb-3 uppercase",
+            isDark ? "text-white/30" : "text-black/35"
+          )}>
+            HAXEUS — Legal
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+            Privacy Policy
           </h1>
-          <p className="text-xl text-theme-2 max-w-2xl mx-auto">
-            Your privacy is important to us. This policy explains how we collect, use, and protect your personal data.
+          <p className={cn("text-xs", isDark ? "text-white/30" : "text-black/35")}>
+            Last updated: {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
 
-        <div className="space-y-12">
-          {/* Introduction */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">1. Introduction</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                At HAXEUS, we are committed to protecting your privacy and ensuring the security of your personal
-                information. This Privacy Policy outlines how we collect, use, disclose, and safeguard your data when
-                you visit our website or make a purchase.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Information We Collect */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">2. Information We Collect</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p className="font-semibold mb-2">Personal Information:</p>
-              <ul className="list-disc list-inside space-y-1 mb-4">
-                <li><strong className="text-theme">Contact Data</strong>: Name, email address, phone number, shipping address, billing address.</li>
-                <li><strong className="text-theme">Account Data</strong>: Username, password, purchase history.</li>
-                <li><strong className="text-theme">Payment Data</strong>: Payment card details (processed securely by third-party payment processors).</li>
-              </ul>
-              <p className="font-semibold mb-2">Non-Personal Information:</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>
-                  <strong className="text-theme">Usage Data</strong>: IP address, browser type, operating system, referring URLs, pages viewed, time spent
-                  on site.
-                </li>
-                <li>
-                  <strong className="text-theme">Cookies and Tracking Technologies</strong>: Information collected via cookies, web beacons, and similar
-                  technologies.
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* How We Use Your Information */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">3. How We Use Your Information</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>We use the collected information for various purposes, including:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Processing and fulfilling your orders.</li>
-                <li>Managing your account and providing customer support.</li>
-                <li>Personalizing your shopping experience.</li>
-                <li>Sending promotional offers and newsletters (with your consent).</li>
-                <li>Improving our website, products, and services.</li>
-                <li>Detecting and preventing fraud and other illegal activities.</li>
-                <li>Complying with legal obligations.</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Sharing Your Information */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">4. Sharing Your Information</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>We may share your information with:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>
-                  <strong className="text-theme">Service Providers</strong>: Third-party vendors who perform services on our behalf (e.g., payment
-                  processing, shipping, marketing).
-                </li>
-                <li><strong className="text-theme">Legal Compliance</strong>: When required by law or to protect our rights, property, or safety.</li>
-                <li><strong className="text-theme">Business Transfers</strong>: In connection with a merger, acquisition, or sale of assets.</li>
-              </ul>
-              <p className="mt-4">
-                We do not sell, rent, or trade your personal information to third parties for their marketing purposes.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Data Security */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">5. Data Security</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                We implement a variety of security measures to maintain the safety of your personal information. Your
-                personal data is contained behind secured networks and is only accessible by a limited number of persons
-                who have special access rights to such systems, and are required to keep the information confidential.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Your Rights */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">6. Your Rights</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>You have the right to:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>Access and obtain a copy of your personal data.</li>
-                <li>Request correction of inaccurate data.</li>
-                <li>Request deletion of your personal data.</li>
-                <li>Object to the processing of your personal data.</li>
-                <li>Withdraw your consent at any time.</li>
-              </ul>
-              <p className="mt-4">To exercise these rights, please contact us using the details provided below.</p>
-            </CardContent>
-          </Card>
-
-          {/* Changes to This Policy */}
-          <Card className="p-8 shadow-md shadow-black/10 bg-card border-theme">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-2xl font-bold text-theme">7. Changes to This Policy</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 text-theme-2 leading-relaxed">
-              <p>
-                We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new
-                Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Contact Us */}
-          <div className="text-center mt-12">
-            <p className="text-lg text-theme-2 mb-6">
-              If you have any questions about this Privacy Policy, please{" "}
-              <Link href="/contact" className="text-[var(--accent)] hover:underline font-bold">
-                contact us
-              </Link>
-              .
-            </p>
-          </div>
+        {/* Intro */}
+        <div className={cn(
+          "rounded-2xl p-6 border mb-10",
+          isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-black/[0.02] border-black/[0.07]"
+        )}>
+          <p className={cn("text-sm leading-relaxed", isDark ? "text-white/65" : "text-black/65")}>
+            HAXEUS ("we", "us", "our") is committed to protecting your privacy. This policy explains what personal information we collect, how we use it, and what rights you have over it. By using haxeus.com, you agree to the practices described here.
+          </p>
         </div>
+
+        {/* Sections */}
+        <div className="space-y-10">
+          {sections.map((section, i) => (
+            <section key={i}>
+              <h2 className={cn(
+                "text-lg font-bold tracking-tight mb-5 pb-3 border-b",
+                isDark ? "border-white/[0.07]" : "border-black/[0.07]"
+              )}>
+                {i + 1}. {section.title}
+              </h2>
+              <div className="space-y-5">
+                {section.content.map((item, j) => (
+                  <div key={j}>
+                    {item.subtitle && (
+                      <p className={cn(
+                        "text-xs font-bold tracking-[0.15em] uppercase mb-2",
+                        isDark ? "text-white/45" : "text-black/50"
+                      )}>
+                        {item.subtitle}
+                      </p>
+                    )}
+                    <p className={cn(
+                      "text-sm leading-relaxed",
+                      isDark ? "text-white/60" : "text-black/65"
+                    )}>
+                      {item.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
       </div>
-    </div>
+    </main>
   )
 }

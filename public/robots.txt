@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /auth/
+Disallow: /checkout/
+Disallow: /cart/
+Allow: /
+
+Sitemap: https://haxeus.com/sitemap.xml

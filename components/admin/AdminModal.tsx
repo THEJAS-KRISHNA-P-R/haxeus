@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { GlassInput } from "@/components/ui/GlassInput";
-import { ShimmerButton } from "@/components/ui/ShimmerButton";
+import { ShimmerButton } from "../ui/ShimmerButton";
 
 export function AdminModal({
   open,

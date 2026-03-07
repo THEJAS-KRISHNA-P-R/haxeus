@@ -2,73 +2,59 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Separator } from "@/components/ui/separator"
 import { supabase, type UserAddress } from "@/lib/supabase"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "@/components/ThemeProvider"
 import { sendOrderConfirmationEmail } from "@/lib/email"
-import { ArrowLeft, CreditCard, Wallet, Building2, Smartphone, QrCode } from "lucide-react"
+import { ArrowLeft, CreditCard, Wallet, Smartphone, MapPin, Check } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { QRCodeSVG } from "qrcode.react"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { RazorpayCheckout } from "@/components/RazorpayCheckout"
+import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, clearCart } = useCart()
   const { toast } = useToast()
   const isMobile = useIsMobile()
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const isDark = mounted && (
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  )
+
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [addresses, setAddresses] = useState<UserAddress[]>([])
   const [selectedAddress, setSelectedAddress] = useState<string>("")
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "online">("cod")
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "online" | "razorpay">("razorpay")
   const [selectedPaymentApp, setSelectedPaymentApp] = useState<string>("gpay")
+  const [couponCode] = useState<string>("")
 
-  useEffect(() => {
-    checkAuth()
-  }, [])
+  useEffect(() => { checkAuth() }, [])
 
   async function checkAuth() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      router.push("/auth?redirect=/checkout")
-      return
-    }
-
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push("/auth?redirect=/checkout"); return }
     setUser(user)
     await loadAddresses(user.id)
   }
 
   async function loadAddresses(userId: string) {
     const { data, error } = await supabase
-      .from("user_addresses")
-      .select("*")
-      .eq("user_id", userId)
+      .from("user_addresses").select("*").eq("user_id", userId)
       .order("is_default", { ascending: false })
-
-    if (error) {
-      console.error("Error loading addresses:", error)
-      return
-    }
-
+    if (error) { console.error("Error loading addresses:", error); return }
     setAddresses(data || [])
-
-    // Select default address or first address
     const defaultAddr = data?.find((addr) => addr.is_default)
-    if (defaultAddr) {
-      setSelectedAddress(defaultAddr.id)
-    } else if (data && data.length > 0) {
-      setSelectedAddress(data[0].id)
-    }
+    if (defaultAddr) setSelectedAddress(defaultAddr.id)
+    else if (data && data.length > 0) setSelectedAddress(data[0].id)
   }
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
@@ -77,166 +63,79 @@ export default function CheckoutPage() {
 
   const UPI_ID = "shahzadak735@okaxis"
   const UPI_NAME = "HAXEUS"
+  const generateUPIString = () =>
+    `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent("Order Payment - HAXEUS")}`
 
-  // Generate UPI payment string
-  const generateUPIString = () => {
-    return `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent(`Order Payment - HAXEUS`)}`
-  }
-
-  // Handle UPI payment on mobile
   const handleUPIPayment = () => {
-    const upiString = generateUPIString()
-
-    // UPI app URLs for different payment apps
     const appUrls: Record<string, string> = {
       gpay: `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
       phonepe: `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
       paytm: `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
-      default: upiString
+      default: generateUPIString(),
     }
-
-    const url = appUrls[selectedPaymentApp] || appUrls.default
-
-    // Open payment app
-    window.location.href = url
-
-    toast({
-      title: "Opening payment app",
-      description: "Complete the payment in your UPI app",
-    })
+    window.location.href = appUrls[selectedPaymentApp] || appUrls.default
+    toast({ title: "Opening payment app", description: "Complete the payment in your UPI app" })
   }
 
   async function handlePlaceOrder() {
     if (!selectedAddress) {
-      toast({
-        title: "Select delivery address",
-        description: "Please select a delivery address to continue",
-        variant: "destructive",
-      })
+      toast({ title: "Select delivery address", description: "Please select a delivery address to continue", variant: "destructive" })
       return
     }
-
     setLoading(true)
-
     try {
-      // Get selected address details
+      const res = await fetch("/api/orders/cod", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items, shippingAddressId: selectedAddress, paymentMethod, total }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Failed to place order")
+
       const address = addresses.find((addr) => addr.id === selectedAddress)
-      if (!address) {
-        throw new Error("Address not found")
+      if (address) {
+        await sendOrderConfirmationEmail({
+          orderId: data.orderId,
+          customerEmail: user.email!,
+          customerName: address.full_name,
+          items: items.map((item) => ({ name: item.product.name, size: item.size, quantity: item.quantity, price: item.product.price })),
+          totalAmount: total,
+          shippingAddress: { fullName: address.full_name, addressLine1: address.address_line1, addressLine2: address.address_line2, city: address.city, state: address.state, pincode: address.pincode, phone: address.phone },
+        }).catch((err) => console.error("Email send failed:", err?.message))
       }
 
-      // 1. Pre-validation: Check stock again before placing order
-      for (const item of items) {
-        const { data: inventory } = await supabase
-          .from("product_inventory")
-          .select("stock_quantity")
-          .eq("product_id", item.product.id)
-          .eq("size", item.size)
-          .single()
-
-        const available = inventory?.stock_quantity ?? 0
-        if (available < item.quantity) {
-          throw new Error(`Insufficient stock for ${item.product.name} (Size: ${item.size}). Only ${available} units left.`)
-        }
-      }
-
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          user_id: user.id,
-          total_amount: total,
-          status: "pending",
-          shipping_address: {
-            fullName: address.full_name,
-            addressLine1: address.address_line1,
-            addressLine2: address.address_line2,
-            city: address.city,
-            state: address.state,
-            pincode: address.pincode,
-            phone: address.phone,
-          },
-          payment_method: paymentMethod,
-          payment_status: paymentMethod === "cod" ? "pending" : "paid",
-        })
-        .select()
-        .single()
-
-      if (orderError) throw orderError
-
-      // Create order items
-      const orderItems = items.map((item) => ({
-        order_id: order.id,
-        product_id: item.product.id,
-        size: item.size,
-        quantity: item.quantity,
-        price: item.product.price,
-      }))
-
-      const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
-
-      if (itemsError) throw itemsError
-
-      // Delete cart items
-      const { error: deleteError } = await supabase
-        .from("cart_items")
-        .delete()
-        .eq("user_id", user.id)
-
-      if (deleteError) console.error("Error deleting cart items:", deleteError)
-
-      // Send order confirmation email
-      await sendOrderConfirmationEmail({
-        orderId: order.id,
-        customerEmail: user.email!,
-        customerName: address.full_name,
-        items: items.map((item) => ({
-          name: item.product.name,
-          size: item.size,
-          quantity: item.quantity,
-          price: item.product.price,
-        })),
-        totalAmount: total,
-        shippingAddress: {
-          fullName: address.full_name,
-          addressLine1: address.address_line1,
-          addressLine2: address.address_line2,
-          city: address.city,
-          state: address.state,
-          pincode: address.pincode,
-          phone: address.phone,
-        },
-      })
-
-      // Clear local cart
       clearCart()
-
-      toast({
-        title: "Order placed successfully!",
-        description: "You will receive a confirmation email shortly.",
-      })
-
-      // Redirect to order confirmation
-      router.push(`/orders/${order.id}`)
+      toast({ title: "Order placed successfully!", description: "You will receive a confirmation email shortly." })
+      router.push(`/orders/${data.orderId}`)
     } catch (error: any) {
-      console.error("Error placing order:", error)
-      toast({
-        title: "Failed to place order",
-        description: error.message || "Please try again",
-        variant: "destructive",
-      })
+      console.error("Error placing order:", error?.message ?? error)
+      toast({ title: "Failed to place order", description: error?.message || "Please try again", variant: "destructive" })
     } finally {
       setLoading(false)
     }
   }
 
+  // ── Shared style tokens ────────────────────────────────────────────────────
+  const card = cn(
+    "rounded-2xl border p-6 transition-colors duration-300",
+    isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-white border-black/[0.08] shadow-sm"
+  )
+  const sectionLabel = cn(
+    "text-xs font-bold tracking-[0.2em] uppercase mb-5 flex items-center gap-1.5",
+    isDark ? "text-white/35" : "text-black/40"
+  )
+  const muted = isDark ? "text-white/50" : "text-black/50"
+  const primary = isDark ? "text-white" : "text-black"
+
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-theme pt-20 flex items-center justify-center">
+      <div className={cn("min-h-screen pt-[88px] flex items-center justify-center", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4 text-theme">Your cart is empty</h1>
+          <p className={cn("text-lg font-semibold mb-4", primary)}>Your cart is empty</p>
           <Link href="/products">
-            <Button className="bg-[var(--accent)] hover:opacity-90">Shop Now</Button>
+            <button className="px-6 py-2.5 bg-[#e93a3a] hover:bg-[#ff4a4a] text-white font-bold rounded-full text-sm transition-all shadow-lg shadow-[#e93a3a]/20">
+              Shop Now
+            </button>
           </Link>
         </div>
       </div>
@@ -244,296 +143,315 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-theme pt-20 pb-8 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className={cn(
+      "min-h-screen pt-[88px] pb-16 px-4 md:px-8 transition-colors duration-300",
+      isDark ? "bg-[#0a0a0a] text-white" : "bg-[#f5f4f0] text-black"
+    )}>
+      <div className="max-w-6xl mx-auto">
+
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-3 mb-10 pt-4">
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="hover:bg-card">
+            <button className={cn(
+              "p-2 rounded-full transition-all",
+              isDark ? "text-white/45 hover:text-white hover:bg-white/[0.07]" : "text-black/45 hover:text-black hover:bg-black/[0.05]"
+            )}>
               <ArrowLeft className="w-5 h-5" />
-            </Button>
+            </button>
           </Link>
-          <h1 className="text-3xl font-bold text-theme">Checkout</h1>
+          <div>
+            <p className={cn("text-xs tracking-[0.25em] font-medium uppercase mb-0.5", isDark ? "text-white/30" : "text-black/35")}>
+              HAXEUS
+            </p>
+            <h1 className="text-2xl font-bold tracking-tight">Checkout</h1>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Address & Payment */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
+
+          {/* ── Left column ───────────────────────────────────────── */}
+          <div className="space-y-5">
+
             {/* Delivery Address */}
-            <Card className="bg-card border-theme text-theme">
-              <CardHeader>
-                <CardTitle className="text-theme">Delivery Address</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {addresses.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-theme-2 mb-4">No saved addresses</p>
-                    <Link href="/profile/addresses/new">
-                      <Button className="bg-[var(--accent)] text-white hover:opacity-90">Add Address</Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
-                    {addresses.map((address) => (
-                      <div
+            <div className={card}>
+              <p className={sectionLabel}>
+                <MapPin className="w-3 h-3" />
+                Delivery Address
+              </p>
+
+              {addresses.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className={cn("text-sm mb-4", muted)}>No saved addresses</p>
+                  <Link href="/profile/addresses/new">
+                    <button className="px-5 py-2 bg-[#e93a3a] hover:bg-[#ff4a4a] text-white font-bold rounded-full text-sm transition-all">
+                      Add Address
+                    </button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {addresses.map((address) => {
+                    const isSelected = selectedAddress === address.id
+                    return (
+                      <button
                         key={address.id}
-                        className={`border rounded-lg p-4 cursor-pointer transition ${selectedAddress === address.id ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-theme"
-                          }`}
                         onClick={() => setSelectedAddress(address.id)}
+                        className={cn(
+                          "w-full text-left rounded-xl p-4 border transition-all duration-200",
+                          isSelected
+                            ? "border-[#e93a3a] bg-[#e93a3a]/[0.06]"
+                            : isDark
+                              ? "border-white/[0.07] hover:border-white/15"
+                              : "border-black/[0.08] hover:border-black/20"
+                        )}
                       >
-                        <div className="flex items-start gap-3">
-                          <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
-                          <label htmlFor={address.id} className="flex-1 cursor-pointer">
-                            <div className="font-semibold text-theme">{address.full_name}</div>
-                            <div className="text-sm text-theme-2 mt-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={cn("text-sm font-semibold", primary)}>{address.full_name}</span>
+                              {address.is_default && (
+                                <span className="text-[10px] font-bold tracking-widest uppercase text-[#e93a3a] bg-[#e93a3a]/10 px-2 py-0.5 rounded-full">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className={cn("text-xs leading-relaxed", muted)}>
                               {address.address_line1}
                               {address.address_line2 && `, ${address.address_line2}`}
-                            </div>
-                            <div className="text-sm text-theme-2">
-                              {address.city}, {address.state} {address.pincode}
-                            </div>
-                            <div className="text-sm text-theme-2 mt-1">Phone: {address.phone}</div>
-                            {address.is_default && (
-                              <div className="text-xs text-[var(--accent)] font-semibold mt-2">DEFAULT</div>
-                            )}
-                          </label>
+                              {" — "}{address.city}, {address.state} {address.pincode}
+                            </p>
+                            <p className={cn("text-xs mt-1", muted)}>+91 {address.phone}</p>
+                          </div>
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all",
+                            isSelected ? "border-[#e93a3a] bg-[#e93a3a]" : isDark ? "border-white/20" : "border-black/20"
+                          )}>
+                            {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                )}
+                      </button>
+                    )
+                  })}
 
-                {addresses.length > 0 && (
                   <Link href="/profile/addresses/new">
-                    <Button variant="outline" className="w-full border-theme hover:bg-card">
-                      Add New Address
-                    </Button>
+                    <button className={cn(
+                      "w-full rounded-xl p-3.5 border border-dashed text-sm font-medium transition-all mt-1",
+                      isDark
+                        ? "border-white/[0.12] text-white/40 hover:text-white/70 hover:border-white/25"
+                        : "border-black/[0.12] text-black/40 hover:text-black/70 hover:border-black/25"
+                    )}>
+                      + Add New Address
+                    </button>
                   </Link>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              )}
+            </div>
 
             {/* Payment Method */}
-            <Card className="bg-card border-theme text-theme">
-              <CardHeader>
-                <CardTitle className="text-theme">Payment Method</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
-                  <div
-                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "cod" ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-theme"
-                      }`}
-                    onClick={() => setPaymentMethod("cod")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="cod" id="cod" />
-                      <label htmlFor="cod" className="flex-1 cursor-pointer flex items-center gap-3">
-                        <Wallet className="w-5 h-5 text-theme-2" />
-                        <div>
-                          <div className="font-semibold text-theme">Cash on Delivery</div>
-                          <div className="text-sm text-theme-2">Pay when you receive</div>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
+            <div className={card}>
+              <p className={sectionLabel}>
+                <CreditCard className="w-3 h-3" />
+                Payment Method
+              </p>
 
-                  <div
-                    className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "online" ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-theme"
-                      }`}
-                    onClick={() => setPaymentMethod("online")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="online" id="online" />
-                      <label htmlFor="online" className="flex-1 cursor-pointer flex items-center gap-3">
-                        <Smartphone className="w-5 h-5 text-theme-2" />
-                        <div>
-                          <div className="font-semibold text-theme">UPI Payment</div>
-                          <div className="text-sm text-theme-2">
-                            {isMobile ? "Pay via UPI app" : "Scan QR code to pay"}
-                          </div>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                </RadioGroup>
-
-                {/* UPI Payment Details */}
-                {paymentMethod === "online" && (
-                  <div className="mt-4 p-4 border border-theme rounded-lg bg-background/50">
-                    {isMobile ? (
-                      // Mobile: Show payment app selection
-                      <div className="space-y-4">
-                        <Label className="text-sm font-semibold text-theme">Select Payment App</Label>
-                        <RadioGroup value={selectedPaymentApp} onValueChange={setSelectedPaymentApp}>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "gpay" ? "border-blue-600 bg-blue-900/20" : "border-theme"
-                                }`}
-                              onClick={() => setSelectedPaymentApp("gpay")}
-                            >
-                              <div className="flex items-center gap-2">
-                                <RadioGroupItem value="gpay" id="gpay" />
-                                <label htmlFor="gpay" className="cursor-pointer text-sm font-medium text-theme">
-                                  Google Pay
-                                </label>
-                              </div>
-                            </div>
-                            <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "phonepe" ? "border-purple-600 bg-purple-900/20" : "border-theme"
-                                }`}
-                              onClick={() => setSelectedPaymentApp("phonepe")}
-                            >
-                              <div className="flex items-center gap-2">
-                                <RadioGroupItem value="phonepe" id="phonepe" />
-                                <label htmlFor="phonepe" className="cursor-pointer text-sm font-medium text-theme">
-                                  PhonePe
-                                </label>
-                              </div>
-                            </div>
-                            <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "paytm" ? "border-blue-600 bg-blue-900/20" : "border-theme"
-                                }`}
-                              onClick={() => setSelectedPaymentApp("paytm")}
-                            >
-                              <div className="flex items-center gap-2">
-                                <RadioGroupItem value="paytm" id="paytm" />
-                                <label htmlFor="paytm" className="cursor-pointer text-sm font-medium text-theme">
-                                  Paytm
-                                </label>
-                              </div>
-                            </div>
-                            <div
-                              className={`border rounded-lg p-3 cursor-pointer transition ${selectedPaymentApp === "default" ? "border-theme-3 bg-card" : "border-theme"
-                                }`}
-                              onClick={() => setSelectedPaymentApp("default")}
-                            >
-                              <div className="flex items-center gap-2">
-                                <RadioGroupItem value="default" id="default" />
-                                <label htmlFor="default" className="cursor-pointer text-sm font-medium text-theme">
-                                  Other UPI
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </RadioGroup>
-                        <Button
-                          onClick={handleUPIPayment}
-                          className="w-full bg-green-600 hover:bg-green-700"
-                        >
-                          <Smartphone className="w-4 h-4 mr-2" />
-                          Pay ₹{total.toLocaleString("en-IN")} via UPI
-                        </Button>
-                        <p className="text-xs text-theme-3 text-center">
-                          You will be redirected to your payment app
-                        </p>
-                      </div>
-                    ) : (
-                      // Desktop: Show QR code
-                      <div className="space-y-4">
-                        <div className="text-center">
-                          <Label className="text-sm font-semibold text-theme">Scan QR Code to Pay</Label>
-                          <p className="text-xs text-theme-3 mt-1">
-                            Use any UPI app to scan and pay
-                          </p>
-                        </div>
-                        <div className="flex justify-center p-4 bg-white dark:bg-[#111] rounded-lg">
-                          <QRCodeSVG
-                            value={generateUPIString()}
-                            size={200}
-                            level="H"
-                            includeMargin={true}
-                            className="border-4 border-theme rounded-lg"
-                          />
-                        </div>
-                        <div className="text-center space-y-2">
-                          <div className="flex items-center justify-center gap-2 text-sm">
-                            <QrCode className="w-4 h-4 text-theme-3" />
-                            <span className="font-semibold text-theme">Amount: ₹{total.toLocaleString("en-IN")}</span>
-                          </div>
-                          <div className="text-xs text-theme-3">
-                            UPI ID: {UPI_ID}
-                          </div>
-                        </div>
-                        <div className="bg-yellow-900/20 border border-yellow-800/30 rounded-lg p-3">
-                          <p className="text-xs text-yellow-200">
-                            ⚠️ After successful payment, please click "I've Paid" button below
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column - Order Summary */}
-          <div>
-            <Card className="sticky top-24 bg-card border-theme">
-              <CardHeader>
-                <CardTitle className="text-theme">Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Items */}
-                <div className="space-y-3">
-                  {items.map((item) => (
-                    <div key={`${item.product.id}-${item.size}`} className="flex gap-3">
-                      <div className="relative h-16 w-16 rounded-md overflow-hidden bg-[#111]/5 flex-shrink-0">
-                        <Image
-                          src={item.product.front_image || "/placeholder.jpg"}
-                          alt={item.product.name}
-                          fill
-                          className="object-cover"
-                        />
+              <div className="space-y-3">
+                {([
+                  { id: "razorpay" as const, icon: <CreditCard className="w-4 h-4" />, title: "Pay Online", sub: "Cards, UPI, NetBanking via Razorpay" },
+                  { id: "cod" as const, icon: <Wallet className="w-4 h-4" />, title: "Cash on Delivery", sub: "Pay when you receive" },
+                  { id: "online" as const, icon: <Smartphone className="w-4 h-4" />, title: "UPI Payment", sub: isMobile ? "Open your UPI app" : "Scan QR to pay" },
+                ] as const).map((opt) => {
+                  const isSelected = paymentMethod === opt.id
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => setPaymentMethod(opt.id)}
+                      className={cn(
+                        "w-full text-left rounded-xl p-4 border transition-all duration-200 flex items-center gap-4",
+                        isSelected
+                          ? "border-[#e93a3a] bg-[#e93a3a]/[0.06]"
+                          : isDark ? "border-white/[0.07] hover:border-white/15" : "border-black/[0.08] hover:border-black/20"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                        isSelected ? "bg-[#e93a3a]/15 text-[#e93a3a]" : isDark ? "bg-white/[0.06] text-white/45" : "bg-black/[0.05] text-black/45"
+                      )}>
+                        {opt.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate text-theme">{item.product.name}</p>
-                        <p className="text-xs text-theme-3">
-                          Size: {item.size} • Qty: {item.quantity}
-                        </p>
-                        <p className="text-sm font-semibold mt-1 text-theme">
-                          ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
-                        </p>
+                        <p className={cn("text-sm font-semibold", primary)}>{opt.title}</p>
+                        <p className={cn("text-xs", muted)}>{opt.sub}</p>
                       </div>
+                      <div className={cn(
+                        "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                        isSelected ? "border-[#e93a3a] bg-[#e93a3a]" : isDark ? "border-white/20" : "border-black/20"
+                      )}>
+                        {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* UPI detail panel */}
+              <AnimatePresence>
+                {paymentMethod === "online" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className={cn(
+                      "mt-4 rounded-xl p-4 border",
+                      isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-black/[0.02] border-black/[0.07]"
+                    )}>
+                      {isMobile ? (
+                        <div className="space-y-3">
+                          <p className={cn("text-xs font-bold tracking-widest uppercase", muted)}>Select App</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { id: "gpay", label: "Google Pay" },
+                              { id: "phonepe", label: "PhonePe" },
+                              { id: "paytm", label: "Paytm" },
+                              { id: "default", label: "Other UPI" },
+                            ].map((app) => (
+                              <button
+                                key={app.id}
+                                onClick={() => setSelectedPaymentApp(app.id)}
+                                className={cn(
+                                  "rounded-xl p-3 text-sm font-medium border transition-all",
+                                  selectedPaymentApp === app.id
+                                    ? "border-[#e93a3a] bg-[#e93a3a]/10 text-[#e93a3a]"
+                                    : isDark ? "border-white/[0.08] text-white/60 hover:border-white/20" : "border-black/[0.08] text-black/60 hover:border-black/20"
+                                )}
+                              >
+                                {app.label}
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            onClick={handleUPIPayment}
+                            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-all"
+                          >
+                            Pay ₹{total.toLocaleString("en-IN")} via UPI
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-4">
+                          <div>
+                            <p className={cn("text-xs font-bold tracking-widest uppercase text-center mb-1", muted)}>Scan to Pay</p>
+                            <p className={cn("text-xs text-center", muted)}>Use any UPI app</p>
+                          </div>
+                          <div className="p-3 bg-white rounded-xl">
+                            <QRCodeSVG value={generateUPIString()} size={160} level="H" includeMargin={false} />
+                          </div>
+                          <div className="text-center">
+                            <p className={cn("text-sm font-bold", primary)}>₹{total.toLocaleString("en-IN")}</p>
+                            <p className={cn("text-xs", muted)}>UPI: {UPI_ID}</p>
+                          </div>
+                          <div className={cn(
+                            "w-full rounded-lg px-3 py-2.5 text-xs border text-center",
+                            isDark ? "bg-yellow-500/[0.08] border-yellow-500/20 text-yellow-400" : "bg-yellow-50 border-yellow-200 text-yellow-700"
+                          )}>
+                            After paying, click "Place Order" below to confirm
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* ── Right column — Order Summary ──────────────────────── */}
+          <div>
+            <div className={cn(card, "lg:sticky lg:top-24")}>
+              <p className={sectionLabel}>Order Summary</p>
+
+              <div className="space-y-4 mb-5">
+                {items.map((item) => (
+                  <div key={`${item.product.id}-${item.size}`} className="flex gap-3">
+                    <div className={cn(
+                      "relative h-14 w-14 rounded-xl overflow-hidden shrink-0",
+                      isDark ? "bg-white/[0.05]" : "bg-black/[0.05]"
+                    )}>
+                      <Image
+                        src={item.product.front_image || "/placeholder.jpg"}
+                        alt={item.product.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-sm font-medium truncate", primary)}>{item.product.name}</p>
+                      <p className={cn("text-xs mt-0.5", muted)}>{item.size} · Qty {item.quantity}</p>
+                      <p className={cn("text-sm font-bold mt-0.5", primary)}>
+                        ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className={cn("h-px mb-4", isDark ? "bg-white/[0.06]" : "bg-black/[0.07]")} />
+
+              <div className="space-y-2.5 mb-5">
+                {[
+                  { label: "Subtotal", value: `₹${subtotal.toLocaleString("en-IN")}` },
+                  { label: "Shipping", value: shipping === 0 ? "Free" : `₹${shipping}` },
+                ].map((row) => (
+                  <div key={row.label} className="flex justify-between text-sm">
+                    <span className={muted}>{row.label}</span>
+                    <span className={cn("font-medium", primary)}>{row.value}</span>
+                  </div>
+                ))}
+                <div className={cn("h-px", isDark ? "bg-white/[0.06]" : "bg-black/[0.07]")} />
+                <div className="flex justify-between">
+                  <span className={cn("font-bold", primary)}>Total</span>
+                  <span className="font-bold text-[#e93a3a] text-base">₹{total.toLocaleString("en-IN")}</span>
                 </div>
+              </div>
 
-                <Separator className="bg-[#111]/5" />
-
-                {/* Price Breakdown */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-theme-3">Subtotal</span>
-                    <span className="font-medium text-theme">₹{subtotal.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-theme-3">Shipping</span>
-                    <span className="font-medium text-theme">{shipping === 0 ? "Free" : `₹${shipping}`}</span>
-                  </div>
-                  <Separator className="bg-theme opacity-10" />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span className="text-theme">Total</span>
-                    <span className="text-theme">₹{total.toLocaleString("en-IN")}</span>
-                  </div>
-                </div>
-
-                <Button
+              {paymentMethod === "razorpay" ? (
+                <RazorpayCheckout
+                  items={items.map((item) => ({
+                    productId: String(item.product.id),
+                    quantity: item.quantity,
+                    size: item.size,
+                  }))}
+                  couponCode={couponCode || undefined}
+                  shippingAddressId={selectedAddress || undefined}
+                  isDark={isDark}
+                />
+              ) : (
+                <button
                   onClick={handlePlaceOrder}
                   disabled={loading || !selectedAddress}
-                  className="w-full bg-[var(--accent)] hover:opacity-90 h-12 text-white font-bold"
+                  className={cn(
+                    "w-full py-4 rounded-full font-bold tracking-widest text-sm transition-all",
+                    "bg-[#e93a3a] hover:bg-[#ff4a4a] text-white shadow-lg shadow-[#e93a3a]/25",
+                    "disabled:opacity-40 disabled:cursor-not-allowed",
+                    loading && "animate-pulse"
+                  )}
                 >
-                  {loading ? "Placing Order..." : "Place Order"}
-                </Button>
+                  {loading ? "Placing Order…" : "Place Order"}
+                </button>
+              )}
 
-                <p className="text-xs text-theme-3 text-center">
-                  By placing your order, you agree to our terms and conditions
-                </p>
-              </CardContent>
-            </Card>
+              <p className={cn("text-xs text-center mt-3", muted)}>
+                By placing your order you agree to our{" "}
+                <Link href="/terms-conditions" className="underline underline-offset-2 hover:text-[#e93a3a] transition-colors">
+                  terms
+                </Link>
+              </p>
+            </div>
           </div>
+
         </div>
       </div>
-    </div>
+    </main>
   )
 }
