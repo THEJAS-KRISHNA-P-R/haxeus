@@ -4,6 +4,8 @@ import Link from "next/link"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 import { useState, useEffect, useRef } from "react"
+import { ShimmerButton } from "@/components/ui/ShimmerButton"
+import { ShinyButton } from "@/components/ui/shiny-button"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion, useScroll, useTransform } from "framer-motion"
@@ -165,33 +167,28 @@ export default function HomePage() {
                   </motion.p>
                 </motion.div>
 
-                <motion.div
-                  variants={fadeIn}
-                  className="flex gap-4 flex-wrap mt-2"
-                >
+                <div className="flex gap-4 flex-wrap mt-2">
                   <Link href="/products">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
+                    <ShinyButton
+                      highlight="#ff0000ff"
+                      highlightSubtle="#ff009dff"
+                      className="h-[52px] px-7"  // ← add this
                     >
-                      <Button size="lg" className="bg-[var(--accent)] hover:opacity-90 text-white px-10 py-6 rounded-full text-lg shadow-lg shadow-[var(--accent)]/20 transition-all duration-300">
-                        Shop Collection
-                      </Button>
-                    </motion.div>
+                      Shop Collection
+                    </ShinyButton>
                   </Link>
                   <Link href="/about">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
+                    <ShimmerButton
+                      background="rgba(0, 0, 0, 0.92)"
+                      borderRadius="100px"
+                      shimmerColor="#dededeff"
+                      shimmerDuration="2.5s"
+                      className="h-[52px] px-7 border-white/[0.08] text-white/90 text-sm font-semibold tracking-widest uppercase"  // ← h-[52px] matches
                     >
-                      <Button variant="outline" size="lg" className="px-10 py-6 rounded-full border border-theme bg-white/5 backdrop-blur-sm hover:bg-white/10 text-theme text-lg transition-all duration-300">
-                        Our Story
-                      </Button>
-                    </motion.div>
+                      Our Story
+                    </ShimmerButton>
                   </Link>
-                </motion.div>
+                </div>
 
                 {/* Stats with accent colors */}
                 <motion.div

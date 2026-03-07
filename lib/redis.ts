@@ -9,11 +9,11 @@ export const redis = new Redis({
 // TTL constants
 export const TTL = {
     ANALYTICS: 60 * 5,      //  5 minutes
-    PRODUCTS: 60 * 10,     // 10 minutes
-    PRODUCT: 60 * 5,      //  5 minutes
-    SETTINGS: 60 * 60,     //  1 hour
-    COUPON: 60 * 2,      //  2 minutes
-    RATE_LIMIT: 60,          //  1 minute window
+    PRODUCTS: 60 * 10,      // 10 minutes
+    PRODUCT: 60 * 5,        //  5 minutes
+    SETTINGS: 60 * 60,      //  1 hour
+    COUPON: 60 * 2,         //  2 minutes
+    RATE_LIMIT: 60,         //  1 minute window
 } as const
 
 // Generic get-or-set with automatic JSON serialization
@@ -43,4 +43,40 @@ export async function invalidate(...keys: string[]) {
     try {
         await redis.del(...keys)
     } catch { }
+}
+
+/**
+ * Sliding window rate limiter using Redis INCR + EXPIRE.
+ * Returns { limited: true } if the caller has exceeded `limit` requests
+ * in the last `windowSecs` seconds.
+ *
+ * Fails open: if Redis is down, returns { limited: false } to avoid
+ * blocking legitimate traffic.
+ */
+export async function rateLimit(
+    key: string,
+    limit: number,
+    windowSecs: number
+): Promise<{ limited: boolean; remaining: number; reset: number }> {
+    try {
+        const redisKey = `rl:${key}`
+        const count = await redis.incr(redisKey)
+
+        // Set expiry only on first increment
+        if (count === 1) {
+            await redis.expire(redisKey, windowSecs)
+        }
+
+        const remaining = Math.max(0, limit - count)
+        const reset = Math.floor(Date.now() / 1000) + windowSecs
+
+        return {
+            limited: count > limit,
+            remaining,
+            reset,
+        }
+    } catch {
+        // Redis down — fail open (don't block traffic)
+        return { limited: false, remaining: limit, reset: 0 }
+    }
 }
