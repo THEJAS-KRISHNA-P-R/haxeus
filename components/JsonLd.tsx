@@ -6,7 +6,7 @@
 //   Category/product pages: <BreadcrumbJsonLd items={[...]} />
 //   Size guide / FAQ pages: <FAQJsonLd items={[...]} />
 
-const SITE_URL = "https://haxeus.com"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 
 // ── Organization — add to root layout once ────────────────────────────────────
 export function OrganizationJsonLd() {
@@ -21,7 +21,7 @@ export function OrganizationJsonLd() {
         contactPoint: {
             "@type": "ContactPoint",
             contactType: "customer support",
-            email: "support@haxeus.com",
+            email: "haxeus.in@gmail.com",
             availableLanguage: ["English", "Malayalam"],
         },
         sameAs: [

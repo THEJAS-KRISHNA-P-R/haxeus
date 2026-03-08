@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
-const SITE_URL = "https://haxeus.com"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY
 
 const INDEXNOW_ENGINES = [

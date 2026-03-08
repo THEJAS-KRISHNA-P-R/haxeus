@@ -180,7 +180,7 @@ export default function PrivacyPolicyPage() {
           isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-black/[0.02] border-black/[0.07]"
         )}>
           <p className={cn("text-sm leading-relaxed", isDark ? "text-white/65" : "text-black/65")}>
-            HAXEUS ("we", "us", "our") is committed to protecting your privacy. This policy explains what personal information we collect, how we use it, and what rights you have over it. By using haxeus.com, you agree to the practices described here.
+            HAXEUS ("we", "us", "our") is committed to protecting your privacy. This policy explains what personal information we collect, how we use it, and what rights you have over it. By using haxeus.in, you agree to the practices described here.
           </p>
         </div>
 

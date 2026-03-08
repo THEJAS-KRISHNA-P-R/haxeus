@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next"
 
-const SITE_URL = "https://haxeus.com"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 
 export default function robots(): MetadataRoute.Robots {
     return {
@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
             {
                 userAgent: "*",
                 allow: ["/", "/products", "/products/", "/about", "/contact", "/size-guide",
-                    "/privacy-policy", "/returns-refunds", "/terms-conditions"],
+                    "/privacy-policy", "/returns-refunds", "/terms-conditions", "/shipping-policy"],
                 disallow: ["/admin", "/admin/", "/api/", "/profile", "/profile/",
                     "/cart", "/checkout", "/order-success", "/auth"],
             },

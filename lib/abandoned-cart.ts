@@ -312,7 +312,7 @@ async function sendAbandonedCartEmail(
         quantity: itemsCount
       }
     ]
-    const checkoutUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://haxeus.com'}/cart`
+    const checkoutUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://haxeus.in'}/cart`
 
     switch (stage) {
       case 1:
@@ -351,7 +351,7 @@ async function sendAbandonedCartEmail(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'HAXEUS <orders@haxeus.com>',
+        from: 'HAXEUS <orders@haxeus.in>',
         to: [email],
         subject: emailTemplate.subject,
         html: emailTemplate.html,

@@ -41,7 +41,7 @@ INSERT INTO public.coupons (code, description, discount_type, discount_value, mi
 -- ─── Store Settings ─────────────────────────────────────────────────────────
 INSERT INTO public.store_settings (key, value) VALUES
 ('store_name', '"HAXEUS"'),
-('store_email', '"support@haxeus.com"'),
+('store_email', '"support@haxeus.in"'),
 ('store_phone', '"+91 98765 43210"'),
 ('currency', '"INR"'),
 ('tax_rate', '18'),
