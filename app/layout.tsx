@@ -10,6 +10,7 @@ import { PWAProvider } from "@/components/PWAProvider"
 import { LightPillarBackground } from "@/components/LightPillarBackground"
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd"
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata, Viewport } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -130,6 +131,7 @@ export default function RootLayout({
             <ConditionalFooter /> {/* Changed from Footer */}
             <Toaster />
             <Analytics />
+            <SpeedInsights />
           </CartProvider>
         </ThemeProvider>
       </body>
