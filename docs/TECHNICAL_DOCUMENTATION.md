@@ -180,10 +180,12 @@ All admin pages query Supabase directly — zero hardcoded mock data.
 
 ## Vercel Deployment & Crons
 The project includes a `vercel.json` for managing automated tasks:
-- **Abandoned Cart Recovery**: Runs every hour at `/api/cron/abandoned-carts`.
-- **Email Queue Processor**: Runs every 10 minutes at `/api/process-emails`.
+- **Abandoned Cart Recovery**: Runs daily at 9:00 AM at `/api/cron/abandoned-carts`.
+- **Email Queue Processor**: Runs daily at 10:00 AM at `/api/process-emails`.
 
-All cron endpoints are protected by the `CRON_SECRET` environment variable. Ensure this is set in Vercel to matching values for the crons to execute successfully.
+## Analytics & Monitoring
+- **Vercel Analytics**: Fully integrated in the root layout for real-time traffic and performance monitoring.
+- **Resend Logs**: Detailed tracking of email delivery status.
 
 ---
 
