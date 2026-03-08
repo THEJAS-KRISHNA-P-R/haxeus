@@ -1,17 +1,20 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import DOMPurify from "isomorphic-dompurify"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
 /**
- * Sanitize user-provided text — strips ALL HTML tags and attributes,
+ * Sanitize user-provided text — strips HTML tags using regex,
  * trims whitespace, and enforces a max length of 2000 characters.
  */
 export function sanitizeText(input: string): string {
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+  if (!input) return ""
+  return input
+    .replace(/<[^>]*>/g, "") // strip HTML tags
+    .replace(/javascript:/gi, "") // strip javascript: protocol
+    .replace(/on\w+\s*=/gi, "") // strip event handlers
     .trim()
     .slice(0, 2000)
 }
