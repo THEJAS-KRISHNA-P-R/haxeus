@@ -39,6 +39,7 @@ export default function EditProductPage() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
@@ -310,6 +311,30 @@ export default function EditProductPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!window.confirm("Are you sure you want to PERMANENTLY delete this product? This will also remove inventory, images, and reviews. Order history will be preserved via snapshots.")) {
+      return
+    }
+
+    setDeleting(true)
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", productId)
+
+      if (error) throw error
+
+      router.push("/admin/products")
+      router.refresh()
+    } catch (error: any) {
+      console.error("Error deleting product:", error)
+      alert(`Failed to delete product: ${error.message}`)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   function updateColors(colorsString: string) {
     const colorsArray = colorsString.split(",").map((c) => c.trim()).filter(c => c)
     setFormData({ ...formData, colors: colorsArray })
@@ -443,9 +468,19 @@ export default function EditProductPage() {
               Cancel
             </Button>
           </Link>
+          {productId !== "new" && (
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={saving || deleting}
+              className="gap-2"
+            >
+              {deleting ? "Deleting..." : "Delete Product"}
+            </Button>
+          )}
           <Button
             onClick={handleSave}
-            disabled={saving || !formData.name || formData.price <= 0}
+            disabled={saving || deleting || !formData.name || formData.price <= 0}
             className={cn("gap-2 text-white", isDark ? "bg-[#e93a3a] hover:bg-[#e93a3a]/80" : "bg-[#e93a3a] hover:bg-[#e93a3a]/80")}
           >
             <Save size={16} />

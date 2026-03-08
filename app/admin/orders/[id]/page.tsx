@@ -23,7 +23,9 @@ interface OrderWithDetails extends Order {
     product: {
       name: string
       front_image: string
-    }
+    } | null
+    product_name: string | null
+    product_image: string | null
   })[]
 }
 
@@ -49,6 +51,8 @@ export default function OrderDetailPage() {
           *,
           order_items (
             *,
+            product_name,
+            product_image,
             product:products (
               name,
               front_image
@@ -87,7 +91,7 @@ export default function OrderDetailPage() {
       // Send shipping update email if status is shipped or delivered
       if (order && (newStatus === "shipped" || newStatus === "delivered")) {
         const { data: userData } = await supabase.auth.admin.getUserById(order.user_id)
-        
+
         if (userData?.user?.email) {
           await sendShippingUpdateEmail({
             orderId: order.id,
@@ -183,14 +187,14 @@ export default function OrderDetailPage() {
                 >
                   <div className="relative h-20 w-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
                     <Image
-                      src={item.product.front_image || "/placeholder.jpg"}
-                      alt={item.product.name}
+                      src={item.product_image || item.product?.front_image || "/placeholder.jpg"}
+                      alt={item.product_name || item.product?.name || "Product"}
                       fill
                       className="object-cover"
                     />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium">{item.product.name}</p>
+                    <p className="font-medium">{item.product_name || item.product?.name || "Product Deleted"}</p>
                     <p className="text-sm text-gray-500">
                       Size: {item.size} • Qty: {item.quantity}
                     </p>

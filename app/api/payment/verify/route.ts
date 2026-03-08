@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
         // ── Decrement inventory for each item ──────────────────────────────────
         const { data: orderItems } = await supabaseAdmin
             .from("order_items")
-            .select("product_id, quantity, size, price, products(name)")
+            .select("product_id, quantity, size, price, product_name, product_image, products(name)")
             .eq("order_id", orderId)
 
         if (orderItems?.length) {
@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
         if (order.shipping_email && orderItems?.length) {
             import("@/lib/email").then(({ sendOrderConfirmationEmail }) => {
                 const formattedItems = orderItems.map((item: any) => ({
-                    name: item.products?.name || "Product",
+                    name: item.product_name || item.products?.name || "Product",
                     size: item.size,
                     quantity: item.quantity,
                     price: item.price,

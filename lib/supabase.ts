@@ -80,10 +80,12 @@ export interface Order {
 export interface OrderItem {
   id: string
   order_id: string
-  product_id: number
+  product_id: number | null
   size: string
   quantity: number
   price: number
+  product_name?: string | null
+  product_image?: string | null
   created_at?: string
   product?: Product
 }
