@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     // Verify cron secret (recommended for production)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
-    
+
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
 
   } catch (error) {
     console.error('Abandoned cart cron job failed:', error)
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
   try {
     // Verify admin authentication
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
@@ -91,13 +91,13 @@ export async function POST(request: Request) {
     }
 
     // Check if user is admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
       .single()
 
-    if (!profile?.is_admin) {
+    if (roleData?.role !== 'admin') {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Manual abandoned cart processing failed:', error)
-    
+
     return NextResponse.json(
       {
         success: false,

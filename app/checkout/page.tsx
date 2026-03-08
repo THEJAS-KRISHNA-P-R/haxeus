@@ -6,35 +6,24 @@ import { supabase, type UserAddress } from "@/lib/supabase"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/components/ThemeProvider"
-import { sendOrderConfirmationEmail } from "@/lib/email"
-import { ArrowLeft, CreditCard, Wallet, Smartphone, MapPin, Check } from "lucide-react"
+import { ArrowLeft, CreditCard, MapPin, Check, Shield } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { QRCodeSVG } from "qrcode.react"
-import { useIsMobile } from "@/hooks/use-mobile"
 import { RazorpayCheckout } from "@/components/RazorpayCheckout"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, clearCart } = useCart()
   const { toast } = useToast()
-  const isMobile = useIsMobile()
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const isDark = mounted && (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = mounted && theme === "dark"
 
   const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
   const [addresses, setAddresses] = useState<UserAddress[]>([])
   const [selectedAddress, setSelectedAddress] = useState<string>("")
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "online" | "razorpay">("razorpay")
-  const [selectedPaymentApp, setSelectedPaymentApp] = useState<string>("gpay")
   const [couponCode] = useState<string>("")
 
   useEffect(() => { checkAuth() }, [])
@@ -60,60 +49,6 @@ export default function CheckoutPage() {
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const shipping = subtotal > 2000 ? 0 : 150
   const total = subtotal + shipping
-
-  const UPI_ID = "shahzadak735@okaxis"
-  const UPI_NAME = "HAXEUS"
-  const generateUPIString = () =>
-    `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent("Order Payment - HAXEUS")}`
-
-  const handleUPIPayment = () => {
-    const appUrls: Record<string, string> = {
-      gpay: `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
-      phonepe: `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
-      paytm: `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${total}&cu=INR`,
-      default: generateUPIString(),
-    }
-    window.location.href = appUrls[selectedPaymentApp] || appUrls.default
-    toast({ title: "Opening payment app", description: "Complete the payment in your UPI app" })
-  }
-
-  async function handlePlaceOrder() {
-    if (!selectedAddress) {
-      toast({ title: "Select delivery address", description: "Please select a delivery address to continue", variant: "destructive" })
-      return
-    }
-    setLoading(true)
-    try {
-      const res = await fetch("/api/orders/cod", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, shippingAddressId: selectedAddress, paymentMethod, total }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "Failed to place order")
-
-      const address = addresses.find((addr) => addr.id === selectedAddress)
-      if (address) {
-        await sendOrderConfirmationEmail({
-          orderId: data.orderId,
-          customerEmail: user.email!,
-          customerName: address.full_name,
-          items: items.map((item) => ({ name: item.product.name, size: item.size, quantity: item.quantity, price: item.product.price })),
-          totalAmount: total,
-          shippingAddress: { fullName: address.full_name, addressLine1: address.address_line1, addressLine2: address.address_line2, city: address.city, state: address.state, pincode: address.pincode, phone: address.phone },
-        }).catch((err) => console.error("Email send failed:", err?.message))
-      }
-
-      clearCart()
-      toast({ title: "Order placed successfully!", description: "You will receive a confirmation email shortly." })
-      router.push(`/orders/${data.orderId}`)
-    } catch (error: any) {
-      console.error("Error placing order:", error?.message ?? error)
-      toast({ title: "Failed to place order", description: error?.message || "Please try again", variant: "destructive" })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   // ── Shared style tokens ────────────────────────────────────────────────────
   const card = cn(
@@ -247,122 +182,31 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* Payment Method */}
+            {/* Payment Method — Razorpay only */}
             <div className={card}>
               <p className={sectionLabel}>
                 <CreditCard className="w-3 h-3" />
                 Payment Method
               </p>
 
-              <div className="space-y-3">
-                {([
-                  { id: "razorpay" as const, icon: <CreditCard className="w-4 h-4" />, title: "Pay Online", sub: "Cards, UPI, NetBanking via Razorpay" },
-                  { id: "cod" as const, icon: <Wallet className="w-4 h-4" />, title: "Cash on Delivery", sub: "Pay when you receive" },
-                  { id: "online" as const, icon: <Smartphone className="w-4 h-4" />, title: "UPI Payment", sub: isMobile ? "Open your UPI app" : "Scan QR to pay" },
-                ] as const).map((opt) => {
-                  const isSelected = paymentMethod === opt.id
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => setPaymentMethod(opt.id)}
-                      className={cn(
-                        "w-full text-left rounded-xl p-4 border transition-all duration-200 flex items-center gap-4",
-                        isSelected
-                          ? "border-[#e93a3a] bg-[#e93a3a]/[0.06]"
-                          : isDark ? "border-white/[0.07] hover:border-white/15" : "border-black/[0.08] hover:border-black/20"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                        isSelected ? "bg-[#e93a3a]/15 text-[#e93a3a]" : isDark ? "bg-white/[0.06] text-white/45" : "bg-black/[0.05] text-black/45"
-                      )}>
-                        {opt.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn("text-sm font-semibold", primary)}>{opt.title}</p>
-                        <p className={cn("text-xs", muted)}>{opt.sub}</p>
-                      </div>
-                      <div className={cn(
-                        "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-                        isSelected ? "border-[#e93a3a] bg-[#e93a3a]" : isDark ? "border-white/20" : "border-black/20"
-                      )}>
-                        {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-                      </div>
-                    </button>
-                  )
-                })}
+              <div className={cn(
+                "flex items-center gap-4 rounded-xl p-4 border",
+                isDark ? "border-white/[0.07] bg-white/[0.02]" : "border-black/[0.07] bg-black/[0.02]"
+              )}>
+                <div className={cn(
+                  "w-9 h-9 rounded-xl flex items-center justify-center shrink-0",
+                  isDark ? "bg-white/[0.06] text-white/60" : "bg-black/[0.05] text-black/60"
+                )}>
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-sm font-semibold", primary)}>Secure payment via Razorpay</p>
+                  <p className={cn("text-xs", muted)}>Cards · UPI · NetBanking · Wallets</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <CreditCard className={cn("w-4 h-4", muted)} />
+                </div>
               </div>
-
-              {/* UPI detail panel */}
-              <AnimatePresence>
-                {paymentMethod === "online" && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className={cn(
-                      "mt-4 rounded-xl p-4 border",
-                      isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-black/[0.02] border-black/[0.07]"
-                    )}>
-                      {isMobile ? (
-                        <div className="space-y-3">
-                          <p className={cn("text-xs font-bold tracking-widest uppercase", muted)}>Select App</p>
-                          <div className="grid grid-cols-2 gap-2">
-                            {[
-                              { id: "gpay", label: "Google Pay" },
-                              { id: "phonepe", label: "PhonePe" },
-                              { id: "paytm", label: "Paytm" },
-                              { id: "default", label: "Other UPI" },
-                            ].map((app) => (
-                              <button
-                                key={app.id}
-                                onClick={() => setSelectedPaymentApp(app.id)}
-                                className={cn(
-                                  "rounded-xl p-3 text-sm font-medium border transition-all",
-                                  selectedPaymentApp === app.id
-                                    ? "border-[#e93a3a] bg-[#e93a3a]/10 text-[#e93a3a]"
-                                    : isDark ? "border-white/[0.08] text-white/60 hover:border-white/20" : "border-black/[0.08] text-black/60 hover:border-black/20"
-                                )}
-                              >
-                                {app.label}
-                              </button>
-                            ))}
-                          </div>
-                          <button
-                            onClick={handleUPIPayment}
-                            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-all"
-                          >
-                            Pay ₹{total.toLocaleString("en-IN")} via UPI
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-4">
-                          <div>
-                            <p className={cn("text-xs font-bold tracking-widest uppercase text-center mb-1", muted)}>Scan to Pay</p>
-                            <p className={cn("text-xs text-center", muted)}>Use any UPI app</p>
-                          </div>
-                          <div className="p-3 bg-white rounded-xl">
-                            <QRCodeSVG value={generateUPIString()} size={160} level="H" includeMargin={false} />
-                          </div>
-                          <div className="text-center">
-                            <p className={cn("text-sm font-bold", primary)}>₹{total.toLocaleString("en-IN")}</p>
-                            <p className={cn("text-xs", muted)}>UPI: {UPI_ID}</p>
-                          </div>
-                          <div className={cn(
-                            "w-full rounded-lg px-3 py-2.5 text-xs border text-center",
-                            isDark ? "bg-yellow-500/[0.08] border-yellow-500/20 text-yellow-400" : "bg-yellow-50 border-yellow-200 text-yellow-700"
-                          )}>
-                            After paying, click "Place Order" below to confirm
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
           </div>
 
@@ -415,31 +259,16 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {paymentMethod === "razorpay" ? (
-                <RazorpayCheckout
-                  items={items.map((item) => ({
-                    productId: String(item.product.id),
-                    quantity: item.quantity,
-                    size: item.size,
-                  }))}
-                  couponCode={couponCode || undefined}
-                  shippingAddressId={selectedAddress || undefined}
-                  isDark={isDark}
-                />
-              ) : (
-                <button
-                  onClick={handlePlaceOrder}
-                  disabled={loading || !selectedAddress}
-                  className={cn(
-                    "w-full py-4 rounded-full font-bold tracking-widest text-sm transition-all",
-                    "bg-[#e93a3a] hover:bg-[#ff4a4a] text-white shadow-lg shadow-[#e93a3a]/25",
-                    "disabled:opacity-40 disabled:cursor-not-allowed",
-                    loading && "animate-pulse"
-                  )}
-                >
-                  {loading ? "Placing Order…" : "Place Order"}
-                </button>
-              )}
+              <RazorpayCheckout
+                items={items.map((item) => ({
+                  productId: String(item.product.id),
+                  quantity: item.quantity,
+                  size: item.size,
+                }))}
+                couponCode={couponCode || undefined}
+                shippingAddressId={selectedAddress || undefined}
+                isDark={isDark}
+              />
 
               <p className={cn("text-xs text-center mt-3", muted)}>
                 By placing your order you agree to our{" "}

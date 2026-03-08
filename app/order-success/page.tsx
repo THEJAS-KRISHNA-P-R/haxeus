@@ -12,10 +12,7 @@ export default function OrderSuccessPage() {
     const { theme } = useTheme()
     const [mounted, setMounted] = useState(false)
     useEffect(() => setMounted(true), [])
-    const isDark = mounted && (
-        theme === "dark" ||
-        (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-    )
+    const isDark = mounted && theme === "dark"
 
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -37,7 +34,7 @@ export default function OrderSuccessPage() {
 
             const { data } = await supabase
                 .from("orders")
-                .select("id, total_amount, status, created_at, order_items(quantity, unit_price, product:products(name))")
+                .select("id, total_amount, status, created_at, order_items(quantity, price, product:products(name))")
                 .eq("id", orderId)
                 .eq("user_id", user.id) // Explicit ownership — don't rely on RLS alone
                 .single()
@@ -112,7 +109,7 @@ export default function OrderSuccessPage() {
                                     {item.product?.name} × {item.quantity}
                                 </span>
                                 <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>
-                                    ₹{(item.unit_price * item.quantity).toLocaleString("en-IN")}
+                                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                                 </span>
                             </div>
                         ))}

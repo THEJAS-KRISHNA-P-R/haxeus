@@ -126,11 +126,20 @@ export default function ProductDetailPage() {
   }
 
   useEffect(() => {
-    if (product) {
+    if (product && inventory.length > 0) {
       const productSizes = product.sizes || product.available_sizes || []
-      if (productSizes.length > 0) setSelectedSize(productSizes[0])
+      // Find first available size
+      const firstAvailable = productSizes.find(size => {
+        const stock = inventory.find(inv => inv.size === size)
+        return stock && stock.stock_quantity > 0
+      })
+      if (firstAvailable) {
+        setSelectedSize(firstAvailable)
+      } else if (productSizes.length > 0) {
+        setSelectedSize(productSizes[0])
+      }
     }
-  }, [product])
+  }, [product, inventory])
 
   const addToCart = async () => {
     if (!selectedSize) {
@@ -187,7 +196,7 @@ export default function ProductDetailPage() {
   }
 
   const selectedStock = inventory.find((inv) => inv.size === selectedSize)
-  const isOutOfStock = selectedStock && selectedStock.stock_quantity <= 0
+  const isOutOfStock = !selectedStock || selectedStock.stock_quantity <= 0
 
   // Show loading state
   if (loading) {
@@ -215,7 +224,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-theme py-8 opacity-0 animate-fadeIn transition-colors duration-300">
+    <div className="min-h-screen bg-theme pt-[100px] pb-8 opacity-0 animate-fadeIn transition-colors duration-300">
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -347,11 +356,12 @@ export default function ProductDetailPage() {
                     <div
                       key={size}
                       className={`relative border-2 rounded-xl p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${!available
-                        ? 'opacity-40 cursor-not-allowed border-theme text-theme-3'
+                        ? 'opacity-30 cursor-not-allowed border-white/5 bg-white/5 text-white/20 grayscale'
                         : selectedSize === size
                           ? 'bg-[var(--accent)] text-white border-[var(--accent)] cursor-pointer shadow-lg shadow-[var(--accent)]/20'
                           : 'hover:bg-card border-theme text-theme-2 cursor-pointer hover:border-[var(--accent)]'
                         }`}
+                      style={!available ? { pointerEvents: 'none', filter: 'contrast(0.5) brightness(0.7)' } : {}}
                       onClick={() => available && setSelectedSize(size)}
                     >
                       {size}

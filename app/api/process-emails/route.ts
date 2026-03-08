@@ -1,5 +1,6 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { sendEmail } from '@/lib/resend'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -64,36 +65,27 @@ export async function POST(request: Request) {
           })
         }
 
-        // Send email via Resend API
-        const resendResponse = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'HAXEUS <onboarding@resend.dev>',
-            to: email.recipient_email,
-            subject: email.subject,
-            html: htmlBody,
-            text: textBody,
-          }),
+        // Send email via our centralized Resend utility
+        const { success, error: sendError } = await sendEmail({
+          to: email.recipient_email,
+          subject: email.subject,
+          html: htmlBody,
+          // from is handled by default in sendEmail as 'orders@haxeus.in'
         })
 
-        if (!resendResponse.ok) {
-          const errorData = await resendResponse.json()
+        if (!success) {
           // Mark as failed
           await supabase
             .from('email_queue')
             .update({
               status: 'failed',
-              error_message: errorData.message || 'Failed to send',
+              error_message: typeof sendError === 'string' ? sendError : JSON.stringify(sendError) || 'Failed to send',
               updated_at: new Date().toISOString()
             })
             .eq('id', email.id)
 
           failCount++
-          console.error(`Failed to send email ${email.id}:`, errorData)
+          console.error(`Failed to send email ${email.id}:`, sendError)
         } else {
           // Mark as sent
           await supabase

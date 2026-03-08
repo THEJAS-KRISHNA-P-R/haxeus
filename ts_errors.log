@@ -1,0 +1,13 @@
+app/admin/orders/[id]/page.tsx(6,10): error TS2305: Module '"@/lib/email"' has no exported member 'sendShippingUpdateEmail'.
+app/checkout/page.tsx(24,6): error TS2367: This comparison appears to be unintentional because the types '"light"' and '"system"' have no overlap.
+app/order-success/page.tsx(17,10): error TS2367: This comparison appears to be unintentional because the types '"light"' and '"system"' have no overlap.
+app/size-guide/page.tsx(81,6): error TS2367: This comparison appears to be unintentional because the types '"light"' and '"system"' have no overlap.
+components/navbar.tsx(40,51): error TS2367: This comparison appears to be unintentional because the types '"light"' and '"system"' have no overlap.
+components/NewsletterSignup.tsx(6,10): error TS2305: Module '"@/lib/email"' has no exported member 'subscribeToNewsletter'.
+components/Shuffle.tsx(186,30): error TS2503: Cannot find namespace 'JSX'.
+components/Shuffle.tsx(193,9): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'string | number | symbol' is not assignable to parameter of type 'string | FunctionComponent<{ ref: any; className: string; style: CSSProperties; }> | ComponentClass<{ ref: any; className: string; style: CSSProperties; }, any>'.
+      Type 'number' is not assignable to type 'string | FunctionComponent<{ ref: any; className: string; style: CSSProperties; }> | ComponentClass<{ ref: any; className: string; style: CSSProperties; }, any>'.
+lib/supabase-server.ts(12,40): error TS2339: Property 'getAll' does not exist on type 'Promise<ReadonlyRequestCookies>'.
+lib/supabase-server.ts(16,37): error TS2339: Property 'set' does not exist on type 'Promise<ReadonlyRequestCookies>'.

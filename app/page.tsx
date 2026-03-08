@@ -41,6 +41,37 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [newsletterEmail, setNewsletterEmail] = useState("")
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "loading" | "success" | "duplicate" | "error">("idle")
+
+  const handleNewsletterSubmit = async () => {
+    if (!newsletterEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail)) return
+    setNewsletterStatus("loading")
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail.trim().toLowerCase() })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        if (data.error === "already_subscribed") {
+          setNewsletterStatus("duplicate")
+        } else {
+          setNewsletterStatus("error")
+        }
+      } else {
+        setNewsletterStatus("success")
+        setNewsletterEmail("")
+      }
+      setTimeout(() => setNewsletterStatus("idle"), 4000)
+    } catch {
+      setNewsletterStatus("error")
+      setTimeout(() => setNewsletterStatus("idle"), 4000)
+    }
+  }
 
   useEffect(() => {
     const check = () => setIsMobile(
@@ -269,15 +300,15 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 2: NEWSLETTER ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
+        <section className="relative py-20 md:py-32 flex items-center z-10 border-t border-theme overflow-x-hidden">
 
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 w-full">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-3xl lg:text-5xl font-bold mb-6 leading-relaxed text-theme"
+              className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed text-theme"
             >
               Join the movement. Your perfect T-shirt is just a click away.
             </motion.h2>
@@ -308,14 +339,30 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter your email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleNewsletterSubmit()}
                 className="flex-1 px-6 py-4 bg-transparent text-theme placeholder:text-theme-3 focus:outline-none text-lg min-w-0"
               />
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-8 h-full rounded-full font-semibold whitespace-nowrap">
-                  Subscribe
+                <Button
+                  onClick={handleNewsletterSubmit}
+                  disabled={newsletterStatus === "loading"}
+                  className="bg-[var(--accent)] hover:opacity-90 text-white px-8 h-full rounded-full font-semibold whitespace-nowrap disabled:opacity-50"
+                >
+                  {newsletterStatus === "loading" ? "..." : "Subscribe"}
                 </Button>
               </motion.div>
             </motion.div>
+            {newsletterStatus === "success" && (
+              <p className="text-sm mt-3 text-emerald-400 font-medium">🎉 You&apos;re in! Welcome to the movement.</p>
+            )}
+            {newsletterStatus === "duplicate" && (
+              <p className="text-sm mt-3 text-[#e7bf04] font-medium">Already subscribed! You&apos;re part of the crew.</p>
+            )}
+            {newsletterStatus === "error" && (
+              <p className="text-sm mt-3 text-[var(--accent)] font-medium">Something went wrong. Try again.</p>
+            )}
             <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -464,15 +511,15 @@ export default function HomePage() {
         </section>
 
         {/* ═══════════════════ SECTION 5: ABOUT ═══════════════════ */}
-        <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+        <section className="relative z-10 border-t border-theme">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 md:py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
-                className="relative h-96 lg:h-[500px]"
+                className="relative h-64 sm:h-80 lg:h-[500px]"
               >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 1 }}
@@ -501,7 +548,7 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 variants={staggerContainer}
               >
-                <motion.h2 variants={fadeInRight} className="text-4xl lg:text-5xl font-bold text-theme mb-6">
+                <motion.h2 variants={fadeInRight} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-theme mb-6 break-words">
                   Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2019
                 </motion.h2>
                 <motion.p variants={fadeInRight} className="text-theme-2 mb-6 leading-relaxed text-lg">

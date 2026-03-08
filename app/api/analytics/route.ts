@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { cached } from "@/lib/redis"
 import { CK, TTL } from "@/lib/cache-keys"
+import { requireAdmin } from "@/lib/admin"
 
 export async function GET(req: NextRequest) {
     const days = Number(req.nextUrl.searchParams.get("days") ?? "30")
@@ -23,12 +24,12 @@ export async function GET(req: NextRequest) {
         }
     )
 
-    // Auth check
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    const { data: role } = await supabase.from("user_roles").select("role")
-        .eq("user_id", session.user.id).single()
-    if (role?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    // Auth check — use getUser() not getSession()
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // Admin check using service role client
+    const isAdmin = await requireAdmin(user.id)
+    if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
     const data = await cached(CK.analytics(days), TTL.ANALYTICS, async () => {
         const since = new Date()

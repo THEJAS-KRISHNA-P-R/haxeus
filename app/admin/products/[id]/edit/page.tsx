@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
+import { useTheme } from "@/components/ThemeProvider"
 import { supabase, type Product, type ProductImage, type ProductInventory } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ import { ArrowLeft, Save } from "lucide-react"
 import Link from "next/link"
 import { ImageGalleryManager } from "@/components/admin/ImageGalleryManager"
 import { SizeInventoryManager } from "@/components/admin/SizeInventoryManager"
+import { cn } from "@/lib/utils"
 
 interface ProductFormData {
   name: string
@@ -28,6 +30,13 @@ export default function EditProductPage() {
   const params = useParams()
   const productId = params.id as string
 
+  const [mounted, setMounted] = useState(false)
+  const { theme } = useTheme()
+
+  // IMPORTANT: while not mounted, render with dark styles as default
+  // This prevents flash and ensures admin feels dark on first load
+  const isDark = !mounted ? true : theme === 'dark'
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<ProductFormData>({
@@ -41,6 +50,7 @@ export default function EditProductPage() {
   })
 
   useEffect(() => {
+    setMounted(true)
     if (productId && productId !== "new") {
       loadProduct()
     } else {
@@ -126,8 +136,8 @@ export default function EditProductPage() {
               colors: formData.colors,
               available_sizes: availableSizes,
               total_stock: totalStock,
-              front_image: null, // Deprecated
-              back_image: null, // Deprecated
+              front_image: formData.images.find(img => img.is_primary)?.image_url || formData.images[0]?.image_url || null,
+              back_image: formData.images.length > 1 ? (formData.images.find(img => !img.is_primary)?.image_url || formData.images[1]?.image_url) : null,
             },
           ])
           .select()
@@ -195,6 +205,8 @@ export default function EditProductPage() {
             colors: formData.colors,
             available_sizes: availableSizes,
             total_stock: totalStock,
+            front_image: formData.images.find(img => img.is_primary)?.image_url || formData.images[0]?.image_url || null,
+            back_image: formData.images.length > 1 ? (formData.images.find(img => !img.is_primary)?.image_url || formData.images[1]?.image_url) : null,
             updated_at: new Date().toISOString(),
           })
           .eq("id", productId)
@@ -303,6 +315,8 @@ export default function EditProductPage() {
     setFormData({ ...formData, colors: colorsArray })
   }
 
+  if (!mounted) return null
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -312,125 +326,132 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="max-w-5xl space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/admin/products">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft size={20} />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-white">
-            {productId === "new" ? "Add New Product" : "Edit Product"}
-          </h1>
-          <p className="text-white/40 mt-1">{productId === "new"
+    <div className={cn("min-h-screen -mx-8 -mt-24 pt-24 px-8 pb-12", isDark ? 'bg-[#0a0a0a] text-white' : 'bg-[#f5f4f0] text-black')}>
+      <div className="max-w-5xl space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Link href="/admin/products">
+            <Button variant="ghost" size="icon" className={isDark ? "hover:bg-white/5 text-white" : "hover:bg-black/5 text-black"}>
+              <ArrowLeft size={20} />
+            </Button>
+          </Link>
+          <div>
+            <h1 className={cn("text-3xl font-bold", isDark ? "text-white" : "text-black")}>
+              {productId === "new" ? "Add New Product" : "Edit Product"}
+            </h1>
+            <p className={cn("mt-1", isDark ? "text-white/40" : "text-black/40")}>{productId === "new"
               ? "Create a new product with images and inventory tracking"
               : "Update product details, images, and inventory"}
-          </p>
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Basic Product Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-white">Product Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Name & Category */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Basic Product Info */}
+        <Card className={isDark ? 'bg-[#111] border border-white/[0.07]' : 'bg-white border border-black/[0.07]'}>
+          <CardHeader>
+            <CardTitle className={isDark ? "text-white" : "text-black"}>Product Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Name & Category */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="name" className={isDark ? "text-white/60" : "text-black/60"}>Product Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., BUSTED Vintage Tee"
+                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category" className={isDark ? "text-white/60" : "text-black/60"}>Category</Label>
+                <Input
+                  id="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  placeholder="e.g., apparel"
+                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
+                />
+              </div>
+            </div>
+
+            {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white/60">Product Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., BUSTED Vintage Tee"
-                required
+              <Label htmlFor="description" className={isDark ? "text-white/60" : "text-black/60"}>Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Detailed product description..."
+                rows={4}
+                className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-white/60">Category</Label>
-              <Input
-                id="category"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                placeholder="e.g., apparel"
-              />
+            {/* Price & Colors */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="price" className={isDark ? "text-white/60" : "text-black/60"}>Price (₹) *</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  min="0"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                  placeholder="2999"
+                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="colors" className={isDark ? "text-white/60" : "text-black/60"}>Available Colors</Label>
+                <Input
+                  id="colors"
+                  value={formData.colors.join(", ")}
+                  onChange={(e) => updateColors(e.target.value)}
+                  placeholder="Black, White, Navy"
+                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
+                />
+                <p className={cn("text-xs", isDark ? "text-white/40" : "text-black/40")}>
+                  Separate multiple colors with commas
+                </p>
+              </div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-white/60">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Detailed product description..."
-              rows={4}
-            />
-          </div>
+        {/* Image Gallery Manager */}
+        <ImageGalleryManager
+          images={formData.images}
+          onChange={(images) => setFormData({ ...formData, images })}
+        />
 
-          {/* Price & Colors */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="price" className="text-white/60">Price (₹) *</Label>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                placeholder="2999"
-                required
-              />
-            </div>
+        {/* Size Inventory Manager */}
+        <SizeInventoryManager
+          inventory={formData.inventory}
+          onChange={(inventory) => setFormData({ ...formData, inventory })}
+        />
 
-            <div className="space-y-2">
-              <Label htmlFor="colors" className="text-white/60">Available Colors</Label>
-              <Input
-                id="colors"
-                value={formData.colors.join(", ")}
-                onChange={(e) => updateColors(e.target.value)}
-                placeholder="Black, White, Navy"
-              />
-              <p className="text-xs text-white/30">
-                Separate multiple colors with commas
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Image Gallery Manager */}
-      <ImageGalleryManager
-        images={formData.images}
-        onChange={(images) => setFormData({ ...formData, images })}
-      />
-
-      {/* Size Inventory Manager */}
-      <SizeInventoryManager
-        inventory={formData.inventory}
-        onChange={(inventory) => setFormData({ ...formData, inventory })}
-      />
-
-      {/* Actions */}
-      <div className="flex justify-end gap-3 pb-8">
-        <Link href="/admin/products">
-          <Button variant="outline">
-            Cancel
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pb-8">
+          <Link href="/admin/products">
+            <Button variant="outline" className={isDark ? "border-white/[0.06] hover:bg-white/5 text-white" : "border-black/[0.06] hover:bg-black/5 text-black"}>
+              Cancel
+            </Button>
+          </Link>
+          <Button
+            onClick={handleSave}
+            disabled={saving || !formData.name || formData.price <= 0}
+            className={cn("gap-2 text-white", isDark ? "bg-[#e93a3a] hover:bg-[#e93a3a]/80" : "bg-[#e93a3a] hover:bg-[#e93a3a]/80")}
+          >
+            <Save size={16} />
+            {saving ? "Saving..." : "Save Product"}
           </Button>
-        </Link>
-        <Button
-          onClick={handleSave}
-          disabled={saving || !formData.name || formData.price <= 0}
-          className="gap-2 bg-[#e93a3a] hover:bg-[#e93a3a]/80 text-white"
-        >
-          <Save size={16} />
-          {saving ? "Saving..." : "Save Product"}
-        </Button>
+        </div>
       </div>
     </div>
   )

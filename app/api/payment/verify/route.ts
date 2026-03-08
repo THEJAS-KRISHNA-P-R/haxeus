@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         // ── Confirm the order belongs to this user (#6.1 partial) ─────────────
         const { data: order } = await supabase
             .from("orders")
-            .select("id, user_id, status, coupon_id")
+            .select("id, user_id, status, coupon_code, discount_amount, shipping_email, shipping_name, shipping_address, total_amount, order_number")
             .eq("id", orderId)
             .eq("razorpay_order_id", razorpay_order_id)
             .single()
@@ -104,52 +104,139 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, orderId: order.id })
         }
 
+        // ── Duplicate payment prevention — check this payment ID isn't already used
+        const { data: existingPayment } = await supabase
+            .from("orders")
+            .select("id")
+            .eq("razorpay_payment_id", razorpay_payment_id)
+            .neq("id", orderId)
+            .maybeSingle()
+
+        if (existingPayment) {
+            console.error("[verify] Duplicate payment ID detected", { razorpay_payment_id, orderId })
+            return NextResponse.json({ error: "Payment already processed" }, { status: 400 })
+        }
+
+        // ── Use service-role client for DB writes (RLS enabled) ────────────────
+        const supabaseAdmin = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            { cookies: { getAll: () => [], setAll: () => { } } }
+        )
+
         // ── Mark order as paid ─────────────────────────────────────────────────
-        await supabase
+        await supabaseAdmin
             .from("orders")
             .update({
                 status: "confirmed",
+                payment_status: "paid",
                 razorpay_payment_id,
                 payment_verified_at: new Date().toISOString(),
             })
             .eq("id", orderId)
 
-        // ── Increment coupon usage & record redemption (#20.1, #20.4) ──────────
-        if (order.coupon_id) {
-            await supabase.rpc("increment_coupon_usage", { coupon_id: order.coupon_id })
-
-            // Record per-user redemption to enforce one-per-user limit
+        // ── Increment coupon usage & record redemption ─────────────────────────
+        if (order.coupon_code) {
+            // Atomic increment via RPC
             try {
-                await supabase.from("coupon_redemptions").insert({
-                    coupon_id: order.coupon_id,
+                await supabaseAdmin.rpc("increment_coupon_usage", { p_coupon_code: order.coupon_code })
+            } catch (rpcErr) {
+                console.error("[verify] Coupon RPC failed, falling back:", rpcErr)
+                // Fallback: non-atomic increment
+                const { data: coupon } = await supabaseAdmin
+                    .from("coupons")
+                    .select("id, used_count")
+                    .eq("code", order.coupon_code)
+                    .single()
+                if (coupon) {
+                    await supabaseAdmin
+                        .from("coupons")
+                        .update({ used_count: (coupon.used_count ?? 0) + 1 })
+                        .eq("id", coupon.id)
+                }
+            }
+
+            // Always record per-user coupon redemption
+            const { data: couponData } = await supabaseAdmin
+                .from("coupons")
+                .select("id")
+                .eq("code", order.coupon_code)
+                .single()
+
+            if (couponData) {
+                await supabaseAdmin.from("coupon_usage").insert({
+                    coupon_id: couponData.id,
                     user_id: user.id,
                     order_id: order.id,
+                    discount_amount: order.discount_amount || 0,
                 })
-            } catch {
-                // Non-fatal: redemption record may already exist from a concurrent call
             }
         }
 
-        // ── Decrement inventory for each item (#20.2) ──────────────────────────
-        const { data: orderItems } = await supabase
+        // ── Decrement inventory for each item ──────────────────────────────────
+        const { data: orderItems } = await supabaseAdmin
             .from("order_items")
-            .select("product_id, quantity")
+            .select("product_id, quantity, size, price, products(name)")
             .eq("order_id", orderId)
 
         if (orderItems?.length) {
             for (const item of orderItems) {
-                const { error: invError } = await supabase.rpc("decrement_inventory", {
-                    p_product_id: item.product_id,
-                    p_quantity: item.quantity,
-                })
-                if (invError) {
-                    // Log but don't fail — webhook will catch and can trigger manual review
-                    console.error("[verify] Inventory decrement failed", {
-                        product_id: item.product_id,
-                        message: invError.message,
+                // Use RPC for atomic inventory decrement
+                try {
+                    await supabaseAdmin.rpc("decrement_inventory_rpc", {
+                        p_product_id: item.product_id,
+                        p_size: item.size ?? "",
+                        p_quantity: item.quantity,
                     })
+                } catch (rpcErr) {
+                    // Fallback: direct update if RPC fails
+                    const { data: inv } = await supabaseAdmin
+                        .from("product_inventory")
+                        .select("id, stock_quantity, sold_quantity")
+                        .eq("product_id", item.product_id)
+                        .eq("size", item.size ?? "")
+                        .maybeSingle()
+
+                    if (inv) {
+                        const { error: invError } = await supabaseAdmin
+                            .from("product_inventory")
+                            .update({
+                                stock_quantity: Math.max(0, (inv.stock_quantity ?? 0) - item.quantity),
+                                sold_quantity: (inv.sold_quantity ?? 0) + item.quantity,
+                            })
+                            .eq("id", inv.id)
+
+                        if (invError) {
+                            console.error("[verify] Inventory decrement failed", {
+                                product_id: item.product_id,
+                                size: item.size,
+                                message: invError.message,
+                            })
+                        }
+                    }
                 }
             }
+        }
+
+        // ── Send Order Confirmation Email ──────────────────────────────────────
+        if (order.shipping_email && orderItems?.length) {
+            import("@/lib/email").then(({ sendOrderConfirmationEmail }) => {
+                const formattedItems = orderItems.map((item: any) => ({
+                    name: item.products?.name || "Product",
+                    size: item.size,
+                    quantity: item.quantity,
+                    price: item.price,
+                }))
+
+                sendOrderConfirmationEmail({
+                    orderId: order.order_number || order.id,
+                    customerEmail: order.shipping_email,
+                    customerName: order.shipping_name || "Customer",
+                    items: formattedItems,
+                    totalAmount: order.total_amount || 0,
+                    shippingAddress: order.shipping_address as any,
+                }).catch(err => console.error("[verify] Email send failed:", err))
+            })
         }
 
         return NextResponse.json({ success: true, orderId: order.id })

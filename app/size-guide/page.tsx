@@ -76,10 +76,7 @@ export default function SizeGuidePage() {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const isDark = mounted && (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = mounted && theme === "dark"
 
   return (
     <main

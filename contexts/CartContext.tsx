@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
+import { checkStockAvailability } from '@/lib/inventory'
+
 export interface CartItem {
   id: string
   product_id: number
@@ -38,7 +40,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUserId(user?.id || null)
-      
+
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setUserId(session?.user?.id || null)
       })
@@ -113,6 +115,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = async (productId: number, size: string, quantity: number) => {
     try {
+      // 1. Check stock first
+      const stock = await checkStockAvailability(productId, size, quantity)
+      if (!stock.available) {
+        throw new Error(stock.currentStock > 0
+          ? `Only ${stock.currentStock} items left in stock for size ${size}.`
+          : `Size ${size} is currently out of stock.`
+        )
+      }
+
+      // 2. Fetch product details
       const { data: product, error: productError } = await supabase
         .from('products')
         .select('id, name, price, front_image')

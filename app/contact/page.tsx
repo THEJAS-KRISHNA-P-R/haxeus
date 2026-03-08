@@ -9,21 +9,50 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ContactPage() {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission here
-    console.log("Form submitted:", formData)
-    alert("Thank you for your message! We'll get back to you soon.")
-    setFormData({ name: "", email: "", subject: "", message: "" })
+    setIsSubmitting(true)
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send message")
+      }
+
+      toast({
+        title: "Message Sent!",
+        description: data.message || "We'll get back to you within 24 hours.",
+      })
+
+      setFormData({ name: "", email: "", subject: "", message: "" })
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -142,8 +171,8 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full bg-[var(--accent)] text-white hover:opacity-90 font-bold">
-                    Send Message
+                  <Button disabled={isSubmitting} type="submit" className="w-full bg-[var(--accent)] text-white hover:opacity-90 font-bold disabled:opacity-50 transition-opacity">
+                    {isSubmitting ? "Sending..." : "Send Message"}
                   </Button>
                 </form>
               </CardContent>
@@ -159,27 +188,7 @@ export default function ContactPage() {
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-theme mb-1">Email</h3>
-                  <p className="text-theme-2">haxeus.is.us@gmail.com</p>
-                  <p className="text-theme-2">haxeus.is.us@gmail.com</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-theme mb-1">Phone</h3>
-                  <p className="text-theme-2">+91 98765 43210</p>
-                  <p className="text-sm text-theme-2">Mon-Fri, 9 AM - 6 PM IST</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-theme mb-1">Address</h3>
-                  <p className="text-theme-2">
-                    HAXEUS Fashion Pvt. Ltd.
-                    <br />
-                    123 Design Street
-                    <br />
-                    Bangalore, Karnataka 560001
-                    <br />
-                    India
-                  </p>
+                  <p className="text-theme-2">haxeus.in@gmail.com</p>
                 </div>
               </CardContent>
             </Card>
@@ -195,12 +204,8 @@ export default function ContactPage() {
                     <span className="text-theme font-medium">9:00 AM - 6:00 PM</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-theme-2">Saturday</span>
+                    <span className="text-theme-2">Saturday & Sunday</span>
                     <span className="text-theme font-medium">10:00 AM - 4:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-theme-2">Sunday</span>
-                    <span className="text-theme font-medium">Closed</span>
                   </div>
                 </div>
               </CardContent>
