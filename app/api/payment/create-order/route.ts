@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
         const productIds = items.map((i: any) => i.productId)
         const { data: products, error: productError } = await supabase
             .from("products")
-            .select("id, price, name")
+            .select("id, price, name, front_image")
             .in("id", productIds)
 
         if (productError || !products?.length) {
@@ -134,6 +134,8 @@ export async function POST(req: NextRequest) {
                 quantity: item.quantity,
                 price: product.price,
                 size: item.size ?? null,
+                product_name: product.name,
+                product_image: product.front_image,
             }
         })
 
