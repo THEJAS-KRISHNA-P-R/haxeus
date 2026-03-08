@@ -184,7 +184,8 @@ The project includes a `vercel.json` for managing automated tasks:
 - **Email Queue Processor**: Runs daily at 10:00 AM at `/api/process-emails`.
 
 ## Analytics & Monitoring
-- **Vercel Analytics**: Fully integrated in the root layout for real-time traffic and performance monitoring.
+- **Vercel Analytics**: Real-time traffic monitoring.
+- **Vercel Speed Insights**: Performance metrics and Core Web Vitals tracking.
 - **Resend Logs**: Detailed tracking of email delivery status.
 
 ---
