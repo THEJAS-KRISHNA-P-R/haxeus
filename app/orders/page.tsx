@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
@@ -12,12 +12,10 @@ import { formatDistanceToNow } from "date-fns"
 
 interface Order {
   id: string
-  order_number: string
   status: string
   payment_status: string
-  total: number
+  total_amount: number
   created_at: string
-  items_count?: number
 }
 
 export default function OrdersPage() {
@@ -31,38 +29,37 @@ export default function OrdersPage() {
   }, [])
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       router.push("/auth")
       return
     }
-    setUser(session.user)
-    fetchOrders(session.user.id)
+    setUser(user)
+    fetchOrders(user.id)
   }
 
   const fetchOrders = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from("backend_order")
+        .from("orders")
         .select(`
           id,
-          order_number,
           status,
           payment_status,
-          total,
+          total_amount,
           created_at
         `)
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
 
       if (error) {
-        console.error("Error fetching orders:", error)
+        console.error("Error fetching orders:", error?.message ?? error?.code ?? JSON.stringify(error))
         setOrders([])
       } else {
         setOrders(data || [])
       }
-    } catch (error) {
-      console.error("Error fetching orders:", error)
+    } catch (error: any) {
+      console.error("Error fetching orders:", error?.message ?? error?.code ?? JSON.stringify(error))
       setOrders([])
     } finally {
       setLoading(false)
@@ -156,7 +153,7 @@ export default function OrdersPage() {
                         {getStatusIcon(order.status)}
                         <div>
                           <h3 className="font-bold text-lg">
-                            Order #{order.order_number}
+                            Order #{order.id.slice(0, 8).toUpperCase()}
                           </h3>
                           <p className="text-sm text-white/50">
                             Placed {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
@@ -165,11 +162,11 @@ export default function OrdersPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-2 mt-3">
-                        <Badge className={getStatusColor(order.status)}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        <Badge className={getStatusColor(order.status ?? "pending")}>
+                          {(order.status ?? "pending").charAt(0).toUpperCase() + (order.status ?? "pending").slice(1)}
                         </Badge>
-                        <Badge className={getPaymentStatusColor(order.payment_status)}>
-                          Payment: {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
+                        <Badge className={getPaymentStatusColor(order.payment_status ?? "pending")}>
+                          Payment: {(order.payment_status ?? "pending").charAt(0).toUpperCase() + (order.payment_status ?? "pending").slice(1)}
                         </Badge>
                       </div>
                     </div>
@@ -179,7 +176,7 @@ export default function OrdersPage() {
                       <div className="text-right">
                         <p className="text-sm text-white/50">Total</p>
                         <p className="text-2xl font-bold text-white">
-                          ₹{order.total.toLocaleString("en-IN")}
+                          ₹{(order.total_amount ?? 0).toLocaleString("en-IN")}
                         </p>
                       </div>
                       <Link href={`/orders/${order.id}`}>

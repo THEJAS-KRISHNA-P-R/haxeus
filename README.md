@@ -212,11 +212,11 @@ Get these values from your Supabase project dashboard at [supabase.com](https://
    - (Optional) Run `database/supabase_setup.sql` for initial data
 
 3. **Verify Setup**:
-   - Check that all `backend_*` tables are created
+   - Check that all tables are created (`products`, `orders`, `order_items`, `product_inventory`, `user_addresses`, `coupons`)
    - Verify RLS is enabled on all tables
    - Test authentication in Supabase dashboard
 
-📚 **See `database/README.md` for detailed database documentation**
+📚 **See `supabase/COMPLETE_DATABASE_SETUP.sql` for detailed database setup**
 
 ### 5. Run Development Server
 

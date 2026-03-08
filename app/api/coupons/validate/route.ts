@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
     if (new Date(coupon.valid_from) > now) return NextResponse.json({ valid: false, error: "Coupon not yet active" })
     if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit)
         return NextResponse.json({ valid: false, error: "Coupon usage limit reached" })
-    if (cartTotal < coupon.minimum_amount)
-        return NextResponse.json({ valid: false, error: `Min order ₹${coupon.minimum_amount} required` })
+    if (cartTotal < coupon.min_purchase_amount)
+        return NextResponse.json({ valid: false, error: `Min order ₹${coupon.min_purchase_amount} required` })
 
     const discount = coupon.discount_type === "percentage"
         ? (cartTotal * coupon.discount_value) / 100

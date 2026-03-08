@@ -34,6 +34,8 @@ export interface Product {
   colors?: string[]
   total_stock: number
   category?: string
+  slug?: string
+  is_active?: boolean
   created_at?: string
   updated_at?: string
 }
@@ -55,6 +57,22 @@ export interface Order {
   total_amount: number
   status: string
   shipping_address?: any
+  shipping_name?: string
+  shipping_email?: string
+  order_number?: string
+  coupon_code?: string
+  discount_amount?: number
+  loyalty_points_used?: number
+  loyalty_points_earned?: number
+  tracking_number?: string
+  shipping_carrier?: string
+  estimated_delivery_date?: string
+  delivered_at?: string
+  payment_status?: string
+  razorpay_order_id?: string
+  razorpay_payment_id?: string
+  payment_verified_at?: string
+  payment_method?: string
   created_at?: string
   updated_at?: string
 }
@@ -140,6 +158,7 @@ export interface ReviewImage {
 export interface Coupon {
   id: string
   code: string
+  description?: string
   discount_type: 'percentage' | 'fixed'
   discount_value: number
   min_purchase_amount: number

@@ -950,8 +950,7 @@ export const NewsletterService = {
             .upsert({
                 email: email.toLowerCase(),
                 first_name: firstName,
-                is_active: true,
-                subscribed_at: new Date().toISOString(),
+                subscribed: true,
                 unsubscribed_at: null,
             }, { onConflict: "email" })
 
@@ -961,7 +960,7 @@ export const NewsletterService = {
     async unsubscribe(email: string) {
         const { error } = await supabase
             .from("newsletter_subscribers")
-            .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
+            .update({ subscribed: false, unsubscribed_at: new Date().toISOString() })
             .eq("email", email.toLowerCase())
 
         if (error) throw error
@@ -1055,14 +1054,14 @@ export const AnalyticsService = {
     async getTopProducts(limit = 5) {
         const { data, error } = await supabase
             .from("order_items")
-            .select("product_id, product_name, quantity")
+            .select("product_id, quantity, products(name)")
             .limit(500)
 
         if (error) throw error
 
-        const totals = (data || []).reduce((acc: Record<string, any>, item) => {
+        const totals = (data || []).reduce((acc: Record<string, any>, item: any) => {
             if (!acc[item.product_id]) {
-                acc[item.product_id] = { product_id: item.product_id, name: item.product_name, total_sold: 0 }
+                acc[item.product_id] = { product_id: item.product_id, name: item.products?.name ?? 'Unknown', total_sold: 0 }
             }
             acc[item.product_id].total_sold += item.quantity
             return acc

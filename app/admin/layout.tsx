@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useState, useRef, useCallback } from "react"
 import {
   LayoutDashboard, ShoppingBag, Package, Users,
-  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X
+  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X, Mail
 } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { supabase } from "@/lib/supabase"
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/admin/coupons", icon: Tag, label: "Coupons" },
   { href: "/admin/reviews", icon: Star, label: "Reviews" },
   { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/admin/communications", icon: Mail, label: "Communications" },
   { href: "/admin/settings", icon: Settings, label: "Settings" },
 ]
 
@@ -243,29 +244,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
+  const [adminEmail, setAdminEmail] = useState<string>("Admin")
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0)
 
-  // Client-side auth guard (backup to middleware)
+  // Server-side auth guard using API route with service role
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser()
+      try {
+        const res = await fetch('/api/admin/verify')
+        const data = await res.json()
 
-      if (error || !user) {
-        router.push('/auth?redirect=/admin')
-        return
+        if (!res.ok || !data.authorized) {
+          router.push('/')
+          return
+        }
+
+        setAdminEmail(data.email ?? 'Admin')
+        setIsAuthorized(true)
+
+        // Also fetch unread message count
+        const fetchMessages = async () => {
+          const { count } = await supabase
+            .from('contact_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'unread')
+          if (count !== null) setUnreadMsgCount(count)
+        }
+        fetchMessages()
+      } catch {
+        router.push('/')
       }
-
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single()
-
-      if (!roleData || roleData.role !== 'admin') {
-        router.push('/?error=unauthorized')
-        return
-      }
-
-      setIsAuthorized(true)
     }
 
     checkAdmin()
@@ -349,8 +357,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }
               }}
             >
-              <item.icon size={18} className="shrink-0" />
-              {item.label}
+              <div className="flex items-center gap-0.875rem flex-1">
+                <item.icon size={18} className="shrink-0" />
+                <span className="ml-[0.875rem]">{item.label}</span>
+              </div>
+              {item.href === "/admin/communications" && unreadMsgCount > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                  {unreadMsgCount}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -369,7 +384,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <div className="min-w-0">
               <p style={{ color: "var(--text)" }} className="text-sm font-bold truncate">Admin</p>
-              <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase truncate opacity-60">admin@haxeus.com</p>
+              <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase truncate opacity-60">{adminEmail}</p>
             </div>
           </div>
           <button

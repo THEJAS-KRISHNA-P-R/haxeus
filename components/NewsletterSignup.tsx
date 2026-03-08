@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-import { subscribeToNewsletter } from "@/lib/email"
 import { Mail, Check, AlertCircle } from "lucide-react"
 
 export function NewsletterSignup() {
@@ -34,15 +33,21 @@ export function NewsletterSignup() {
     setMessage("")
 
     try {
-      const success = await subscribeToNewsletter({ email })
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
 
-      if (success) {
+      const result = await res.json()
+
+      if (result.success) {
         setStatus("success")
-        setMessage("Thanks for subscribing! Check your email.")
+        setMessage(result.message || "Thanks for subscribing! Check your email.")
         setEmail("")
       } else {
         setStatus("error")
-        setMessage("Something went wrong. Please try again.")
+        setMessage(result.message || "Something went wrong. Please try again.")
       }
     } catch (error) {
       setStatus("error")
@@ -94,8 +99,8 @@ export function NewsletterSignup() {
       {message && (
         <div
           className={`mt-3 p-3 rounded-lg flex items-start gap-2 text-sm ${status === "success"
-              ? "border bg-green-900/50 text-green-200 border-green-800/30"
-              : "bg-red-900/50 text-red-200 border-red-800/30"
+            ? "border bg-green-900/50 text-green-200 border-green-800/30"
+            : "bg-red-900/50 text-red-200 border-red-800/30"
             }`}
         >
           {status === "success" ? (

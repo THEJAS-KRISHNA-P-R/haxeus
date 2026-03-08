@@ -64,6 +64,10 @@ const sections = [
         text: "All data is transmitted over HTTPS/TLS encryption. Passwords are hashed using bcrypt and never stored in plain text. Payment information is handled entirely by Razorpay's PCI-DSS compliant infrastructure — we never see or store your card details.",
       },
       {
+        subtitle: "Legal Framework",
+        text: "HAXEUS processes your data in compliance with the Information Technology Act 2000, the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules 2011, and the Digital Personal Data Protection (DPDP) Act 2023 as applicable.",
+      },
+      {
         subtitle: "Data Retention",
         text: "Order and account data is retained for 7 years to comply with Indian accounting regulations. You may request deletion of your account and personal data at any time — we will delete all data not required for legal compliance within 30 days.",
       },
@@ -78,11 +82,36 @@ const sections = [
       },
       {
         subtitle: "Correction & Deletion",
-        text: "You may update your account information at any time from your profile page. To delete your account and associated data, contact us at privacy@haxeus.com.",
+        text: "You may update your account information at any time from your profile page. To delete your account and associated data, contact us at haxeus.in@gmail.com.",
       },
       {
         subtitle: "Opt-Out",
         text: "You can opt out of marketing emails at any time. To opt out of analytics cookies, you can clear cookies and enable Do Not Track in your browser settings.",
+      },
+    ],
+  },
+  {
+    title: "Your Rights Under DPDP Act 2023",
+    content: [
+      {
+        subtitle: "Right to Access",
+        text: "You have the right to obtain a summary of your personal data that we hold, along with information about how it is being processed.",
+      },
+      {
+        subtitle: "Right to Correction",
+        text: "You have the right to request correction of any inaccurate or misleading personal data, and to have incomplete data completed.",
+      },
+      {
+        subtitle: "Right to Erasure",
+        text: "You have the right to request erasure of your personal data, subject to any legal obligations that require us to retain certain records.",
+      },
+      {
+        subtitle: "Right to Nominate",
+        text: "You have the right to nominate another person to exercise your data rights on your behalf, in the event of your death or incapacity.",
+      },
+      {
+        subtitle: "",
+        text: "To exercise any of these rights, email haxeus.in@gmail.com with the subject line 'DPDP Rights Request'. We will respond within 14 business days.",
       },
     ],
   },
@@ -109,7 +138,7 @@ const sections = [
     content: [
       {
         subtitle: "",
-        text: "For any privacy-related questions or requests, contact us at privacy@haxeus.com or through our Contact page. We aim to respond within 2 business days.",
+        text: "For any privacy-related questions or requests, contact us at haxeus.in@gmail.com or through our Contact page. We aim to respond within 2 business days.",
       },
     ],
   },
@@ -119,10 +148,7 @@ export default function PrivacyPolicyPage() {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const isDark = mounted && (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = mounted && theme === "dark"
 
   return (
     <main

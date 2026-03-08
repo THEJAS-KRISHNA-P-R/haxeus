@@ -183,14 +183,13 @@ const Shuffle: React.FC<ShuffleProps> = ({
         };
     }, [triggerOnHover, text]);
 
-    const Tag = tag as keyof JSX.IntrinsicElements;
     const combinedStyle: React.CSSProperties = {
         textAlign,
         ...style,
     };
 
     return React.createElement(
-        Tag,
+        tag as string,
         {
             ref: ref as any,
             className: `shuffle-parent ${isReady ? 'is-ready' : ''} ${className}`,

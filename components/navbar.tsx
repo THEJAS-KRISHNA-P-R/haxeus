@@ -37,7 +37,7 @@ export function Navbar() {
     setMounted(true)
   }, [])
 
-  const isDark = mounted && (theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches))
+  const isDark = mounted && theme === "dark"
   const [user, setUser] = useState<any>(null)
   const { totalItems } = useCart()
   const [isMenuOpen, setIsMenuOpen] = useState(false)

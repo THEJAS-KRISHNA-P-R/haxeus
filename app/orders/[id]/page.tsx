@@ -10,23 +10,21 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { supabase } from "@/lib/supabase"
-import { 
-  Package, 
-  Truck, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  Package,
+  Truck,
+  CheckCircle,
+  XCircle,
+  Clock,
   ArrowLeft,
   MapPin,
   CreditCard,
-  Calendar,
-  FileText
 } from "lucide-react"
 import { format } from "date-fns"
 
 interface OrderItem {
   id: string
-  product_id: string
+  product_id: number
   size: string
   quantity: number
   price: number
@@ -38,27 +36,14 @@ interface OrderItem {
 
 interface Order {
   id: string
-  order_number: string
   status: string
   payment_status: string
-  email: string
-  phone: string
-  shipping_first_name: string
-  shipping_last_name: string
-  shipping_address_line_1: string
-  shipping_address_line_2: string
-  shipping_city: string
-  shipping_state: string
-  shipping_zip_code: string
-  shipping_country: string
-  subtotal: number
-  shipping_cost: number
-  tax_amount: number
+  shipping_address: any
+  total_amount: number
   discount_amount: number
-  total: number
   payment_method: string
   tracking_number: string
-  customer_notes: string
+  coupon_code: string
   created_at: string
   updated_at: string
   items?: OrderItem[]
@@ -76,19 +61,19 @@ export default function OrderDetailsPage() {
   }, [orderId])
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       router.push("/auth")
       return
     }
-    fetchOrderDetails(orderId, session.user.id)
+    fetchOrderDetails(orderId, user.id)
   }
 
   const fetchOrderDetails = async (orderId: string, userId: string) => {
     try {
-      // Fetch order
+      // Fetch order — filter by user_id to prevent IDOR
       const { data: orderData, error: orderError } = await supabase
-        .from("backend_order")
+        .from("orders")
         .select("*")
         .eq("id", orderId)
         .eq("user_id", userId)
@@ -96,25 +81,25 @@ export default function OrderDetailsPage() {
 
       if (orderError) throw orderError
 
-      // Fetch order items
+      // Fetch order items with product info
       const { data: itemsData, error: itemsError } = await supabase
-        .from("backend_orderitem")
+        .from("order_items")
         .select(`
           *,
-          product:backend_product(name, front_image)
+          product:products(name, front_image)
         `)
         .eq("order_id", orderId)
 
       if (itemsError) {
-        console.warn("Error fetching order items:", itemsError)
+        console.warn("Error fetching order items:", itemsError?.message ?? itemsError?.code)
       }
 
       setOrder({
         ...orderData,
         items: itemsData || []
       })
-    } catch (error) {
-      console.error("Error fetching order details:", error)
+    } catch (error: any) {
+      console.error("Error fetching order details:", error?.message ?? error?.code ?? JSON.stringify(error))
       router.push("/orders")
     } finally {
       setLoading(false)
@@ -138,11 +123,12 @@ export default function OrderDetailsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "delivered":  return "bg-green-900/30 text-green-400 border border-green-500/20"
-      case "shipped":    return "bg-[#07e4e1]/10 text-[#07e4e1] border border-[#07e4e1]/20"
+      case "delivered": return "bg-green-900/30 text-green-400 border border-green-500/20"
+      case "shipped": return "bg-[#07e4e1]/10 text-[#07e4e1] border border-[#07e4e1]/20"
       case "processing": return "bg-[#e7bf04]/10 text-[#e7bf04] border border-[#e7bf04]/20"
-      case "cancelled":  return "bg-[#e93a3a]/10 text-[#e93a3a] border border-[#e93a3a]/20"
-      default:           return "bg-[#1a1a1a] text-white/50 border border-white/10"
+      case "cancelled": return "bg-[#e93a3a]/10 text-[#e93a3a] border border-[#e93a3a]/20"
+      case "confirmed": return "bg-green-900/30 text-green-400 border border-green-500/20"
+      default: return "bg-[#1a1a1a] text-white/50 border border-white/10"
     }
   }
 
@@ -174,6 +160,14 @@ export default function OrderDetailsPage() {
     )
   }
 
+  // Parse shipping address from JSONB
+  const addr = order.shipping_address || {}
+
+  // Calculate subtotal from items
+  const itemsSubtotal = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) ?? 0
+  const discountAmt = order.discount_amount ?? 0
+  const shippingCost = (order.total_amount ?? 0) - itemsSubtotal + discountAmt
+
   return (
     <div className="min-h-screen bg-[#080808] py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -188,13 +182,13 @@ export default function OrderDetailsPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Order #{order.order_number}
+                Order #{order.id.slice(0, 8).toUpperCase()}
               </h1>
               <p className="text-white/40"> {format(new Date(order.created_at), "MMMM d, yyyy 'at' h:mm a")}
               </p>
             </div>
-            <Badge className={`${getStatusColor(order.status)} text-lg px-4 py-2`}>
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+            <Badge className={`${getStatusColor(order.status ?? "pending")} text-lg px-4 py-2`}>
+              {(order.status ?? "pending").charAt(0).toUpperCase() + (order.status ?? "pending").slice(1)}
             </Badge>
           </div>
         </div>
@@ -235,42 +229,25 @@ export default function OrderDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* Shipping Address */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Shipping Address
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-white/60">
-                  <p className="font-semibold">
-                    {order.shipping_first_name} {order.shipping_last_name}
-                  </p>
-                  <p>{order.shipping_address_line_1}</p>
-                  {order.shipping_address_line_2 && <p>{order.shipping_address_line_2}</p>}
-                  <p>
-                    {order.shipping_city}, {order.shipping_state} {order.shipping_zip_code}
-                  </p>
-                  <p>{order.shipping_country}</p>
-                  {order.phone && <p className="mt-2">Phone: {order.phone}</p>}
-                  <p>Email: {order.email}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Customer Notes */}
-            {order.customer_notes && (
+            {/* Shipping Address — read from JSONB */}
+            {addr && (addr.full_name || addr.address_line1) && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    Order Notes
+                    <MapPin className="w-5 h-5" />
+                    Shipping Address
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-white/60">{order.customer_notes}</p>
+                  <div className="text-white/60">
+                    {addr.full_name && <p className="font-semibold">{addr.full_name}</p>}
+                    {addr.address_line1 && <p>{addr.address_line1}</p>}
+                    {addr.address_line2 && <p>{addr.address_line2}</p>}
+                    <p>
+                      {[addr.city, addr.state, addr.pincode].filter(Boolean).join(", ")}
+                    </p>
+                    {addr.phone && <p className="mt-2">Phone: {addr.phone}</p>}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -288,11 +265,13 @@ export default function OrderDetailsPage() {
                   {getStatusIcon(order.status)}
                   <div>
                     <p className="font-semibold">
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      {(order.status ?? "pending").charAt(0).toUpperCase() + (order.status ?? "pending").slice(1)}
                     </p>
-                    <p className="text-sm text-white/40">
-                      Last updated {format(new Date(order.updated_at), "MMM d, yyyy")}
-                    </p>
+                    {order.updated_at && (
+                      <p className="text-sm text-white/40">
+                        Last updated {format(new Date(order.updated_at), "MMM d, yyyy")}
+                      </p>
+                    )}
                   </div>
                 </div>
                 {order.tracking_number && (
@@ -322,8 +301,8 @@ export default function OrderDetailsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">Status</span>
-                    <Badge className={order.payment_status === "paid" ? "bg-green-900/30 text-green-400 border border-green-500/20" : "bg-[#e7bf04]/10 text-[#e7bf04] border border-[#e7bf04]/20"}>
-                      {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
+                    <Badge className={(order.payment_status ?? "pending") === "paid" ? "bg-green-900/30 text-green-400 border border-green-500/20" : "bg-[#e7bf04]/10 text-[#e7bf04] border border-[#e7bf04]/20"}>
+                      {(order.payment_status ?? "pending").charAt(0).toUpperCase() + (order.payment_status ?? "pending").slice(1)}
                     </Badge>
                   </div>
                 </div>
@@ -338,26 +317,30 @@ export default function OrderDetailsPage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>₹{order.subtotal.toLocaleString("en-IN")}</span>
+                  <span>₹{itemsSubtotal.toLocaleString("en-IN")}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>{order.shipping_cost === 0 ? "Free" : `₹${order.shipping_cost.toLocaleString("en-IN")}`}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tax</span>
-                  <span>₹{order.tax_amount.toLocaleString("en-IN")}</span>
-                </div>
-                {order.discount_amount > 0 && (
+                {shippingCost > 0 && (
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>₹{shippingCost.toLocaleString("en-IN")}</span>
+                  </div>
+                )}
+                {shippingCost === 0 && (
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                  </div>
+                )}
+                {discountAmt > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount</span>
-                    <span>-₹{order.discount_amount.toLocaleString("en-IN")}</span>
+                    <span>-₹{discountAmt.toLocaleString("en-IN")}</span>
                   </div>
                 )}
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>₹{order.total.toLocaleString("en-IN")}</span>
+                  <span>₹{(order.total_amount ?? 0).toLocaleString("en-IN")}</span>
                 </div>
               </CardContent>
             </Card>

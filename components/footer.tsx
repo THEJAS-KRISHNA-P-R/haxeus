@@ -22,7 +22,7 @@ export function Footer() {
           {[
             { title: "Shop", links: [{ label: "Products", href: "/products" }, { label: "Size Guide", href: "/size-guide" }] },
             { title: "Company", links: [{ label: "About", href: "/about" }, { label: "Contact", href: "/contact" }] },
-            { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }, { label: "Returns", href: "/returns-refunds" }, { label: "Terms", href: "/terms-conditions" }] },
+            { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }, { label: "Returns", href: "/returns-refunds" }, { label: "Terms", href: "/terms-conditions" }, { label: "Shipping", href: "/shipping-policy" }] },
           ].map((col) => (
             <div key={col.title}>
               <h4 className="text-xs font-bold text-[var(--accent-yellow)]/60 uppercase tracking-[0.2em] mb-4">{col.title}</h4>
