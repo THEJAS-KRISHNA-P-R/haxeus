@@ -7,4 +7,4 @@ Disallow: /checkout/
 Disallow: /cart/
 Allow: /
 
-Sitemap: https://haxeus.com/sitemap.xml
+Sitemap: https://haxeus.in/sitemap.xml

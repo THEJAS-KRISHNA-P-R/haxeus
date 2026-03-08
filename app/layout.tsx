@@ -15,7 +15,7 @@ import type { Metadata, Viewport } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
 
-const SITE_URL = "https://haxeus.com"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 const SITE_NAME = "HAXEUS"
 const SITE_DESCRIPTION =
   "HAXEUS — Luxury streetwear for those who move differently. Oversized fits, dark aesthetics, limited drops. Shop hoodies, tees, and pants."

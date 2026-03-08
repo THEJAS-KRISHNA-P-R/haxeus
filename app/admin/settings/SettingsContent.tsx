@@ -177,7 +177,7 @@ export default function SettingsContent() {
                                 type="email"
                                 value={settings.notification_email}
                                 onChange={e => set("notification_email", e.target.value)}
-                                placeholder="alerts@haxeus.com"
+                                placeholder="alerts@haxeus.in"
                             />
                         </div>
                     </AdminCard>

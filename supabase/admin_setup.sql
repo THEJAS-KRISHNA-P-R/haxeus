@@ -59,13 +59,13 @@ CREATE POLICY "Admins can manage store settings"
 -- 7. Default settings
 INSERT INTO public.store_settings (key, value) VALUES
   ('store_name',          '"HAXEUS"'),
-  ('store_email',         '"admin@haxeus.com"'),
+  ('store_email',         '"admin@haxeus.in"'),
   ('currency',            '"INR"'),
   ('shipping_rate',       '99'),
   ('free_shipping_above', '999'),
   ('cod_enabled',         'true'),
   ('maintenance_mode',    'false'),
-  ('notification_email',  '"admin@haxeus.com"')
+  ('notification_email',  '"admin@haxeus.in"')
 ON CONFLICT (key) DO NOTHING;
 
 -- 8. Grant yourself admin — replace with your actual UUID from auth.users

@@ -3,9 +3,9 @@
 //
 // Usage (e.g. after creating a product in your admin API route):
 //   import { notifySearchEngines, notifyProductUpdate } from '@/lib/indexnow'
-//   await notifySearchEngines([`https://haxeus.com/products/${product.slug}`])
+//   await notifySearchEngines([`https://haxeus.in/products/${product.slug}`])
 
-const SITE_URL = "https://haxeus.com"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY
 
 const ENGINES = [
