@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider"
 import { PWAProvider } from "@/components/PWAProvider"
 import { LightPillarBackground } from "@/components/LightPillarBackground"
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd"
+import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -128,6 +129,7 @@ export default function RootLayout({
 
             <ConditionalFooter /> {/* Changed from Footer */}
             <Toaster />
+            <Analytics />
           </CartProvider>
         </ThemeProvider>
       </body>
