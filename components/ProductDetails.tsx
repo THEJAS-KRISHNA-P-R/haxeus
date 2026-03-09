@@ -1,4 +1,4 @@
-﻿import dynamic from "next/dynamic";
+import dynamic from "next/dynamic";
 const ProductDetailsSkeleton = dynamic(() => import("./ProductDetailsSkeleton").then(mod => mod.ProductDetailsSkeleton), { ssr: false, loading: () => <div className="animate-pulse space-y-4"><div className="h-64 bg-[#1a1a1a] rounded-xl" /><div className="h-8 w-1/2 bg-[#1a1a1a] rounded-lg" /><div className="h-4 w-1/3 bg-[#1a1a1a] rounded-lg" /><div className="h-4 w-1/4 bg-[#1a1a1a] rounded-lg" /><div className="h-10 w-full bg-[#1a1a1a] rounded-lg" /></div> });
 "use client";
 
@@ -66,7 +66,7 @@ export default function ProductDetails({ product }: { product: Product }) {
       <div>
         <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
         <div className="flex items-center gap-4 mb-4">
-          <span className="text-3xl font-bold text-[#e93a3a]">₹{product.price.toLocaleString()}</span>
+          <span className="text-3xl font-bold text-[#e93a3a]">?{product.price.toLocaleString()}</span>
           {product.total_stock > 0 && (
             <span className="bg-black text-white text-xs px-3 py-1 rounded-full font-semibold">In Stock</span>
           )}

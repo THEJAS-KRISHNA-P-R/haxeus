@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -50,7 +50,7 @@ export default function CheckoutPage() {
   const shipping = subtotal > 2000 ? 0 : 150
   const total = subtotal + shipping
 
-  // ── Shared style tokens ────────────────────────────────────────────────────
+  // -- Shared style tokens ----------------------------------------------------
   const card = cn(
     "rounded-2xl border p-6 transition-colors duration-300",
     isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-white border-black/[0.08] shadow-sm"
@@ -104,7 +104,7 @@ export default function CheckoutPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
 
-          {/* ── Left column ───────────────────────────────────────── */}
+          {/* -- Left column ----------------------------------------- */}
           <div className="space-y-5">
 
             {/* Delivery Address */}
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* ── Right column — Order Summary ──────────────────────── */}
+          {/* -- Right column — Order Summary ------------------------ */}
           <div>
             <div className={cn(card, "lg:sticky lg:top-24")}>
               <p className={sectionLabel}>Order Summary</p>
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
                       isDark ? "bg-white/[0.05]" : "bg-black/[0.05]"
                     )}>
                       <Image
-                        src={item.product.front_image || "/placeholder.jpg"}
+                        src={item.product.front_image || "/placeholder.svg"}
                         alt={item.product.name}
                         fill
                         className="object-cover"
@@ -233,7 +233,7 @@ export default function CheckoutPage() {
                       <p className={cn("text-sm font-medium truncate", primary)}>{item.product.name}</p>
                       <p className={cn("text-xs mt-0.5", muted)}>{item.size} · Qty {item.quantity}</p>
                       <p className={cn("text-sm font-bold mt-0.5", primary)}>
-                        ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                        ?{(item.product.price * item.quantity).toLocaleString("en-IN")}
                       </p>
                     </div>
                   </div>
@@ -244,8 +244,8 @@ export default function CheckoutPage() {
 
               <div className="space-y-2.5 mb-5">
                 {[
-                  { label: "Subtotal", value: `₹${subtotal.toLocaleString("en-IN")}` },
-                  { label: "Shipping", value: shipping === 0 ? "Free" : `₹${shipping}` },
+                  { label: "Subtotal", value: `?${subtotal.toLocaleString("en-IN")}` },
+                  { label: "Shipping", value: shipping === 0 ? "Free" : `?${shipping}` },
                 ].map((row) => (
                   <div key={row.label} className="flex justify-between text-sm">
                     <span className={muted}>{row.label}</span>
@@ -255,7 +255,7 @@ export default function CheckoutPage() {
                 <div className={cn("h-px", isDark ? "bg-white/[0.06]" : "bg-black/[0.07]")} />
                 <div className="flex justify-between">
                   <span className={cn("font-bold", primary)}>Total</span>
-                  <span className="font-bold text-[#e93a3a] text-base">₹{total.toLocaleString("en-IN")}</span>
+                  <span className="font-bold text-[#e93a3a] text-base">?{total.toLocaleString("en-IN")}</span>
                 </div>
               </div>
 

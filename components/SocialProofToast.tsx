@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 
 interface Sale {
@@ -51,7 +51,7 @@ export function SocialProofToast() {
         >
             <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#e93a3a]/10 flex items-center justify-center text-lg flex-shrink-0">
-                    🛒
+                    ??
                 </div>
                 <div className="min-w-0">
                     <p className="text-sm font-medium text-white truncate">

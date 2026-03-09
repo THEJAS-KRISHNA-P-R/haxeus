@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -85,7 +85,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 id: item.product_id,
                 name: 'Unknown Product',
                 price: 0,
-                front_image: '/placeholder.jpg'
+                front_image: '/placeholder.svg'
               }
             }
           })

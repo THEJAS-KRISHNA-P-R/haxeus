@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect, useMemo, lazy, Suspense } from "react"
 import Image from "next/image"
@@ -187,9 +187,9 @@ function ProductsContent() {
                 </SelectTrigger>
                 <SelectContent className="bg-card border-theme text-theme">
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-2000">Under ₹2,000</SelectItem>
-                  <SelectItem value="2000-3000">₹2,000 - ₹3,000</SelectItem>
-                  <SelectItem value="above-3000">Above ₹3,000</SelectItem>
+                  <SelectItem value="under-2000">Under ?2,000</SelectItem>
+                  <SelectItem value="2000-3000">?2,000 - ?3,000</SelectItem>
+                  <SelectItem value="above-3000">Above ?3,000</SelectItem>
                 </SelectContent>
               </Select>
             </motion.div>
@@ -285,7 +285,7 @@ function ProductsContent() {
                 transition={{ duration: 0.5 }}
                 className="text-6xl mb-6"
               >
-                😞
+                ??
               </motion.div>
               <p className="text-2xl text-theme-2 mb-6">
                 {products.length === 0
@@ -341,7 +341,7 @@ function ProductsContent() {
                             loading={index < 4 ? "eager" : "lazy"}
                             onError={(e) => {
                               const target = e.target as HTMLImageElement
-                              target.src = "/placeholder.svg?height=400&width=400&text=Product+Image"
+                              target.src = "/placeholder.svg"
                             }}
                           />
                         </motion.div>
@@ -418,9 +418,9 @@ function ProductsContent() {
                             className="text-2xl font-bold text-theme"
                             whileHover={{ scale: 1.1, color: "var(--accent)" }}
                           >
-                            ₹{product.price.toLocaleString("en-IN")}
+                            ?{product.price.toLocaleString("en-IN")}
                           </motion.span>
-                          <div className="text-xs text-green-500 font-medium">✓ Free shipping</div>
+                          <div className="text-xs text-green-500 font-medium">? Free shipping</div>
                         </div>
                         <Link href={`/products/${product.id}`}>
                           <motion.div whileHover={hoverScale} whileTap={tapScale}>

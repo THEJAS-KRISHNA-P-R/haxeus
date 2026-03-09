@@ -101,11 +101,13 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         <defs>
           <linearGradient id="${redGradId}" x1="100%" y1="0%" x2="0%" y2="0%">
             <stop offset="0%" stop-color="#0000"/>
-            <stop offset="100%" stop-color="red"/>
+            <stop offset="91%" stop-color="red"/>
+            <stop offset="100%" stop-color="#0000"/>
           </linearGradient>
           <linearGradient id="${blueGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stop-color="#0000"/>
-            <stop offset="100%" stop-color="blue"/>
+            <stop offset="91%" stop-color="blue"/>
+            <stop offset="100%" stop-color="#0000"/>
           </linearGradient>
         </defs>
         <!-- Background: Neutral (no displacement) -->

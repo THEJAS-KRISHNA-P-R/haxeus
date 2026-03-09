@@ -187,7 +187,7 @@ export default function OrderDetailPage() {
                 >
                   <div className="relative h-20 w-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
                     <Image
-                      src={item.product_image || item.product?.front_image || "/placeholder.jpg"}
+                      src={item.product_image || item.product?.front_image || "/placeholder.svg"}
                       alt={item.product_name || item.product?.name || "Product"}
                       fill
                       className="object-cover"

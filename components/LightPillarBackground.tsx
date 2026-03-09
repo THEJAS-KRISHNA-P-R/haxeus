@@ -30,20 +30,36 @@ export function LightPillarBackground() {
 
     if (isMobile === null) return null
 
-    // These props produce the dense smoke reference image exactly
-    const sharedProps = {
-        topColor: "#52f6ffff",
+    const commonProps = {
         bottomColor: "#000000ff",
-        pillarWidth: 7.5,        // wide = fills screen with overlapping SDF fields
-        pillarHeight: 0.6,       // squished Y = more horizontal layering
-        pillarRotation: 235,     // diagonal sweep
-        glowAmount: 0.004,       // correct brightness for width 7.5
         noiseIntensity: 0.0,
-        intensity: 1.0,
-        rotationSpeed: 0.1,
         interactive: false,
         mixBlendMode: "screen" as React.CSSProperties["mixBlendMode"],
         className: "w-full h-full",
+    }
+
+    // Portrait/narrow — tighter SDF fields, compensated for 2×vert stretch + fewer GPU iterations
+    const mobileProps = {
+        ...commonProps,
+        topColor: "rgb(0, 225, 255)",
+        pillarWidth: 7.2,        // tight = dense SDF coverage on narrow portrait canvas
+        pillarHeight: 0.99,      // slightly squished = avoids vertical string-like wisps
+        pillarRotation: 220,     // diagonal sweep tuned for portrait
+        glowAmount: 0.0028,      // compensates for portrait aspect stretch + iteration gap vs desktop
+        intensity: 0.98,
+        rotationSpeed: 0.09,
+    }
+
+    // Landscape/wide — spread wide, squished Y, tuned brightness
+    const desktopProps = {
+        ...commonProps,
+        topColor: "#52f6ffff",
+        pillarWidth: 8.5,        // wide = fills landscape with overlapping SDF fields
+        pillarHeight: 0.55,      // squished Y = more horizontal layering on wide screen
+        pillarRotation: 235,     // diagonal sweep
+        glowAmount: 0.0042,      // correct brightness for width 8.5
+        intensity: 1.0,
+        rotationSpeed: 0.1,
     }
 
     return (
@@ -66,9 +82,9 @@ export function LightPillarBackground() {
             aria-hidden="true"
         >
             {isMobile ? (
-                <LightPillarMobile {...sharedProps} quality="high" />
+                <LightPillarMobile {...mobileProps} quality="high" />
             ) : (
-                <LightPillarDesktop {...sharedProps} quality="high" />
+                <LightPillarDesktop {...desktopProps} quality="high" />
             )}
         </div>
     )

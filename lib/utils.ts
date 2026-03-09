@@ -6,15 +6,21 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Sanitize user-provided text — strips HTML tags using regex,
- * trims whitespace, and enforces a max length of 2000 characters.
+ * Sanitize user-provided text — strips HTML tags, dangerous protocols,
+ * event handlers, null bytes, and Unicode control chars, then trims
+ * and enforces a max length of 2000 characters.
  */
 export function sanitizeText(input: string): string {
   if (!input) return ""
   return input
-    .replace(/<[^>]*>/g, "") // strip HTML tags
-    .replace(/javascript:/gi, "") // strip javascript: protocol
-    .replace(/on\w+\s*=/gi, "") // strip event handlers
+    .replace(/\0/g, "")                     // strip null bytes
+    .replace(/<[^>]*>/g, "")                // strip HTML tags
+    .replace(/javascript\s*:/gi, "")        // strip javascript: protocol
+    .replace(/vbscript\s*:/gi, "")          // strip vbscript: protocol
+    .replace(/data\s*:[^,]*;base64/gi, "")  // strip data: base64 URIs
+    .replace(/on\w+\s*=/gi, "")             // strip event handlers
+    .replace(/expression\s*\(/gi, "")       // strip CSS expressions
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "") // strip control chars
     .trim()
     .slice(0, 2000)
 }

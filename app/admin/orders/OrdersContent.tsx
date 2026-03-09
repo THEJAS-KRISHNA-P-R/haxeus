@@ -114,7 +114,7 @@ export default function OrdersContent() {
                                 className={cn(
                                     "px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.05em] transition-all duration-200",
                                     filter === s
-                                        ? "bg-white text-black shadow-lg"
+                                        ? "bg-[var(--text)] text-[var(--bg)] shadow-lg"
                                         : "text-[var(--text-3)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text)]"
                                 )}
                             >

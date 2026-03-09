@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { processAbandonedCarts } from '@/lib/abandoned-cart'
 
 export const dynamic = 'force-dynamic'
@@ -28,12 +28,18 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    // Use service-role client for server-side cron (not browser client)
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Process abandoned carts
     const result = await processAbandonedCarts(supabase)
@@ -58,18 +64,13 @@ export async function GET(request: Request) {
         total: result.stage1Sent + result.stage2Sent + result.stage3Sent,
         errors: result.errors.length
       },
-      errors: result.errors
     })
 
   } catch (error) {
     console.error('Abandoned cart cron job failed:', error)
 
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to process abandoned carts',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Cron job failed' },
       { status: 500 }
     )
   }
@@ -80,29 +81,17 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    // Verify admin authentication
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
+    // Verify cron secret for POST as well
+    const authHeader = request.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is admin
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .single()
-
-    if (roleData?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      )
-    }
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Process abandoned carts
     const result = await processAbandonedCarts(supabase)
@@ -124,11 +113,7 @@ export async function POST(request: Request) {
     console.error('Manual abandoned cart processing failed:', error)
 
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to process abandoned carts',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Failed to process abandoned carts' },
       { status: 500 }
     )
   }

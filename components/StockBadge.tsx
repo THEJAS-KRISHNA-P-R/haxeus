@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -43,7 +43,7 @@ export function StockBadge({ stock, lowThreshold = 5 }: Props) {
 
     return (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-green-400 bg-green-900/30">
-            ✓ In Stock
+            ? In Stock
         </span>
     );
 }

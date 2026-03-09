@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
         // ── Rate limiting (#16.2) ──────────────────────────────────────────────
         const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-        const { limited: ipLimited } = await rateLimit(`verify:ip:${ip}`, 10, 60)
+        const { limited: ipLimited } = await rateLimit(`verify:ip:${ip}`, 10, 60, { failClosed: true })
         if (ipLimited) {
             return NextResponse.json({ error: "Too many requests" }, { status: 429 })
         }
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Per-order rate limit — prevent brute-force signature guessing (#16.2)
-        const { limited: orderLimited } = await rateLimit(`verify:order:${orderId}`, 3, 300)
+        const { limited: orderLimited } = await rateLimit(`verify:order:${orderId}`, 3, 300, { failClosed: true })
         if (orderLimited) {
             return NextResponse.json({ error: "Too many verification attempts for this order" }, { status: 429 })
         }

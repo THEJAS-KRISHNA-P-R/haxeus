@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -229,7 +229,7 @@ function ProfileContent() {
                           <div className="relative h-16 w-16 rounded-md overflow-hidden bg-background/5 flex-shrink-0">
                             <Image
                               src={
-                                item.product.front_image || "/placeholder.jpg"
+                                item.product.front_image || "/placeholder.svg"
                               }
                               alt={item.product.name}
                               fill
@@ -245,7 +245,7 @@ function ProfileContent() {
                             </p>
                           </div>
                           <p className="font-semibold text-theme">
-                            ₹{Number(item.price).toLocaleString("en-IN")}
+                            ?{Number(item.price).toLocaleString("en-IN")}
                           </p>
                         </div>
                       ))}
@@ -253,7 +253,7 @@ function ProfileContent() {
                     <div className="flex items-center justify-between pt-4 border-t border-theme">
                       <p className="font-semibold text-theme">Total</p>
                       <p className="font-bold text-lg text-theme">
-                        ₹{Number(order.total_amount).toLocaleString("en-IN")}
+                        ?{Number(order.total_amount).toLocaleString("en-IN")}
                       </p>
                     </div>
                   </CardContent>
@@ -351,7 +351,7 @@ function ProfileContent() {
                     <Link href={`/products/${item.product.id}`}>
                       <div className="relative h-64 bg-background/5">
                         <Image
-                          src={item.product.front_image || "/placeholder.jpg"}
+                          src={item.product.front_image || "/placeholder.svg"}
                           alt={item.product.name}
                           fill
                           className="object-cover"
@@ -364,7 +364,7 @@ function ProfileContent() {
                       </h3>
                       <div className="flex items-center justify-between">
                         <p className="font-bold text-lg text-theme">
-                          ₹{Number(item.product.price).toLocaleString("en-IN")}
+                          ?{Number(item.product.price).toLocaleString("en-IN")}
                         </p>
                         <Button
                           variant="ghost"
