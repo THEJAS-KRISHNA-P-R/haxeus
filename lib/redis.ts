@@ -50,13 +50,14 @@ export async function invalidate(...keys: string[]) {
  * Returns { limited: true } if the caller has exceeded `limit` requests
  * in the last `windowSecs` seconds.
  *
- * Fails open: if Redis is down, returns { limited: false } to avoid
- * blocking legitimate traffic.
+ * Fails open by default. Set `failClosed: true` on security-sensitive
+ * endpoints (payment, auth) so requests are blocked when Redis is unavailable.
  */
 export async function rateLimit(
     key: string,
     limit: number,
-    windowSecs: number
+    windowSecs: number,
+    { failClosed = false }: { failClosed?: boolean } = {}
 ): Promise<{ limited: boolean; remaining: number; reset: number }> {
     try {
         const redisKey = `rl:${key}`
@@ -76,7 +77,7 @@ export async function rateLimit(
             reset,
         }
     } catch {
-        // Redis down — fail open (don't block traffic)
-        return { limited: false, remaining: limit, reset: 0 }
+        // Redis down — fail closed on sensitive endpoints, open otherwise
+        return { limited: failClosed, remaining: failClosed ? 0 : limit, reset: 0 }
     }
 }

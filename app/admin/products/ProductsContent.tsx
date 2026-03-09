@@ -168,7 +168,7 @@ export default function ProductsManagementContent() {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-xl overflow-hidden border border-[var(--border)] bg-black shrink-0 relative">
                                                     <Image
-                                                        src={product.front_image || "/placeholder.jpg"}
+                                                        src={product.front_image || "/placeholder.svg"}
                                                         alt={product.name}
                                                         fill
                                                         className="object-cover transition-transform group-hover:scale-110"
@@ -203,7 +203,7 @@ export default function ProductsManagementContent() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
-                                                <Link href={`/admin/products/${product.id}`}>
+                                                <Link href={`/admin/products/${product.id}/edit`}>
                                                     <button className="p-2.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-3)] hover:text-[var(--text)] hover:border-[var(--text-3)] border border-transparent transition-all">
                                                         <Edit size={14} />
                                                     </button>

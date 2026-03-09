@@ -67,8 +67,8 @@ const LightPillarMobile: React.FC<LightPillarProps> = ({
         // Quality settings — mobile is always low/medium, never high
         const qualityMap = {
             low: { iterations: 20, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMult: 2.0 },
-            medium: { iterations: 30, waveIterations: 2, pixelRatio: 0.6, precision: 'mediump', stepMult: 1.5 },
-            high: { iterations: 38, waveIterations: 5, pixelRatio: 0.75, precision: 'mediump', stepMult: 1.2 },
+            medium: { iterations: 36, waveIterations: 3, pixelRatio: 0.6, precision: 'mediump', stepMult: 1.3 },
+            high: { iterations: 58, waveIterations: 5, pixelRatio: 0.75, precision: 'mediump', stepMult: 1.0 },
         };
         const s = qualityMap[quality] || qualityMap.low;
 
@@ -261,11 +261,13 @@ void main() {
         const uRotSin = gl.getUniformLocation(program, 'uRotSin');
         const uAspect = gl.getUniformLocation(program, 'uAspect');
 
-        // Parse color hex → [r, g, b] 0..1
-        const hexToRgb = (hex: string): [number, number, number] => {
-            const r = parseInt(hex.slice(1, 3), 16) / 255;
-            const g = parseInt(hex.slice(3, 5), 16) / 255;
-            const b = parseInt(hex.slice(5, 7), 16) / 255;
+        // Parse color string (hex #rrggbb / #rrggbbaa  OR  rgb() / rgba()) → [r, g, b] 0..1
+        const hexToRgb = (color: string): [number, number, number] => {
+            const rgb = color.match(/rgba?\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)/i);
+            if (rgb) return [parseFloat(rgb[1]) / 255, parseFloat(rgb[2]) / 255, parseFloat(rgb[3]) / 255];
+            const r = parseInt(color.slice(1, 3), 16) / 255;
+            const g = parseInt(color.slice(3, 5), 16) / 255;
+            const b = parseInt(color.slice(5, 7), 16) / 255;
             return [r, g, b];
         };
 

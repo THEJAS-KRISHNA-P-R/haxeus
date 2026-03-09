@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useTheme } from "@/components/ThemeProvider"
 import { useEffect, useState } from "react"
@@ -6,32 +6,32 @@ import { cn } from "@/lib/utils"
 
 const sections = [
   {
-    title: "Eligibility for Returns",
+    title: "Replacement Eligibility",
     content: [
       {
-        subtitle: "10-Day Policy",
-        text: "We offer a 10-day replacement policy from the date of delivery. If 10 days have gone by since your delivery, we unfortunately cannot offer you a return or exchange.",
+        subtitle: "10-Day Replacement Policy",
+        text: "We offer a 10-day replacement policy from the date of delivery. If 10 days have gone by since your delivery, we unfortunately cannot process a replacement request.",
       },
       {
         subtitle: "Condition on Arrival",
-        text: "To be eligible for a return, your item must be unused and in the same condition that you received it. It must also be in the original packaging with all tags intact.",
+        text: "To be eligible for a replacement, your item must be unused and in the same condition that you received it. It must also be in the original packaging with all tags intact.",
       },
       {
         subtitle: "Exceptions",
-        text: "Items purchased during clearance sales or using specific high-value promotional codes are not eligible for returns or refunds unless they arrive damaged.",
+        text: "Items purchased during clearance sales or using specific high-value promotional codes are not eligible for replacement unless they arrive defective or damaged.",
       },
     ],
   },
   {
-    title: "Return Process",
+    title: "Replacement Process",
     content: [
       {
-        subtitle: "Initiating a Return",
-        text: "To initiate a return, please send an email to haxeus.in@gmail.com with your Order ID and clear photos of the product and packaging.",
+        subtitle: "Initiating a Replacement",
+        text: "To request a replacement, please send an email to haxeus.in@gmail.com with your Order ID and clear photos of the defective or damaged product and packaging.",
       },
       {
         subtitle: "Approval",
-        text: "Once your request is received, we will inspect the photos and notify you of the approval or rejection of your return.",
+        text: "Once your request is received, we will inspect the photos and notify you of the approval or rejection of your replacement request.",
       },
       {
         subtitle: "Shipping the Item",
@@ -43,8 +43,12 @@ const sections = [
     title: "Refunds",
     content: [
       {
+        subtitle: "When Refunds Apply",
+        text: "Refunds are only issued if a replacement is not available for your size. We do not offer refunds as a substitute for replacement — refunds are a last resort when stock is unavailable.",
+      },
+      {
         subtitle: "Processing Time",
-        text: "Once your return is received and inspected, we will send you an email to notify you that we have received your returned item. Refunds are processed within 7-10 business days.",
+        text: "Once your returned item is received and inspected, we will notify you by email. Refunds are processed within 7-10 business days to your original payment method.",
       },
       {
         subtitle: "Refund Method",
@@ -53,11 +57,11 @@ const sections = [
     ],
   },
   {
-    title: "Exchanges",
+    title: "Size Replacements",
     content: [
       {
-        subtitle: "Size Exchanges",
-        text: "We only replace items if they are defective, damaged, or require a size exchange. If you need to exchange it for the same item in a different size, send us an email at haxeus.in@gmail.com.",
+        subtitle: "Wrong Size",
+        text: "We replace items if they are defective, damaged, or if you require a size exchange. If you need to request a replacement in a different size, send us an email at haxeus.in@gmail.com with your Order ID.",
       },
     ],
   },
@@ -66,7 +70,7 @@ const sections = [
     content: [
       {
         subtitle: "Email Assistance",
-        text: "For any assistance regarding returns and refunds, please reach out to haxeus.in@gmail.com. We are here to help.",
+        text: "For any assistance regarding replacements, please reach out to haxeus.in@gmail.com. We are here to help.",
       },
     ],
   },
@@ -93,7 +97,7 @@ export default function ReturnsRefundsPage() {
             HAXEUS — Legal
           </p>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
-            Returns & Refunds
+            Replacement Policy
           </h1>
           <p className={cn("text-xs", isDark ? "text-white/30" : "text-black/35")}>
             Last updated: {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
@@ -105,7 +109,7 @@ export default function ReturnsRefundsPage() {
           isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-black/[0.02] border-black/[0.07]"
         )}>
           <p className={cn("text-sm leading-relaxed", isDark ? "text-white/65" : "text-black/65")}>
-            We want you to be completely satisfied with your HAXEUS purchase. This policy outlines how we handle returns, exchanges, and refunds to ensure a smooth shopping experience.
+            We want you to be completely satisfied with your HAXEUS purchase. We offer a 10-day replacement policy for defective or damaged items. We do not offer returns for refunds — only replacements. Refunds are issued solely when a replacement cannot be fulfilled.
           </p>
         </div>
 

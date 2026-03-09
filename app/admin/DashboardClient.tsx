@@ -218,7 +218,7 @@ export default function DashboardClient() {
                                 onClick={() => (window.location.href = `/admin/products/${p.id}`)}
                             >
                                 <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-[var(--border)]">
-                                    <img src={p.image_url || "/placeholder.jpg"} alt={p.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                    <img src={p.image_url || "/placeholder.svg"} alt={p.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                                     <div className="absolute top-0 left-0 w-full h-full bg-black/20" />
                                 </div>
                                 <div className="flex-1 min-w-0">

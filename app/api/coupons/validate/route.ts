@@ -5,7 +5,16 @@ import { redis, cached } from "@/lib/redis"
 import { CK, TTL } from "@/lib/cache-keys"
 
 export async function POST(req: NextRequest) {
-    const { code, cartTotal } = await req.json()
+    let body: any
+    try { body = await req.json() } catch {
+        return NextResponse.json({ valid: false, error: "Invalid request" }, { status: 400 })
+    }
+    const { code, cartTotal } = body
+
+    if (!code || typeof code !== 'string' || typeof cartTotal !== 'number' || cartTotal < 0) {
+        return NextResponse.json({ valid: false, error: "Invalid input" }, { status: 400 })
+    }
+
     const ip = req.headers.get("x-forwarded-for") ?? "unknown"
     const rlKey = CK.rateLimitCoupon(ip)
 
@@ -56,5 +65,13 @@ export async function POST(req: NextRequest) {
         ? (cartTotal * coupon.discount_value) / 100
         : coupon.discount_value
 
-    return NextResponse.json({ valid: true, discount: Math.min(discount, cartTotal), coupon })
+    return NextResponse.json({
+        valid: true,
+        discount: Math.min(discount, cartTotal),
+        coupon: {
+            discount_type: coupon.discount_type,
+            discount_value: coupon.discount_value,
+            code: coupon.code,
+        },
+    })
 }

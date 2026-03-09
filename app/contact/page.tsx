@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import type React from "react"
 
@@ -64,14 +64,14 @@ export default function ContactPage() {
 
   const faqs = [
     {
-      question: "What is your return policy?",
+      question: "Do you offer returns?",
       answer:
-        "We offer a 30-day return policy for all unworn items in original condition. Please visit our Returns & Refunds page for detailed information.",
+        "We don't offer returns. We provide a 10-day replacement policy from the date of delivery for items that are defective or damaged. Items must be unworn, unwashed, with original tags attached. Email haxeus.in@gmail.com with your order ID and photos to initiate.",
     },
     {
       question: "How long does shipping take?",
       answer:
-        "Standard shipping takes 3-5 business days within India. Express shipping (1-2 business days) is available for an additional fee.",
+        "Orders are processed within 2-3 business days. Standard shipping then takes 7-10 business days across India.",
     },
     {
       question: "What sizes do you offer?",
@@ -81,7 +81,7 @@ export default function ContactPage() {
     {
       question: "Are your T-shirts pre-shrunk?",
       answer:
-        "Yes, all our T-shirts are pre-shrunk and made from 100% premium cotton to ensure they maintain their fit after washing.",
+        "Yes, all our T-shirts are pre-shrunk and made from 100% premium bio-washed cotton to ensure they maintain their fit after washing.",
     },
     {
       question: "Do you offer international shipping?",
@@ -91,6 +91,11 @@ export default function ContactPage() {
       question: "How can I track my order?",
       answer:
         "Once your order ships, you'll receive a tracking number via email. You can use this to track your package on our website or the courier's website.",
+    },
+    {
+      question: "What is your refund policy?",
+      answer:
+        "Refunds are only issued if a replacement is not available for your size. Once confirmed, refunds are processed within 7-10 business days to your original payment method.",
     },
   ]
 

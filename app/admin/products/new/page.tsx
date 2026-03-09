@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -242,7 +242,7 @@ export default function NewProductPage() {
             {/* Price & Colors */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="price" className={isDark ? "text-white/60" : "text-black/60"}>Price (₹) *</Label>
+                <Label htmlFor="price" className={isDark ? "text-white/60" : "text-black/60"}>Price (?) *</Label>
                 <Input
                   id="price"
                   type="number"

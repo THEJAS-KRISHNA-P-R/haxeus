@@ -7,7 +7,9 @@ import { sendWelcomeEmail } from '@/lib/email'
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
-    const redirect = searchParams.get('redirect') || '/'
+    // S-01: Prevent open redirect — only allow relative paths on our own origin
+    let redirect = searchParams.get('redirect') || '/'
+    if (!redirect.startsWith('/') || redirect.startsWith('//')) redirect = '/'
 
     if (code) {
         const cookieStore = await cookies()

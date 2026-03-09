@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
         // ── Rate limiting (#16.1) ──────────────────────────────────────────────
         const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-        const { limited: ipLimited } = await rateLimit(`create-order:ip:${ip}`, 5, 60)
+        const { limited: ipLimited } = await rateLimit(`create-order:ip:${ip}`, 5, 60, { failClosed: true })
         if (ipLimited) {
             return NextResponse.json({ error: "Too many requests. Please wait." }, { status: 429 })
         }
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Per-user rate limit (#16.1)
-        const { limited: userLimited } = await rateLimit(`create-order:user:${user.id}`, 10, 300)
+        const { limited: userLimited } = await rateLimit(`create-order:user:${user.id}`, 10, 300, { failClosed: true })
         if (userLimited) {
             return NextResponse.json({ error: "Too many orders attempted. Please wait." }, { status: 429 })
         }

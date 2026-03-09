@@ -127,7 +127,7 @@ export default function CommunicationsContent() {
                     className={cn(
                         "px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.05em] transition-all duration-200 flex items-center gap-1.5",
                         activeTab === "messages"
-                            ? "bg-white text-black shadow-lg"
+                            ? "bg-[var(--text)] text-[var(--bg)] shadow-lg"
                             : "text-[var(--text-3)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text)]"
                     )}
                 >
@@ -144,7 +144,7 @@ export default function CommunicationsContent() {
                     className={cn(
                         "px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.05em] transition-all duration-200 flex items-center gap-1.5",
                         activeTab === "newsletter"
-                            ? "bg-white text-black shadow-lg"
+                            ? "bg-[var(--text)] text-[var(--bg)] shadow-lg"
                             : "text-[var(--text-3)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text)]"
                     )}
                 >
@@ -156,7 +156,7 @@ export default function CommunicationsContent() {
                     className={cn(
                         "px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.05em] transition-all duration-200 flex items-center gap-1.5",
                         activeTab === "overview"
-                            ? "bg-white text-black shadow-lg"
+                            ? "bg-[var(--text)] text-[var(--bg)] shadow-lg"
                             : "text-[var(--text-3)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text)]"
                     )}
                 >
@@ -242,7 +242,7 @@ export default function CommunicationsContent() {
 
                                                 {/* Expanded Message View */}
                                                 {expandedMessage === msg.id && (
-                                                    <div className="p-6 bg-black/20 border-t border-theme-border flex gap-8">
+                                                    <div className="p-6 bg-[var(--bg-elevated)]/60 border-t border-[var(--border)] flex gap-8">
                                                         <div className="flex-1 space-y-4">
                                                             <div>
                                                                 <h4 className="text-xs uppercase text-theme-3 font-bold tracking-widest mb-2">Message Content</h4>
@@ -273,7 +273,7 @@ export default function CommunicationsContent() {
                         {/* NEWSLETTER TAB */}
                         {activeTab === "newsletter" && (
                             <div className="overflow-x-auto min-h-[400px]">
-                                <div className="p-4 border-b border-theme flex justify-between items-center bg-black/10">
+                                <div className="p-4 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg-elevated)]/40">
                                     <div className="text-sm text-theme-2">
                                         Total Subscribers: <span className="text-theme font-bold ml-1">{subscribers.length}</span>
                                     </div>
@@ -340,7 +340,7 @@ export default function CommunicationsContent() {
                                         </div>
                                         <div>
                                             <div className="text-[10px] font-bold text-theme-3 uppercase tracking-wider mb-0.5">Unread</div>
-                                            <div className="text-xl font-bold text-white">{unreadCount}</div>
+                                            <div className="text-xl font-bold text-[var(--text)]">{unreadCount}</div>
                                         </div>
                                     </div>
 

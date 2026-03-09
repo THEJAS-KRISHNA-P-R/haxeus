@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { supabase, ProductInventory } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { useCart } from "@/contexts/CartContext"
+import { useTheme } from "@/components/ThemeProvider"
 import { WishlistButton } from "@/components/WishlistButton"
 import { Heart, ShoppingCart, Truck, Shield, RotateCcw, Star, Zap } from "lucide-react"
 import { getProductInventory, checkStockAvailability } from "@/lib/inventory"
@@ -42,6 +43,10 @@ export default function ProductDetailPage() {
   const { toast } = useToast()
   const { addItem } = useCart()
 
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  const isDark = mounted ? theme === "dark" : true
+
   const [product, setProduct] = useState<Product | null>(null)
   const [productImages, setProductImages] = useState<ProductImage[]>([])
   const [loading, setLoading] = useState(true)
@@ -53,6 +58,8 @@ export default function ProductDetailPage() {
   const [inventory, setInventory] = useState<ProductInventory[]>([])
   const [reviews, setReviews] = useState<any[]>([])
   const [ratingSummary, setRatingSummary] = useState<any>(null)
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     fetchProduct()
@@ -252,7 +259,7 @@ export default function ProductDetailPage() {
                   className="object-cover transition-opacity duration-300"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.src = "/placeholder.svg?height=600&width=600&text=Product+Image"
+                    target.src = "/placeholder.svg"
                   }}
                 />
               ) : (
@@ -263,7 +270,7 @@ export default function ProductDetailPage() {
                   className="object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.src = "/placeholder.svg?height=600&width=600&text=Product+Image"
+                    target.src = "/placeholder.svg"
                   }}
                 />
               )}
@@ -289,7 +296,7 @@ export default function ProductDetailPage() {
                         className="object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
-                          target.src = "/placeholder.svg?height=80&width=80&text=Img"
+                          target.src = "/placeholder.svg"
                         }}
                       />
                       {img.is_primary && (
@@ -346,30 +353,36 @@ export default function ProductDetailPage() {
             {/* Size Selection */}
             <div>
               <Label className="text-lg font-semibold mb-4 block text-theme">Size</Label>
-              <div className="flex gap-3 flex-wrap">
+              <div className="flex flex-wrap gap-2">
                 {(product.sizes || product.available_sizes || []).map((size) => {
-                  const stock = inventory.find(inv => inv.size === size)
-                  const available = !stock || stock.stock_quantity > 0
-                  const lowStock = stock && stock.stock_quantity > 0 && stock.stock_quantity <= stock.low_stock_threshold
+                  const inventoryItem = inventory.find(i => i.size === size)
+                  const inStock = (inventoryItem?.stock_quantity ?? 0) > 0
+                  const isSelected = selectedSize === size
+                  const lowStock = inventoryItem && inventoryItem.stock_quantity > 0 && inventoryItem.stock_quantity <= inventoryItem.low_stock_threshold
 
                   return (
-                    <div
-                      key={size}
-                      className={`relative border-2 rounded-xl p-4 flex items-center justify-center min-w-[60px] font-semibold transition-all ${!available
-                        ? 'opacity-30 cursor-not-allowed border-white/5 bg-white/5 text-white/20 grayscale'
-                        : selectedSize === size
-                          ? 'bg-[var(--accent)] text-white border-[var(--accent)] cursor-pointer shadow-lg shadow-[var(--accent)]/20'
-                          : 'hover:bg-card border-theme text-theme-2 cursor-pointer hover:border-[var(--accent)]'
-                        }`}
-                      style={!available ? { pointerEvents: 'none', filter: 'contrast(0.5) brightness(0.7)' } : {}}
-                      onClick={() => available && setSelectedSize(size)}
-                    >
-                      {size}
-                      {!available && <span className="ml-1 text-xs">✕</span>}
-                      {lowStock && available && <span className="ml-1 text-xs">⚡</span>}
-                      {lowStock && available && (
+                    <div key={size} className="relative">
+                      <button
+                        onClick={() => inStock && setSelectedSize(size)}
+                        disabled={!inStock}
+                        className={`
+                          px-5 py-2.5 rounded-full text-sm font-semibold border transition-all duration-200
+                          ${isSelected
+                            ? 'bg-[#e93a3a] border-[#e93a3a] text-white'
+                            : inStock
+                              ? isDark
+                                ? 'bg-transparent border-white/20 text-white hover:border-white/60'
+                                : 'bg-transparent border-black/20 text-black hover:border-black/60'
+                              : 'opacity-30 cursor-not-allowed border-white/10 text-white/30'
+                          }
+                        `}
+                      >
+                        {size}
+                        {!inStock && <span className="ml-1 text-xs">✕</span>}
+                      </button>
+                      {lowStock && inStock && (
                         <Badge className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs">
-                          {stock.stock_quantity} left
+                          {inventoryItem.stock_quantity} left
                         </Badge>
                       )}
                     </div>
@@ -447,8 +460,8 @@ export default function ProductDetailPage() {
               </Card>
               <Card className="p-4 text-center bg-card border-theme">
                 <RotateCcw className="w-8 h-8 mx-auto mb-2 text-[var(--accent-pink)]" />
-                <div className="font-semibold text-theme">Easy Returns</div>
-                <div className="text-sm text-theme-3">5-day return policy</div>
+                <div className="font-semibold text-theme">10-Day Replacement</div>
+                <div className="text-sm text-theme-3">10-day replacement policy</div>
               </Card>
             </div>
 
@@ -469,7 +482,7 @@ export default function ProductDetailPage() {
                 <ul className="space-y-2 text-theme-3 text-sm">
                   <li>• <strong>Domestic Shipping:</strong> 1-2 weeks</li>
                   <li>• <strong>International:</strong> Product price + shipping charges</li>
-                  <li>• <strong>Returns:</strong> Easy returns within 5 days of delivery</li>
+                  <li>• <strong>Replacement:</strong> 10-day replacement from date of delivery</li>
                 </ul>
               </div>
             </Card>

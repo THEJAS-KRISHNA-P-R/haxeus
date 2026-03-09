@@ -26,7 +26,7 @@ import { supabase } from "@/lib/supabase"
 
 
 const DynamicTestimonials = dynamic(() => import("../components/Testimonials"), {
-  loading: () => <div className="h-96 animate-pulse bg-[#111] rounded-2xl" />,
+  loading: () => <div className="h-96 animate-pulse bg-[var(--bg-elevated)] rounded-2xl" />,
 })
 
 interface FeaturedProduct {
@@ -240,7 +240,7 @@ export default function HomePage() {
                       className="cursor-default"
                     >
                       <div className="text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                      <div className="text-sm text-theme-3 mt-1">{stat.label}</div>
+                      <div className="text-sm text-theme-2 mt-1">{stat.label}</div>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -267,7 +267,7 @@ export default function HomePage() {
                     className="mx-auto rounded-xl"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
-                      target.src = "/placeholder.svg?height=500&width=400&text=Featured+Product"
+                      target.src = "/placeholder.svg"
                     }}
                   />
 
@@ -334,7 +334,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex max-w-md mx-auto shadow-2xl rounded-full overflow-hidden bg-black/20 backdrop-blur-sm"
+              className="flex max-w-md mx-auto shadow-2xl rounded-full overflow-hidden bg-[var(--bg-elevated)]/80 backdrop-blur-sm"
             >
               <input
                 type="email"
@@ -396,12 +396,12 @@ export default function HomePage() {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-[#111] rounded-2xl overflow-hidden animate-pulse">
-                    <div className="aspect-square bg-white/5" />
+                  <div key={i} className="bg-[var(--bg-elevated)] rounded-2xl overflow-hidden animate-pulse">
+                    <div className="aspect-square bg-[var(--text)]/5" />
                     <div className="p-6 space-y-3">
-                      <div className="h-6 bg-white/5 rounded w-3/4" />
-                      <div className="h-8 bg-white/5 rounded w-1/2" />
-                      <div className="h-12 bg-white/5 rounded-full w-full" />
+                      <div className="h-6 bg-[var(--text)]/5 rounded w-3/4" />
+                      <div className="h-8 bg-[var(--text)]/5 rounded w-1/2" />
+                      <div className="h-12 bg-[var(--text)]/5 rounded-full w-full" />
                     </div>
                   </div>
                 ))}
@@ -458,7 +458,7 @@ export default function HomePage() {
                                 loading={index === 0 ? "eager" : "lazy"}
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement
-                                  target.src = "/placeholder.svg?height=400&width=400&text=Product+Image"
+                                  target.src = "/placeholder.svg"
                                 }}
                               />
                             </motion.div>

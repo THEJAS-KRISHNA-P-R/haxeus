@@ -41,8 +41,8 @@ export async function createReturnRequest(request: {
     (Date.now() - deliveredDate.getTime()) / (1000 * 60 * 60 * 24)
   )
 
-  if (daysSinceDelivery > 7) {
-    return { success: false, error: 'Return window has expired (7 days)' }
+  if (daysSinceDelivery > 10) {
+    return { success: false, error: 'Replacement window has expired (10 days from delivery)' }
   }
 
   // Calculate refund amount

@@ -56,12 +56,15 @@ export async function POST(request: Request) {
         let htmlBody = template?.html_body || email.subject
         let textBody = template?.text_body || email.subject
 
-        // Replace variables in template
+        // Replace variables in template (safe string replacement, no RegExp from user data)
         if (email.template_data) {
           Object.keys(email.template_data).forEach(key => {
-            const value = email.template_data[key]
-            htmlBody = htmlBody.replace(new RegExp(`{${key}}`, 'g'), value)
-            textBody = textBody.replace(new RegExp(`{${key}}`, 'g'), value)
+            // Escape value for HTML context to prevent XSS in emails
+            const raw = String(email.template_data[key] ?? '')
+            const safe = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+            const placeholder = `{${key}}`
+            while (htmlBody.includes(placeholder)) htmlBody = htmlBody.replace(placeholder, safe)
+            while (textBody.includes(placeholder)) textBody = textBody.replace(placeholder, raw)
           })
         }
 

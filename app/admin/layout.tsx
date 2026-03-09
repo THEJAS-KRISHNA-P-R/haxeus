@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useEffect, useState, useRef, useCallback } from "react"
@@ -21,9 +21,9 @@ const navItems = [
   { href: "/admin/settings", icon: Settings, label: "Settings" },
 ]
 
-// ──────────────────────────────────
+// ----------------------------------
 // Admin Global Search Component
-// ──────────────────────────────────
+// ----------------------------------
 
 interface SearchResult {
   type: "order" | "product" | "customer" | "coupon" | "nav"
@@ -89,7 +89,7 @@ function AdminSearch() {
       type: "order",
       id: o.id,
       title: `Order #${o.id.slice(-8).toUpperCase()}`,
-      subtitle: `${o.email} — ₹${o.total_amount} — ${o.status.toUpperCase()}`,
+      subtitle: `${o.email} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ?${o.total_amount} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ${o.status.toUpperCase()}`,
       href: `/admin/orders?id=${o.id}`,
     }))
 
@@ -97,7 +97,7 @@ function AdminSearch() {
       type: "product",
       id: String(p.id),
       title: p.name,
-      subtitle: `₹${p.price} — ${p.is_active ? "Active" : "Inactive"}`,
+      subtitle: `?${p.price} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ${p.is_active ? "Active" : "Inactive"}`,
       href: `/admin/products/${p.id}`,
     }))
 
@@ -113,7 +113,7 @@ function AdminSearch() {
       type: "coupon",
       id: String(c.id),
       title: c.code,
-      subtitle: `${c.discount_type === "percentage" ? c.discount_value + "% off" : "₹" + c.discount_value + " off"} — ${c.is_active ? "Active" : "Paused"}`,
+      subtitle: `${c.discount_type === "percentage" ? c.discount_value + "% off" : "?" + c.discount_value + " off"} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ${c.is_active ? "Active" : "Paused"}`,
       href: `/admin/coupons`,
     }))
 
@@ -165,7 +165,7 @@ function AdminSearch() {
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
-          placeholder="Search nav, users, orders (paid, pending)…"
+          placeholder="Search nav, users, orders (paid, pending)ÃƒÂ¢Ã‚Â€Ã‚Â¦"
           style={{
             background: "transparent", border: "none", outline: "none",
             color: "var(--text)", fontSize: "0.8125rem", width: "100%",
@@ -190,7 +190,7 @@ function AdminSearch() {
             }}
           >
             {loading ? (
-              <div className="px-4 py-3 text-xs" style={{ color: "var(--text-3)" }}>Searching…</div>
+              <div className="px-4 py-3 text-xs" style={{ color: "var(--text-3)" }}>SearchingÃƒÂ¢Ã‚Â€Ã‚Â¦</div>
             ) : (
               results.map(r => (
                 <button
@@ -236,9 +236,9 @@ function AdminSearch() {
   )
 }
 
-// ──────────────────────────────────
+// ----------------------------------
 // Admin Layout
-// ──────────────────────────────────
+// ----------------------------------
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -297,7 +297,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
 
-      {/* ── SIDEBAR ── */}
+      {/* -- SIDEBAR -- */}
       <aside
         style={{
           background: "var(--bg-card)",
@@ -398,7 +398,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* ── ADMIN TOPBAR ── */}
+      {/* -- ADMIN TOPBAR -- */}
       <header
         style={{
           background: "var(--bg-card)",
@@ -431,7 +431,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </header>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* -- MAIN CONTENT -- */}
       <main
         style={{ background: "var(--bg)" }}
         className="ml-64 pt-24 min-h-screen px-8"
@@ -443,7 +443,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           style={{ borderTop: "1px solid var(--border)", color: "var(--text-3)" }}
           className="mt-12 px-8 py-4 text-xs text-center"
         >
-          HAXEUS Admin © {new Date().getFullYear()}
+          HAXEUS Admin ÃƒÂ‚Ã‚Â© {new Date().getFullYear()}
         </footer>
       </main>
 
