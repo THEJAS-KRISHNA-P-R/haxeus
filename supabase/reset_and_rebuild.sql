@@ -695,8 +695,9 @@ CREATE POLICY "orders_admin_read" ON public.orders FOR SELECT USING (
 CREATE POLICY "orders_admin_update" ON public.orders FOR UPDATE USING (
     EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
 );
--- Service role inserts/updates new orders — bypasses RLS naturally, no blanket policy needed
-CREATE POLICY "orders_service_insert" ON public.orders FOR INSERT WITH CHECK (true);
+-- Service role inserts/updates new orders — bypasses RLS naturally (BYPASSRLS)
+-- No blanket policy needed; direct client INSERT is blocked by default-deny RLS
+-- CREATE POLICY "orders_service_insert" ... WITH CHECK (true)  <-- intentionally removed
 
 -- ── order_items policies ────────────────────────────────────────────────────
 CREATE POLICY "order_items_own_read" ON public.order_items FOR SELECT USING (
@@ -705,7 +706,9 @@ CREATE POLICY "order_items_own_read" ON public.order_items FOR SELECT USING (
 CREATE POLICY "order_items_admin_read" ON public.order_items FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
 );
-CREATE POLICY "order_items_service_insert" ON public.order_items FOR INSERT WITH CHECK (true);
+-- Service role inserts order_items via API routes (BYPASSRLS) — no policy needed
+-- Explicit block prevents direct client writes:
+CREATE POLICY "order_items_no_direct_insert" ON public.order_items FOR INSERT WITH CHECK (false);
 
 -- ── coupons policies ────────────────────────────────────────────────────────
 CREATE POLICY "coupons_read_active" ON public.coupons FOR SELECT USING (true);
@@ -715,7 +718,7 @@ CREATE POLICY "coupons_admin_manage" ON public.coupons FOR ALL USING (
 
 -- ── coupon_usage policies ───────────────────────────────────────────────────
 CREATE POLICY "coupon_usage_own_read" ON public.coupon_usage FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "coupon_usage_service_insert" ON public.coupon_usage FOR INSERT WITH CHECK (true);
+-- coupon_usage: written only by service role via RPC (BYPASSRLS) — no policy needed
 
 -- ── wishlist policies ───────────────────────────────────────────────────────
 CREATE POLICY "wishlist_own" ON public.wishlist FOR ALL USING (auth.uid() = user_id);
@@ -780,10 +783,13 @@ CREATE POLICY "settings_admin_manage" ON public.store_settings FOR ALL USING (
 );
 
 -- ── email_queue policies ────────────────────────────────────────────────────
+-- email_queue: managed only by service role / cron jobs (BYPASSRLS)
 CREATE POLICY "email_queue_admin_read" ON public.email_queue FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
 );
-CREATE POLICY "email_queue_service_manage" ON public.email_queue FOR ALL USING (true);
+CREATE POLICY "email_queue_admin_update" ON public.email_queue FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
+);
 
 -- ── email_templates policies ────────────────────────────────────────────────
 CREATE POLICY "email_templates_read_all" ON public.email_templates FOR SELECT USING (true);
@@ -800,10 +806,11 @@ CREATE POLICY "abandoned_carts_own" ON public.abandoned_carts FOR ALL USING (aut
 CREATE POLICY "abandoned_carts_service" ON public.abandoned_carts FOR SELECT USING (true);
 
 -- ── audit_log policies ──────────────────────────────────────────────────────
+-- audit_log: service role writes via BYPASSRLS; block direct client writes
 CREATE POLICY "audit_admin_read" ON public.audit_log FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
 );
-CREATE POLICY "audit_service_insert" ON public.audit_log FOR INSERT WITH CHECK (true);
+CREATE POLICY "audit_no_direct_write" ON public.audit_log FOR INSERT WITH CHECK (false);
 
 
 -- ============================================================================
@@ -811,7 +818,7 @@ CREATE POLICY "audit_service_insert" ON public.audit_log FOR INSERT WITH CHECK (
 -- ============================================================================
 
 -- low_stock_products (lib/inventory.ts getLowStockProducts)
-CREATE OR REPLACE VIEW public.low_stock_products AS
+CREATE OR REPLACE VIEW public.low_stock_products WITH (security_invoker = on) AS
 SELECT
     pi.id,
     pi.product_id,
@@ -826,7 +833,7 @@ JOIN public.products p ON p.id = pi.product_id
 WHERE pi.stock_quantity <= pi.low_stock_threshold;
 
 -- top_selling_products (lib/recommendations.ts getBestSellers)
-CREATE OR REPLACE VIEW public.top_selling_products AS
+CREATE OR REPLACE VIEW public.top_selling_products WITH (security_invoker = on) AS
 SELECT
     p.id,
     p.name,
@@ -838,7 +845,7 @@ GROUP BY p.id, p.name
 ORDER BY total_sold DESC;
 
 -- products_with_ratings (lib/search.ts advancedProductSearch)
-CREATE OR REPLACE VIEW public.products_with_ratings AS
+CREATE OR REPLACE VIEW public.products_with_ratings WITH (security_invoker = on) AS
 SELECT
     p.*,
     COALESCE(AVG(pr.rating), 0) AS average_rating,
@@ -854,28 +861,40 @@ GROUP BY p.id;
 
 -- increment_coupon_usage (by code — verify/route.ts)
 CREATE OR REPLACE FUNCTION public.increment_coupon_usage(p_coupon_code text)
-RETURNS void AS $$
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     UPDATE public.coupons
     SET used_count = COALESCE(used_count, 0) + 1
     WHERE code = p_coupon_code;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- increment_coupon_usage (by id — lib/coupons.ts)
 CREATE OR REPLACE FUNCTION public.increment_coupon_usage(p_coupon_id uuid)
-RETURNS void AS $$
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     UPDATE public.coupons
     SET used_count = COALESCE(used_count, 0) + 1
     WHERE id = p_coupon_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- reserve_product_stock (lib/inventory.ts)
 CREATE OR REPLACE FUNCTION public.reserve_product_stock(
     p_product_id bigint, p_size text, p_quantity integer
-) RETURNS void AS $$
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     UPDATE public.product_inventory
     SET reserved_quantity = reserved_quantity + p_quantity,
@@ -886,24 +905,32 @@ BEGIN
         RAISE EXCEPTION 'Insufficient stock for product % size %', p_product_id, p_size;
     END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- release_product_stock (lib/inventory.ts)
 CREATE OR REPLACE FUNCTION public.release_product_stock(
     p_product_id bigint, p_size text, p_quantity integer
-) RETURNS void AS $$
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     UPDATE public.product_inventory
     SET reserved_quantity = GREATEST(reserved_quantity - p_quantity, 0),
         updated_at = now()
     WHERE product_id = p_product_id AND size = p_size;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- decrement_inventory_rpc (lib/inventory.ts, verify/route.ts)
 CREATE OR REPLACE FUNCTION public.decrement_inventory_rpc(
     p_product_id bigint, p_size text, p_quantity integer
-) RETURNS void AS $$
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     UPDATE public.product_inventory
     SET stock_quantity = GREATEST(stock_quantity - p_quantity, 0),
@@ -911,12 +938,16 @@ BEGIN
         updated_at = now()
     WHERE product_id = p_product_id AND size = p_size;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- increment_inventory (lib/returns.ts — restock on approved return)
 CREATE OR REPLACE FUNCTION public.increment_inventory(
     p_product_id bigint, p_size text, p_quantity integer
-) RETURNS void AS $$
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     UPDATE public.product_inventory
     SET stock_quantity = stock_quantity + p_quantity,
@@ -924,12 +955,16 @@ BEGIN
         updated_at = now()
     WHERE product_id = p_product_id AND size = p_size;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- update_review_helpful_count (lib/reviews.ts)
 CREATE OR REPLACE FUNCTION public.update_review_helpful_count(
     p_review_id uuid, p_is_helpful boolean, p_delta integer
-) RETURNS void AS $$
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     IF p_is_helpful THEN
         UPDATE public.product_reviews
@@ -941,18 +976,22 @@ BEGIN
         WHERE id = p_review_id;
     END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- increment_abandoned_cart_emails (lib/abandoned-cart.ts)
 CREATE OR REPLACE FUNCTION public.increment_abandoned_cart_emails(cart_id uuid)
-RETURNS void AS $$
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     UPDATE public.abandoned_carts
     SET email_sent_count = email_sent_count + 1,
         last_email_sent_at = now()
     WHERE id = cart_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 
 -- ============================================================================
@@ -960,7 +999,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger AS $$
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
     INSERT INTO public.profiles (id, email, full_name, role)
     VALUES (
@@ -972,7 +1015,7 @@ BEGIN
     ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created

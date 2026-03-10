@@ -11,29 +11,31 @@ ALTER TABLE orders
 CREATE INDEX IF NOT EXISTS idx_orders_razorpay_order_id ON orders(razorpay_order_id);
 
 -- RPC: increment coupon usage atomically
-CREATE OR REPLACE FUNCTION increment_coupon_usage(coupon_id UUID)
+CREATE OR REPLACE FUNCTION public.increment_coupon_usage(coupon_id UUID)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_catalog
 AS $$
 BEGIN
-  UPDATE coupons
+  UPDATE public.coupons
   SET usage_count = usage_count + 1
   WHERE id = coupon_id;
 END;
 $$;
 
 -- RPC: decrement inventory atomically (fails if stock would go negative)
-CREATE OR REPLACE FUNCTION decrement_inventory(p_product_id UUID, p_quantity INT)
+CREATE OR REPLACE FUNCTION public.decrement_inventory(p_product_id UUID, p_quantity INT)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_catalog
 AS $$
 DECLARE
   current_qty INT;
 BEGIN
   SELECT quantity INTO current_qty
-  FROM product_inventory
+  FROM public.product_inventory
   WHERE product_id = p_product_id
   FOR UPDATE;
 
@@ -45,7 +47,7 @@ BEGIN
     RAISE EXCEPTION 'Insufficient stock for product %: has %, needs %', p_product_id, current_qty, p_quantity;
   END IF;
 
-  UPDATE product_inventory
+  UPDATE public.product_inventory
   SET quantity = quantity - p_quantity
   WHERE product_id = p_product_id;
 END;

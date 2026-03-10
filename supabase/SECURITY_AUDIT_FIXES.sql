@@ -74,6 +74,7 @@ CREATE OR REPLACE FUNCTION apply_coupon_atomic(
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_catalog
 AS $$
 DECLARE
   v_count INT;
@@ -82,7 +83,7 @@ BEGIN
   -- Obtain row-level lock to prevent concurrent over-redemption
   SELECT usage_count, usage_limit
   INTO v_count, v_limit
-  FROM coupons
+  FROM public.coupons
   WHERE id = p_coupon_id
   FOR UPDATE;
 
@@ -92,7 +93,7 @@ BEGIN
   END IF;
 
   -- Increment atomically
-  UPDATE coupons
+  UPDATE public.coupons
   SET usage_count = usage_count + 1
   WHERE id = p_coupon_id;
 
@@ -111,13 +112,14 @@ CREATE OR REPLACE FUNCTION decrement_inventory(p_product_id UUID, p_quantity INT
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_catalog
 AS $$
 DECLARE
   current_qty INT;
 BEGIN
   -- FOR UPDATE acquires row-level lock — prevents concurrent oversell
   SELECT quantity INTO current_qty
-  FROM product_inventory
+  FROM public.product_inventory
   WHERE product_id = p_product_id
   FOR UPDATE;
 
@@ -131,7 +133,7 @@ BEGIN
       p_product_id, current_qty, p_quantity;
   END IF;
 
-  UPDATE product_inventory
+  UPDATE public.product_inventory
   SET quantity = quantity - p_quantity
   WHERE product_id = p_product_id;
 END;
@@ -219,12 +221,13 @@ CREATE OR REPLACE FUNCTION expire_pending_orders()
 RETURNS INT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_catalog
 AS $$
 DECLARE
   affected INT;
 BEGIN
   WITH expired AS (
-    UPDATE orders
+    UPDATE public.orders
     SET status = 'expired'
     WHERE status = 'pending'
       AND created_at < NOW() - INTERVAL '30 minutes'
