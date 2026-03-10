@@ -18,7 +18,7 @@
 
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- For better search performance
+CREATE EXTENSION IF NOT EXISTS "pg_trgm" SCHEMA extensions; -- extensions schema keeps public API surface clean
 
 -- ========================================
 -- SECTION 1: USER MANAGEMENT
@@ -52,12 +52,17 @@ CREATE POLICY "Service role can manage roles" ON user_roles
   USING (true);
 
 -- HELPER FUNCTION TO CHECK IF USER IS ADMIN
-CREATE OR REPLACE FUNCTION is_admin(user_uuid UUID)
-RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION public.is_admin(user_uuid UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
-  RETURN EXISTS (SELECT 1 FROM user_roles WHERE user_id = user_uuid AND role = 'admin');
+  RETURN EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = user_uuid AND role = 'admin');
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- USER ADDRESSES TABLE
 DROP TABLE IF EXISTS user_addresses CASCADE;
@@ -448,9 +453,7 @@ CREATE POLICY "Admin can view email queue" ON email_queue
   FOR SELECT 
   USING (EXISTS (SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND role = 'admin'));
 
-CREATE POLICY "System can insert emails" ON email_queue 
-  FOR INSERT 
-  WITH CHECK (true);
+-- Service role bypasses RLS (BYPASSRLS privilege) — no blanket INSERT policy needed
 
 CREATE POLICY "Admin can update email queue" ON email_queue 
   FOR UPDATE 
@@ -531,6 +534,12 @@ CREATE TABLE email_campaigns (
   sent_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+ALTER TABLE email_campaigns ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "email_campaigns_admin_manage" ON email_campaigns;
+CREATE POLICY "email_campaigns_admin_manage" ON email_campaigns FOR ALL
+  USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- ========================================
 -- SECTION 7: COUPONS & DISCOUNTS
@@ -708,6 +717,13 @@ CREATE TABLE search_queries (
 
 CREATE INDEX idx_search_queries_query ON search_queries USING gin(query gin_trgm_ops);
 
+ALTER TABLE search_queries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "search_queries_insert_any" ON search_queries;
+DROP POLICY IF EXISTS "search_queries_admin_read"  ON search_queries;
+CREATE POLICY "search_queries_insert_any" ON search_queries FOR INSERT WITH CHECK (true);
+CREATE POLICY "search_queries_admin_read" ON search_queries FOR SELECT USING (public.is_admin());
+
 -- PRODUCT VIEWS TABLE
 DROP TABLE IF EXISTS product_views CASCADE;
 CREATE TABLE product_views (
@@ -737,6 +753,13 @@ CREATE TABLE analytics_events (
 
 CREATE INDEX idx_analytics_events_type ON analytics_events(event_type);
 CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at);
+
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "analytics_events_insert_any" ON analytics_events;
+DROP POLICY IF EXISTS "analytics_events_admin_read" ON analytics_events;
+CREATE POLICY "analytics_events_insert_any" ON analytics_events FOR INSERT WITH CHECK (true);
+CREATE POLICY "analytics_events_admin_read" ON analytics_events FOR SELECT USING (public.is_admin());
 
 -- ========================================
 -- SECTION 11: PRODUCT RECOMMENDATIONS
@@ -781,13 +804,16 @@ CREATE TABLE price_changes (
 -- ========================================
 
 -- Function to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Apply updated_at triggers to relevant tables
 DROP TRIGGER IF EXISTS update_user_roles_updated_at ON user_roles;
@@ -815,14 +841,17 @@ CREATE TRIGGER update_newsletter_updated_at BEFORE UPDATE ON newsletter_subscrib
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Function: Update product rating on review changes
-CREATE OR REPLACE FUNCTION update_product_rating()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.update_product_rating()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
-  UPDATE products SET updated_at = NOW()
+  UPDATE public.products SET updated_at = NOW()
   WHERE id = COALESCE(NEW.product_id, OLD.product_id);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS trigger_update_product_rating ON product_reviews;
 CREATE TRIGGER trigger_update_product_rating
@@ -830,18 +859,21 @@ AFTER INSERT OR UPDATE OR DELETE ON product_reviews
 FOR EACH ROW EXECUTE FUNCTION update_product_rating();
 
 -- Function: Decrement inventory on order
-CREATE OR REPLACE FUNCTION decrement_inventory()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.decrement_inventory()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
-  UPDATE product_inventory
-  SET 
+  UPDATE public.product_inventory
+  SET
     stock_quantity = stock_quantity - NEW.quantity,
-    sold_quantity = sold_quantity + NEW.quantity,
-    updated_at = NOW()
+    sold_quantity  = sold_quantity  + NEW.quantity,
+    updated_at     = NOW()
   WHERE product_id = NEW.product_id AND size = NEW.size;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS trigger_decrement_inventory ON order_items;
 CREATE TRIGGER trigger_decrement_inventory
@@ -849,29 +881,32 @@ AFTER INSERT ON order_items
 FOR EACH ROW EXECUTE FUNCTION decrement_inventory();
 
 -- Function: Award loyalty points on order delivery
-CREATE OR REPLACE FUNCTION award_loyalty_points()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.award_loyalty_points()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public, pg_catalog
+AS $$
 DECLARE
   points_to_award INTEGER;
 BEGIN
   IF NEW.status = 'delivered' AND OLD.status != 'delivered' THEN
     points_to_award := FLOOR(NEW.total_amount / 10);
-    
-    INSERT INTO loyalty_points (user_id, total_points, lifetime_points)
+
+    INSERT INTO public.loyalty_points (user_id, total_points, lifetime_points)
     VALUES (NEW.user_id, points_to_award, points_to_award)
     ON CONFLICT (user_id) DO UPDATE SET
-      total_points = loyalty_points.total_points + points_to_award,
-      lifetime_points = loyalty_points.lifetime_points + points_to_award,
-      updated_at = NOW();
-    
-    INSERT INTO loyalty_transactions (user_id, points, transaction_type, order_id, description)
+      total_points    = public.loyalty_points.total_points    + points_to_award,
+      lifetime_points = public.loyalty_points.lifetime_points + points_to_award,
+      updated_at      = NOW();
+
+    INSERT INTO public.loyalty_transactions (user_id, points, transaction_type, order_id, description)
     VALUES (NEW.user_id, points_to_award, 'earned', NEW.id, 'Order completed');
-    
-    UPDATE orders SET loyalty_points_earned = points_to_award WHERE id = NEW.id;
+
+    UPDATE public.orders SET loyalty_points_earned = points_to_award WHERE id = NEW.id;
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS trigger_award_loyalty_points ON orders;
 CREATE TRIGGER trigger_award_loyalty_points
@@ -879,21 +914,25 @@ AFTER UPDATE ON orders
 FOR EACH ROW EXECUTE FUNCTION award_loyalty_points();
 
 -- Function: Queue welcome email on user signup
-CREATE OR REPLACE FUNCTION queue_welcome_email()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.queue_welcome_email()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 DECLARE
   user_email TEXT;
-  user_name TEXT;
+  user_name  TEXT;
 BEGIN
   user_email := NEW.email;
-  user_name := COALESCE(
+  user_name  := COALESCE(
     NEW.raw_user_meta_data->>'name',
     NEW.raw_user_meta_data->>'full_name',
     split_part(user_email, '@', 1)
   );
-  
+
   BEGIN
-    INSERT INTO email_queue (
+    INSERT INTO public.email_queue (
       email_type, recipient_email, recipient_name, subject, template_data, status
     ) VALUES (
       'welcome', user_email, user_name, 'Welcome to HAXEUS!',
@@ -903,10 +942,10 @@ BEGIN
     WHEN OTHERS THEN
       RAISE WARNING 'Failed to queue welcome email for %: %', user_email, SQLERRM;
   END;
-  
+
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -918,36 +957,36 @@ FOR EACH ROW EXECUTE FUNCTION queue_welcome_email();
 -- ========================================
 
 -- Product with average rating
-CREATE OR REPLACE VIEW products_with_ratings AS
-SELECT 
+CREATE OR REPLACE VIEW public.products_with_ratings WITH (security_invoker = on) AS
+SELECT
   p.*,
   COALESCE(AVG(pr.rating), 0) as average_rating,
   COUNT(pr.id) as review_count
-FROM products p
-LEFT JOIN product_reviews pr ON p.id = pr.product_id AND pr.is_approved = true
+FROM public.products p
+LEFT JOIN public.product_reviews pr ON p.id = pr.product_id AND pr.is_approved = true
 GROUP BY p.id;
 
 -- Low stock products
-CREATE OR REPLACE VIEW low_stock_products AS
-SELECT 
+CREATE OR REPLACE VIEW public.low_stock_products WITH (security_invoker = on) AS
+SELECT
   p.name,
   pi.size,
   pi.color,
   pi.stock_quantity,
   pi.low_stock_threshold
-FROM product_inventory pi
-JOIN products p ON p.id = pi.product_id
+FROM public.product_inventory pi
+JOIN public.products p ON p.id = pi.product_id
 WHERE pi.stock_quantity <= pi.low_stock_threshold;
 
 -- Top selling products
-CREATE OR REPLACE VIEW top_selling_products AS
-SELECT 
+CREATE OR REPLACE VIEW public.top_selling_products WITH (security_invoker = on) AS
+SELECT
   p.id,
   p.name,
   SUM(oi.quantity) as total_sold,
   SUM(oi.quantity * oi.price) as total_revenue
-FROM products p
-JOIN order_items oi ON p.id = oi.product_id
+FROM public.products p
+JOIN public.order_items oi ON p.id = oi.product_id
 GROUP BY p.id, p.name
 ORDER BY total_sold DESC;
 

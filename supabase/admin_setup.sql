@@ -25,6 +25,7 @@ RETURNS boolean
 LANGUAGE sql
 SECURITY DEFINER
 STABLE
+SET search_path = public, pg_catalog
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.user_roles
