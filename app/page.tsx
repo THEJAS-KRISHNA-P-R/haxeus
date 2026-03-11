@@ -549,7 +549,7 @@ export default function HomePage() {
                 variants={staggerContainer}
               >
                 <motion.h2 variants={fadeInRight} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-theme mb-6 break-words">
-                  Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2019
+                  Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2025
                 </motion.h2>
                 <motion.p variants={fadeInRight} className="text-theme-2 mb-6 leading-relaxed text-lg">
                   At HAXEUS, we believe that comfort shouldn&apos;t compromise style. Our journey began with a simple mission:

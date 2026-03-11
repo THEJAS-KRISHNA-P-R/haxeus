@@ -7,40 +7,12 @@ import { cn } from "@/lib/utils"
 const sizeData = {
   tshirts: {
     label: "T-Shirts / Hoodies",
-    headers: ["Size", "Chest (cm)", "Length (cm)", "Shoulder (cm)", "Sleeve (cm)"],
+    headers: ["Size", "Chest (in)", "Length (in)"],
     rows: [
-      ["XS", "84–88", "66", "41", "59"],
-      ["S", "88–92", "69", "43", "61"],
-      ["M", "96–100", "72", "46", "63"],
-      ["L", "104–108", "75", "49", "65"],
-      ["XL", "112–116", "78", "52", "67"],
-      ["XXL", "120–124", "81", "55", "69"],
-    ],
-  },
-  bottoms: {
-    label: "Pants / Shorts",
-    headers: ["Size", "Waist (cm)", "Hip (cm)", "Inseam (cm)", "Rise (cm)"],
-    rows: [
-      ["XS", "68–72", "88–92", "74", "24"],
-      ["S", "72–76", "92–96", "76", "25"],
-      ["M", "80–84", "100–104", "78", "26"],
-      ["L", "88–92", "108–112", "80", "27"],
-      ["XL", "96–100", "116–120", "82", "28"],
-      ["XXL", "104–108", "124–128", "84", "29"],
-    ],
-  },
-  footwear: {
-    label: "Footwear",
-    headers: ["EU", "US Men", "US Women", "UK", "CM"],
-    rows: [
-      ["38", "5.5", "7", "4.5", "24"],
-      ["39", "6.5", "8", "5.5", "25"],
-      ["40", "7", "8.5", "6", "25.5"],
-      ["41", "8", "9.5", "7", "26.5"],
-      ["42", "9", "10.5", "8", "27"],
-      ["43", "10", "11.5", "9", "28"],
-      ["44", "10.5", "12", "9.5", "28.5"],
-      ["45", "11.5", "13", "10.5", "29.5"],
+      ["S", "40", "27.5"],
+      ["M", "42", "28.5"],
+      ["L", "44", "29.5"],
+      ["XL", "46", "30.5"],
     ],
   },
 }
@@ -49,26 +21,6 @@ const measureGuide = [
   {
     label: "Chest",
     desc: "Measure around the fullest part of your chest, keeping the tape parallel to the ground.",
-  },
-  {
-    label: "Waist",
-    desc: "Measure around your natural waistline, the narrowest part of your torso.",
-  },
-  {
-    label: "Hip",
-    desc: "Stand with feet together. Measure around the fullest part of your hips and seat.",
-  },
-  {
-    label: "Inseam",
-    desc: "Measure from the crotch seam down to the bottom of the leg along the inner seam.",
-  },
-  {
-    label: "Shoulder",
-    desc: "Measure from the edge of one shoulder across the back to the edge of the other.",
-  },
-  {
-    label: "Foot Length",
-    desc: "Place your foot on paper, trace around it, and measure the longest distance heel to toe.",
   },
 ]
 
@@ -100,7 +52,7 @@ export default function SizeGuidePage() {
           <p className={cn("text-sm leading-relaxed max-w-xl",
             isDark ? "text-white/50" : "text-black/55"
           )}>
-            All HAXEUS garments are cut for an oversized streetwear silhouette. If you prefer a closer fit, size down one. All measurements are in centimetres unless stated.
+            All measurements are in inches unless stated.
           </p>
         </div>
 
@@ -211,10 +163,11 @@ export default function SizeGuidePage() {
             ? "bg-[#e93a3a]/[0.06] border-[#e93a3a]/20"
             : "bg-[#e93a3a]/[0.04] border-[#e93a3a]/15"
         )}>
-          <p className="text-xs font-bold tracking-[0.2em] uppercase text-[#e93a3a] mb-2">Fit Note</p>
-          <p className={cn("text-sm leading-relaxed", isDark ? "text-white/60" : "text-black/65")}>
-            HAXEUS pieces are intentionally oversized. Our fits are designed to drape — not cling.
-            When between sizes always go with your smaller measurement. Still unsure?{" "}
+          <p className={cn(
+            "text-sm",
+            isDark ? "text-white/70" : "text-black/70"
+          )}>
+            Still unsure?{" "}
             <a href="/contact" className="text-[#e93a3a] hover:underline font-medium">
               Contact us
             </a>{" "}

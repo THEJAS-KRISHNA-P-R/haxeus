@@ -55,6 +55,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [addingToCart, setAddingToCart] = useState(false)
+  const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [inventory, setInventory] = useState<ProductInventory[]>([])
   const [reviews, setReviews] = useState<any[]>([])
   const [ratingSummary, setRatingSummary] = useState<any>(null)
@@ -81,7 +82,7 @@ export default function ProductDetailPage() {
       if (data) {
         setProduct({
           ...data,
-          sizes: data.available_sizes || data.sizes || ["S", "M", "L", "XL", "XXL"]
+          sizes: data.available_sizes || data.sizes || ["S", "M", "L", "XL"]
         })
       }
     } catch (error) {
@@ -248,9 +249,25 @@ export default function ProductDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images - Scrollable Gallery */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Main Image */}
-            <div className="aspect-square relative bg-card rounded-2xl overflow-hidden shadow-2xl border border-theme">
+            <div
+              className="aspect-square relative bg-black rounded-2xl overflow-hidden"
+              onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
+              onTouchEnd={(e) => {
+                if (touchStartX === null) return
+                const diff = touchStartX - e.changedTouches[0].clientX
+                const total = productImages.length > 0 ? productImages.length : 1
+                if (Math.abs(diff) > 40) {
+                  if (diff > 0) {
+                    setSelectedImageIndex(i => (i + 1) % total)
+                  } else {
+                    setSelectedImageIndex(i => (i - 1 + total) % total)
+                  }
+                }
+                setTouchStartX(null)
+              }}
+            >
               {productImages.length > 0 ? (
                 <Image
                   src={productImages[selectedImageIndex]?.image_url || "/placeholder.svg"}
@@ -276,6 +293,25 @@ export default function ProductDetailPage() {
               )}
             </div>
 
+            {/* Swipe dots — below the image */}
+            {productImages.length > 1 && (
+              <div className="flex justify-center gap-1.5">
+                {productImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImageIndex(i)}
+                    className="block rounded-full transition-all duration-200"
+                    style={{
+                      width: i === selectedImageIndex ? "18px" : "6px",
+                      height: "6px",
+                      background: i === selectedImageIndex ? "var(--text)" : "var(--text-3)",
+                      opacity: i === selectedImageIndex ? 1 : 0.4,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
             {/* Thumbnail Strip - Scrollable */}
             {productImages.length > 1 && (
               <div className="relative">
@@ -284,9 +320,9 @@ export default function ProductDetailPage() {
                     <button
                       key={img.id}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
-                        ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-105'
-                        : 'border-theme hover:border-[var(--accent)]/60'
+                      className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${selectedImageIndex === index
+                        ? 'opacity-100 scale-105'
+                        : 'opacity-50 hover:opacity-80'
                         }`}
                     >
                       <Image
@@ -300,7 +336,7 @@ export default function ProductDetailPage() {
                         }}
                       />
                       {img.is_primary && (
-                        <span className="absolute bottom-0.5 right-0.5 bg-red-600 text-white text-[9px] px-1 rounded">
+                        <span className="absolute bottom-0.5 right-0.5 bg-black/60 text-white text-[9px] px-1 rounded">
                           Main
                         </span>
                       )}
@@ -323,10 +359,11 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Product Details */}
-          <div className="space-y-8">
+          <div className="space-y-5">
+            {/* Name + Price */}
             <div>
-              <h1 className="text-4xl font-bold text-theme mb-4">{product.name}</h1>
-              <div className="flex items-center gap-4 mb-6">
+              <h1 className="text-3xl lg:text-4xl font-bold text-theme mb-3">{product.name}</h1>
+              <div className="flex items-center gap-4 mb-4">
                 <span className="text-3xl font-bold text-[var(--accent)]">₹{product.price.toLocaleString("en-IN")}</span>
                 {ratingSummary && ratingSummary.totalReviews > 0 && (
                   <div className="flex items-center gap-2">
@@ -334,25 +371,24 @@ export default function ProductDetailPage() {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-5 h-5 ${i < Math.round(ratingSummary.averageRating)
+                          className={`w-4 h-4 ${i < Math.round(ratingSummary.averageRating)
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-theme-3'
                             }`}
                         />
                       ))}
                     </div>
-                    <span className="text-theme-2">
-                      {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.totalReviews} reviews)
+                    <span className="text-theme-2 text-sm">
+                      {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.totalReviews})
                     </span>
                   </div>
                 )}
               </div>
-              <p className="text-theme-2 leading-relaxed text-lg">{product.description}</p>
             </div>
 
             {/* Size Selection */}
             <div>
-              <Label className="text-lg font-semibold mb-4 block text-theme">Size</Label>
+              <Label className="text-base font-semibold mb-3 block text-theme">Size</Label>
               <div className="flex flex-wrap gap-2">
                 {(product.sizes || product.available_sizes || []).map((size) => {
                   const inventoryItem = inventory.find(i => i.size === size)
@@ -396,33 +432,28 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-
-            {/* Quantity */}
-            <div>
-              <Label htmlFor="quantity" className="text-lg font-semibold mb-4 block text-theme">
-                Quantity
-              </Label>
-              <Select value={quantity.toString()} onValueChange={(value) => setQuantity(Number.parseInt(value))}>
-                <SelectTrigger className="w-32 h-12 bg-card border-theme text-theme">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-theme text-theme">
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <SelectItem key={num} value={num.toString()} className="text-white/70 hover:bg-white/5">
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-3">
+            {/* Quantity + Action Buttons — all in one compact block */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Label className="text-base font-semibold text-theme shrink-0">Qty:</Label>
+                <Select value={quantity.toString()} onValueChange={(value) => setQuantity(Number.parseInt(value))}>
+                  <SelectTrigger className="w-24 h-10 bg-card border-theme text-theme">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-theme text-theme">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex gap-3">
                 <Button
                   onClick={addToCart}
                   disabled={addingToCart || isOutOfStock}
-                  className="flex-1 bg-transparent hover:bg-[var(--accent)]/10 text-[var(--accent)] border-2 border-[var(--accent)] h-14 text-lg disabled:opacity-50 transition-all"
+                  className="flex-1 bg-transparent hover:bg-[var(--accent)]/10 text-[var(--accent)] border-2 border-[var(--accent)] h-12 text-base disabled:opacity-50 transition-all"
                   size="lg"
                   variant="outline"
                 >
@@ -432,19 +463,22 @@ export default function ProductDetailPage() {
                 <WishlistButton
                   productId={product.id}
                   size="lg"
-                  className="h-14 px-6 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
+                  className="h-12 px-5 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
                 />
               </div>
               <Button
                 onClick={buyNow}
                 disabled={addingToCart || isOutOfStock}
-                className="w-full bg-[var(--accent)] hover:opacity-90 text-white h-14 text-lg font-bold shadow-lg shadow-[var(--accent)]/20 hover:shadow-xl transition-all disabled:opacity-50"
+                className="w-full bg-[var(--accent)] hover:opacity-90 text-white h-12 text-base font-bold shadow-lg shadow-[var(--accent)]/20 transition-all disabled:opacity-50"
                 size="lg"
               >
                 <Zap className="w-5 h-5 mr-2" />
                 {isOutOfStock ? "Out of Stock" : "Buy Now"}
               </Button>
             </div>
+
+            {/* Description — below the buy buttons */}
+            <p className="text-theme-2 leading-relaxed">{product.description}</p>
 
             {/* Features */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -469,8 +503,6 @@ export default function ProductDetailPage() {
             <Card className="p-6 bg-card border-theme">
               <h3 className="font-bold text-lg mb-4 text-theme">Product Details</h3>
               <ul className="space-y-2 text-theme-2">
-                <li>• <strong>Material:</strong> 100% Bio-Washed Cotton (Raised)</li>
-                <li>• Pre-shrunk for perfect fit</li>
                 <li>• Machine washable (cold water recommended)</li>
                 <li>• Unique HAXEUS design</li>
                 <li>• Comfortable relaxed fit</li>
@@ -480,7 +512,7 @@ export default function ProductDetailPage() {
               <div className="mt-6 pt-4 border-t border-theme">
                 <h4 className="font-semibold mb-3 text-theme">Shipping &amp; Returns</h4>
                 <ul className="space-y-2 text-theme-3 text-sm">
-                  <li>• <strong>Domestic Shipping:</strong> 1-2 weeks</li>
+                  <li>• <strong>Domestic Shipping:</strong> 7-10 days</li>
                   <li>• <strong>International:</strong> Product price + shipping charges</li>
                   <li>• <strong>Replacement:</strong> 10-day replacement from date of delivery</li>
                 </ul>

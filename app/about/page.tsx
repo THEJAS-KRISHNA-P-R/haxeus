@@ -13,30 +13,14 @@ const SparklesCore = dynamic(
 
 const values = [
   {
-    icon: Palette,
-    title: 'Artist First',
-    desc: 'We collaborate with underground artists and pay 30% royalty on every sale. No exceptions.',
-  },
-  {
     icon: Shirt,
-    title: '300gsm Heavyweight',
-    desc: 'Premium bio-washed cotton that feels incredible on day 1 and day 100. Pre-shrunk. Built to last.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Limited Drops',
-    desc: 'Every piece is numbered. Once a drop sells out, it\'s gone forever. No restocks.',
-  },
+    title: '240gsm Heavyweight',
+    desc: 'Our tees and hoodies are made from premium 240gsm cotton for that perfect drape and durability.',},
   {
     icon: Truck,
     title: 'Ships in 48h',
-    desc: 'Order today, we ship within 48 hours. Pan-India delivery in 5-7 days.',
-  },
-  {
-    icon: Recycle,
-    title: 'Conscious Craft',
-    desc: 'Eco-friendly inks, plastic-free packaging, and sustainable sourcing wherever possible.',
-  },
+    desc: 'Order today, we ship within 48 hours. Pan-India delivery in 7-10      days.',
+  },  
   {
     icon: Heart,
     title: 'Community Driven',
@@ -45,9 +29,8 @@ const values = [
 ];
 
 const timeline = [
-  { year: '2024', event: 'The idea is born — art meets streetwear.' },
-  { year: '2025', event: 'First collection drops. First 100 customers.' },
-  { year: '2026', event: 'HAXEUS goes live. The movement begins.' },
+  { year: '2025', event: 'The idea is born — art meets streetwear.' },
+  { year: '2026', event: 'First collection drops. First 100 customers. HAXEUS goes live. The movement begins.' },
 ];
 
 const stagger = {
@@ -151,8 +134,8 @@ export default function AboutPage() {
               variants={fadeUp}
               className="text-lg text-theme-2 leading-relaxed"
             >
-              We partner with underground artists from across India to create limited-edition drops
-              you'll never find in a mall. Every tee is a canvas. Every purchase supports an independent creator.
+              We make our drops ourselves — no middlemen, no mass production. Just bold designs and quality you
+              you'll never find in a mall. Every tee is a canvas.
             </motion.p>
           </motion.div>
         </div>
@@ -243,9 +226,8 @@ export default function AboutPage() {
             className="grid grid-cols-2 md:grid-cols-4 gap-8"
           >
             {[
-              { value: '300gsm', label: 'Premium Cotton' },
+              { value: '240gsm', label: 'Premium Cotton' },
               { value: '48h', label: 'Ship Time' },
-              { value: '30%', label: 'Artist Royalty' },
               { value: '∞', label: 'Creativity' },
             ].map((s) => (
               <motion.div

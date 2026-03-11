@@ -91,7 +91,7 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                         <Input
                             value={newSize}
                             onChange={(e) => setNewSize(e.target.value)}
-                            placeholder="Enter size (e.g., S, M, L, XL, XXL)"
+                            placeholder="Enter size (e.g., S, M, L, XL)"
                             className="bg-white dark:bg-[#111] border-black/10 dark:border-white/[0.06] text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/30"
                             onKeyDown={(e) => e.key === 'Enter' && addSize()}
                         />

@@ -71,17 +71,12 @@ export default function ContactPage() {
     {
       question: "How long does shipping take?",
       answer:
-        "Orders are processed within 2-3 business days. Standard shipping then takes 7-10 business days across India.",
+        "Orders are processed within 2 business days. Standard shipping then takes 7-10 business days across India.",
     },
     {
       question: "What sizes do you offer?",
       answer:
-        "We offer sizes from S to XXL. Please check our size guide on each product page for detailed measurements.",
-    },
-    {
-      question: "Are your T-shirts pre-shrunk?",
-      answer:
-        "Yes, all our T-shirts are pre-shrunk and made from 100% premium bio-washed cotton to ensure they maintain their fit after washing.",
+        "We offer sizes from S to XL. Please check our size guide on each product page for detailed measurements.",
     },
     {
       question: "Do you offer international shipping?",

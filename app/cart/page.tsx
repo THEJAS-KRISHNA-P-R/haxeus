@@ -119,7 +119,7 @@ export default function CartPage() {
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const discountAmount = (subtotal * discount) / 100
-  const shipping = subtotal > 2000 ? 0 : 150
+  const shipping = subtotal > 1000 ? 0 : 150
   const total = subtotal - discountAmount + shipping
 
   if (items.length === 0) {
@@ -303,7 +303,7 @@ export default function CartPage() {
                   </Button>
                 </Link>
 
-                <div className="mt-4 text-center text-sm text-theme-3">Free shipping on orders above ?2,000</div>
+                <div className="mt-4 text-center text-sm text-theme-3">Free shipping on orders above ₹1,000</div>
               </CardContent>
             </Card>
 
@@ -314,7 +314,7 @@ export default function CartPage() {
                   <Truck className="w-6 h-6 text-[var(--accent)]" />
                   <div>
                     <div className="font-semibold text-sm text-theme">Free Shipping</div>
-                    <div className="text-xs text-theme-3">On orders above ?2,000</div>
+                    <div className="text-xs text-theme-3">On orders above ₹1,000</div>
                   </div>
                 </div>
               </Card>
@@ -331,8 +331,8 @@ export default function CartPage() {
                 <div className="flex items-center gap-3">
                   <RotateCcw className="w-6 h-6 text-[var(--accent)]" />
                   <div>
-                    <div className="font-semibold text-sm text-theme">Easy Returns</div>
-                    <div className="text-xs text-theme-3">30-day return policy</div>
+                    <div className="font-semibold text-sm text-theme">Replacements</div>
+                    <div className="text-xs text-theme-3">10-day replacement policy</div>
                   </div>
                 </div>
               </Card>
