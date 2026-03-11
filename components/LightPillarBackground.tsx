@@ -12,10 +12,14 @@ export function LightPillarBackground() {
     const [isMobile, setIsMobile] = useState<boolean | null>(null)
 
     useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < 768)
-        check()
-        window.addEventListener("resize", check, { passive: true })
-        return () => window.removeEventListener("resize", check)
+        // Detect once on mount only — never re-check on resize.
+        // If we re-checked on resize, rotating a phone to landscape would flip
+        // isMobile→false, remount the desktop variant with different props, and
+        // change the color/brightness mid-session.
+        const isMobileDevice =
+            /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+            (window.innerWidth < 768 && "ontouchstart" in window)
+        setIsMobile(isMobileDevice)
     }, [])
 
     if (isMobile === null) return null
