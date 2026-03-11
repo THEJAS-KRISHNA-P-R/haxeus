@@ -58,10 +58,11 @@ const LightPillar: React.FC<LightPillarProps> = ({
         if (!containerRef.current || !webGLSupported) return;
         const container = containerRef.current;
 
-        // CRITICAL: read from visualViewport — container.clientWidth is 0 inside position:fixed at mount
-        const vp = window.visualViewport;
-        const width = vp ? Math.floor(vp.width) : window.innerWidth;
-        const height = vp ? Math.floor(vp.height) : window.innerHeight;
+        // Use window.innerWidth/Height — matches 100vw/100vh which is what the
+        // fixed container uses. visualViewport can differ (zoom, subpixel rounding)
+        // causing uResolution to mismatch the CSS canvas display size → stretch.
+        const width = window.innerWidth;
+        const height = window.innerHeight;
 
         // Pause when tab hidden
         const handleVisibility = () => { isVisibleRef.current = !document.hidden; };
@@ -74,11 +75,10 @@ const LightPillar: React.FC<LightPillarProps> = ({
         );
         observer.observe(container);
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-            || window.innerWidth < 768;
+        const isLowEndDevice = navigator.hardwareConcurrency != null && navigator.hardwareConcurrency <= 4;
 
         let effectiveQuality = quality;
-        if (isMobile && quality !== 'low') effectiveQuality = 'low';
+        if (isLowEndDevice && quality === 'high') effectiveQuality = 'medium';
 
         const qualitySettings = {
             low: { iterations: 28, waveIterations: 2, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.5 },
@@ -284,21 +284,24 @@ const LightPillar: React.FC<LightPillarProps> = ({
             if (resizeTimer) clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 if (!rendererRef.current || !materialRef.current) return;
-                const v = window.visualViewport;
-                const newW = v ? Math.floor(v.width) : window.innerWidth;
-                const newH = v ? Math.floor(v.height) : window.innerHeight;
+                const newW = window.innerWidth;
+                const newH = window.innerHeight;
                 rendererRef.current.setSize(newW, newH);
                 materialRef.current.uniforms.uResolution.value.set(newW, newH);
             }, 150);
         };
-        window.addEventListener('resize', handleResize, { passive: true });
-        window.visualViewport?.addEventListener('resize', handleResize, { passive: true });
+        // Use orientationchange instead of resize on mobile.
+        // window.resize fires every time the address bar hides/shows during scroll,
+        // causing renderer.setSize() to mismatch the CSS 100vh container → stretch.
+        // orientationchange only fires on a real portrait↔landscape flip.
+        const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+        const resizeEvent = isMobileDevice ? 'orientationchange' : 'resize';
+        window.addEventListener(resizeEvent, handleResize, { passive: true });
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibility);
             observer.disconnect();
-            window.removeEventListener('resize', handleResize);
-            window.visualViewport?.removeEventListener('resize', handleResize);
+            window.removeEventListener(resizeEvent, handleResize);
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
             if (rendererRef.current) {
                 rendererRef.current.dispose();
