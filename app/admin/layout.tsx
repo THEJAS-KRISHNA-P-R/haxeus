@@ -47,9 +47,12 @@ function AdminSearch() {
     if (term.length < 2) { setResults([]); return }
     setLoading(true)
 
+    // Sanitize: strip characters that could break PostgREST .or() filter syntax
+    const safeTerm = term.replace(/[(),]/g, "")
+
     // 1. Navigation Search
     const navResults: SearchResult[] = navItems
-      .filter(item => item.label.toLowerCase().includes(term))
+      .filter(item => item.label.toLowerCase().includes(safeTerm))
       .map(item => ({
         type: "nav",
         id: item.href,
@@ -61,25 +64,25 @@ function AdminSearch() {
 
     // 2. Status-based Order Search
     const statuses = ["paid", "pending", "shipped", "delivered", "cancelled"]
-    const matchedStatus = statuses.find(s => s.startsWith(term))
+    const matchedStatus = statuses.find(s => s.startsWith(safeTerm))
 
     // 3. Parallel Database Search
     const [ordersRes, productsRes, couponsRes, customersRes] = await Promise.all([
       supabase.from("orders")
         .select("id, email, total_amount, status")
-        .or(matchedStatus ? `status.eq.${matchedStatus}` : `email.ilike.%${term}%,id.ilike.%${term}%`)
+        .or(matchedStatus ? `status.eq.${matchedStatus}` : `email.ilike.%${safeTerm}%,id.ilike.%${safeTerm}%`)
         .limit(matchedStatus ? 8 : 4),
       supabase.from("products")
         .select("id, name, price, is_active")
-        .ilike("name", `%${term}%`)
+        .ilike("name", `%${safeTerm}%`)
         .limit(4),
       supabase.from("coupons")
         .select("id, code, discount_type, discount_value, is_active")
-        .ilike("code", `%${term}%`)
+        .ilike("code", `%${safeTerm}%`)
         .limit(3),
       supabase.from("profiles")
         .select("id, full_name, email")
-        .or(`full_name.ilike.%${term}%,email.ilike.%${term}%`)
+        .or(`full_name.ilike.%${safeTerm}%,email.ilike.%${safeTerm}%`)
         .limit(4)
     ])
 

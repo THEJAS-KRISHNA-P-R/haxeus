@@ -36,7 +36,7 @@ const sections = [
         content: [
             {
                 subtitle: "Standard Shipping",
-                text: "A flat shipping fee of ₹150 is charged on all orders below ₹2,000. Orders above ₹2,000 qualify for free standard shipping across India.",
+                text: "A flat shipping fee of ₹150 is charged on all orders below ₹1,000. Orders above ₹1,000 qualify for free standard shipping across India.",
             },
             {
                 subtitle: "No Hidden Fees",

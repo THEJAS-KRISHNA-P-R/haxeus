@@ -18,7 +18,7 @@ const inter = Inter({ subsets: ["latin"] })
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 const SITE_NAME = "HAXEUS"
 const SITE_DESCRIPTION =
-  "HAXEUS — Luxury streetwear for those who move differently. Oversized fits, dark aesthetics, limited drops. Shop hoodies, tees, and pants."
+  "HAXEUS — Luxury streetwear for those who move differently. Oversized fits, dark aesthetics, limited drops. Shop tees and hoodies."
 const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
 export const metadata: Metadata = {

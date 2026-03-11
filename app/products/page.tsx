@@ -82,7 +82,7 @@ function ProductsContent() {
           return {
             ...product,
             front_image: galleryImage || product.front_image || "/placeholder.svg",
-            sizes: product.available_sizes || product.sizes || ["S", "M", "L", "XL", "XXL"]
+            sizes: product.available_sizes || product.sizes || ["S", "M", "L", "XL"]
           }
         })
         setProducts(mappedProducts)
@@ -132,118 +132,57 @@ function ProductsContent() {
   return (
     <div className="min-h-screen bg-theme pt-20 pb-12 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Compact header + filters bar */}
         <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-          className="text-center mb-12"
-        >
-          <motion.h1
-            className="text-5xl lg:text-6xl font-bold text-theme mb-6"
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
-            Featured <motion.span
-              style={{ color: "var(--accent)" }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
-              Collection
-            </motion.span>
-          </motion.h1>
-          <motion.p
-            className="text-xl text-theme-2 max-w-2xl mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            Discover our most popular premium T-shirts, carefully crafted for ultimate comfort and style.
-          </motion.p>
-        </motion.div>
-
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-10"
+          transition={{ duration: 0.4 }}
+          className="flex items-center justify-between gap-3 mb-5 flex-wrap"
         >
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <motion.div
-              className="flex items-center gap-2"
-              whileHover={{ scale: 1.05 }}
-            >
-              <SlidersHorizontal className="w-5 h-5 text-[var(--accent)]" />
-              <span className="text-sm font-semibold text-theme-2">Filters:</span>
-            </motion.div>
-
-            <motion.div whileHover={hoverScale} whileTap={tapScale}>
-              <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-[200px] bg-card border border-theme hover:border-[var(--accent)] shadow-sm text-theme">
-                  <SelectValue placeholder="Price Range" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-theme text-theme">
-                  <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-2000">Under ?2,000</SelectItem>
-                  <SelectItem value="2000-3000">?2,000 - ?3,000</SelectItem>
-                  <SelectItem value="above-3000">Above ?3,000</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
-
-            <motion.div whileHover={hoverScale} whileTap={tapScale}>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[200px] bg-card border border-theme hover:border-[var(--accent)] shadow-sm text-theme">
-                  <SelectValue placeholder="Sort By" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-theme text-theme">
-                  <SelectItem value="default" className="text-white/60 hover:bg-[#111]/5">Default</SelectItem>
-                  <SelectItem value="price-low" className="text-white/60 hover:bg-[#111]/5">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high" className="text-white/60 hover:bg-[#111]/5">Price: High to Low</SelectItem>
-                  <SelectItem value="name" className="text-white/60 hover:bg-[#111]/5">Name: A to Z</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
-
-            <AnimatePresence>
-              {(searchQuery || priceRange !== "all" || sortBy !== "default") && (
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setPriceRange("all")
-                        setSortBy("default")
-                        window.history.pushState({}, "", "/products")
-                      }}
-                      className="text-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 font-semibold"
-                    >
-                      Clear Filters
-                    </Button>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-theme leading-tight">
+              Featured <span style={{ color: "var(--accent)" }}>Collection</span>
+            </h1>
+            <p className="text-xs text-theme-2 mt-0.5">
+              {loading ? "…" : filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+              {searchQuery && ` for "${searchQuery}"`}
+            </p>
           </div>
-
-          {/* Results count */}
-          <motion.div
-            className="text-center text-sm text-theme-2 mt-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            Showing <span className="font-bold text-[var(--accent)]">{loading ? '...' : filteredProducts.length}</span> {filteredProducts.length === 1 ? "product" : "products"}
-            {searchQuery && ` for "${searchQuery}"`}
-          </motion.div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <SlidersHorizontal className="w-4 h-4 text-[var(--accent)] shrink-0" />
+            <Select value={priceRange} onValueChange={setPriceRange}>
+              <SelectTrigger className="w-[120px] sm:w-[150px] bg-card border border-theme h-8 text-xs text-theme">
+                <SelectValue placeholder="Price" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-theme text-theme">
+                <SelectItem value="all">All Prices</SelectItem>
+                <SelectItem value="under-2000">Under ₹2,000</SelectItem>
+                <SelectItem value="2000-3000">₹2,000–₹3,000</SelectItem>
+                <SelectItem value="above-3000">Above ₹3,000</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[110px] sm:w-[140px] bg-card border border-theme h-8 text-xs text-theme">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-theme text-theme">
+                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="price-low">Low → High</SelectItem>
+                <SelectItem value="price-high">High → Low</SelectItem>
+                <SelectItem value="name">A → Z</SelectItem>
+              </SelectContent>
+            </Select>
+            {(searchQuery || priceRange !== "all" || sortBy !== "default") && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setPriceRange("all"); setSortBy("default"); window.history.pushState({}, "", "/products") }}
+                className="text-[var(--accent)] hover:bg-[var(--accent)]/10 text-xs h-8 px-2"
+              >
+                Clear
+              </Button>
+            )}
+          </div>
         </motion.div>
 
         {/* Products Grid */}
@@ -254,18 +193,17 @@ function ProductsContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div key={i} className="bg-card rounded-lg overflow-hidden shadow-md shadow-black/10 animate-pulse">
                   <div className="aspect-square bg-[#111]/5" />
-                  <div className="p-6 space-y-3">
-                    <div className="h-6 bg-[#111]/5 rounded w-3/4" />
-                    <div className="h-4 bg-[#111]/5 rounded w-full" />
-                    <div className="h-4 bg-[#111]/5 rounded w-2/3" />
-                    <div className="flex justify-between items-center pt-2">
-                      <div className="h-8 bg-[#111]/5 rounded w-24" />
-                      <div className="h-10 bg-[#111]/5 rounded w-20" />
+                  <div className="p-3 sm:p-5 space-y-2">
+                    <div className="h-4 bg-[#111]/5 rounded w-3/4" />
+                    <div className="h-3 bg-[#111]/5 rounded w-full hidden sm:block" />
+                    <div className="flex justify-between items-center pt-1">
+                      <div className="h-6 bg-[#111]/5 rounded w-16" />
+                      <div className="h-8 bg-[#111]/5 rounded w-16" />
                     </div>
                   </div>
                 </div>
@@ -312,7 +250,7 @@ function ProductsContent() {
               initial="hidden"
               animate="visible"
               variants={staggerFast}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
             >
               {filteredProducts.map((product, index) => (
                 <motion.div
@@ -336,7 +274,7 @@ function ProductsContent() {
                             src={product.front_image || "/placeholder.svg"}
                             alt={product.name}
                             fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                             className="object-cover"
                             loading={index < 4 ? "eager" : "lazy"}
                             onError={(e) => {
@@ -381,10 +319,10 @@ function ProductsContent() {
                     </Link>
 
                     {/* Product Details */}
-                    <CardContent className="p-6">
+                    <CardContent className="p-3 sm:p-5">
                       <Link href={`/products/${product.id}`}>
                         <motion.h3
-                          className="text-lg font-bold text-theme mb-2 hover:text-[var(--accent)] cursor-pointer line-clamp-1"
+                          className="text-sm sm:text-lg font-bold text-theme mb-1 sm:mb-2 hover:text-[var(--accent)] cursor-pointer line-clamp-1"
                           whileHover={{ x: 5 }}
                           transition={{ duration: 0.2 }}
                         >
@@ -392,10 +330,10 @@ function ProductsContent() {
                         </motion.h3>
                       </Link>
 
-                      <p className="text-sm text-theme-2 mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <p className="hidden sm:block text-sm text-theme-2 mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
 
-                      {/* Size Options */}
-                      <div className="flex gap-1 mb-4 flex-wrap">
+                      {/* Size Options — desktop only */}
+                      <div className="hidden sm:flex gap-1 mb-3 flex-wrap">
                         {(product.sizes || product.available_sizes || []).slice(0, 5).map((size, sizeIndex) => (
                           <motion.div
                             key={size}
@@ -412,19 +350,19 @@ function ProductsContent() {
                       </div>
 
                       {/* Price and Action */}
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-1">
                         <div>
                           <motion.span
-                            className="text-2xl font-bold text-theme"
+                            className="text-base sm:text-2xl font-bold text-theme"
                             whileHover={{ scale: 1.1, color: "var(--accent)" }}
                           >
-                            ?{product.price.toLocaleString("en-IN")}
+                            ₹{product.price.toLocaleString("en-IN")}
                           </motion.span>
-                          <div className="text-xs text-green-500 font-medium">? Free shipping</div>
+                          <div className="hidden sm:block text-xs text-green-500 font-medium">Free shipping</div>
                         </div>
                         <Link href={`/products/${product.id}`}>
                           <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                            <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-6 py-6 rounded-full font-semibold shadow-md">
+                            <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-3 sm:px-6 py-2 sm:py-6 text-xs sm:text-sm rounded-full font-semibold shadow-md">
                               View
                             </Button>
                           </motion.div>

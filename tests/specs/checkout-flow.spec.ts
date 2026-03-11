@@ -20,7 +20,7 @@ test.describe('Checkout Flow', () => {
     await page.screenshot({ path: 'playwright-output/checkout-02-product-detail.png', fullPage: true });
 
     // Step 3: Select a size
-    const sizeButtons = page.locator('button').filter({ hasText: /^(S|M|L|XL|XXL)$/ });
+    const sizeButtons = page.locator('button').filter({ hasText: /^(S|M|L|XL)$/ });
     if (await sizeButtons.count() > 0) {
       await sizeButtons.first().click();
     }

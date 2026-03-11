@@ -8,6 +8,15 @@
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 
+// Safely serialize JSON for embedding in a <script> tag.
+// JSON.stringify does NOT escape </script>, so we must do it manually.
+function safeJsonLd(obj: unknown): string {
+  return JSON.stringify(obj)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+}
+
 // ── Organization — add to root layout once ────────────────────────────────────
 export function OrganizationJsonLd() {
     const schema = {
@@ -33,7 +42,7 @@ export function OrganizationJsonLd() {
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
     )
 }
@@ -58,7 +67,7 @@ export function WebsiteJsonLd() {
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
     )
 }
@@ -100,7 +109,7 @@ export function ProductJsonLd({
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
     )
 }
@@ -123,7 +132,7 @@ export function BreadcrumbJsonLd({ items }: { items: BreadcrumbItem[] }) {
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
     )
 }
@@ -145,7 +154,7 @@ export function FAQJsonLd({ items }: { items: FAQItem[] }) {
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
         />
     )
 }

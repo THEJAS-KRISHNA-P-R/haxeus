@@ -26,7 +26,7 @@ const defaults: SettingsState = {
     store_email: "haxeus.in@gmail.com",
     currency: "INR",
     shipping_rate: 150,
-    free_shipping_above: 2000,
+    free_shipping_above: 1000,
     cod_enabled: false,
     maintenance_mode: false,
     notification_email: "haxeus.in@gmail.com",
