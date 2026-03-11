@@ -89,7 +89,7 @@ function AdminSearch() {
       type: "order",
       id: o.id,
       title: `Order #${o.id.slice(-8).toUpperCase()}`,
-      subtitle: `${o.email} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ?${o.total_amount} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ${o.status.toUpperCase()}`,
+      subtitle: `${o.email} · ₹${o.total_amount} · ${o.status.toUpperCase()}`,
       href: `/admin/orders?id=${o.id}`,
     }))
 
@@ -97,7 +97,7 @@ function AdminSearch() {
       type: "product",
       id: String(p.id),
       title: p.name,
-      subtitle: `?${p.price} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ${p.is_active ? "Active" : "Inactive"}`,
+      subtitle: `₹${p.price} · ${p.is_active ? "Active" : "Inactive"}`,
       href: `/admin/products/${p.id}`,
     }))
 
@@ -113,7 +113,7 @@ function AdminSearch() {
       type: "coupon",
       id: String(c.id),
       title: c.code,
-      subtitle: `${c.discount_type === "percentage" ? c.discount_value + "% off" : "?" + c.discount_value + " off"} ÃƒÂ¢Ã‚Â€Ã¢Â€Â ${c.is_active ? "Active" : "Paused"}`,
+      subtitle: `${c.discount_type === "percentage" ? c.discount_value + "% off" : "₹" + c.discount_value + " off"} · ${c.is_active ? "Active" : "Paused"}`,
       href: `/admin/coupons`,
     }))
 
@@ -190,7 +190,7 @@ function AdminSearch() {
             }}
           >
             {loading ? (
-              <div className="px-4 py-3 text-xs" style={{ color: "var(--text-3)" }}>SearchingÃƒÂ¢Ã‚Â€Ã‚Â¦</div>
+              <div className="px-4 py-3 text-xs" style={{ color: "var(--text-3)" }}>Searching…</div>
             ) : (
               results.map(r => (
                 <button
@@ -443,7 +443,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           style={{ borderTop: "1px solid var(--border)", color: "var(--text-3)" }}
           className="mt-12 px-8 py-4 text-xs text-center"
         >
-          HAXEUS Admin ÃƒÂ‚Ã‚Â© {new Date().getFullYear()}
+          HAXEUS Admin © {new Date().getFullYear()}
         </footer>
       </main>
 
