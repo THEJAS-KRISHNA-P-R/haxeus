@@ -165,7 +165,7 @@ function AdminSearch() {
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
-          placeholder="Search nav, users, orders (paid, pending)ÃƒÂ¢Ã‚Â€Ã‚Â¦"
+          placeholder="Search nav, users, orders (paid, pending)…"
           style={{
             background: "transparent", border: "none", outline: "none",
             color: "var(--text)", fontSize: "0.8125rem", width: "100%",
