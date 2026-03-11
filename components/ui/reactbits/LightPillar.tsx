@@ -64,6 +64,9 @@ const LightPillar: React.FC<LightPillarProps> = ({
         const width = window.innerWidth;
         const height = window.innerHeight;
 
+        // Detect mobile once — used for quality, resize event, and norm factor.
+        const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+
         // Pause when tab hidden
         const handleVisibility = () => { isVisibleRef.current = !document.hidden; };
         document.addEventListener('visibilitychange', handleVisibility);
@@ -138,6 +141,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
       uniform float uPillarRotSin;
       uniform float uWaveSin[4];
       uniform float uWaveCos[4];
+      uniform float uNormFactor;
       varying vec2 vUv;
 
       const float PI      = 3.141592653589793;
@@ -155,7 +159,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
 
       void main() {
         vec2 fragCoord = vUv * uResolution;
-        vec2 uv = (fragCoord * 2.0 - uResolution) / uResolution.y;
+        vec2 uv = (fragCoord * 2.0 - uResolution) / uNormFactor;
 
         uv = vec2(
           uv.x * uPillarRotCos - uv.y * uPillarRotSin,
@@ -241,6 +245,9 @@ const LightPillar: React.FC<LightPillarProps> = ({
                 uPillarRotSin: { value: Math.sin(pillarRotRad) },
                 uWaveSin: { value: waveSinVals },
                 uWaveCos: { value: waveCosVals },
+                // On mobile: always max(w,h) so portrait zoom is locked across orientations.
+                // On desktop: height — identical to the previous uResolution.y behaviour.
+                uNormFactor: { value: isMobileDevice ? Math.max(width, height) : height },
             },
             transparent: true, depthWrite: false, depthTest: false,
         });
@@ -288,13 +295,19 @@ const LightPillar: React.FC<LightPillarProps> = ({
                 const newH = window.innerHeight;
                 rendererRef.current.setSize(newW, newH);
                 materialRef.current.uniforms.uResolution.value.set(newW, newH);
+                // Keep zoom locked: mobile always normalises by the larger dimension
+                // so rotating portrait→landscape doesn't change how zoomed-in the pattern looks.
+                if (isMobileDevice) {
+                    materialRef.current.uniforms.uNormFactor.value = Math.max(newW, newH);
+                } else {
+                    materialRef.current.uniforms.uNormFactor.value = newH;
+                }
             }, 150);
         };
         // Use orientationchange instead of resize on mobile.
         // window.resize fires every time the address bar hides/shows during scroll,
         // causing renderer.setSize() to mismatch the CSS 100vh container → stretch.
         // orientationchange only fires on a real portrait↔landscape flip.
-        const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
         const resizeEvent = isMobileDevice ? 'orientationchange' : 'resize';
         window.addEventListener(resizeEvent, handleResize, { passive: true });
 
