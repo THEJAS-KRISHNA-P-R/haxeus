@@ -135,7 +135,8 @@ export default function OrdersContent() {
                             <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase tracking-widest">Loading Orders...</p>
                         </div>
                     ) : (
-                        <div className="min-w-[800px]">
+                        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                            <div className="min-w-[800px]">
                             <AdminTableHeader cols="grid-cols-[1.5fr_2fr_1.5fr_1fr_1.2fr_1.2fr_0.5fr] !py-4">
                                 <div>Order ID</div>
                                 <div>Customer</div>
@@ -210,6 +211,7 @@ export default function OrdersContent() {
                                     })
                                 )}
                             </div>
+                        </div>
                         </div>
                     )}
                 </div>

@@ -22,6 +22,8 @@ import {
   cardHover,
 } from "@/lib/animations"
 import Shuffle from "@/components/Shuffle"
+import SplitText from "@/components/ui/SplitText"
+import ShinyText from "@/components/ui/ShinyText"
 import { supabase } from "@/lib/supabase"
 
 
@@ -45,6 +47,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [heroLine1Done, setHeroLine1Done] = useState(false)
+  const [heroLine2Done, setHeroLine2Done] = useState(false)
+  const [heroLine3Done, setHeroLine3Done] = useState(false)
   const [newsletterEmail, setNewsletterEmail] = useState("")
   const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "loading" | "success" | "duplicate" | "error">("idle")
 
@@ -157,7 +162,7 @@ export default function HomePage() {
         <section className="relative min-h-screen flex items-center z-10">
           {/* No LightPillar here — it's in layout.tsx now, fixed behind everything */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
               {/* Hero Text */}
               <motion.div
                 initial="hidden"
@@ -165,36 +170,140 @@ export default function HomePage() {
                 variants={staggerContainer}
                 className="space-y-8"
               >
-                <motion.div variants={fadeInUp}>
+                <div>
                   <div className="relative py-10 overflow-visible">
-                    <h1 className="text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-white">
-                      <motion.span
-                        className="block text-white drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]"
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.15, duration: 0.4 }}
-                      >
-                        For Those Who
-                      </motion.span>
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight">
+                      {/* Line 1 */}
+                      <span className="relative block drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]">
+                        {/* invisible height placeholder — no visible duplicate */}
+                        <span className="block text-white pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">For Those Who</span>
+                        <motion.span
+                          className="absolute inset-0 block"
+                          animate={{ opacity: heroLine1Done ? 0 : 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <SplitText
+                            text="For Those Who"
+                            tag="span"
+                            className="block text-white"
+                            splitType="chars"
+                            delay={65}
+                            duration={2.4}
+                            from={{ opacity: 0, y: 20 }}
+                            to={{ opacity: 1, y: 0 }}
+                            threshold={0}
+                            rootMargin="0px"
+                            textAlign="left"
+                            onLetterAnimationComplete={() => setHeroLine1Done(true)}
+                          />
+                        </motion.span>
+                        <motion.span
+                          className="absolute inset-0 block"
+                          animate={{ opacity: heroLine1Done ? 1 : 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ShinyText
+                            text="For Those Who"
+                            className="block"
+                            display="block"
+                            baseVisible={false}
+                            disabled={!heroLine1Done}
+                            color="#ffffff"
+                            shineColor="#ffc0c0"
+                            speed={3}
+                            spread={60}
+                            delay={1}
+                          />
+                        </motion.span>
+                      </span>
 
-                      <motion.span
-                        className="block drop-shadow-[0_4px_18px_rgba(233,58,58,0.4)]"
-                        style={{ color: "var(--accent)" }}
-                        initial={{ opacity: 0, scale: 0.99 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3, duration: 0.4 }}
-                      >
-                        Won&apos;t Change
-                      </motion.span>
+                      {/* Line 2 */}
+                      <span className="relative block drop-shadow-[0_4px_18px_rgba(233,58,58,0.4)]">
+                        {/* invisible height placeholder — no visible duplicate */}
+                        <span className="block text-[var(--accent)] pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">Won't Change</span>
+                        <motion.span
+                          className="absolute inset-0 block"
+                          animate={{ opacity: heroLine2Done ? 0 : 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <SplitText
+                            text="Won't Change"
+                            tag="span"
+                            className="block text-[var(--accent)]"
+                            splitType="chars"
+                            delay={65}
+                            duration={2.4}
+                            from={{ opacity: 0, y: 20 }}
+                            to={{ opacity: 1, y: 0 }}
+                            threshold={0}
+                            rootMargin="0px"
+                            textAlign="left"
+                            onLetterAnimationComplete={() => setHeroLine2Done(true)}
+                          />
+                        </motion.span>
+                        <motion.span
+                          className="absolute inset-0 block"
+                          animate={{ opacity: heroLine2Done ? 1 : 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ShinyText
+                            text="Won't Change"
+                            className="block"
+                            display="block"
+                            baseVisible={false}
+                            disabled={!heroLine2Done}
+                            color="#e93e3a"
+                            shineColor="#f86666"
+                            speed={3}
+                            spread={60}
+                            delay={1}
+                          />
+                        </motion.span>
+                      </span>
 
-                      <motion.span
-                        className="block text-white/80 drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]"
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.45, duration: 0.4 }}
-                      >
-                        To Fit In
-                      </motion.span>
+                      {/* Line 3 */}
+                      <span className="relative block drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]">
+                        {/* invisible height placeholder — no visible duplicate */}
+                        <span className="block text-white/80 pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">To Fit In</span>
+                        <motion.span
+                          className="absolute inset-0 block"
+                          animate={{ opacity: heroLine3Done ? 0 : 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <SplitText
+                            text="To Fit In"
+                            tag="span"
+                            className="block text-white/80"
+                            splitType="chars"
+                            delay={65}
+                            duration={2.4}
+                            from={{ opacity: 0, y: 20 }}
+                            to={{ opacity: 1, y: 0 }}
+                            threshold={0}
+                            rootMargin="0px"
+                            textAlign="left"
+                            onLetterAnimationComplete={() => setHeroLine3Done(true)}
+                          />
+                        </motion.span>
+                        <motion.span
+                          className="absolute inset-0 block"
+                          animate={{ opacity: heroLine3Done ? 1 : 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ShinyText
+                            text="To Fit In"
+                            className="block"
+                            display="block"
+                            baseVisible={false}
+                            disabled={!heroLine3Done}
+                            color="rgba(255,255,255,0.8)"
+                            shineColor="#ffbcbc"
+                            speed={3}
+                            spread={60}
+                            delay={1}
+                          />
+                        </motion.span>
+                      </span>
                     </h1>
                   </div>
 
@@ -208,7 +317,7 @@ export default function HomePage() {
                       that refuses to blend in.
                     </p>
                   </motion.div>
-                </motion.div>
+                </div>
 
                 <div className="flex gap-4 flex-wrap mt-2">
                   <Link href="/products">
@@ -238,7 +347,7 @@ export default function HomePage() {
                   variants={staggerFast}
                   initial="hidden"
                   animate="visible"
-                  className="grid grid-cols-3 gap-8 pt-8"
+                  className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 pt-6 sm:pt-8"
                 >
                   {[
                     { value: "10+", label: "Happy Customers", color: "#e7bf04" },
@@ -251,8 +360,8 @@ export default function HomePage() {
                       whileHover={{ scale: 1.1, y: -5 }}
                       className="cursor-default"
                     >
-                      <div className="text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                      <div className="text-sm text-white/70 mt-1">{stat.label}</div>
+                      <div className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
+                      <div className="text-xs sm:text-sm text-white/70 mt-1">{stat.label}</div>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -347,7 +456,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex max-w-md mx-auto shadow-2xl rounded-full overflow-hidden bg-[var(--bg-elevated)]/80 backdrop-blur-sm"
+              className="flex max-w-[calc(100%-2rem)] sm:max-w-md mx-auto shadow-2xl rounded-full overflow-hidden bg-[var(--bg-elevated)]/80 backdrop-blur-sm"
             >
               <input
                 type="email"
@@ -398,10 +507,10 @@ export default function HomePage() {
               variants={scrollReveal}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
                 Featured <span style={{ color: "var(--accent)" }}>Collection</span>
               </h2>
-              <p className="text-xl text-white/80 max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
                 Discover our most popular premium T-shirts, carefully crafted for ultimate comfort and style.
               </p>
             </motion.div>
@@ -430,7 +539,6 @@ export default function HomePage() {
                   transition={{ duration: 2, repeat: Infinity }}
                   className="text-6xl mb-6"
                 >
-                  🚀
                 </motion.div>
                 <h3 className="text-3xl font-bold text-theme mb-4">Coming Soon!</h3>
                 <p className="text-lg text-theme-2 max-w-md mx-auto mb-8">

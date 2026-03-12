@@ -1,5 +1,6 @@
 "use client";
 import dynamic from 'next/dynamic';
+import ShinyText from '@/components/ui/ShinyText';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -75,31 +76,35 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: 'easeOut' }}
           >
-            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight select-none bg-gradient-to-b from-[var(--text)] to-[var(--text-2)] bg-clip-text text-transparent px-4 pb-2">
-              HAXEUS
-            </h1>
-          </motion.div>
             <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)] font-semibold mb-4">
               Our Story
             </p>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-[10rem] font-black tracking-tight select-none px-4 pb-2">
+              <ShinyText
+                text="HAXEUS"
+                color="var(--text)"
+                shineColor="#b38f8f"
+                speed={3}
+                spread={100}
+                delay={0.5}
+              />
+            </h1>
           </motion.div>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="mt-4 text-lg text-theme-2 tracking-widest uppercase"
-          >
-            Art · Identity · Culture
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.8 }}>
             <p className="mt-4 text-lg text-theme-2 tracking-widest uppercase">
               Art · Identity · Culture
             </p>
           </motion.div>
-        >
-          <span className="text-xs tracking-wider uppercase">Scroll</span>
-          <ArrowDown className="w-4 h-4" />
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.8 }}
+            className="mt-8 flex flex-col items-center gap-2 text-theme-2"
+          >
+            <span className="text-xs tracking-wider uppercase">Scroll</span>
+            <ArrowDown className="w-4 h-4" />
+          </motion.div>
+        </div>
       </section>
 
       {/* ───── BRAND STORY ───── */}
@@ -146,11 +151,14 @@ export default function AboutPage() {
             className="text-3xl md:text-4xl font-black mb-12 text-center"
           >
             The Journey
-          <motion.div initial={{ y: 20 }} whileInView={{ y: 0 }} viewport={{ once: true }}>
-            <h2 className="text-3xl md:text-4xl font-black mb-12 text-center">
-              The Journey
-            </h2>
-          </motion.div>
+          </motion.h2>
+          <div className="relative border-l-2 border-[var(--accent)] pl-6 space-y-10">
+            {timeline.map((t, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
                 className="relative pl-8"
               >
@@ -201,26 +209,6 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">{v.title}</h3>
                 <p className="text-theme-2 leading-relaxed text-sm">{v.desc}</p>
-              <motion.div initial={{ y: 20 }} whileInView={{ y: 0 }} viewport={{ once: true }}>
-                <h2 className="text-3xl md:text-4xl font-black mb-4 text-center">
-                  What We Stand For
-                </h2>
-              </motion.div>
-              <p className="text-center text-theme-2 mb-14 max-w-xl mx-auto">
-                Every decision we make is driven by these principles.
-              </p>
-            {[
-              { value: '240gsm', label: 'Premium Cotton' },
-              { value: '48h', label: 'Ship Time' },
-              { value: '∞', label: 'Creativity' },
-            ].map((s) => (
-              <motion.div
-                key={s.label}
-                variants={fadeUp}
-                className="text-center"
-              >
-                <div className="text-4xl md:text-5xl font-black text-[var(--accent)]">{s.value}</div>
-                <div className="text-sm text-theme-2 mt-2 uppercase tracking-widest">{s.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -239,27 +227,31 @@ export default function AboutPage() {
             Ready to <span className="text-[var(--accent)]">wear art</span>?
           </h2>
           <p className="text-lg text-theme-2">
-            Every drop is limited. Once it's gone, it's gone.
+            Every drop is limited. Once it&apos;s gone, it&apos;s gone.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/products">
-              <motion.div variants={fadeUp}>
-                <h2 className="text-4xl md:text-5xl font-black leading-tight">
-                  Born from a <span className="text-[var(--accent)]">rebellion</span> against boring merch.
-                </h2>
-              </motion.div>
-              <motion.div variants={fadeUp}>
-                <p className="text-lg text-theme-2 leading-relaxed">
-                  HAXEUS started with a simple belief: your clothes should say something about you.
-                  Not a logo someone else chose. Not a trend everyone follows. Something real.
-                </p>
-              </motion.div>
-              <motion.div variants={fadeUp}>
-                <p className="text-lg text-theme-2 leading-relaxed">
-                  We make our drops ourselves — no middlemen, no mass production. Just bold designs and quality you
-                  you&apos;ll never find in a mall. Every tee is a canvas.
-                </p>
-              </motion.div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-8 py-4 bg-[var(--accent)] text-white font-bold rounded-full hover:opacity-90 transition-opacity"
+              >
+                Shop Now
+              </motion.button>
+            </Link>
+            <Link href="/contact">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-8 py-4 border border-theme font-bold rounded-full hover:border-[var(--accent)] transition-colors"
+              >
+                Get in Touch
+              </motion.button>
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
     </main>
   );
 }

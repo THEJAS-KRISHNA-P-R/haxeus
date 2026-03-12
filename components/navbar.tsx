@@ -45,6 +45,7 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   const pathname = usePathname()
+  const isHome = pathname === "/"
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
@@ -130,7 +131,7 @@ export function Navbar() {
                 priority
                 className={cn(
                   "w-6 h-6 contrast-200 transition-all",
-                  isDark ? "invert brightness-0" : "brightness-0"
+                  isHome ? "invert brightness-0" : isDark ? "invert brightness-0" : "brightness-0"
                 )}
               />
               <span className="text-sm font-bold tracking-widest text-[#e93a3a]">HAXEUS</span>
@@ -293,8 +294,8 @@ export function Navbar() {
 
       {/* ── MOBILE TOP BAR ───────────────────────────────────────── */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-[200] px-3 pt-3"
-        style={{ willChange: 'transform', transform: 'translateZ(0)' }}
+        className="md:hidden fixed top-0 left-0 right-0 z-[200] px-3 pt-safe px-safe"
+        style={{ willChange: 'transform', transform: 'translateZ(0)', paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
       >
         <AnimatePresence mode="wait">
           {isSearchOpen ? (
@@ -374,7 +375,10 @@ export function Navbar() {
                       width={20}
                       height={20}
                       priority
-                      className={cn("w-6 h-6 contrast-200", isDark ? "invert brightness-0" : "brightness-0")}
+                      className={cn(
+                        "w-6 h-6 contrast-200",
+                        isHome ? "invert brightness-0" : isDark ? "invert brightness-0" : "brightness-0"
+                      )}
                     />
                     <span className="text-sm font-bold tracking-widest">HAXEUS</span>
                   </Link>

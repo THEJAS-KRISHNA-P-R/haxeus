@@ -57,9 +57,9 @@ export default function ProductDetails({ product }: { product: Product }) {
   };
 
   return (
-    <div className="bg-[#111] rounded-3xl shadow-md shadow-black/10 p-10 w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 px-2 md:px-0">
+    <div className="bg-[#111] rounded-3xl shadow-md shadow-black/10 p-4 sm:p-6 md:p-10 w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 px-2 md:px-0">
       <div className="flex items-center justify-center">
-        <div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-xl bg-black">
+        <div className="relative w-full h-64 sm:h-80 md:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl bg-black">
           <Image src={product.front_image || "/placeholder.svg"} alt={product.name} fill className="object-contain" />
         </div>
       </div>
