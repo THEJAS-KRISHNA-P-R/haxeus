@@ -362,7 +362,6 @@ function ProductsContent() {
                         >
                           ₹{product.price.toLocaleString("en-IN")}
                         </motion.span>
-                        <div className="hidden sm:block text-xs text-green-500 font-medium">Free shipping</div>
                       </div>
                     </CardContent>
                   </Card>
