@@ -14,7 +14,11 @@ export async function generateMetadata({
   const search = typeof resolvedSearchParams.search === "string"
     ? resolvedSearchParams.search.trim()
     : ""
+  const sort = typeof resolvedSearchParams.sort === "string" ? resolvedSearchParams.sort : ""
+  const price = typeof resolvedSearchParams.price === "string" ? resolvedSearchParams.price : ""
   const hasSearchIntent = search.length > 0
+  const hasFilterParams = sort.length > 0 || price.length > 0
+  const shouldNoIndex = hasSearchIntent || hasFilterParams
 
   return {
     title: hasSearchIntent ? `Search results for ${search}` : "Products",
@@ -24,7 +28,7 @@ export async function generateMetadata({
     alternates: {
       canonical: `${SITE_URL}/products`,
     },
-    robots: hasSearchIntent
+    robots: shouldNoIndex
       ? {
           index: false,
           follow: true,
@@ -56,7 +60,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: hasSearchIntent ? `Search results for ${search} | HAXEUS` : "Products | HAXEUS",
-      description: hasSearchIntent
+      description: shouldNoIndex
         ? `Browse HAXEUS results for ${search}.`
         : "Explore premium HAXEUS streetwear products and limited drops.",
     },
