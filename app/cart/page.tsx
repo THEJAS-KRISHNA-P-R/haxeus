@@ -229,10 +229,10 @@ export default function CartPage() {
                             <div className="text-[10px] text-[var(--accent)] font-medium mb-1">Max Stock Reached</div>
                           )}
                           <div className="text-lg font-bold text-theme">
-                            ?{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                            ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
                           </div>
                           <div className="text-sm text-theme-3 mt-1">
-                            ?{item.product.price.toLocaleString("en-IN")} each
+                            ₹{item.product.price.toLocaleString("en-IN")} each
                           </div>
                         </div>
                       </div>
@@ -278,22 +278,22 @@ export default function CartPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between text-theme-2">
                     <span>Subtotal</span>
-                    <span>?{subtotal.toLocaleString("en-IN")}</span>
+                    <span>₹{subtotal.toLocaleString("en-IN")}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-green-500">
                       <span>Discount ({discount}%)</span>
-                      <span>-?{discountAmount.toLocaleString("en-IN")}</span>
+                      <span>-₹{discountAmount.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-theme-2">
                     <span>Shipping</span>
-                    <span>{shipping === 0 ? "Free" : `?${shipping}`}</span>
+                    <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
                   </div>
                   <Separator className="bg-theme opacity-10" />
                   <div className="flex justify-between text-lg font-bold text-theme">
                     <span>Total</span>
-                    <span>?{total.toLocaleString("en-IN")}</span>
+                    <span>₹{total.toLocaleString("en-IN")}</span>
                   </div>
                 </div>
 

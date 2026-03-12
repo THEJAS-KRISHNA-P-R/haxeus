@@ -36,6 +36,10 @@ interface FeaturedProduct {
   image: string
 }
 
+function isSupabaseStorageUrl(url?: string) {
+  return typeof url === "string" && url.includes(".supabase.co/storage/v1/")
+}
+
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([])
   const [loading, setLoading] = useState(true)
@@ -84,6 +88,8 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
+    let isActive = true
+
     async function fetchFeaturedProducts() {
       try {
         const { data, error } = await supabase
@@ -104,6 +110,8 @@ export default function HomePage() {
 
         if (error) throw error
 
+        if (!isActive) return
+
         if (data && data.length > 0) {
           const mapped = data.map((product: any) => {
             const primaryImg = product.product_images?.find((img: any) => img.is_primary)
@@ -120,13 +128,21 @@ export default function HomePage() {
           setFeaturedProducts(mapped)
         }
       } catch (error) {
-        console.error("Error fetching featured products:", error)
+        if ((error as { name?: string })?.name !== "AbortError") {
+          console.error("Error fetching featured products:", error)
+        }
       } finally {
-        setLoading(false)
+        if (isActive) {
+          setLoading(false)
+        }
       }
     }
 
     fetchFeaturedProducts()
+
+    return () => {
+      isActive = false
+    }
   }, [])
 
   const accentColors = ["#e7bf04", "#c03c9d", "#07e4e1"]
@@ -152,13 +168,13 @@ export default function HomePage() {
                 <motion.div variants={fadeInUp}>
                   <div className="relative py-10 overflow-visible">
                     <motion.h1
-                      className="text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-theme"
+                      className="text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-white"
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <motion.span
-                        className="block text-theme drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]"
+                        className="block text-white drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15, duration: 0.4 }}
@@ -177,7 +193,7 @@ export default function HomePage() {
                       </motion.span>
 
                       <motion.span
-                        className="block text-theme-2 drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]"
+                        className="block text-white/80 drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.45, duration: 0.4 }}
@@ -188,7 +204,7 @@ export default function HomePage() {
                   </div>
 
                   <motion.p
-                    className="text-lg text-theme-2 mt-4 leading-relaxed max-w-lg"
+                    className="text-lg text-white/80 mt-4 leading-relaxed max-w-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
@@ -240,7 +256,7 @@ export default function HomePage() {
                       className="cursor-default"
                     >
                       <div className="text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                      <div className="text-sm text-theme-2 mt-1">{stat.label}</div>
+                      <div className="text-sm text-white/70 mt-1">{stat.label}</div>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -308,7 +324,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed text-theme"
+              className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed text-white"
             >
               Join the movement. Your perfect T-shirt is just a click away.
             </motion.h2>
@@ -368,7 +384,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="text-sm mt-4 text-theme-2"
+              className="text-sm mt-4 text-white/70"
             >
               Get exclusive offers and updates. Unsubscribe anytime.
             </motion.p>
@@ -385,10 +401,10 @@ export default function HomePage() {
               variants={scrollReveal}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl lg:text-5xl font-bold text-theme mb-4">
+              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
                 Featured <span style={{ color: "var(--accent)" }}>Collection</span>
               </h2>
-              <p className="text-xl text-theme-2 max-w-2xl mx-auto">
+              <p className="text-xl text-white/80 max-w-2xl mx-auto">
                 Discover our most popular premium T-shirts, carefully crafted for ultimate comfort and style.
               </p>
             </motion.div>
@@ -442,10 +458,11 @@ export default function HomePage() {
                     transition={{ duration: 0.6, delay: index * 0.15 }}
                   >
                     <motion.div whileHover={cardHover} whileTap={{ scale: 0.98 }}>
-                      <Card className="overflow-hidden bg-card border border-theme rounded-2xl group hover:border-theme-hover transition-all">
+                      <Card className="overflow-hidden bg-card border-0 rounded-2xl group transition-all">
                         <Link href={`/products/${product.id}`}>
                           <div className="aspect-square relative bg-black overflow-hidden">
                             <motion.div
+                              className="relative h-full w-full"
                               whileHover={{ scale: 1.1 }}
                               transition={{ duration: 0.6 }}
                             >
@@ -456,6 +473,7 @@ export default function HomePage() {
                                 sizes="(max-width: 768px) 100vw, 33vw"
                                 className="object-cover"
                                 loading={index === 0 ? "eager" : "lazy"}
+                                unoptimized={isSupabaseStorageUrl(product.image)}
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement
                                   target.src = "/placeholder.svg"
@@ -548,15 +566,15 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 variants={staggerContainer}
               >
-                <motion.h2 variants={fadeInRight} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-theme mb-6 break-words">
+                <motion.h2 variants={fadeInRight} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 break-words">
                   Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2025
                 </motion.h2>
-                <motion.p variants={fadeInRight} className="text-theme-2 mb-6 leading-relaxed text-lg">
+                <motion.p variants={fadeInRight} className="text-white/80 mb-6 leading-relaxed text-lg">
                   At HAXEUS, we believe that comfort shouldn&apos;t compromise style. Our journey began with a simple mission:
                   to create the perfect T-shirt that combines premium materials, exceptional craftsmanship, and timeless
                   design.
                 </motion.p>
-                <motion.p variants={fadeInRight} className="text-theme-2 mb-8 leading-relaxed text-lg">
+                <motion.p variants={fadeInRight} className="text-white/80 mb-8 leading-relaxed text-lg">
                   Every piece in our collection is meticulously crafted using the finest cotton blends, ensuring
                   durability, breathability, and that luxurious feel against your skin.
                 </motion.p>
@@ -580,7 +598,7 @@ export default function HomePage() {
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
                       />
-                      <span className="font-semibold text-theme-2">{feature.label}</span>
+                      <span className="font-semibold text-white/80">{feature.label}</span>
                     </motion.div>
                   ))}
                 </motion.div>

@@ -41,6 +41,10 @@ interface Product {
   sizes?: string[]
 }
 
+function isSupabaseStorageUrl(url?: string) {
+  return typeof url === "string" && url.includes(".supabase.co/storage/v1/")
+}
+
 function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -110,8 +114,9 @@ function ProductsContent() {
     // Price range filter
     if (priceRange !== "all") {
       filtered = filtered.filter((product) => {
-        if (priceRange === "under-2000") return product.price < 2000
-        if (priceRange === "2000-3000") return product.price >= 2000 && product.price <= 3000
+        if (priceRange === "under-600") return product.price < 600
+        if (priceRange === "1000-2000") return product.price >= 1000 && product.price <= 2000
+        if (priceRange === "2000-3000") return product.price > 2000 && product.price <= 3000
         if (priceRange === "above-3000") return product.price > 3000
         return true
       })
@@ -156,7 +161,8 @@ function ProductsContent() {
               </SelectTrigger>
               <SelectContent className="bg-card border-theme text-theme">
                 <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="under-2000">Under ₹2,000</SelectItem>
+                <SelectItem value="under-600">Under ₹600</SelectItem>
+                <SelectItem value="1000-2000">₹1,000–₹2,000</SelectItem>
                 <SelectItem value="2000-3000">₹2,000–₹3,000</SelectItem>
                 <SelectItem value="above-3000">Above ₹3,000</SelectItem>
               </SelectContent>
@@ -262,11 +268,12 @@ function ProductsContent() {
                   whileHover={{ y: -10 }}
                   className="snap-start"
                 >
-                  <Card className="group overflow-hidden bg-card shadow-none hover:shadow-md border border-theme h-full transition-all">
+                  <Link href={`/products/${product.id}`} className="block h-full">
+                  <Card className="group overflow-hidden bg-card shadow-none hover:shadow-md border border-theme h-full transition-all cursor-pointer">
                     {/* Product Image */}
-                    <Link href={`/products/${product.id}`}>
-                      <div className="aspect-square relative bg-black overflow-hidden cursor-pointer">
+                      <div className="aspect-square relative bg-black overflow-hidden">
                         <motion.div
+                          className="relative h-full w-full"
                           whileHover={{ scale: 1.1, rotate: 2 }}
                           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                         >
@@ -277,6 +284,7 @@ function ProductsContent() {
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                             className="object-cover"
                             loading={index < 4 ? "eager" : "lazy"}
+                            unoptimized={isSupabaseStorageUrl(product.front_image)}
                             onError={(e) => {
                               const target = e.target as HTMLImageElement
                               target.src = "/placeholder.svg"
@@ -309,28 +317,25 @@ function ProductsContent() {
                               whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              <Button size="sm" className="bg-[var(--accent)] hover:opacity-90 shadow-md">
+                              <Button size="sm" className="bg-[var(--accent)] hover:opacity-90 shadow-md" onClick={(e) => e.stopPropagation()}>
                                 <ShoppingCart className="w-4 h-4" />
                               </Button>
                             </motion.div>
                           </div>
                         </motion.div>
                       </div>
-                    </Link>
 
                     {/* Product Details */}
-                    <CardContent className="p-3 sm:p-5">
-                      <Link href={`/products/${product.id}`}>
+                    <CardContent className="p-3 sm:p-5 flex flex-col flex-1">
                         <motion.h3
-                          className="text-sm sm:text-lg font-bold text-theme mb-1 sm:mb-2 hover:text-[var(--accent)] cursor-pointer line-clamp-1"
+                          className="text-base sm:text-xl font-bold text-theme mb-1 sm:mb-2 hover:text-[var(--accent)] line-clamp-1"
                           whileHover={{ x: 5 }}
                           transition={{ duration: 0.2 }}
                         >
                           {product.name}
                         </motion.h3>
-                      </Link>
 
-                      <p className="hidden sm:block text-sm text-theme-2 mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <p className="text-xs sm:text-sm text-theme-2 mb-2 sm:mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
 
                       {/* Size Options — desktop only */}
                       <div className="hidden sm:flex gap-1 mb-3 flex-wrap">
@@ -349,27 +354,19 @@ function ProductsContent() {
                         ))}
                       </div>
 
-                      {/* Price and Action */}
-                      <div className="flex items-center justify-between gap-1">
-                        <div>
-                          <motion.span
-                            className="text-base sm:text-2xl font-bold text-theme"
-                            whileHover={{ scale: 1.1, color: "var(--accent)" }}
-                          >
-                            ₹{product.price.toLocaleString("en-IN")}
-                          </motion.span>
-                          <div className="hidden sm:block text-xs text-green-500 font-medium">Free shipping</div>
-                        </div>
-                        <Link href={`/products/${product.id}`}>
-                          <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                            <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-3 sm:px-6 py-2 sm:py-6 text-xs sm:text-sm rounded-full font-semibold shadow-md">
-                              View
-                            </Button>
-                          </motion.div>
-                        </Link>
+                      {/* Price */}
+                      <div className="mt-auto">
+                        <motion.span
+                          className="text-base sm:text-xl font-bold text-theme"
+                          whileHover={{ scale: 1.1, color: "var(--accent)" }}
+                        >
+                          ₹{product.price.toLocaleString("en-IN")}
+                        </motion.span>
+                        <div className="hidden sm:block text-xs text-green-500 font-medium">Free shipping</div>
                       </div>
                     </CardContent>
                   </Card>
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>
