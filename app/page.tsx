@@ -167,12 +167,7 @@ export default function HomePage() {
               >
                 <motion.div variants={fadeInUp}>
                   <div className="relative py-10 overflow-visible">
-                    <motion.h1
-                      className="text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-white"
-                      initial={{ opacity: 0, y: 14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                    >
+                    <h1 className="text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-white">
                       <motion.span
                         className="block text-white drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]"
                         initial={{ opacity: 0, y: 6 }}
@@ -200,18 +195,19 @@ export default function HomePage() {
                       >
                         To Fit In
                       </motion.span>
-                    </motion.h1>
+                    </h1>
                   </div>
 
-                  <motion.p
-                    className="text-lg text-white/80 mt-4 leading-relaxed max-w-lg"
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
                   >
-                    Bold designs for bold individuals. Express yourself unapologetically with premium streetwear
-                    that refuses to blend in.
-                  </motion.p>
+                    <p className="text-lg text-white/80 mt-4 leading-relaxed max-w-lg">
+                      Bold designs for bold individuals. Express yourself unapologetically with premium streetwear
+                      that refuses to blend in.
+                    </p>
+                  </motion.div>
                 </motion.div>
 
                 <div className="flex gap-4 flex-wrap mt-2">
@@ -319,15 +315,16 @@ export default function HomePage() {
         <section className="relative py-20 md:py-32 flex items-center z-10 border-t border-theme overflow-x-hidden">
 
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 w-full">
-            <motion.h2
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed text-white"
             >
-              Join the movement. Your perfect T-shirt is just a click away.
-            </motion.h2>
+              <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed text-white">
+                Join the movement. Your perfect T-shirt is just a click away.
+              </h2>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -566,18 +563,24 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 variants={staggerContainer}
               >
-                <motion.h2 variants={fadeInRight} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 break-words">
-                  Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2025
-                </motion.h2>
-                <motion.p variants={fadeInRight} className="text-white/80 mb-6 leading-relaxed text-lg">
-                  At HAXEUS, we believe that comfort shouldn&apos;t compromise style. Our journey began with a simple mission:
-                  to create the perfect T-shirt that combines premium materials, exceptional craftsmanship, and timeless
-                  design.
-                </motion.p>
-                <motion.p variants={fadeInRight} className="text-white/80 mb-8 leading-relaxed text-lg">
-                  Every piece in our collection is meticulously crafted using the finest cotton blends, ensuring
-                  durability, breathability, and that luxurious feel against your skin.
-                </motion.p>
+                <motion.div variants={fadeInRight}>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 break-words">
+                    Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2025
+                  </h2>
+                </motion.div>
+                <motion.div variants={fadeInRight}>
+                  <p className="text-white/80 mb-6 leading-relaxed text-lg">
+                    At HAXEUS, we believe that comfort shouldn&apos;t compromise style. Our journey began with a simple mission:
+                    to create the perfect T-shirt that combines premium materials, exceptional craftsmanship, and timeless
+                    design.
+                  </p>
+                </motion.div>
+                <motion.div variants={fadeInRight}>
+                  <p className="text-white/80 mb-8 leading-relaxed text-lg">
+                    Every piece in our collection is meticulously crafted using the finest cotton blends, ensuring
+                    durability, breathability, and that luxurious feel against your skin.
+                  </p>
+                </motion.div>
 
                 <motion.div variants={fadeInRight} className="grid grid-cols-2 gap-6 mb-8">
                   {[
