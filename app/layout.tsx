@@ -36,7 +36,6 @@ export const metadata: Metadata = {
   authors: [{ name: "HAXEUS", url: SITE_URL }],
   creator: "HAXEUS",
   publisher: "HAXEUS",
-  alternates: { canonical: SITE_URL },
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -70,9 +69,9 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: SITE_NAME },
   formatDetection: { telephone: false },
-  verification: {
-    google: "PASTE_GOOGLE_SEARCH_CONSOLE_TOKEN_HERE",
-  },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 }
 
 export const viewport: Viewport = {

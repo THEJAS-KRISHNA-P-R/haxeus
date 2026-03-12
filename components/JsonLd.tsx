@@ -17,6 +17,14 @@ function safeJsonLd(obj: unknown): string {
     .replace(/&/g, "\\u0026")
 }
 
+function absoluteUrl(url: string): string {
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+        return url
+    }
+
+    return `${SITE_URL}${url.startsWith("/") ? url : `/${url}`}`
+}
+
 // ── Organization — add to root layout once ────────────────────────────────────
 export function OrganizationJsonLd() {
     const schema = {
@@ -82,17 +90,19 @@ interface ProductJsonLdProps {
     slug: string
     inStock: boolean
     brand?: string
+    aggregateRating?: number
+    reviewCount?: number
 }
 
 export function ProductJsonLd({
-    name, description, image, price, currency = "INR", slug, inStock, brand = "HAXEUS",
+    name, description, image, price, currency = "INR", slug, inStock, brand = "HAXEUS", aggregateRating, reviewCount,
 }: ProductJsonLdProps) {
     const schema = {
         "@context": "https://schema.org",
         "@type": "Product",
         name,
         description,
-        image: Array.isArray(image) ? image : [image],
+        image: (Array.isArray(image) ? image : [image]).map(absoluteUrl),
         url: `${SITE_URL}/products/${slug}`,
         brand: { "@type": "Brand", name: brand },
         offers: {
@@ -104,6 +114,15 @@ export function ProductJsonLd({
             availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             seller: { "@type": "Organization", name: "HAXEUS", url: SITE_URL },
         },
+        ...(aggregateRating && reviewCount
+            ? {
+                aggregateRating: {
+                    "@type": "AggregateRating",
+                    ratingValue: aggregateRating.toFixed(1),
+                    reviewCount,
+                },
+            }
+            : {}),
     }
 
     return (
