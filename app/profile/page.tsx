@@ -245,7 +245,7 @@ function ProfileContent() {
                             </p>
                           </div>
                           <p className="font-semibold text-theme">
-                            ?{Number(item.price).toLocaleString("en-IN")}
+                            ₹{Number(item.price).toLocaleString("en-IN")}
                           </p>
                         </div>
                       ))}
@@ -253,7 +253,7 @@ function ProfileContent() {
                     <div className="flex items-center justify-between pt-4 border-t border-theme">
                       <p className="font-semibold text-theme">Total</p>
                       <p className="font-bold text-lg text-theme">
-                        ?{Number(order.total_amount).toLocaleString("en-IN")}
+                        ₹{Number(order.total_amount).toLocaleString("en-IN")}
                       </p>
                     </div>
                   </CardContent>
@@ -364,7 +364,7 @@ function ProfileContent() {
                       </h3>
                       <div className="flex items-center justify-between">
                         <p className="font-bold text-lg text-theme">
-                          ?{Number(item.product.price).toLocaleString("en-IN")}
+                          ₹{Number(item.product.price).toLocaleString("en-IN")}
                         </p>
                         <Button
                           variant="ghost"

@@ -233,7 +233,7 @@ export default function CheckoutPage() {
                       <p className={cn("text-sm font-medium truncate", primary)}>{item.product.name}</p>
                       <p className={cn("text-xs mt-0.5", muted)}>{item.size} · Qty {item.quantity}</p>
                       <p className={cn("text-sm font-bold mt-0.5", primary)}>
-                        ?{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                        ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
                       </p>
                     </div>
                   </div>
@@ -255,7 +255,7 @@ export default function CheckoutPage() {
                 <div className={cn("h-px", isDark ? "bg-white/[0.06]" : "bg-black/[0.07]")} />
                 <div className="flex justify-between">
                   <span className={cn("font-bold", primary)}>Total</span>
-                  <span className="font-bold text-[#e93a3a] text-base">?{total.toLocaleString("en-IN")}</span>
+                  <span className="font-bold text-[#e93a3a] text-base">₹{total.toLocaleString("en-IN")}</span>
                 </div>
               </div>
 

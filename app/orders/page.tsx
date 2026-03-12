@@ -176,7 +176,7 @@ export default function OrdersPage() {
                       <div className="text-right">
                         <p className="text-sm text-white/50">Total</p>
                         <p className="text-2xl font-bold text-white">
-                          ?{(order.total_amount ?? 0).toLocaleString("en-IN")}
+                          ₹{(order.total_amount ?? 0).toLocaleString("en-IN")}
                         </p>
                       </div>
                       <Link href={`/orders/${order.id}`}>

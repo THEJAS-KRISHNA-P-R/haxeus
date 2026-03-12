@@ -66,7 +66,7 @@ export default function ProductDetails({ product }: { product: Product }) {
       <div>
         <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
         <div className="flex items-center gap-4 mb-4">
-          <span className="text-3xl font-bold text-[#e93a3a]">?{product.price.toLocaleString()}</span>
+          <span className="text-3xl font-bold text-[#e93a3a]">₹{product.price.toLocaleString()}</span>
           {product.total_stock > 0 && (
             <span className="bg-black text-white text-xs px-3 py-1 rounded-full font-semibold">In Stock</span>
           )}

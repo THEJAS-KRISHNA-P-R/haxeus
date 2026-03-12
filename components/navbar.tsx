@@ -144,7 +144,7 @@ export function Navbar() {
                   className={cn(
                     "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
                     isActive(item.href)
-                      ? "text-[#e93a3a] bg-[#e93a3a]/10"
+                      ? "text-[#e93a3a]"
                       : isDark
                         ? "text-white/50 hover:text-white hover:bg-white/[0.07]"
                         : "text-black/50 hover:text-black hover:bg-black/[0.05]"
