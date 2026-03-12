@@ -21,7 +21,7 @@ export async function generateMetadata({
   const shouldNoIndex = hasSearchIntent || hasFilterParams
 
   return {
-    title: hasSearchIntent ? `Search results for ${search}` : "Products",
+    title: hasSearchIntent ? `Search results for ${search}` : "Shop Streetwear T-Shirts & Hoodies",
     description: hasSearchIntent
       ? `Browse HAXEUS results for ${search}. Explore oversized streetwear, graphic tees, and premium drops.`
       : "Shop HAXEUS products: oversized streetwear, graphic tees, and premium limited drops.",

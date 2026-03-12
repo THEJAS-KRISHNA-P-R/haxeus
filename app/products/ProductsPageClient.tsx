@@ -125,7 +125,7 @@ function ProductsContent() {
     <div className="min-h-screen bg-theme pt-20 pb-12 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 1, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="flex items-center justify-between gap-3 mb-5 flex-wrap"
