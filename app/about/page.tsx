@@ -38,8 +38,8 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  hidden: { y: 30 },
+  visible: { y: 0, transition: { duration: 0.6 } },
 };
 
 export default function AboutPage() {
@@ -70,21 +70,19 @@ export default function AboutPage() {
 
         {/* Content */}
         <div className="relative z-10 text-center px-4">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-sm uppercase tracking-[0.3em] text-[var(--accent)] font-semibold mb-4"
-          >
-            Our Story
-          </motion.p>
-          <motion.h1
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: 'easeOut' }}
-            className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight select-none bg-gradient-to-b from-[var(--text)] to-[var(--text-2)] bg-clip-text text-transparent px-4 pb-2"
           >
-            HAXEUS
+            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight select-none bg-gradient-to-b from-[var(--text)] to-[var(--text-2)] bg-clip-text text-transparent px-4 pb-2">
+              HAXEUS
+            </h1>
+          </motion.div>
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)] font-semibold mb-4">
+              Our Story
+            </p>
+          </motion.div>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -93,14 +91,11 @@ export default function AboutPage() {
             className="mt-4 text-lg text-theme-2 tracking-widest uppercase"
           >
             Art · Identity · Culture
-          </motion.p>
-        </div>
-
-        {/* Scroll cue */}
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-8 z-10 text-theme-2 flex flex-col items-center gap-2"
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.8 }}>
+            <p className="mt-4 text-lg text-theme-2 tracking-widest uppercase">
+              Art · Identity · Culture
+            </p>
+          </motion.div>
         >
           <span className="text-xs tracking-wider uppercase">Scroll</span>
           <ArrowDown className="w-4 h-4" />
@@ -151,14 +146,11 @@ export default function AboutPage() {
             className="text-3xl md:text-4xl font-black mb-12 text-center"
           >
             The Journey
-          </motion.h2>
-          <div className="relative border-l-2 border-[var(--accent)]/20 ml-4 space-y-12">
-            {timeline.map((t, i) => (
-              <motion.div
-                key={t.year}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+          <motion.div initial={{ y: 20 }} whileInView={{ y: 0 }} viewport={{ once: true }}>
+            <h2 className="text-3xl md:text-4xl font-black mb-12 text-center">
+              The Journey
+            </h2>
+          </motion.div>
                 transition={{ delay: i * 0.15 }}
                 className="relative pl-8"
               >
@@ -209,22 +201,14 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">{v.title}</h3>
                 <p className="text-theme-2 leading-relaxed text-sm">{v.desc}</p>
+              <motion.div initial={{ y: 20 }} whileInView={{ y: 0 }} viewport={{ once: true }}>
+                <h2 className="text-3xl md:text-4xl font-black mb-4 text-center">
+                  What We Stand For
+                </h2>
               </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ───── NUMBERS ───── */}
-      <section className="py-20 px-6 lg:px-8 bg-card transition-colors duration-300">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
-          >
+              <p className="text-center text-theme-2 mb-14 max-w-xl mx-auto">
+                Every decision we make is driven by these principles.
+              </p>
             {[
               { value: '240gsm', label: 'Premium Cotton' },
               { value: '48h', label: 'Ship Time' },
@@ -259,26 +243,23 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/products">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-10 py-4 bg-red-600 text-white font-bold text-lg rounded-full hover:bg-red-700 transition-colors shadow-lg shadow-red-500/25"
-              >
-                Shop the Drop
-              </motion.button>
-            </Link>
-            <Link href="/contact">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-10 py-4 border-2 border-theme text-theme font-bold text-lg rounded-full hover:bg-card transition-colors"
-              >
-                Get in Touch
-              </motion.button>
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+              <motion.div variants={fadeUp}>
+                <h2 className="text-4xl md:text-5xl font-black leading-tight">
+                  Born from a <span className="text-[var(--accent)]">rebellion</span> against boring merch.
+                </h2>
+              </motion.div>
+              <motion.div variants={fadeUp}>
+                <p className="text-lg text-theme-2 leading-relaxed">
+                  HAXEUS started with a simple belief: your clothes should say something about you.
+                  Not a logo someone else chose. Not a trend everyone follows. Something real.
+                </p>
+              </motion.div>
+              <motion.div variants={fadeUp}>
+                <p className="text-lg text-theme-2 leading-relaxed">
+                  We make our drops ourselves — no middlemen, no mass production. Just bold designs and quality you
+                  you&apos;ll never find in a mall. Every tee is a canvas.
+                </p>
+              </motion.div>
     </main>
   );
 }

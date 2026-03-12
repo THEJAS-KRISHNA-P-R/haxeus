@@ -167,6 +167,19 @@ export default async function ProductLayout({
 
   return (
     <>
+      {/* Server-rendered product content — visible to crawlers before JS executes */}
+      <div className="sr-only">
+        <h1>{product.name}</h1>
+        <p>{product.description}</p>
+        <p>Price: &#8377;{product.price}</p>
+        {product.available_sizes && product.available_sizes.length > 0 && (
+          <p>Available sizes: {product.available_sizes.join(", ")}</p>
+        )}
+        <p>
+          Premium oversized streetwear from HAXEUS. Made with 240gsm heavyweight cotton. Ships across India within 48 hours.
+          10-day replacement policy on defective items. Free shipping available on qualifying orders.
+        </p>
+      </div>
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: SITE_URL },
