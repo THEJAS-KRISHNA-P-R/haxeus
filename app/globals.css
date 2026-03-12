@@ -192,6 +192,20 @@ input[type="checkbox"]:checked {
   accent-color: #e7bf04;
 }
 
+/* Safe area insets for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .pt-safe {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+  .pb-safe {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  .px-safe {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
 

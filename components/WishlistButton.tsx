@@ -58,29 +58,21 @@ export function WishlistButton({
       return
     }
 
-    setLoading(true)
+    // Optimistic update — flip immediately, no loading state
+    const wasInWishlist = inWishlist
+    setInWishlist(!wasInWishlist)
 
     try {
-      if (inWishlist) {
-        const success = await removeFromWishlist(productId)
-        if (success) {
-          setInWishlist(false)
-        } else {
-          alert("Failed to remove from wishlist")
-        }
-      } else {
-        const success = await addToWishlist(productId)
-        if (success) {
-          setInWishlist(true)
-        } else {
-          alert("Failed to add to wishlist")
-        }
+      const success = wasInWishlist
+        ? await removeFromWishlist(productId)
+        : await addToWishlist(productId)
+
+      // Only revert if the call actually failed
+      if (!success) {
+        setInWishlist(wasInWishlist)
       }
-    } catch (error) {
-      console.error("Error toggling wishlist:", error)
-      alert("An error occurred")
-    } finally {
-      setLoading(false)
+    } catch {
+      setInWishlist(wasInWishlist)
     }
   }
 

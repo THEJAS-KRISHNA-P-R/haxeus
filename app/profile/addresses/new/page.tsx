@@ -78,15 +78,15 @@ export default function NewAddressPage() {
           <h1 className="text-3xl font-bold text-white">Add New Address</h1>
         </div>
 
-        <Card>
+        <Card className="bg-card border-theme text-theme">
           <CardHeader>
-            <CardTitle>Address Details</CardTitle>
+            <CardTitle className="text-theme">Address Details</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="full_name">Full Name *</Label>
+                  <Label htmlFor="full_name" className="text-theme">Full Name *</Label>
                   <Input
                     id="full_name"
                     value={formData.full_name}
@@ -94,11 +94,12 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, full_name: e.target.value })
                     }
                     required
+                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Label htmlFor="phone" className="text-theme">Phone Number *</Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -107,12 +108,13 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, phone: e.target.value })
                     }
                     required
+                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address_line1">Address Line 1 *</Label>
+                <Label htmlFor="address_line1" className="text-theme">Address Line 1 *</Label>
                 <Input
                   id="address_line1"
                   value={formData.address_line1}
@@ -121,11 +123,12 @@ export default function NewAddressPage() {
                   }
                   placeholder="House no., Building name"
                   required
+                  className="bg-[#121212] border-theme text-white placeholder:text-white/40"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address_line2">Address Line 2</Label>
+                <Label htmlFor="address_line2" className="text-theme">Address Line 2</Label>
                 <Input
                   id="address_line2"
                   value={formData.address_line2}
@@ -133,12 +136,13 @@ export default function NewAddressPage() {
                     setFormData({ ...formData, address_line2: e.target.value })
                   }
                   placeholder="Road name, Area, Colony"
+                  className="bg-[#121212] border-theme text-white placeholder:text-white/40"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
+                  <Label htmlFor="city" className="text-theme">City *</Label>
                   <Input
                     id="city"
                     value={formData.city}
@@ -146,11 +150,12 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, city: e.target.value })
                     }
                     required
+                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="state">State *</Label>
+                  <Label htmlFor="state" className="text-theme">State *</Label>
                   <Input
                     id="state"
                     value={formData.state}
@@ -158,11 +163,12 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, state: e.target.value })
                     }
                     required
+                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="pincode">Pincode *</Label>
+                  <Label htmlFor="pincode" className="text-theme">Pincode *</Label>
                   <Input
                     id="pincode"
                     value={formData.pincode}
@@ -170,6 +176,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, pincode: e.target.value })
                     }
                     required
+                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
                   />
                 </div>
               </div>
@@ -182,7 +189,7 @@ export default function NewAddressPage() {
                     setFormData({ ...formData, is_default: checked as boolean })
                   }
                 />
-                <Label htmlFor="is_default" className="cursor-pointer">
+                <Label htmlFor="is_default" className="cursor-pointer text-theme">
                   Set as default address
                 </Label>
               </div>

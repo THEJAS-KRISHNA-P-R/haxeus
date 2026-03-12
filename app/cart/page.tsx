@@ -172,6 +172,7 @@ export default function CartPage() {
                         alt={item.product.name}
                         width={96}
                         height={96}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
@@ -209,7 +210,7 @@ export default function CartPage() {
                             size="sm"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             disabled={item.quantity <= 1}
-                            className="w-8 h-8 p-0 border-theme hover:bg-card"
+                            className="w-10 h-10 p-0 border-theme hover:bg-card"
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
@@ -219,7 +220,7 @@ export default function CartPage() {
                             size="sm"
                             onClick={() => handleIncrease(item)}
                             disabled={item.quantity >= getAvailableStock(item)}
-                            className="w-8 h-8 p-0 border-theme hover:bg-card"
+                            className="w-10 h-10 p-0 border-theme hover:bg-card"
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
