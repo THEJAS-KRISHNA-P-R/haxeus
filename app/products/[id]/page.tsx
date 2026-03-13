@@ -1,6 +1,6 @@
-﻿"use client"
+"use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ import { WishlistButton } from "@/components/WishlistButton"
 import { Heart, ShoppingCart, Truck, Shield, RotateCcw, Star, Zap } from "lucide-react"
 import { getProductInventory, checkStockAvailability } from "@/lib/inventory"
 import { getProductReviews, getProductRatingsSummary } from "@/lib/reviews"
+import { useStoreSettings } from "@/hooks/useStoreSettings"
 
 interface Product {
   id: number
@@ -59,8 +60,22 @@ export default function ProductDetailPage() {
   const [inventory, setInventory] = useState<ProductInventory[]>([])
   const [reviews, setReviews] = useState<any[]>([])
   const [ratingSummary, setRatingSummary] = useState<any>(null)
+  const [stickyBarVisible, setStickyBarVisible] = useState(false)
+  const buySectionRef = useRef<HTMLDivElement>(null)
+  const { settings } = useStoreSettings()
 
   useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    const el = buySectionRef.current
+    if (!el) return
+    const ob = new IntersectionObserver(
+      ([e]) => setStickyBarVisible(!e.isIntersecting),
+      { threshold: 0, rootMargin: "-80px 0px 0px 0px" }
+    )
+    ob.observe(el)
+    return () => ob.disconnect()
+  }, [product])
 
   useEffect(() => {
     fetchProduct()
@@ -232,7 +247,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-theme pt-[100px] pb-8 opacity-0 animate-fadeIn transition-colors duration-300">
+    <div className={`min-h-screen bg-theme pt-[100px] opacity-0 animate-fadeIn transition-colors duration-300 ${stickyBarVisible ? "pb-24 md:pb-8" : "pb-8"}`}>
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -271,8 +286,10 @@ export default function ProductDetailPage() {
               {productImages.length > 0 ? (
                 <Image
                   src={productImages[selectedImageIndex]?.image_url || "/placeholder.svg"}
-                  alt={`${product.name} - Image ${selectedImageIndex + 1}`}
+                  alt={`HAXEUS ${product.name} oversized streetwear - front view`}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
                   className="object-cover transition-opacity duration-300"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
@@ -282,8 +299,10 @@ export default function ProductDetailPage() {
               ) : (
                 <Image
                   src={product.front_image || "/placeholder.svg"}
-                  alt={product.name}
+                  alt={`HAXEUS ${product.name} oversized streetwear tee`}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
                   className="object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
@@ -327,8 +346,10 @@ export default function ProductDetailPage() {
                     >
                       <Image
                         src={img.image_url}
-                        alt={`${product.name} thumbnail ${index + 1}`}
+                        alt={`HAXEUS ${product.name} - view ${index + 1}`}
                         fill
+                        sizes="80px"
+                        loading="lazy"
                         className="object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
@@ -402,7 +423,7 @@ export default function ProductDetailPage() {
                         onClick={() => inStock && setSelectedSize(size)}
                         disabled={!inStock}
                         className={`
-                          px-5 py-2.5 rounded-full text-sm font-semibold border transition-all duration-200
+                          px-5 py-2.5 min-h-[44px] rounded-full text-sm font-semibold border transition-all duration-200
                           ${isSelected
                             ? 'bg-[#e93a3a] border-[#e93a3a] text-white'
                             : inStock
@@ -432,8 +453,30 @@ export default function ProductDetailPage() {
               )}
             </div>
 
+            {/* Urgency badge */}
+            <div className="flex items-center gap-2 text-sm text-[var(--accent)] font-medium">
+              <Zap className="w-4 h-4" />
+              Limited drop – ends in 7 days
+            </div>
+
+            {/* Trust badges — near buy button */}
+            <div className="flex flex-wrap gap-3 text-xs text-theme-2">
+              <span className="flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-green-500" />
+                Secure checkout
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Truck className="w-3.5 h-3.5 text-theme-2" />
+                Free shipping over ₹{settings.free_shipping_above.toLocaleString("en-IN")}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <RotateCcw className="w-3.5 h-3.5 text-theme-2" />
+                10-day replacement
+              </span>
+            </div>
+
             {/* Quantity + Action Buttons — all in one compact block */}
-            <div className="space-y-3">
+            <div ref={buySectionRef} className="space-y-3">
               <div className="flex items-center gap-3">
                 <Label className="text-base font-semibold text-theme shrink-0">Qty:</Label>
                 <Select value={quantity.toString()} onValueChange={(value) => setQuantity(Number.parseInt(value))}>
@@ -561,6 +604,39 @@ export default function ProductDetailPage() {
             </Card>
           </div>
         </div>
+
+        {/* Sticky add-to-cart bar — mobile only */}
+        {stickyBarVisible && (
+          <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-theme p-3 safe-area-pb">
+            <div className="flex items-center gap-3 max-w-7xl mx-auto">
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-theme truncate">{product.name}</p>
+                <p className="text-[var(--accent)] font-bold">₹{product.price.toLocaleString("en-IN")}</p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Button
+                  onClick={addToCart}
+                  disabled={addingToCart || isOutOfStock}
+                  size="lg"
+                  variant="outline"
+                  className="h-12 px-4 border-2 border-[var(--accent)] text-[var(--accent)] bg-transparent hover:bg-[var(--accent)]/10"
+                >
+                  <ShoppingCart className="w-5 h-5 mr-1.5" />
+                  {isOutOfStock ? "Out" : "Add"}
+                </Button>
+                <Button
+                  onClick={buyNow}
+                  disabled={addingToCart || isOutOfStock}
+                  size="lg"
+                  className="h-12 px-4 bg-[var(--accent)] hover:opacity-90 text-white"
+                >
+                  <Zap className="w-5 h-5 mr-1.5" />
+                  Buy Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Reviews Section */}
         {ratingSummary && ratingSummary.totalReviews > 0 && (

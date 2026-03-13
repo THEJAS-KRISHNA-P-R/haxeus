@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import type { Metadata } from "next"
-import { BreadcrumbJsonLd, ProductJsonLd } from "@/components/JsonLd"
+import { BreadcrumbJsonLd, ProductJsonLd, ProductFAQJsonLd } from "@/components/JsonLd"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 
@@ -197,6 +197,7 @@ export default async function ProductLayout({
         aggregateRating={ratingSummary?.averageRating}
         reviewCount={ratingSummary?.totalReviews}
       />
+      <ProductFAQJsonLd />
       {children}
     </>
   )

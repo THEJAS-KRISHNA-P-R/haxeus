@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Truck, Shield, RotateCcw } from "lucide-react"
+import { useStoreSettings } from "@/hooks/useStoreSettings"
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart } = useCart()
@@ -25,6 +26,7 @@ export default function CartPage() {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponSuccess, setCouponSuccess] = useState<string | null>(null)
   const [couponError, setCouponError] = useState<string | null>(null)
+  const { settings } = useStoreSettings()
 
   useEffect(() => {
     // Check auth state
@@ -119,7 +121,7 @@ export default function CartPage() {
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const discountAmount = (subtotal * discount) / 100
-  const shipping = subtotal > 1000 ? 0 : 150
+  const shipping = subtotal >= settings.free_shipping_above ? 0 : settings.shipping_rate
   const total = subtotal - discountAmount + shipping
 
   if (items.length === 0) {
@@ -304,7 +306,7 @@ export default function CartPage() {
                   </Button>
                 </Link>
 
-                <div className="mt-4 text-center text-sm text-theme-3">Free shipping on orders above ₹1,000</div>
+                <div className="mt-4 text-center text-sm text-theme-3">Free shipping on orders above ₹{settings.free_shipping_above.toLocaleString("en-IN")}</div>
               </CardContent>
             </Card>
 
@@ -315,7 +317,7 @@ export default function CartPage() {
                   <Truck className="w-6 h-6 text-[var(--accent)]" />
                   <div>
                     <div className="font-semibold text-sm text-theme">Free Shipping</div>
-                    <div className="text-xs text-theme-3">On orders above ₹1,000</div>
+                    <div className="text-xs text-theme-3">On orders above ₹{settings.free_shipping_above.toLocaleString("en-IN")}</div>
                   </div>
                 </div>
               </Card>
