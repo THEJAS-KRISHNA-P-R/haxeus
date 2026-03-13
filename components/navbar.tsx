@@ -200,7 +200,7 @@ export function Navbar() {
                     animate={{ opacity: 1 }}
                     onClick={() => setIsSearchOpen(true)}
                     className={cn(
-                      "p-2 rounded-full transition-all",
+                      "p-2 rounded-full transition-all touch-target",
                       isDark
                         ? "text-white/45 hover:text-white hover:bg-white/[0.07]"
                         : "text-black/45 hover:text-black hover:bg-black/[0.05]"
@@ -215,7 +215,7 @@ export function Navbar() {
               <Link
                 href="/cart"
                 className={cn(
-                  "relative p-2 rounded-full transition-all",
+                  "relative p-2 rounded-full transition-all touch-target flex items-center justify-center",
                   isDark
                     ? "text-white/45 hover:text-white hover:bg-white/[0.07]"
                     : "text-black/45 hover:text-black hover:bg-black/[0.05]"
@@ -233,7 +233,7 @@ export function Navbar() {
               <Link
                 href="/profile?tab=wishlist"
                 className={cn(
-                  "p-2 rounded-full transition-all",
+                  "p-2 rounded-full transition-all touch-target flex items-center justify-center",
                   isDark
                     ? "text-white/45 hover:text-[#c03c9d] hover:bg-[#c03c9d]/[0.08]"
                     : "text-black/45 hover:text-[#c03c9d] hover:bg-[#c03c9d]/[0.08]"
@@ -389,7 +389,7 @@ export function Navbar() {
 
                   <button
                     onClick={() => setIsSearchOpen(true)}
-                    className={cn("p-2 rounded-full transition-colors", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
+                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
                     aria-label="Search"
                   >
                     <Search className="h-5 w-5" />
@@ -397,7 +397,7 @@ export function Navbar() {
 
                   <Link
                     href={user ? "/profile" : "/auth"}
-                    className={cn("p-2 rounded-full transition-colors", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
+                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
                     aria-label={user ? "Profile" : "Sign in"}
                   >
                     <User className="h-5 w-5" />
@@ -410,7 +410,7 @@ export function Navbar() {
                       )
                       btn?.click()
                     }}
-                    className={cn("p-2 rounded-full transition-colors", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
+                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
                     aria-label="Menu"
                   >
                     <Menu className="h-5 w-5" />

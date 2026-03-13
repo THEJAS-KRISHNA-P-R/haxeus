@@ -161,9 +161,33 @@ export function BreadcrumbJsonLd({ items }: { items: BreadcrumbItem[] }) {
     )
 }
 
-// ── FAQ — use on size guide, returns, and other FAQ-like pages ────────────────
+// ── Product FAQ — use on product pages for sizing, shipping, returns ──────────
 interface FAQItem { question: string; answer: string }
 
+const PRODUCT_FAQ_ITEMS: FAQItem[] = [
+  {
+    question: "What sizes does this product come in?",
+    answer: "HAXEUS products are available in S, M, L, and XL. We recommend checking our size guide for the best fit. Our oversized streetwear tends to run relaxed.",
+  },
+  {
+    question: "How long does shipping take?",
+    answer: "We ship within 48 hours. Domestic delivery typically takes 7-10 days across India. International shipping is available with additional charges.",
+  },
+  {
+    question: "What is your return policy?",
+    answer: "HAXEUS offers a 10-day replacement policy on defective items. Contact us within 10 days of delivery for quality issues. Items must be unworn with tags attached.",
+  },
+  {
+    question: "What material is this made from?",
+    answer: "Our products are made from premium 240gsm bio-washed cotton for durability, breathability, and a premium feel against your skin.",
+  },
+]
+
+export function ProductFAQJsonLd() {
+  return <FAQJsonLd items={PRODUCT_FAQ_ITEMS} />
+}
+
+// ── FAQ — use on size guide, returns, and other FAQ-like pages ────────────────
 export function FAQJsonLd({ items }: { items: FAQItem[] }) {
     const schema = {
         "@context": "https://schema.org",

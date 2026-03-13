@@ -653,6 +653,7 @@ export default function HomePage() {
                     src="/images/statue-front.jpg"
                     alt="HAXEUS Quality"
                     fill
+                    sizes="(max-width: 640px) 100vw, 50vw"
                     className="object-cover rounded-2xl"
                     loading="lazy"
                     onError={(e) => {

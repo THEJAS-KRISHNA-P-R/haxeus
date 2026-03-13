@@ -11,6 +11,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile tap targets — min 44px for accessibility */
+@media (pointer: coarse) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
 :root {
   --font-bebas: 'Bebas Neue';
   --font-clash: 'Clash Display';
