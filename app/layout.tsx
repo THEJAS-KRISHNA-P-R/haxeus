@@ -18,19 +18,20 @@ const inter = Inter({ subsets: ["latin"] })
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 const SITE_NAME = "HAXEUS"
 const SITE_DESCRIPTION =
-  "HAXEUS — Luxury streetwear for those who move differently. Oversized fits, dark aesthetics, limited drops. Shop tees and hoodies."
+  "HAXEUS — Premium streetwear for those who move differently. Shop hoodies, tees, and premium apparel. Oversized fits, dark aesthetics, limited drops."
 const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Luxury Streetwear`,
+    default: `${SITE_NAME} — Premium Artistic Streetwear`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   keywords: [
-    "luxury streetwear India", "oversized hoodies India", "dark aesthetic clothing",
-    "premium streetwear brand India", "HAXEUS", "limited drop streetwear",
+    "HAXEUS", "haxeus", "haxeus.in",
+    "premium streetwear India", "oversized hoodies India", "dark aesthetic clothing",
+    "premium streetwear brand India", "limited drop streetwear",
     "streetwear Kerala", "graphic tees India", "urban fashion India", "oversized tshirt India",
   ],
   authors: [{ name: "HAXEUS", url: SITE_URL }],
@@ -41,15 +42,16 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Luxury Streetwear`,
+    title: `${SITE_NAME} — Premium Artistic Streetwear`,
     description: SITE_DESCRIPTION,
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "HAXEUS — Luxury Streetwear", type: "image/jpeg" }],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "HAXEUS — Premium Artistic Streetwear", type: "image/jpeg" }],
+    determiner: "auto",
   },
   twitter: {
     card: "summary_large_image",
     site: "@haxeus",
     creator: "@haxeus",
-    title: `${SITE_NAME} — Luxury Streetwear`,
+    title: `${SITE_NAME} — Premium Artistic Streetwear`,
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE],
   },

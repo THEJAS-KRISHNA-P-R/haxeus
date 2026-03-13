@@ -686,7 +686,7 @@ export default function HomePage() {
                 <motion.div variants={fadeInRight}>
                   <p className="text-white/80 mb-8 leading-relaxed text-lg">
                     Every piece in our collection is meticulously crafted using the finest cotton blends, ensuring
-                    durability, breathability, and that luxurious feel against your skin.
+                    durability, breathability, and that premium feel against your skin.
                   </p>
                 </motion.div>
 
