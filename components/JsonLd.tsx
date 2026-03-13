@@ -31,10 +31,11 @@ export function OrganizationJsonLd() {
         "@context": "https://schema.org",
         "@type": "Organization",
         name: "HAXEUS",
+        alternateName: ["haxeus", "haxeus.in", "Haxeus", "HAXEUS India"],
         url: SITE_URL,
         logo: `${SITE_URL}/android-chrome-192x192.png`,
         description:
-            "HAXEUS — Luxury streetwear for those who move differently. Oversized fits, dark aesthetics, limited drops.",
+            "HAXEUS — Premium artistic streetwear for those who move differently. Oversized fits, dark aesthetics, limited drops. Shop hoodies, tees, and premium apparel.",
         contactPoint: {
             "@type": "ContactPoint",
             contactType: "customer support",
@@ -61,7 +62,11 @@ export function WebsiteJsonLd() {
         "@context": "https://schema.org",
         "@type": "WebSite",
         name: "HAXEUS",
+        alternateName: ["haxeus", "haxeus.in", "HAXEUS — Premium Streetwear"],
         url: SITE_URL,
+        description: "HAXEUS — Premium artistic streetwear for those who move differently. Shop hoodies, tees, and premium apparel.",
+        publisher: { "@type": "Organization", name: "HAXEUS", url: SITE_URL },
+        inLanguage: "en-IN",
         potentialAction: {
             "@type": "SearchAction",
             target: {
