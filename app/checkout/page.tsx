@@ -47,7 +47,7 @@ export default function CheckoutPage() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-  const shipping = subtotal > 2000 ? 0 : 150
+  const shipping = subtotal > 1000 ? 0 : 150
   const total = subtotal + shipping
 
   // -- Shared style tokens ----------------------------------------------------
@@ -244,8 +244,8 @@ export default function CheckoutPage() {
 
               <div className="space-y-2.5 mb-5">
                 {[
-                  { label: "Subtotal", value: `?${subtotal.toLocaleString("en-IN")}` },
-                  { label: "Shipping", value: shipping === 0 ? "Free" : `?${shipping}` },
+                  { label: "Subtotal", value: `₹${subtotal.toLocaleString("en-IN")}` },
+                  { label: "Shipping", value: shipping === 0 ? "Free" : `₹${shipping}` },
                 ].map((row) => (
                   <div key={row.label} className="flex justify-between text-sm">
                     <span className={muted}>{row.label}</span>
