@@ -91,7 +91,7 @@ export default function CartPage() {
         })
       } else {
         setDiscount(data.coupon.discount_type === "percentage" ? data.coupon.discount_value : (data.discount / subtotal) * 100)
-        setCouponSuccess(`${data.coupon.discount_type === "percentage" ? data.coupon.discount_value + "%" : "?" + data.coupon.discount_value} discount applied!`)
+        setCouponSuccess(`${data.coupon.discount_type === "percentage" ? data.coupon.discount_value + "%" : "₹" + data.coupon.discount_value} discount applied!`)
         toast({
           title: "Coupon Applied",
           description: "Your discount has been added.",
@@ -269,8 +269,8 @@ export default function CartPage() {
                     {couponLoading ? "..." : "Apply"}
                   </Button>
                 </div>
-                {couponSuccess && <div className="mt-2 text-sm text-green-500">? {couponSuccess}</div>}
-                {couponError && <div className="mt-2 text-sm text-red-500">? {couponError}</div>}
+                {couponSuccess && <div className="mt-2 text-sm text-green-500">₹ {couponSuccess}</div>}
+                {couponError && <div className="mt-2 text-sm text-red-500">₹ {couponError}</div>}
               </CardContent>
             </Card>
 
