@@ -1,18 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Toggle } from "@/components/ui/Toggle"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useTheme } from "next-themes"
 
 export default function NewAddressPage() {
   const router = useRouter()
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
     full_name: "",
@@ -24,6 +27,12 @@ export default function NewAddressPage() {
     pincode: "",
     is_default: false,
   })
+  const isDark = !mounted ? true : (
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  )
+
+  useEffect(() => setMounted(true), [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -66,7 +75,7 @@ export default function NewAddressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] pt-20 pb-12">
+    <div className={`min-h-screen pt-20 pb-12 ${isDark ? 'bg-[#0a0a0a]' : 'bg-[#f5f4f0]'}`}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link href="/profile?tab=addresses">
@@ -75,7 +84,7 @@ export default function NewAddressPage() {
               Back to Profile
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-white">Add New Address</h1>
+          <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>Add New Address</h1>
         </div>
 
         <Card className="bg-card border-theme text-theme">
@@ -94,7 +103,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, full_name: e.target.value })
                     }
                     required
-                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
+                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
                   />
                 </div>
 
@@ -108,7 +117,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, phone: e.target.value })
                     }
                     required
-                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
+                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
                   />
                 </div>
               </div>
@@ -123,7 +132,7 @@ export default function NewAddressPage() {
                   }
                   placeholder="House no., Building name"
                   required
-                  className="bg-[#121212] border-theme text-white placeholder:text-white/40"
+                  className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
                 />
               </div>
 
@@ -136,7 +145,7 @@ export default function NewAddressPage() {
                     setFormData({ ...formData, address_line2: e.target.value })
                   }
                   placeholder="Road name, Area, Colony"
-                  className="bg-[#121212] border-theme text-white placeholder:text-white/40"
+                  className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
                 />
               </div>
 
@@ -150,7 +159,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, city: e.target.value })
                     }
                     required
-                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
+                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
                   />
                 </div>
 
@@ -163,7 +172,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, state: e.target.value })
                     }
                     required
-                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
+                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
                   />
                 </div>
 
@@ -176,18 +185,16 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, pincode: e.target.value })
                     }
                     required
-                    className="bg-[#121212] border-theme text-white placeholder:text-white/40"
+                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
                   />
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_default"
+                <Toggle
                   checked={formData.is_default}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, is_default: checked as boolean })
-                  }
+                  onChange={(checked) => setFormData({ ...formData, is_default: checked })}
+                  size="md"
                 />
                 <Label htmlFor="is_default" className="cursor-pointer text-theme">
                   Set as default address

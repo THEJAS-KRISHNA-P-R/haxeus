@@ -23,21 +23,11 @@ import {
   hoverScale,
   tapScale,
 } from "@/lib/animations"
+import { ProductCard } from "@/components/ui/ProductCard"
 
-interface Product {
-  id: number
-  name: string
-  description: string
-  price: number
-  front_image?: string
-  back_image?: string
-  available_sizes?: string[]
-  sizes?: string[]
-}
+import type { Product } from "@/lib/supabase"
 
-function isSupabaseStorageUrl(url?: string) {
-  return typeof url === "string" && url.includes(".supabase.co/storage/v1/")
-}
+
 
 function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([])
@@ -243,109 +233,13 @@ function ProductsContent() {
               className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
             >
               {filteredProducts.map((product, index) => (
-                <motion.div
+                <ProductCard
                   key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0 }}
-                  transition={{ duration: 0.4, ease: "easeOut", delay: index * 0.05 }}
-                  whileHover={{ y: -10 }}
-                  className="snap-start"
-                >
-                  <Link href={`/products/${product.id}`} className="block h-full">
-                    <Card className="group overflow-hidden bg-card shadow-none hover:shadow-md border border-theme h-full transition-all cursor-pointer">
-                      <div className="aspect-square relative bg-black overflow-hidden">
-                        <motion.div
-                          className="relative h-full w-full"
-                          whileHover={{ scale: 1.1, rotate: 2 }}
-                          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          <Image
-                            src={product.front_image || "/placeholder.svg"}
-                            alt={`HAXEUS ${product.name} premium streetwear`}
-                            fill
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
-                            className="object-cover"
-                            loading={index < 4 ? "eager" : "lazy"}
-                            unoptimized={isSupabaseStorageUrl(product.front_image)}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.src = "/placeholder.svg"
-                            }}
-                          />
-                        </motion.div>
-
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"
-                          initial={{ opacity: 0.4 }}
-                          whileHover={{ opacity: 1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3">
-                            <motion.div
-                              initial={{ y: 20, opacity: 0 }}
-                              whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <WishlistButton
-                                productId={product.id}
-                                variant="ghost"
-                                size="sm"
-                                className="bg-card text-theme hover:bg-theme shadow-md"
-                              />
-                            </motion.div>
-                            <motion.div
-                              initial={{ y: 20, opacity: 0 }}
-                              whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <Button size="sm" className="bg-[var(--accent)] hover:opacity-90 shadow-md" onClick={(e) => e.stopPropagation()}>
-                                <ShoppingCart className="w-4 h-4" />
-                              </Button>
-                            </motion.div>
-                          </div>
-                        </motion.div>
-                      </div>
-
-                      <CardContent className="p-3 sm:p-5 flex flex-col flex-1">
-                        <motion.h3
-                          className="text-base sm:text-xl font-bold text-theme mb-1 sm:mb-2 hover:text-[var(--accent)] line-clamp-1"
-                          whileHover={{ x: 5 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {product.name}
-                        </motion.h3>
-
-                        <p className="text-xs sm:text-sm text-theme-2 mb-2 sm:mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
-
-                        <div className="hidden sm:flex gap-1 mb-3 flex-wrap">
-                          {(product.sizes || product.available_sizes || []).slice(0, 5).map((size, sizeIndex) => (
-                            <motion.div
-                              key={size}
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{ delay: index * 0.05 + sizeIndex * 0.05 }}
-                              whileHover={{ scale: 1.1, backgroundColor: "var(--accent)", color: "#ffffff" }}
-                            >
-                              <Badge variant="outline" className="text-xs px-2 py-1 cursor-pointer border-theme text-theme-2 hover:bg-[var(--accent)]">
-                                {size}
-                              </Badge>
-                            </motion.div>
-                          ))}
-                        </div>
-
-                        <div className="mt-auto">
-                          <motion.span
-                            className="text-base sm:text-xl font-bold text-theme"
-                            whileHover={{ scale: 1.1, color: "var(--accent)" }}
-                          >
-                            ₹{product.price.toLocaleString("en-IN")}
-                          </motion.span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
+                  product={product}
+                  index={index}
+                  accentColor="#e7bf04"
+                  variant="default"
+                />
               ))}
             </motion.div>
           )}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTheme } from "@/components/ThemeProvider"
 import { supabase, type ProductImage, type ProductInventory } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,8 @@ import Link from "next/link"
 import { ImageGalleryManager } from "@/components/admin/ImageGalleryManager"
 import { SizeInventoryManager } from "@/components/admin/SizeInventoryManager"
 import { cn } from "@/lib/utils"
+import { Toggle } from "@/components/ui/Toggle"
+import { motion } from "framer-motion"
 
 interface ProductFormData {
   name: string
@@ -27,7 +29,13 @@ interface ProductFormData {
 
 export default function NewProductPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [saving, setSaving] = useState(false)
+
+  const [isPreorder, setIsPreorder] = useState(searchParams?.get("preorder") === "true")
+  const [preorderStatus, setPreorderStatus] = useState<"active" | "sold_out" | "stopped">("active")
+  const [expectedDate, setExpectedDate] = useState("")
+  const [maxPreorders, setMaxPreorders] = useState<string>("")
 
   const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
@@ -83,6 +91,12 @@ export default function NewProductPage() {
           total_stock: totalStock,
           front_image: formData.images.find(img => img.is_primary)?.image_url || formData.images[0]?.image_url || null,
           back_image: formData.images.length > 1 ? (formData.images.find(img => !img.is_primary)?.image_url || formData.images[1]?.image_url) : null,
+          // Preorder fields
+          is_preorder: isPreorder,
+          preorder_status: isPreorder ? preorderStatus : null,
+          expected_date: isPreorder && expectedDate ? expectedDate : null,
+          max_preorders: isPreorder && maxPreorders ? parseInt(maxPreorders) : null,
+          preorder_count: 0,
         })
         .select('id')
 
@@ -282,6 +296,88 @@ export default function NewProductPage() {
           inventory={formData.inventory}
           onChange={(inventory) => setFormData({ ...formData, inventory })}
         />
+
+        {/* Preorder Section */}
+        <div className={`rounded-2xl border p-5 ${
+          isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-black/[0.01] border-black/[0.07]"
+        }`}>
+          <div className="flex items-center justify-between mb-1">
+            <div>
+              <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-black"}`}>
+                Pre-Order
+              </p>
+              <p className={`text-xs mt-0.5 ${isDark ? "text-white/40" : "text-black/40"}`}>
+                List this product before it&apos;s in stock. Customers can register interest.
+              </p>
+            </div>
+            <Toggle
+              checked={isPreorder}
+              onChange={setIsPreorder}
+              size="md"
+            />
+          </div>
+
+          {/* Preorder fields — only visible when toggle is on */}
+          {isPreorder && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/[0.06] overflow-hidden"
+            >
+              {/* Status */}
+              <div>
+                <Label className={`block text-xs font-medium mb-1.5 ${isDark ? "text-white/60" : "text-black/60"}`}>
+                  Status
+                </Label>
+                <select
+                  value={preorderStatus}
+                  onChange={(e) => setPreorderStatus(e.target.value as any)}
+                  className={`w-full px-3 py-2.5 rounded-xl border text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-[#e93a3a]/50 ${
+                    isDark
+                      ? "border-white/[0.10] text-white"
+                      : "border-black/[0.10] text-black"
+                  }`}
+                >
+                  <option value="active" className={isDark ? "bg-[#111]" : ""}>Active — accepting registrations</option>
+                  <option value="sold_out" className={isDark ? "bg-[#111]" : ""}>Sold Out — no new registrations</option>
+                  <option value="stopped" className={isDark ? "bg-[#111]" : ""}>Stopped — hidden from public</option>
+                </select>
+              </div>
+
+              {/* Expected Date */}
+              <div>
+                <Label className={`block text-xs font-medium mb-1.5 ${isDark ? "text-white/60" : "text-black/60"}`}>
+                  Expected Date
+                  <span className={`ml-1 font-normal ${isDark ? "text-white/30" : "text-black/30"}`}>(optional)</span>
+                </Label>
+                <Input
+                  type="date"
+                  value={expectedDate}
+                  onChange={(e) => setExpectedDate(e.target.value)}
+                  className={isDark ? 'bg-transparent border-white/10 text-white' : 'bg-transparent border-black/10 text-black'}
+                />
+              </div>
+
+              {/* Max Pre-orders */}
+              <div>
+                <Label className={`block text-xs font-medium mb-1.5 ${isDark ? "text-white/60" : "text-black/60"}`}>
+                  Max Pre-orders
+                  <span className={`ml-1 font-normal ${isDark ? "text-white/30" : "text-black/30"}`}>(leave blank for unlimited)</span>
+                </Label>
+                <Input
+                  type="number"
+                  value={maxPreorders}
+                  onChange={(e) => setMaxPreorders(e.target.value)}
+                  placeholder="e.g. 100"
+                  min={1}
+                  className={isDark ? 'bg-transparent border-white/10 text-white placeholder:text-white/30' : 'bg-transparent border-black/10 text-black placeholder:text-black/30'}
+                />
+              </div>
+            </motion.div>
+          )}
+        </div>
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pb-8">

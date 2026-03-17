@@ -9,6 +9,7 @@ import { X, GripVertical, Star, Plus, Image as ImageIcon, Upload, Loader2, Clipb
 import Image from "next/image"
 import { supabase, ProductImage } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
+import imageCompression from "browser-image-compression"
 
 interface ImageGalleryManagerProps {
     images: ProductImage[]
@@ -51,31 +52,43 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
     // Upload image to Supabase Storage
     const uploadImage = async (file: File) => {
         setUploading(true)
-        setUploadProgress("Preparing upload...")
+        setUploadProgress("Compressing image...")
+
+        let processedFile: File = file
+        try {
+            const compressed = await imageCompression(file, {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1200,
+                useWebWorker: true,
+                fileType: "image/webp",
+            })
+            // imageCompression returns a Blob-like, cast to File for proper name
+            processedFile = new File([compressed], file.name.replace(/\.[^.]+$/, ".webp"), {
+                type: "image/webp",
+            })
+            setUploadProgress("Uploading to storage...")
+        } catch (compressionError) {
+            console.warn("Compression skipped, uploading original:", compressionError)
+            setUploadProgress("Uploading to storage...")
+        }
 
         try {
-            // Generate unique filename
-            const fileExt = file.type.split('/')[1] || 'png'
-            const fileName = `product-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+            const fileName = `product-${Date.now()}-${Math.random().toString(36).substring(7)}.webp`
             const filePath = `products/${fileName}`
-
-            setUploadProgress("Uploading to storage...")
 
             // Upload to Supabase Storage
             const { data, error } = await supabase.storage
                 .from('product-images')
-                .upload(filePath, file, {
+                .upload(filePath, processedFile, {
                     cacheControl: '3600',
                     upsert: false
                 })
 
             if (error) {
                 console.error("Upload error:", error)
-                // If bucket doesn't exist, show helpful message
                 if (error.message.includes('Bucket not found') || error.message.includes('bucket')) {
                     setUploadProgress("Storage bucket not found. Using data URL instead...")
-                    // Fall back to data URL
-                    const dataUrl = await fileToDataUrl(file)
+                    const dataUrl = await fileToDataUrl(processedFile)
                     addImageByUrl(dataUrl)
                     return
                 }
@@ -84,7 +97,6 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
 
             setUploadProgress("Getting public URL...")
 
-            // Get public URL
             const { data: urlData } = supabase.storage
                 .from('product-images')
                 .getPublicUrl(filePath)
@@ -97,9 +109,8 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
             console.error("Image upload failed:", error)
             setUploadProgress(`Upload failed: ${error.message}. Using data URL...`)
 
-            // Fallback to data URL if upload fails
             try {
-                const dataUrl = await fileToDataUrl(file)
+                const dataUrl = await fileToDataUrl(processedFile)
                 addImageByUrl(dataUrl)
             } catch (fallbackError) {
                 console.error("Data URL fallback failed:", fallbackError)
@@ -203,6 +214,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                 </CardTitle>
                 <p className="text-sm text-black/40 dark:text-white/40">
                     Add multiple images for your product. <span className="text-red-500 font-medium">Paste images directly (Ctrl+V)</span> or use the upload button.
+                    Images are automatically <span className="font-medium text-green-600 dark:text-green-400">compressed & converted to WebP</span> before uploading.
                 </p>
             </CardHeader>
             <CardContent className="space-y-4">

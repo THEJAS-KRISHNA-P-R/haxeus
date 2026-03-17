@@ -46,6 +46,27 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const isHome = pathname === "/"
+  const desktopNavbarGlassProps = {
+    brightness: 100,
+    opacity: 0.85,
+    blur: 14,
+    backgroundOpacity: 0.15,
+    saturation: 1.1,
+    distortionScale: -18,
+    redOffset: 0,
+    greenOffset: 0,
+    blueOffset: 0,
+  }
+  const mobileNavbarGlassProps = {
+    brightness: 100,
+    opacity: 0.88,
+    blur: 12,
+    backgroundOpacity: 0.15,
+    distortionScale: -15,
+    redOffset: 0,
+    greenOffset: 0,
+    blueOffset: 0,
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
@@ -107,15 +128,7 @@ export function Navbar() {
           height={56}
           borderRadius={100}
           borderWidth={0.06}
-          brightness={isDark ? 50 : 100}
-          opacity={isDark ? 0.8 : 0.85}
-          blur={14}
-          backgroundOpacity={isDark ? 0.28 : 0.15}
-          saturation={isDark ? 1.2 : 1.1}
-          distortionScale={-18}
-          redOffset={0}
-          greenOffset={0}
-          blueOffset={0}
+          {...desktopNavbarGlassProps}
           className="w-full glass-surface-fixed transition-all duration-300"
         >
           <div className="flex items-center justify-between w-full px-5 gap-3">
@@ -311,14 +324,7 @@ export function Navbar() {
                 height={56}
                 borderRadius={100}
                 borderWidth={0.05}
-                brightness={isDark ? 50 : 100}
-                opacity={isDark ? 0.82 : 0.88}
-                blur={12}
-                backgroundOpacity={isDark ? 0.28 : 0.15}
-                distortionScale={-15}
-                redOffset={0}
-                greenOffset={0}
-                blueOffset={0}
+                {...mobileNavbarGlassProps}
                 className="w-full glass-surface-fixed"
               >
                 <div className="flex items-center gap-2 w-full px-4">
@@ -357,14 +363,7 @@ export function Navbar() {
                 height={56}
                 borderRadius={100}
                 borderWidth={0.05}
-                brightness={isDark ? 50 : 100}
-                opacity={isDark ? 0.82 : 0.88}
-                blur={12}
-                backgroundOpacity={isDark ? 0.28 : 0.15}
-                distortionScale={-15}
-                redOffset={0}
-                greenOffset={0}
-                blueOffset={0}
+                {...mobileNavbarGlassProps}
                 className="w-full glass-surface-fixed"
               >
                 <div className="flex items-center w-full px-4 gap-2">

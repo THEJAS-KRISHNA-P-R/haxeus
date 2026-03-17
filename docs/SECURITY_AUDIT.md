@@ -263,4 +263,83 @@ WITH CHECK (
 ## Notes
 
 - This document should be treated as the canonical workspace audit report.
+- This document should be treated as the canonical workspace audit report.
 - The repository memory summary should remain aligned with this file after future audits.
+
+---
+
+## Audit — 2026-03-17
+
+### Scope
+Changes audited in this session:
+- Preorder system consolidation (`is_preorder`, `preorder_status`, `expected_date`, `max_preorders`, `preorder_count` flags on `products` table)
+- Admin Storage Manager (`/api/admin/storage/buckets`, `/api/admin/storage/files`)
+- Homepage CMS API route (`/api/admin/config/homepage`)
+- Shared `ProductCard` component
+- `PreorderModal` component
+- `ImageGalleryManager` with `browser-image-compression`
+
+### Auth Pattern
+
+| Route | Two-Client | Role Check | Status |
+|-------|-----------|------------|--------|
+| `GET /api/admin/storage/buckets` | ✅ ANON + service role | ✅ `requireAdmin()` `.maybeSingle()` | **PASS** |
+| `GET /api/admin/storage/files` | ✅ ANON + service role | ✅ `requireAdmin()` `.maybeSingle()` | **PASS** |
+| `DELETE /api/admin/storage/files` | ✅ ANON + service role | ✅ `requireAdmin()` `.maybeSingle()` | **PASS** |
+| `PATCH /api/admin/config/homepage` | ✅ ANON + service role | ✅ direct `user_roles` `.maybeSingle()` | **PASS** |
+| `GET /api/admin/products/trending` | ✅ via `requireAdminRoute()` | ✅ `.maybeSingle()` | **PASS** |
+| `GET /api/preorders` | N/A — public route | N/A | **PASS** |
+| `POST /api/preorders/register` | N/A — public route | N/A | **PASS** |
+
+### Input Validation
+
+| Route | Field | Validation | Status |
+|-------|-------|-----------|--------|
+| `POST /api/preorders/register` | `product_id` | `parseInt(n, 10)` + `> 0` guard | ✅ Fixed |
+| `POST /api/preorders/register` | `email` | Regex `^[^\s@]+@[^\s@]+\.[^\s@]+$` | ✅ Pass |
+| `POST /api/preorders/register` | `name`, `size` | Passed via parameterised query — no SQL injection risk | ✅ Pass |
+| `POST /api/preorders/register` | `product_id` (preorder check) | `.eq("is_preorder", true)` + `.maybeSingle()` | ✅ Fixed |
+| `DELETE /api/admin/storage/files` | `bucket` | Validated against `listBuckets()` result | ✅ Fixed |
+| `DELETE /api/admin/storage/files` | `paths[]` | Each entry checked `typeof p === "string"`, max 50 enforced | ✅ Fixed |
+| `PATCH /api/admin/config/homepage` | body | `request.json()` in try/catch; merged via `deepMerge()` into parameterised upsert | ✅ Pass |
+
+### Data Exposure
+
+| Check | Finding | Status |
+|-------|---------|--------|
+| `GET /api/preorders` response | Display-safe fields only: `id, name, price, description, front_image, is_preorder, preorder_status, expected_date, max_preorders, preorder_count` | ✅ Pass |
+| `POST /api/preorders/register` response | Returns `{ success: true }` only — no user data leaked | ✅ Pass |
+| `ProductCard.tsx` | No service role key; no admin-only data fetched from client | ✅ Pass |
+| `PreorderModal.tsx` | Only calls public `/api/preorders/register`; no admin endpoints from client | ✅ Pass |
+| `localStorage` usage | Wishlist stores only integer product IDs; `JSON.parse` wrapped in `try/catch` | ✅ Pass |
+
+### XSS Audit
+- `dangerouslySetInnerHTML`: **No instances found** in any new or modified file.
+- All user-provided strings rendered via React JSX (auto-escaped).
+
+### Secret Exposure Scan
+- No hardcoded Supabase URLs outside env variables.
+- No `service_role` key in client-side files.
+- No JWT tokens (`eyJ...`) hardcoded in any source file.
+- `SUPABASE_SERVICE_ROLE_KEY` confined to `lib/admin.ts`, `lib/admin-route.ts`, and server-only API routes.
+
+### Fixes Applied
+- [x] **Fix 1 — Two-client pattern**: All new admin routes use correct ANON key for `auth.getUser()` and service role for storage/DB ops. No regression.
+- [x] **Fix 2 — `preorder_count` write protection**: Admin product forms set `preorder_count: 0` on create; never accept it from client on update. Increments only via `increment_preorder_count` RPC.
+- [x] **Fix 3 — Storage bucket validation**: `DELETE /api/admin/storage/files` validates `bucket` param against `listBuckets()` before removing. Invalid bucket → 400.
+- [x] **Fix 4 — `is_preorder` validation in register**: `POST /api/preorders/register` queries with `.eq("is_preorder", true)` + `.maybeSingle()` — ensures product exists and is a preorder before accepting registrations.
+- [x] **Bonus — `product_id` integer coercion**: `parseInt(n, 10)` + `> 0` guard applied before any DB use.
+- [x] **Bonus — Path type validation**: DELETE route verifies every entry in `paths[]` is a string.
+
+### Open Items / Accepted Risks
+
+| Item | Risk | Notes |
+|------|------|-------|
+| No length cap on `name`/`size` in register route | Low | Stored via parameterised query. Add `maxLength` client-side as UX improvement |
+| Storage bucket publicly readable | Accepted | Product images are intentionally public |
+| No rate limiting on `POST /api/preorders/register` | Medium | Could enable email enumeration. Recommend IP-based rate limiting in a future pass |
+
+### Sign-off
+- Audited by: Antigravity
+- Date: 2026-03-17
+- `tsc --noEmit` → **PASS** (exit code 0)

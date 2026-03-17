@@ -11,6 +11,7 @@ import {
     AdminInput,
     AdminSearchInput
 } from "@/components/admin/AdminUI"
+import { Toggle } from "@/components/ui/Toggle"
 import { cn } from "@/lib/utils"
 
 interface Coupon {
@@ -369,18 +370,7 @@ export default function CouponsContent() {
                             </div>
 
                             <div className="flex items-center gap-4 pt-2">
-                                <button
-                                    onClick={() => setForm(f => ({ ...f, is_active: !f.is_active }))}
-                                    className={cn(
-                                        "relative w-12 h-6 rounded-full transition-colors border border-[var(--border)]",
-                                        form.is_active ? "bg-[var(--accent)]" : "bg-[var(--bg-elevated)]"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "absolute top-1 w-3.5 h-3.5 bg-white rounded-full transition-all",
-                                        form.is_active ? "left-7" : "left-1"
-                                    )} />
-                                </button>
+                                <Toggle checked={form.is_active} onChange={(checked) => setForm(f => ({ ...f, is_active: checked }))} />
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-2)]">
                                     {form.is_active ? "Active" : "Paused"}
                                 </span>

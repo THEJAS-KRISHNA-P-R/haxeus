@@ -1,132 +1,147 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { useTheme } from "next-themes"
+import { motion, AnimatePresence } from "framer-motion"
+import { X, Copy } from "lucide-react"
+import type { ExitPopupConfig } from "@/types/homepage"
 
-const STORAGE_KEY = "haxeus_exit_popup_shown"
-const DISCOUNT_CODE = "WELCOME10"
+interface ExitPopupProps {
+  config?: ExitPopupConfig
+}
 
-export function ExitIntentPopup() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [email, setEmail] = useState("")
-  const [submitted, setSubmitted] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+const STORAGE_KEY = "haxeus_exit_popup_dismissed"
 
-  const handleClose = useCallback(() => {
-    setIsOpen(false)
-    setError(null)
-    try {
-      sessionStorage.setItem(STORAGE_KEY, "1")
-    } catch {}
-  }, [])
+function shouldShowPopup(cooldownHours: number): boolean {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return true
+    const dismissedAt = parseInt(raw, 10)
+    if (isNaN(dismissedAt)) return true
+    const hoursElapsed = (Date.now() - dismissedAt) / (1000 * 60 * 60)
+    return hoursElapsed >= cooldownHours
+  } catch {
+    return true // if localStorage unavailable, show it
+  }
+}
+
+function recordDismiss() {
+  try {
+    localStorage.setItem(STORAGE_KEY, Date.now().toString())
+  } catch { /* silent fail */ }
+}
+
+export function ExitIntentPopup({ config }: ExitPopupProps) {
+  if (!config) return null
+
+  const [visible, setVisible] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+  const { theme } = useTheme()
 
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem(STORAGE_KEY)) return
-    } catch {}
+    if (!config.enabled || !shouldShowPopup(config.cooldown_hours)) {
+      return
+    }
 
     const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && !isOpen) {
-        setIsOpen(true)
+      if (e.clientY <= 0 && !visible) {
+        setTimeout(() => {
+          // Final check before showing
+          if (shouldShowPopup(config.cooldown_hours)) {
+            setVisible(true)
+          }
+        }, config.trigger_delay_ms || 0)
       }
     }
 
-    document.addEventListener("mouseout", handleMouseLeave)
-    return () => document.removeEventListener("mouseout", handleMouseLeave)
-  }, [isOpen])
+    document.addEventListener("mouseleave", handleMouseLeave)
+    return () => document.removeEventListener("mouseleave", handleMouseLeave)
+  }, [config.enabled, config.cooldown_hours, config.trigger_delay_ms, visible])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email.trim()) return
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        if (data.error === "already_subscribed") {
-          setSubmitted(true)
-        } else if (res.status === 429) {
-          setError("Too many attempts. Please try again later.")
-        } else {
-          setError(data.error || "Something went wrong. Please try again.")
-        }
-        return
-      }
-      setSubmitted(true)
-    } catch {
-      setError("Could not subscribe. Please try again.")
-    } finally {
-      setLoading(false)
-    }
+  const handleDismiss = () => {
+    setVisible(false)
+    recordDismiss()
   }
 
-  if (!isOpen) return null
+  const handleCopy = () => {
+    navigator.clipboard?.writeText(config.coupon_code)
+    setIsCopied(true)
+    setTimeout(() => setIsCopied(false), 1500)
+  }
+
+  const shadowStrong = { textShadow: "0 2px 16px rgba(0,0,0,0.75), 0 1px 6px rgba(0,0,0,0.55)" }
+  const accentColor = config.accent_color || "#e93a3a"
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-card border border-theme rounded-2xl shadow-2xl p-6 sm:p-8 animate-in zoom-in-95 duration-200">
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 p-1 rounded-full text-theme-3 hover:text-theme hover:bg-theme/10 transition-colors"
-          aria-label="Close"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <AnimatePresence>
+      {visible && (
+        <>
+          <div
+            className="fixed inset-0 z-[100]"
+            style={{ backgroundColor: `rgba(0,0,0,${config.overlay_opacity || 0.75})` }}
+            onClick={handleDismiss}
+          />
+          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className={`relative ${config.image_url ? 'max-w-2xl' : 'max-w-md'} w-full ${theme === 'dark' ? 'bg-[#0f0f0f]' : 'bg-[#f5f4f0]'} rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl`}
+            >
+              <button onClick={handleDismiss} className="absolute top-4 right-4 text-white/40 hover:text-white/80 transition-colors z-10">
+                <X size={20} />
+              </button>
 
-        {submitted ? (
-          <div className="text-center py-4">
-            <p className="text-lg font-semibold text-theme mb-2">Check your email!</p>
-            <p className="text-sm text-theme-2 mb-4">
-              Use code <strong className="text-[var(--accent)]">{DISCOUNT_CODE}</strong> at checkout for 10% off your first order.
-            </p>
-            <Button onClick={handleClose} className="bg-[var(--accent)] hover:opacity-90">
-              Start Shopping
-            </Button>
+              <div className={config.image_url ? 'grid md:grid-cols-2' : ''}>
+                {config.image_url && (
+                  <div className="relative hidden md:block">
+                    <Image src={config.image_url} alt={config.image_alt} layout="fill" objectFit="cover" />
+                  </div>
+                )}
+
+                <div className={`p-8 flex flex-col ${!config.image_url ? 'items-center text-center' : 'justify-center'}`}>
+                  <h2 className="text-2xl font-bold text-white mb-2" style={shadowStrong}>{config.headline}</h2>
+                  <p className="text-white/70 mb-4" style={shadowStrong}>{config.subtext}</p>
+                  
+                  <div className="my-4">
+                    <p className="text-sm text-white/50 mb-2">{config.offer_label}</p>
+                    <div
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono font-bold text-lg tracking-widest cursor-pointer select-all transition-all"
+                      style={{ backgroundColor: `${accentColor}20`, border: `1.5px solid ${accentColor}`, color: accentColor }}
+                      onClick={handleCopy}
+                      title="Click to copy"
+                    >
+                      {isCopied ? "Copied!" : config.coupon_code}
+                      {!isCopied && <Copy size={14} className="opacity-60" />}
+                    </div>
+                  </div>
+
+                  <Link href={config.cta_href} onClick={handleDismiss} className={`w-full mt-4 ${!config.image_url ? 'max-w-xs' : ''}`}>
+                    <button
+                      className="w-full font-bold rounded-full py-3.5 text-white tracking-wide transition-opacity hover:opacity-90"
+                      style={{ backgroundColor: accentColor }}
+                    >
+                      {config.cta_text}
+                    </button>
+                  </Link>
+
+                  <p className="text-xs text-white/50 mt-4">{config.fine_print}</p>
+
+                  <button
+                    onClick={handleDismiss}
+                    className="text-xs text-white/35 hover:text-white/60 transition-colors underline-offset-2 hover:underline mt-6"
+                  >
+                    {config.dismiss_text}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        ) : (
-          <>
-            <div className="text-center mb-6">
-              <p className="text-2xl font-bold text-theme mb-1">Wait! Get 10% off</p>
-              <p className="text-sm text-theme-2">Subscribe and we&apos;ll send you a discount code for your first order.</p>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value)
-                  setError(null)
-                }}
-                required
-                disabled={loading}
-                className="h-11 bg-card border-theme text-theme placeholder:text-theme-3 focus-visible:ring-[var(--accent)]/40 focus-visible:border-[var(--accent)]/40 disabled:opacity-50"
-              />
-              {error && (
-                <p className="text-sm text-[var(--accent)]">{error}</p>
-              )}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[var(--accent)] hover:opacity-90 h-11 disabled:opacity-50"
-              >
-                {loading ? "Subscribing…" : "Get 10% Off"}
-              </Button>
-            </form>
-            <p className="text-xs text-theme-3 mt-4 text-center">
-              Unsubscribe anytime. We respect your privacy.
-            </p>
-          </>
-        )}
-      </div>
-    </div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }
