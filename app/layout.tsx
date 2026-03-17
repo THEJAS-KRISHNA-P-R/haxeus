@@ -9,7 +9,6 @@ import { ThemeProvider } from "@/components/ThemeProvider"
 import { PWAProvider } from "@/components/PWAProvider"
 import { LightPillarBackground } from "@/components/LightPillarBackground"
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd"
-import { ExitIntentPopup } from "@/components/ExitIntentPopup"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata, Viewport } from "next"
@@ -131,7 +130,6 @@ export default function RootLayout({
             </main>
 
             <ConditionalFooter />
-            <ExitIntentPopup />
             <Toaster />
             <Analytics />
             <SpeedInsights />

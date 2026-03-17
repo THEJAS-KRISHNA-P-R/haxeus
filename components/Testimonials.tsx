@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 const testimonials = [
-  { name: "Arjun Sharma",  role: "Fashion Enthusiast", text: "The quality is absolutely incredible. Most comfortable T-shirts I\'ve ever owned.", rating: 5, initial: "A" },
+  { name: "Arjun Sharma",  role: "Fashion Enthusiast", text: "The quality is absolutely incredible. Most comfortable T-shirts I've ever owned.", rating: 5, initial: "A" },
   { name: "Priya Patel",   role: "Creative Director",  text: "They maintain their shape and softness even after countless washes. Worth every penny.", rating: 5, initial: "P" },
   { name: "Rohit Kumar",   role: "Software Engineer",  text: "Professional enough for work, comfortable enough for weekends. Remarkable detail.", rating: 5, initial: "R" },
 ];
@@ -21,7 +21,7 @@ export function TestimonialsSection() {
             {[...testimonials, ...testimonials].map((t, i) => (
               <div key={i} className={cn("flex-shrink-0 w-72 sm:w-80 p-5 sm:p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--border-hover)] transition-colors relative overflow-hidden group")}>
                 <div className="absolute inset-0 bg-[radial-gradient(300px_at_50%_50%,rgba(128,128,128,0.05),transparent)] opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="flex gap-1 mb-4">{Array.from({ length: t.rating }).map((_, j) => <span key={j} className="text-hx-accent text-sm">★</span>)}</div>
+                <div className="flex gap-1 mb-4">{Array.from({ length: t.rating }).map((_, j) => <span key={j} className="text-hx-accent text-sm">*</span>)}</div>
                 <p className="text-[var(--text-2)] text-sm leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center text-xs font-bold text-[var(--text)] border border-[var(--border)]">{t.initial}</div>

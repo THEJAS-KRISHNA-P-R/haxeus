@@ -37,6 +37,13 @@ export interface Product {
   is_active?: boolean
   created_at?: string
   updated_at?: string
+  
+  // Preorder fields
+  is_preorder?: boolean
+  preorder_status?: "active" | "sold_out" | "stopped" | null
+  expected_date?: string | null
+  max_preorders?: number | null
+  preorder_count?: number
 }
 
 export interface CartItem {
@@ -236,4 +243,15 @@ export interface AbandonedCart {
   recovered_at?: string
   created_at?: string
   updated_at?: string
+}
+
+export interface PreorderRegistration {
+  id: string
+  product_id: number
+  user_id: string | null
+  email: string
+  name: string | null
+  size: string | null
+  notified: boolean
+  created_at: string
 }

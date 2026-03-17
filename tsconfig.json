@@ -40,6 +40,7 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
+    "_disabled",
     "node_modules",
     ".next",
     "out",

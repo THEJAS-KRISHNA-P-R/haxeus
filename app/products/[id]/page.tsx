@@ -46,7 +46,11 @@ export default function ProductDetailPage() {
 
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const isDark = mounted ? theme === "dark" : true
+  const resolvedTheme = theme as "light" | "dark" | "system"
+  const isDark = !mounted ? true : (
+    resolvedTheme === "dark" ||
+    (resolvedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  )
 
   const [product, setProduct] = useState<Product | null>(null)
   const [productImages, setProductImages] = useState<ProductImage[]>([])
@@ -373,7 +377,7 @@ export default function ProductDetailPage() {
 
             {/* Image counter */}
             {productImages.length > 1 && (
-              <p className="text-center text-sm text-white/40">
+              <p className={`text-center text-sm ${isDark ? "text-white/30" : "text-black/35"}`}>
                 {selectedImageIndex + 1} of {productImages.length} images
               </p>
             )}
@@ -430,7 +434,9 @@ export default function ProductDetailPage() {
                               ? isDark
                                 ? 'bg-transparent border-white/20 text-white hover:border-white/60'
                                 : 'bg-transparent border-black/20 text-black hover:border-black/60'
-                              : 'opacity-30 cursor-not-allowed border-white/10 text-white/30'
+                              : isDark
+                                ? 'opacity-30 cursor-not-allowed border-white/10 text-white/30'
+                                : 'opacity-30 cursor-not-allowed border-black/10 text-black/35'
                           }
                         `}
                       >

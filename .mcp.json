@@ -1,5 +1,8 @@
 {
   "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=hexzhuaifunjowwqkxcy&read_only=true"
+    },
     "playwright": {
       "command": "npx",
       "args": [

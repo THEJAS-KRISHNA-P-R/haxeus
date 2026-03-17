@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useState, useRef, useCallback } from "react"
 import {
   LayoutDashboard, ShoppingBag, Package, Users,
-  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X, Mail
+  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X, Mail, ShoppingCart, HardDrive
 } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { supabase } from "@/lib/supabase"
@@ -13,12 +13,14 @@ const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Overview" },
   { href: "/admin/orders", icon: ShoppingBag, label: "Orders" },
   { href: "/admin/products", icon: Package, label: "Products" },
+  { href: "/admin/storage", icon: HardDrive, label: "Storage" },
+  { href: "/admin/preorders", icon: ShoppingCart, label: "Pre-Orders" },
   { href: "/admin/users", icon: Users, label: "Customers" },
   { href: "/admin/coupons", icon: Tag, label: "Coupons" },
+  { href: "/admin/settings", icon: Settings, label: "Settings" },
   { href: "/admin/reviews", icon: Star, label: "Reviews" },
   { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/admin/communications", icon: Mail, label: "Communications" },
-  { href: "/admin/settings", icon: Settings, label: "Settings" },
 ]
 
 // ----------------------------------

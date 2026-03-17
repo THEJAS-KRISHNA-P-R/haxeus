@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 import { useState, useEffect, useRef } from "react"
+import { useTheme } from "next-themes"
 import { ShimmerButton } from "@/components/ui/ShimmerButton"
 import { ShinyButton } from "@/components/ui/shiny-button"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,11 @@ import Shuffle from "@/components/Shuffle"
 import SplitText from "@/components/ui/SplitText"
 import ShinyText from "@/components/ui/ShinyText"
 import { supabase } from "@/lib/supabase"
+import { useHomepageConfig } from "@/hooks/useHomepageConfig"
+import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
+import { ProductCard } from "@/components/ui/ProductCard"
+import { PreorderModal } from "@/components/PreorderModal"
+import type { Product } from "@/lib/supabase"
 
 
 const DynamicTestimonials = dynamic(() => import("../components/Testimonials"), {
@@ -35,7 +41,8 @@ interface FeaturedProduct {
   id: number
   name: string
   price: number
-  image: string
+  image?: string
+  front_image?: string
 }
 
 function isSupabaseStorageUrl(url?: string) {
@@ -43,7 +50,11 @@ function isSupabaseStorageUrl(url?: string) {
 }
 
 export default function HomePage() {
-  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([])
+  const { theme } = useTheme()
+  const { config } = useHomepageConfig()
+  const [mounted, setMounted] = useState(false)
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [preorderItems, setPreorderItems] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -52,6 +63,11 @@ export default function HomePage() {
   const [heroLine3Done, setHeroLine3Done] = useState(false)
   const [newsletterEmail, setNewsletterEmail] = useState("")
   const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "loading" | "success" | "duplicate" | "error">("idle")
+  const [preorderModalItem, setPreorderModalItem] = useState<Product | null>(null)
+  const isDark = !mounted ? true : (
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  )
 
   const handleNewsletterSubmit = async () => {
     if (!newsletterEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail)) return
@@ -83,6 +99,10 @@ export default function HomePage() {
   }
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
     const check = () => setIsMobile(
       window.innerWidth < 768 ||
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -93,11 +113,43 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
+    const controller = new AbortController()
+    let isActive = true
+
+    async function fetchPreorderItems() {
+      try {
+        const res = await fetch("/api/preorders", { signal: controller.signal })
+        if (!res.ok) return
+        const data = await res.json()
+        if (isActive) {
+          setPreorderItems(Array.isArray(data) ? data : [])
+        }
+      } catch (err: any) {
+        if (err.name === 'AbortError') return
+        if (isActive) {
+          setPreorderItems([])
+        }
+      }
+    }
+
+    fetchPreorderItems()
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
     let isActive = true
 
     async function fetchFeaturedProducts() {
       try {
-        const { data, error } = await supabase
+        const mode = config.featured_products.selection_mode
+        const count = config.featured_products.count ?? 3
+
+        let query = supabase
           .from("products")
           .select(`
             id,
@@ -110,8 +162,20 @@ export default function HomePage() {
               display_order
             )
           `)
-          .order("id")
-          .limit(3)
+        
+        // Supabase client v2 might not support .abortSignal(signal) in all environments or types
+        // so we rely on isActive for now if the client doesn't support it, 
+        // but we keep the AbortController for consistency if we find a way to plug it in.
+
+        if (mode === "manual" && config.featured_products.manual_product_ids?.length > 0) {
+          query = query.in("id", config.featured_products.manual_product_ids).limit(count)
+        } else if (mode === "newest") {
+          query = query.order("id", { ascending: false }).limit(count)
+        } else {
+          query = query.order("id").limit(count)
+        }
+
+        const { data, error } = await query
 
         if (error) throw error
 
@@ -124,15 +188,14 @@ export default function HomePage() {
             const galleryImage = primaryImg?.image_url || firstImg?.image_url
 
             return {
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image: galleryImage || product.front_image || "/placeholder.svg"
+              ...product,
+              front_image: galleryImage || product.front_image || "/placeholder.svg"
             }
           })
           setFeaturedProducts(mapped)
         }
       } catch (error) {
+        if ((error as { name?: string })?.name === "AbortError") return
         if ((error as { name?: string })?.name !== "AbortError") {
           console.error("Error fetching featured products:", error)
         }
@@ -147,20 +210,36 @@ export default function HomePage() {
 
     return () => {
       isActive = false
+      controller.abort()
     }
-  }, [])
+  }, [config.featured_products])
 
   const accentColors = ["#e7bf04", "#c03c9d", "#07e4e1"]
+  const isSectionVisible = (sectionKey: "announcement_bar" | "hero" | "newsletter" | "featured_products" | "preorder" | "testimonials" | "about", visible = true) => {
+    return visible !== false && !config.hidden_sections?.includes(sectionKey)
+  }
 
   return (
     <>
-
-      {/* ═══ PAGE CONTENT — window scrolls; fixed bg stays in place ═══ */}
+      {/* PAGE CONTENT - window scrolls; fixed bg stays in place */}
       <div ref={containerRef} style={{ position: 'relative', zIndex: 1 }}>
 
-        {/* ═══════════════════ SECTION 1: HERO ═══════════════════ */}
+        {isSectionVisible("announcement_bar", config.announcement_bar?.visible) && config.announcement_bar?.text && (
+          <div
+            className="w-full text-center py-2.5 px-4 text-sm font-semibold tracking-wide z-20"
+            style={{
+              backgroundColor: config.announcement_bar.bg_color ?? "#e93a3a",
+              color: config.announcement_bar.text_color ?? "#ffffff"
+            }}
+          >
+            {config.announcement_bar.text}
+          </div>
+        )}
+
+        {/* SECTION 1: HERO */}
+        {isSectionVisible("hero", config.hero.visible) && (
         <section className="relative min-h-screen flex items-center z-10">
-          {/* No LightPillar here — it's in layout.tsx now, fixed behind everything */}
+          {/* No LightPillar here - it's in layout.tsx now, fixed behind everything */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
               {/* Hero Text */}
@@ -175,15 +254,15 @@ export default function HomePage() {
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight">
                       {/* Line 1 */}
                       <span className="relative block drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]">
-                        {/* invisible height placeholder — no visible duplicate */}
-                        <span className="block text-white pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">For Those Who</span>
+                        {/* invisible height placeholder - no visible duplicate */}
+                        <span className="block text-white pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">{config.hero.line1 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line1}</span>
                         <motion.span
                           className="absolute inset-0 block"
                           animate={{ opacity: heroLine1Done ? 0 : 1 }}
                           transition={{ duration: 0.3 }}
                         >
                           <SplitText
-                            text="For Those Who"
+                            text={config.hero.line1 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line1}
                             tag="span"
                             className="block text-white"
                             splitType="chars"
@@ -203,7 +282,7 @@ export default function HomePage() {
                           transition={{ duration: 0.3 }}
                         >
                           <ShinyText
-                            text="For Those Who"
+                            text={config.hero.line1 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line1}
                             className="block"
                             display="block"
                             baseVisible={false}
@@ -219,15 +298,15 @@ export default function HomePage() {
 
                       {/* Line 2 */}
                       <span className="relative block drop-shadow-[0_4px_18px_rgba(233,58,58,0.4)]">
-                        {/* invisible height placeholder — no visible duplicate */}
-                        <span className="block text-[var(--accent)] pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">Won't Change</span>
+                        {/* invisible height placeholder - no visible duplicate */}
+                        <span className="block text-[var(--accent)] pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">{config.hero.line2 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line2}</span>
                         <motion.span
                           className="absolute inset-0 block"
                           animate={{ opacity: heroLine2Done ? 0 : 1 }}
                           transition={{ duration: 0.3 }}
                         >
                           <SplitText
-                            text="Won't Change"
+                            text={config.hero.line2 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line2}
                             tag="span"
                             className="block text-[var(--accent)]"
                             splitType="chars"
@@ -247,7 +326,7 @@ export default function HomePage() {
                           transition={{ duration: 0.3 }}
                         >
                           <ShinyText
-                            text="Won't Change"
+                            text={config.hero.line2 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line2}
                             className="block"
                             display="block"
                             baseVisible={false}
@@ -263,15 +342,15 @@ export default function HomePage() {
 
                       {/* Line 3 */}
                       <span className="relative block drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]">
-                        {/* invisible height placeholder — no visible duplicate */}
-                        <span className="block text-white/80 pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">To Fit In</span>
+                        {/* invisible height placeholder - no visible duplicate */}
+                        <span className="block text-white/80 pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">{config.hero.line3 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line3}</span>
                         <motion.span
                           className="absolute inset-0 block"
                           animate={{ opacity: heroLine3Done ? 0 : 1 }}
                           transition={{ duration: 0.3 }}
                         >
                           <SplitText
-                            text="To Fit In"
+                            text={config.hero.line3 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line3}
                             tag="span"
                             className="block text-white/80"
                             splitType="chars"
@@ -291,7 +370,7 @@ export default function HomePage() {
                           transition={{ duration: 0.3 }}
                         >
                           <ShinyText
-                            text="To Fit In"
+                            text={config.hero.line3 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line3}
                             className="block"
                             display="block"
                             baseVisible={false}
@@ -312,32 +391,31 @@ export default function HomePage() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
                   >
-                    <p className="text-lg text-white/80 mt-4 leading-relaxed max-w-lg">
-                      Bold designs for bold individuals. Express yourself unapologetically with premium streetwear
-                      that refuses to blend in.
+                    <p className="text-lg mt-4 leading-relaxed max-w-lg text-white/80">
+                      {config.hero.subtext ?? DEFAULT_HOMEPAGE_CONFIG.hero.subtext}
                     </p>
                   </motion.div>
                 </div>
 
                 <div className="flex gap-4 flex-wrap mt-2">
-                  <Link href="/products">
+                  <Link href={config.hero.cta_primary?.href ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_primary.href}>
                     <ShinyButton
                       highlight="#ff0000ff"
                       highlightSubtle="#ff009dff"
-                      className="h-[52px] px-7"  // ← add this
+                      className="h-[52px] px-7"
                     >
-                      Shop Collection
+                      {config.hero.cta_primary?.text ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_primary.text}
                     </ShinyButton>
                   </Link>
-                  <Link href="/about">
+                  <Link href={config.hero.cta_secondary?.href ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_secondary.href}>
                     <ShimmerButton
                       background="rgba(0, 0, 0, 0.92)"
                       borderRadius="100px"
                       shimmerColor="#dededeff"
                       shimmerDuration="2.5s"
-                      className="h-[52px] px-7 border-white/[0.08] text-white/90 text-sm font-semibold tracking-widest uppercase"  // ← h-[52px] matches
+                      className="h-[52px] px-7 border-white/[0.08] text-white/90 text-sm font-semibold tracking-widest uppercase"
                     >
-                      Our Story
+                      {config.hero.cta_secondary?.text ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_secondary.text}
                     </ShimmerButton>
                   </Link>
                 </div>
@@ -349,11 +427,7 @@ export default function HomePage() {
                   animate="visible"
                   className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 pt-6 sm:pt-8"
                 >
-                  {[
-                    { value: "10+", label: "Happy Customers", color: "#e7bf04" },
-                    { value: "99%", label: "Satisfaction Rate", color: "#c03c9d" },
-                    { value: "24/7", label: "Support", color: "#07e4e1" }
-                  ].map((stat, index) => (
+                  {[...(config.hero.stats ?? DEFAULT_HOMEPAGE_CONFIG.hero.stats)].map((stat, index) => (
                     <motion.div
                       key={index}
                       variants={scaleIn}
@@ -361,7 +435,7 @@ export default function HomePage() {
                       className="cursor-default"
                     >
                       <div className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                      <div className="text-xs sm:text-sm text-white/70 mt-1">{stat.label}</div>
+                      <div className="text-xs sm:text-sm mt-1 text-white/70">{stat.label}</div>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -380,7 +454,7 @@ export default function HomePage() {
                   transition={{ duration: 0.4 }}
                 >
                   <Image
-                    src="/images/save-flower-front.jpg"
+                    src={config.hero.hero_product_image_url ?? DEFAULT_HOMEPAGE_CONFIG.hero.hero_product_image_url}
                     alt="Featured T-shirt"
                     width={400}
                     height={500}
@@ -400,8 +474,10 @@ export default function HomePage() {
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     className="absolute top-4 right-4 bg-black/80 backdrop-blur-md rounded-2xl px-4 py-3"
                   >
-                    <div className="text-xs text-[#e7bf04] font-medium">Artistic Designs</div>
-                    <div className="text-sm font-bold text-white">Premium Quality</div>
+                    <div className="text-xs font-medium" style={{ color: config.hero.badge_top.color ?? "#e7bf04" }}>
+                      {config.hero.badge_top.label ?? DEFAULT_HOMEPAGE_CONFIG.hero.badge_top.label}
+                    </div>
+                    <div className="text-sm font-bold text-white">{config.hero.badge_top?.value ?? DEFAULT_HOMEPAGE_CONFIG.hero.badge_top.value}</div>
                   </motion.div>
 
                   <motion.div
@@ -411,16 +487,56 @@ export default function HomePage() {
                     whileHover={{ scale: 1.1, rotate: -5 }}
                     className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-md rounded-2xl px-4 py-3"
                   >
-                    <div className="text-xs text-[#07e4e1] font-medium">Eco-Conscious</div>
-                    <div className="text-sm font-bold text-white">Sustainable</div>
+                    <div className="text-xs font-medium" style={{ color: config.hero.badge_bottom.color ?? "#07e4e1" }}>
+                      {config.hero.badge_bottom.label ?? DEFAULT_HOMEPAGE_CONFIG.hero.badge_bottom.label}
+                    </div>
+                    <div className="text-sm font-bold text-white">{config.hero.badge_bottom?.value ?? DEFAULT_HOMEPAGE_CONFIG.hero.badge_bottom.value}</div>
                   </motion.div>
                 </motion.div>
               </motion.div>
             </div>
           </div>
         </section>
+        )}
 
-        {/* ═══════════════════ SECTION 2: NEWSLETTER ═══════════════════ */}
+        {/* SECTION 1.5: PREORDER */}
+        {preorderItems.length > 0 && isSectionVisible("preorder", config.preorder.visible) && (
+          <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 text-center">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={scrollReveal}
+                className="mb-16"
+              >
+                <div className="text-xs tracking-[0.25em] font-medium uppercase text-[var(--accent)] mb-2">COMING SOON</div>
+                <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>
+                  {config.preorder.heading}
+                </h2>
+                <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-white/80">
+                  {config.preorder.subtext}
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                {preorderItems.map((product, index) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    index={index}
+                    accentColor={accentColors[index % 3]}
+                    variant="preorder"
+                    onPreorderClick={(p) => setPreorderModalItem(p)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* SECTION 2: NEWSLETTER */}
+        {isSectionVisible("newsletter", config.newsletter.visible) && (
         <section className="relative py-20 md:py-32 flex items-center z-10 border-t border-theme overflow-x-hidden">
 
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 w-full">
@@ -430,8 +546,8 @@ export default function HomePage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed text-white">
-                Join the movement. Your perfect T-shirt is just a click away.
+              <h2 className={`text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed ${isDark ? "text-white" : "text-black"}`}>
+                {config.newsletter.heading ?? DEFAULT_HOMEPAGE_CONFIG.newsletter.heading}
               </h2>
             </motion.div>
 
@@ -445,7 +561,7 @@ export default function HomePage() {
               <Link href="/products">
                 <motion.div whileHover={hoverScale} whileTap={tapScale}>
                   <Button size="lg" className="bg-theme text-theme border border-theme hover:bg-card-2 px-10 py-6 rounded-full text-lg font-semibold shadow-lg">
-                    Shop Now
+                    {config.newsletter.cta_text ?? DEFAULT_HOMEPAGE_CONFIG.newsletter.cta_text}
                   </Button>
                 </motion.div>
               </Link>
@@ -464,7 +580,7 @@ export default function HomePage() {
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleNewsletterSubmit()}
-                className="flex-1 px-6 py-4 bg-transparent text-theme placeholder:text-theme-3 focus:outline-none text-lg min-w-0"
+                className={`flex-1 px-6 py-4 bg-transparent focus:outline-none text-lg min-w-0 ${isDark ? "text-white placeholder:text-white/30" : "text-black placeholder:text-black/30"}`}
               />
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
@@ -477,7 +593,7 @@ export default function HomePage() {
               </motion.div>
             </motion.div>
             {newsletterStatus === "success" && (
-              <p className="text-sm mt-3 text-emerald-400 font-medium">🎉 You&apos;re in! Welcome to the movement.</p>
+              <p className="text-sm mt-3 text-emerald-400 font-medium">You&apos;re in! Welcome to the movement.</p>
             )}
             {newsletterStatus === "duplicate" && (
               <p className="text-sm mt-3 text-[#e7bf04] font-medium">Already subscribed! You&apos;re part of the crew.</p>
@@ -492,12 +608,14 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="text-sm mt-4 text-white/70"
             >
-              Get exclusive offers and updates. Unsubscribe anytime.
+              {config.newsletter.subtext ?? DEFAULT_HOMEPAGE_CONFIG.newsletter.subtext}
             </motion.p>
           </div>
         </section>
+        )}
 
-        {/* ═══════════════════ SECTION 3: FEATURED PRODUCTS ═══════════════════ */}
+        {/* SECTION 3: FEATURED PRODUCTS */}
+        {isSectionVisible("featured_products", config.featured_products.visible) && (
         <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             <motion.div
@@ -507,11 +625,11 @@ export default function HomePage() {
               variants={scrollReveal}
               className="text-center mb-16"
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                Featured <span style={{ color: "var(--accent)" }}>Collection</span>
+              <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>
+                {config.featured_products.heading ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading} <span style={{ color: "var(--accent)" }}>{config.featured_products.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading_accent}</span>
               </h2>
-              <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-                Discover our most popular premium T-shirts, carefully crafted for ultimate comfort and style.
+              <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-white/80">
+                {config.featured_products.subtext ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.subtext}
               </p>
             </motion.div>
 
@@ -541,7 +659,7 @@ export default function HomePage() {
                 >
                 </motion.div>
                 <h3 className="text-3xl font-bold text-theme mb-4">Coming Soon!</h3>
-                <p className="text-lg text-theme-2 max-w-md mx-auto mb-8">
+                <p className="text-lg text-white/70 max-w-md mx-auto mb-8">
                   We&apos;re working on bringing you amazing products. Stay tuned!
                 </p>
                 <Link href="/contact">
@@ -553,87 +671,33 @@ export default function HomePage() {
                 </Link>
               </motion.div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 text-left">
                 {featuredProducts.map((product, index) => (
-                  <motion.div
+                  <ProductCard
                     key={product.id}
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 0.6, delay: index * 0.15 }}
-                  >
-                    <motion.div whileHover={cardHover} whileTap={{ scale: 0.98 }}>
-                      <Card className="overflow-hidden bg-card border-0 rounded-2xl group transition-all">
-                        <Link href={`/products/${product.id}`}>
-                          <div className="aspect-square relative bg-black overflow-hidden">
-                            <motion.div
-                              className="relative h-full w-full"
-                              whileHover={{ scale: 1.1 }}
-                              transition={{ duration: 0.6 }}
-                            >
-                              <Image
-                                src={product.image || "/placeholder.svg"}
-                                alt={product.name}
-                                fill
-                                sizes="(max-width: 768px) 100vw, 33vw"
-                                className="object-cover"
-                                loading={index === 0 ? "eager" : "lazy"}
-                                unoptimized={isSupabaseStorageUrl(product.image)}
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement
-                                  target.src = "/placeholder.svg"
-                                }}
-                              />
-                            </motion.div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            {/* Accent border on hover */}
-                            <div
-                              className="absolute bottom-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                              style={{ background: accentColors[index % 3] }}
-                            />
-                          </div>
-                        </Link>
-                        <CardContent className="p-6">
-                          <Shuffle
-                            text={product.name}
-                            tag="h3"
-                            className="text-xl font-semibold mb-2 text-theme"
-                            shuffleDirection="right"
-                            duration={0.3}
-                            animationMode="evenodd"
-                            shuffleTimes={1}
-                            ease="power3.out"
-                            stagger={0.02}
-                            threshold={0}
-                            triggerOnce={false}
-                            triggerOnHover={true}
-                            respectReducedMotion={true}
-                            textAlign="left"
-                          />
-                          <p className="text-2xl font-bold text-theme mb-4">₹{product.price.toLocaleString("en-IN")}</p>
-                          <Link href={`/products/${product.id}`}>
-                            <motion.div whileHover={hoverScale} whileTap={tapScale}>
-                              <Button className="w-full bg-[var(--accent)] text-white hover:opacity-90 py-6 text-lg font-semibold rounded-full shadow-md shadow-[var(--accent)]/10 transition-all duration-300">
-                                View Details
-                              </Button>
-                            </motion.div>
-                          </Link>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  </motion.div>
+                    product={product}
+                    index={index}
+                    accentColor={accentColors[index % 3]}
+                    variant="default"
+                  />
                 ))}
               </div>
             )}
           </div>
         </section>
+        )}
 
-        {/* ═══════════════════ SECTION 4: TESTIMONIALS ═══════════════════ */}
+
+
+        {/* SECTION 4: TESTIMONIALS */}
+        {isSectionVisible("testimonials") && (
         <section className="relative z-10 border-t border-theme">
           <DynamicTestimonials />
         </section>
+        )}
 
-        {/* ═══════════════════ SECTION 5: ABOUT ═══════════════════ */}
+        {/* SECTION 5: ABOUT */}
+        {isSectionVisible("about", config.about.visible) && (
         <section className="relative z-10 border-t border-theme">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 md:py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -650,7 +714,7 @@ export default function HomePage() {
                   className="relative h-full"
                 >
                   <Image
-                    src="/images/statue-front.jpg"
+                    src={config.about.image_url ?? DEFAULT_HOMEPAGE_CONFIG.about.image_url}
                     alt="HAXEUS Quality"
                     fill
                     sizes="(max-width: 640px) 100vw, 50vw"
@@ -673,31 +737,23 @@ export default function HomePage() {
                 variants={staggerContainer}
               >
                 <motion.div variants={fadeInRight}>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 break-words">
-                    Crafting <span style={{ color: "var(--accent)" }}>Premium</span> Since 2025
+                  <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 break-words ${isDark ? "text-white" : "text-black"}`}>
+                    {config.about.heading ?? DEFAULT_HOMEPAGE_CONFIG.about.heading} <span style={{ color: "var(--accent)" }}>{config.about.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_accent}</span> {config.about.heading_suffix ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_suffix}
                   </h2>
                 </motion.div>
                 <motion.div variants={fadeInRight}>
-                  <p className="text-white/80 mb-6 leading-relaxed text-lg">
-                    At HAXEUS, we believe that comfort shouldn&apos;t compromise style. Our journey began with a simple mission:
-                    to create the perfect T-shirt that combines premium materials, exceptional craftsmanship, and timeless
-                    design.
+                  <p className="mb-6 leading-relaxed text-lg text-white/80">
+                    {config.about.body1 ?? DEFAULT_HOMEPAGE_CONFIG.about.body1}
                   </p>
                 </motion.div>
                 <motion.div variants={fadeInRight}>
-                  <p className="text-white/80 mb-8 leading-relaxed text-lg">
-                    Every piece in our collection is meticulously crafted using the finest cotton blends, ensuring
-                    durability, breathability, and that premium feel against your skin.
+                  <p className="mb-8 leading-relaxed text-lg text-white/80">
+                    {config.about.body2 ?? DEFAULT_HOMEPAGE_CONFIG.about.body2}
                   </p>
                 </motion.div>
 
                 <motion.div variants={fadeInRight} className="grid grid-cols-2 gap-6 mb-8">
-                  {[
-                    { label: "Premium Materials", color: "#e7bf04" },
-                    { label: "Ethical Production", color: "#c03c9d" },
-                    { label: "Sustainable Practices", color: "#07e4e1" },
-                    { label: "Perfect Fit", color: "#e93a3a" }
-                  ].map((feature, index) => (
+                  {[...(config.about.features ?? DEFAULT_HOMEPAGE_CONFIG.about.features)].map((feature, index) => (
                     <motion.div
                       key={index}
                       className="flex items-center"
@@ -716,10 +772,10 @@ export default function HomePage() {
                 </motion.div>
 
                 <motion.div variants={fadeInRight}>
-                  <Link href="/about">
+                  <Link href={config.about.cta_href ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_href}>
                     <motion.div whileHover={hoverScale} whileTap={tapScale}>
                       <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[var(--accent)]/20 transition-all duration-300">
-                        Learn More About Us
+                        {config.about.cta_text ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_text}
                       </Button>
                     </motion.div>
                   </Link>
@@ -728,7 +784,16 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        )}
       </div>
+
+      {preorderModalItem && (
+        <PreorderModal
+          item={preorderModalItem}
+          isOpen={!!preorderModalItem}
+          onClose={() => setPreorderModalItem(null)}
+        />
+      )}
     </>
   )
 }
