@@ -269,14 +269,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         // Also fetch unread message count
         const fetchMessages = async () => {
-          const { count } = await supabase
-            .from('contact_messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'unread')
-          if (count !== null) setUnreadMsgCount(count)
+          try {
+            const { count, error } = await supabase
+              .from('contact_messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('status', 'unread')
+            
+            if (!error && count !== null) {
+              setUnreadMsgCount(count)
+            }
+          } catch (err) {
+            console.warn("Could not fetch unread messages (table might be missing)")
+          }
         }
         fetchMessages()
-      } catch {
+      } catch (err) {
         router.push('/')
       }
     }

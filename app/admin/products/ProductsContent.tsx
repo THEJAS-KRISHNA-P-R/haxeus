@@ -171,6 +171,7 @@ export default function ProductsManagementContent() {
                                                         src={product.front_image || "/placeholder.svg"}
                                                         alt={product.name}
                                                         fill
+                                                        sizes="48px"
                                                         className="object-cover transition-transform group-hover:scale-110"
                                                     />
                                                 </div>

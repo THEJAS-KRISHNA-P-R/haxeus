@@ -27,10 +27,6 @@ export default function NewAddressPage() {
     pincode: "",
     is_default: false,
   })
-  const isDark = !mounted ? true : (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
 
   useEffect(() => setMounted(true), [])
 
@@ -75,7 +71,7 @@ export default function NewAddressPage() {
   }
 
   return (
-    <div className={`min-h-screen pt-20 pb-12 ${isDark ? 'bg-[#0a0a0a]' : 'bg-[#f5f4f0]'}`}>
+    <div className="min-h-screen pt-20 pb-12 bg-theme">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link href="/profile?tab=addresses">
@@ -84,7 +80,7 @@ export default function NewAddressPage() {
               Back to Profile
             </Button>
           </Link>
-          <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>Add New Address</h1>
+          <h1 className="text-3xl font-bold text-theme">Add New Address</h1>
         </div>
 
         <Card className="bg-card border-theme text-theme">
@@ -103,7 +99,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, full_name: e.target.value })
                     }
                     required
-                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
+                    className="bg-transparent border-theme text-theme placeholder:text-theme-3"
                   />
                 </div>
 
@@ -117,7 +113,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, phone: e.target.value })
                     }
                     required
-                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
+                    className="bg-transparent border-theme text-theme placeholder:text-theme-3"
                   />
                 </div>
               </div>
@@ -132,7 +128,7 @@ export default function NewAddressPage() {
                   }
                   placeholder="House no., Building name"
                   required
-                  className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
+                  className="bg-transparent border-theme text-theme placeholder:text-theme-3"
                 />
               </div>
 
@@ -145,7 +141,7 @@ export default function NewAddressPage() {
                     setFormData({ ...formData, address_line2: e.target.value })
                   }
                   placeholder="Road name, Area, Colony"
-                  className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
+                  className="bg-transparent border-theme text-theme placeholder:text-theme-3"
                 />
               </div>
 
@@ -159,7 +155,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, city: e.target.value })
                     }
                     required
-                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
+                    className="bg-transparent border-theme text-theme placeholder:text-theme-3"
                   />
                 </div>
 
@@ -172,7 +168,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, state: e.target.value })
                     }
                     required
-                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
+                    className="bg-transparent border-theme text-theme placeholder:text-theme-3"
                   />
                 </div>
 
@@ -185,7 +181,7 @@ export default function NewAddressPage() {
                       setFormData({ ...formData, pincode: e.target.value })
                     }
                     required
-                    className={isDark ? "bg-transparent border-white/[0.12] text-white placeholder:text-white/30" : "bg-transparent border-black/[0.12] text-black placeholder:text-black/30"}
+                    className="bg-transparent border-theme text-theme placeholder:text-theme-3"
                   />
                 </div>
               </div>
@@ -207,7 +203,7 @@ export default function NewAddressPage() {
                     Cancel
                   </Button>
                 </Link>
-                <Button type="submit" disabled={saving} className="flex-1">
+                <Button type="submit" disabled={saving} className="flex-1 bg-[var(--accent)] hover:opacity-90 text-white">
                   {saving ? "Saving..." : "Save Address"}
                 </Button>
               </div>

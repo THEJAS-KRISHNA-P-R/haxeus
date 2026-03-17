@@ -19,10 +19,10 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Razorpay checkout + Next.js inline runtime scripts
-      "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
-      // Supabase realtime (wss) + Razorpay API
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com",
+      // Razorpay checkout + Next.js inline runtime scripts + Vercel Analytics
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com",
+      // Supabase realtime (wss) + Razorpay API + Vercel Insights
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com https://vitals.vercel-insights.com",
       // Supabase Storage images + data URIs + blob for canvas
       "img-src 'self' data: blob: https://*.supabase.co https://hebbkx1anhila5yf.public.blob.vercel-storage.com https://images.unsplash.com",
       // Razorpay modal iframes

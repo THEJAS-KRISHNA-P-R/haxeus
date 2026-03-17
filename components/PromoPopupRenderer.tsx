@@ -108,6 +108,7 @@ export function PromoPopupRenderer({
                   src={popup.image_url}
                   alt={popup.image_alt || "Promo"}
                   fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
                   priority
                 />

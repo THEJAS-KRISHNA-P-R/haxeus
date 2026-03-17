@@ -312,6 +312,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                         src={image.image_url}
                                         alt={`Product image ${index + 1}`}
                                         fill
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         className="object-cover"
                                     />
                                     {image.is_primary && (

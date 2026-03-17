@@ -12,8 +12,8 @@ const PRECACHE_URLS = [
   '/orders',
   '/offline',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/favi/web-app-manifest-192x192.png',
+  '/favi/web-app-manifest-512x512.png'
 ]
 
 // Install event - cache essential assets
@@ -115,8 +115,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body || 'New notification from HAXEUS',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
+    icon: '/favi/favicon-96x96.png',
+    badge: '/favi/favicon-96x96.png',
     image: data.image,
     data: {
       url: data.url || '/',
