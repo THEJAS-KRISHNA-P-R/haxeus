@@ -251,7 +251,7 @@ export default function HomePage() {
                 >
                   <div>
                     <div className="relative py-10 overflow-visible">
-                      <h1 
+                      <h1
                         className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold leading-[1.15] tracking-tight"
                         style={{ fontKerning: 'none', fontVariantLigatures: 'none' }}
                       >
@@ -403,8 +403,8 @@ export default function HomePage() {
                   <div className="flex gap-4 flex-wrap mt-2">
                     <Link href={config.hero.cta_primary?.href ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_primary.href}>
                       <ShinyButton
-                        highlight="#ff0000ff"
-                        highlightSubtle="#ff009dff"
+                        highlight="#000000ff"
+                        highlightSubtle="#ff0000ff"
                         className="h-[52px] px-7"
                       >
                         {config.hero.cta_primary?.text ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_primary.text}
@@ -412,11 +412,11 @@ export default function HomePage() {
                     </Link>
                     <Link href={config.hero.cta_secondary?.href ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_secondary.href}>
                       <ShimmerButton
-                        background="rgba(0, 0, 0, 0.92)"
+                        background="rgba(0, 0, 0, 1)"
                         borderRadius="100px"
-                        shimmerColor="#dededeff"
+                        shimmerColor="#ffffffff"
                         shimmerDuration="2.5s"
-                        className="h-[52px] px-7 border-white/[0.08] text-white/90 text-sm font-semibold tracking-widest uppercase"
+                        className="h-[52px] px-7 border-white/[0.08] text-red-600/90 font-bold text-sm tracking-widest uppercase hover:text-white"
                       >
                         {config.hero.cta_secondary?.text ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_secondary.text}
                       </ShimmerButton>
