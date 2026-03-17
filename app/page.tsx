@@ -459,13 +459,13 @@ export default function HomePage() {
                     transition={{ duration: 0.4 }}
                   >
                     <Image
-                      src={config.hero.hero_product_image_url ?? DEFAULT_HOMEPAGE_CONFIG.hero.hero_product_image_url}
+                      src={(config.hero.hero_product_image_url ?? DEFAULT_HOMEPAGE_CONFIG.hero.hero_product_image_url) || "/placeholder.svg"}
                       alt="Featured T-shirt"
-                      width={400}
+                      width={500}
                       height={500}
                       priority
-                      className="mx-auto rounded-xl"
-                      style={{ height: "auto" }}
+                      className="mx-auto rounded-xl w-full h-full object-cover"
+                      style={{ width: 'auto', height: 'auto' }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
                         target.src = "/placeholder.svg"
