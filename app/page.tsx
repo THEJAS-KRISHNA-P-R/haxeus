@@ -155,6 +155,8 @@ export default function HomePage() {
             id,
             name,
             price,
+            description,
+            tagline,
             front_image,
             product_images (
               image_url,
@@ -463,6 +465,7 @@ export default function HomePage() {
                       height={500}
                       priority
                       className="mx-auto rounded-xl"
+                      style={{ height: "auto" }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
                         target.src = "/placeholder.svg"

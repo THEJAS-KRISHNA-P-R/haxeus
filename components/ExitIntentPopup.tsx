@@ -98,7 +98,13 @@ export function ExitIntentPopup({ config }: ExitPopupProps) {
               <div className={config.image_url ? 'grid md:grid-cols-2' : ''}>
                 {config.image_url && (
                   <div className="relative hidden md:block">
-                    <Image src={config.image_url} alt={config.image_alt} layout="fill" objectFit="cover" />
+                    <Image 
+                      src={config.image_url} 
+                      alt={config.image_alt} 
+                      fill 
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover" 
+                    />
                   </div>
                 )}
 

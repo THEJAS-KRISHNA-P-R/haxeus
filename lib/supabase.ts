@@ -44,6 +44,9 @@ export interface Product {
   expected_date?: string | null
   max_preorders?: number | null
   preorder_count?: number
+  
+  // Custom label/tagline for product page
+  tagline?: string | null
 }
 
 export interface CartItem {

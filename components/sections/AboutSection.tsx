@@ -59,6 +59,7 @@ export function AboutSection({ config }: AboutSectionProps) {
               src={config.image_url}
               alt="About HAXEUS"
               fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
             />
           </motion.div>

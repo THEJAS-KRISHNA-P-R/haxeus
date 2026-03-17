@@ -190,7 +190,7 @@ function ProfileContent() {
                     Start shopping to see your orders here
                   </p>
                   <Link href="/products">
-                    <Button className="bg-[var(--accent)] hover:opacity-90">Browse Products</Button>
+                    <Button className="bg-[var(--accent)] hover:opacity-90 text-white">Browse Products</Button>
                   </Link>
                 </CardContent>
               </Card>
@@ -233,6 +233,7 @@ function ProfileContent() {
                               }
                               alt={item.product.name}
                               fill
+                              sizes="64px"
                               className="object-cover"
                             />
                           </div>
@@ -267,7 +268,7 @@ function ProfileContent() {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-theme">Saved Addresses</h2>
               <Link href="/profile/addresses/new">
-                <Button className="gap-2 bg-[var(--accent)] hover:opacity-90">
+                <Button className="gap-2 bg-[var(--accent)] hover:opacity-90 text-white">
                   <Plus size={16} />
                   Add Address
                 </Button>
@@ -285,7 +286,7 @@ function ProfileContent() {
                     Add an address for faster checkout
                   </p>
                   <Link href="/profile/addresses/new">
-                    <Button className="bg-[var(--accent)] hover:opacity-90">Add Address</Button>
+                    <Button className="bg-[var(--accent)] hover:opacity-90 text-white">Add Address</Button>
                   </Link>
                 </CardContent>
               </Card>
@@ -304,10 +305,10 @@ function ProfileContent() {
                           )}
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" className="hover:bg-theme opacity-10">
+                          <Button variant="ghost" size="icon" className="hover:bg-theme text-theme-2 hover:text-theme">
                             <Edit size={16} />
                           </Button>
-                          <Button variant="ghost" size="icon" className="hover:bg-theme opacity-10">
+                          <Button variant="ghost" size="icon" className="hover:bg-theme">
                             <Trash2 size={16} className="text-[var(--accent)]" />
                           </Button>
                         </div>
@@ -340,7 +341,7 @@ function ProfileContent() {
                     Save your favorite products here
                   </p>
                   <Link href="/products">
-                    <Button className="bg-[var(--accent)] hover:opacity-90">Browse Products</Button>
+                    <Button className="bg-[var(--accent)] hover:opacity-90 text-white">Browse Products</Button>
                   </Link>
                 </CardContent>
               </Card>
@@ -354,6 +355,7 @@ function ProfileContent() {
                           src={item.product.front_image || "/placeholder.svg"}
                           alt={item.product.name}
                           fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
                         />
                       </div>
@@ -369,7 +371,7 @@ function ProfileContent() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="hover:bg-theme opacity-10"
+                          className="hover:bg-theme"
                           onClick={async () => {
                             // Remove from wishlist
                             const success = await removeFromWishlist(item.product.id)
@@ -424,7 +426,7 @@ function ProfileContent() {
               <CardContent className="space-y-3">
                 <Button
                   variant="outline"
-                  className="w-full justify-start gap-2 border-theme hover:bg-theme opacity-10 text-theme-2"
+                  className="w-full justify-start gap-2 border-theme hover:bg-theme text-theme-2 hover:text-theme"
                   onClick={handleLogout}
                 >
                   <LogOut size={16} />

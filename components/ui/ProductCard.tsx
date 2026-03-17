@@ -85,7 +85,7 @@ export function ProductCard({
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                 className="object-cover"
-                loading={index < 4 ? "eager" : "lazy"}
+                priority={index < 4}
                 unoptimized={isSupabaseStorageUrl(product.front_image)}
                 onError={(e) => {
                   const t = e.target as HTMLImageElement
@@ -171,24 +171,6 @@ export function ProductCard({
               {product.description || "Premium streetwear"}
             </p>
 
-            {/* Sizes */}
-            {variant === "default" && (
-              <div className="hidden sm:flex gap-1 mb-3 flex-wrap">
-                {sizes.slice(0, 5).map((size, sizeIndex) => (
-                  <motion.div
-                    key={size}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: index * 0.05 + sizeIndex * 0.05 }}
-                    whileHover={{ scale: 1.1, backgroundColor: "var(--accent)", color: "#ffffff" }}
-                  >
-                    <Badge variant="outline" className="text-[10px] px-2 py-0.5 cursor-pointer border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-[var(--accent)]">
-                      {size}
-                    </Badge>
-                  </motion.div>
-                ))}
-              </div>
-            )}
 
             <div className="mt-auto">
               <div className="flex items-center gap-2 mb-2">

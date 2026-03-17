@@ -25,6 +25,7 @@ interface ProductFormData {
   colors: string[]
   images: ProductImage[]
   inventory: ProductInventory[]
+  tagline: string
 }
 
 export default function EditProductPage() {
@@ -56,6 +57,7 @@ export default function EditProductPage() {
     colors: ["Black"],
     images: [],
     inventory: [],
+    tagline: "",
   })
 
   useEffect(() => {
@@ -103,6 +105,7 @@ export default function EditProductPage() {
         colors: product.colors || ["Black"],
         images: images || [],
         inventory: inventory || [],
+        tagline: product.tagline || "",
       })
       
       setIsPreorder(product.is_preorder ?? false)
@@ -152,6 +155,7 @@ export default function EditProductPage() {
               total_stock: totalStock,
               front_image: formData.images.find(img => img.is_primary)?.image_url || formData.images[0]?.image_url || null,
               back_image: formData.images.length > 1 ? (formData.images.find(img => !img.is_primary)?.image_url || formData.images[1]?.image_url) : null,
+              tagline: formData.tagline || null,
               // Preorder fields
               is_preorder: isPreorder,
               preorder_status: isPreorder ? preorderStatus : null,
@@ -213,6 +217,7 @@ export default function EditProductPage() {
           colors: formData.colors,
           available_sizes: availableSizes,
           total_stock: totalStock,
+          tagline: formData.tagline || null,
         })
 
         const { data: updateResult, error: productError } = await supabase
@@ -228,6 +233,7 @@ export default function EditProductPage() {
             front_image: formData.images.find(img => img.is_primary)?.image_url || formData.images[0]?.image_url || null,
             back_image: formData.images.length > 1 ? (formData.images.find(img => !img.is_primary)?.image_url || formData.images[1]?.image_url) : null,
             updated_at: new Date().toISOString(),
+            tagline: formData.tagline || null,
             // Preorder fields
             is_preorder: isPreorder,
             preorder_status: isPreorder ? preorderStatus : null,
@@ -438,6 +444,21 @@ export default function EditProductPage() {
                 rows={4}
                 className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
               />
+            </div>
+
+            {/* Tagline */}
+            <div className="space-y-2">
+              <Label htmlFor="tagline" className={isDark ? "text-white/60" : "text-black/60"}>Promotional Tagline (Optional)</Label>
+              <Input
+                id="tagline"
+                value={formData.tagline}
+                onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                placeholder="e.g., Limited drop – ends in 7 days"
+                className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
+              />
+              <p className={cn("text-xs", isDark ? "text-white/40" : "text-black/40")}>
+                Displays above the product name on the product page.
+              </p>
             </div>
 
             {/* Price & Colors */}

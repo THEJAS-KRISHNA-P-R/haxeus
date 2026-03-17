@@ -28,6 +28,7 @@ interface Product {
   back_image?: string
   available_sizes?: string[]
   sizes?: string[]
+  tagline?: string | null
 }
 
 interface ProductImage {
@@ -460,10 +461,12 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Urgency badge */}
-            <div className="flex items-center gap-2 text-sm text-[var(--accent)] font-medium">
-              <Zap className="w-4 h-4" />
-              Limited drop – ends in 7 days
-            </div>
+            {product.tagline && (
+              <div className="flex items-center gap-2 text-sm text-[var(--accent)] font-medium">
+                <Zap className="w-4 h-4" />
+                {product.tagline}
+              </div>
+            )}
 
             {/* Trust badges — near buy button */}
             <div className="flex flex-wrap gap-3 text-xs text-theme-2">
@@ -733,7 +736,7 @@ export default function ProductDetailPage() {
                       <div className="flex gap-2 mb-3">
                         {review.images.map((img: any) => (
                           <div key={img.id} className="w-20 h-20 relative rounded-lg overflow-hidden">
-                            <Image src={img.image_url} alt="Review" fill className="object-cover" />
+                            <Image src={img.image_url} alt="Review" fill sizes="(max-width: 768px) 80px, 80px" className="object-cover" />
                           </div>
                         ))}
                       </div>

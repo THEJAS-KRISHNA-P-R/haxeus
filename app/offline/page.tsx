@@ -39,7 +39,7 @@ export default function OfflinePage() {
           </button>
 
           <div className="text-sm text-white/40">
-            <p className="mb-2">? Tip: Some pages might still work offline</p>
+            <p className="mb-2">Tip: Some pages might still work offline</p>
             <div className="flex justify-center space-x-4">
               <a href="/" className="text-[#e7bf04] hover:text-[#e7bf04]/80">Home</a>
               <a href="/products" className="text-[#07e4e1] hover:text-[#07e4e1]/80">Products</a>
@@ -50,7 +50,7 @@ export default function OfflinePage() {
 
         <div className="mt-12 p-4 bg-[#111] rounded-2xl border border-white/[0.06]">
           <p className="text-sm text-white/40">
-            ?? Install our app for a better offline experience and faster access!
+            Install our app for a better offline experience and faster access!
           </p>
         </div>
       </div>
