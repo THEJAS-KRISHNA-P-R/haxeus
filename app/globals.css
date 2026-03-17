@@ -320,3 +320,36 @@ footer {
 section {
   background: transparent;
 }
+
+/* ── Hero Text Exact Sync Shine ── */
+@keyframes hero-shine-pan {
+  0% { background-position: 200% center; }
+  100% { background-position: -50% center; }
+}
+
+.hero-shine-line1 {
+  background-image: linear-gradient(60deg, #ffffff 0%, #ffffff 35%, #ffc0c0 50%, #ffffff 65%, #ffffff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: hero-shine-pan 3s linear infinite;
+}
+
+.hero-shine-line2 {
+  background-image: linear-gradient(60deg, #e93e3a 0%, #e93e3a 35%, #f86666 50%, #e93e3a 65%, #e93e3a 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: hero-shine-pan 3s linear infinite;
+}
+
+.hero-shine-line3 {
+  background-image: linear-gradient(60deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.8) 35%, #ffbcbc 50%, rgba(255,255,255,0.8) 65%, rgba(255,255,255,0.8) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: hero-shine-pan 3s linear infinite;
+}

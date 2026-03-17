@@ -110,7 +110,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
     lineHeight: 'inherit',
     letterSpacing: 'inherit',
     font: 'inherit',
-    whiteSpace: 'pre-wrap',
+    whiteSpace: 'inherit',
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
@@ -126,7 +126,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
         letterSpacing: 'inherit',
         lineHeight: 'inherit',
         position: 'relative',
-        whiteSpace: 'pre-wrap',
+        whiteSpace: 'inherit',
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
