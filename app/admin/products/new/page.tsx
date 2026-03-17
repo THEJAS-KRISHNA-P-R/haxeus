@@ -356,6 +356,7 @@ export default function NewProductPage() {
                   type="date"
                   value={expectedDate}
                   onChange={(e) => setExpectedDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
                   className={isDark ? 'bg-transparent border-white/10 text-white' : 'bg-transparent border-black/10 text-black'}
                 />
               </div>
