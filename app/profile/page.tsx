@@ -347,7 +347,7 @@ function ProfileContent() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {wishlist.map((item) => (
+                {wishlist.map((item, index) => (
                   <Card key={item.id} className="overflow-hidden bg-card border-theme">
                     <Link href={`/products/${item.product.id}`}>
                       <div className="relative h-64 bg-background/5">
@@ -357,6 +357,7 @@ function ProfileContent() {
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
+                          priority={index === 0}
                         />
                       </div>
                     </Link>

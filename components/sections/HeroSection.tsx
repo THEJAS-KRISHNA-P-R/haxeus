@@ -28,11 +28,12 @@ export function HeroSection({ config }: HeroSectionProps) {
       transition={{ duration: 0.8, delay: 0.2 }}
     >
       <Image
-        src={config.hero_product_image_url}
+        src={config.hero_product_image_url || "/placeholder.svg"}
         alt="Hero Product"
         width={800}
         height={800}
         className="rounded-2xl object-cover"
+        style={{ width: 'auto', height: 'auto' }}
         priority
       />
     </motion.div>

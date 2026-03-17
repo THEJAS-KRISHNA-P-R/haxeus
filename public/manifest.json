@@ -52,7 +52,7 @@
       "url": "/products",
       "icons": [
         {
-          "src": "/icons/shop-icon.png",
+          "src": "/favi/favicon-96x96.png",
           "sizes": "96x96"
         }
       ]
@@ -64,7 +64,7 @@
       "url": "/cart",
       "icons": [
         {
-          "src": "/icons/cart-icon.png",
+          "src": "/favi/favicon-96x96.png",
           "sizes": "96x96"
         }
       ]
@@ -76,7 +76,7 @@
       "url": "/orders",
       "icons": [
         {
-          "src": "/icons/orders-icon.png",
+          "src": "/favi/favicon-96x96.png",
           "sizes": "96x96"
         }
       ]

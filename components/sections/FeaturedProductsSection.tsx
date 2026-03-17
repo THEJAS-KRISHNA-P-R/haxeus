@@ -66,11 +66,12 @@ export function FeaturedProductsSection({ config, products }: FeaturedProductsSe
                 <div className={`rounded-2xl overflow-hidden border ${isDark ? 'bg-white/[0.03] border-white/[0.07]' : 'bg-black/[0.02] border-black/[0.07]'}`}>
                   <div className="aspect-square overflow-hidden">
                     <Image
-                      src={product.front_image || '/images/placeholder.png'}
+                      src={product.front_image || '/placeholder.svg'}
                       alt={product.name}
                       width={500}
                       height={500}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      style={{ width: 'auto', height: 'auto' }}
                     />
                   </div>
                   <div className="p-4">
