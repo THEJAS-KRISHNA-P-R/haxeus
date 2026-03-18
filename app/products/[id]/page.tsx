@@ -2,18 +2,6 @@ import { notFound } from "next/navigation"
 import dynamic from "next/dynamic"
 import { fetchProductById } from "@/lib/fetch-product"
 import { ProductPageClient } from "./ProductPageClient"
-import { TrackProductView } from "@/components/TrackProductView"
-
-// Dynamic imports for heavy components below the fold
-const RelatedProducts = dynamic(
-  () => import("@/components/RelatedProducts").then(m => ({ default: m.RelatedProducts })),
-  { ssr: false }
-)
-
-const RecentlyViewed = dynamic(
-  () => import("@/components/RecentlyViewed").then(m => ({ default: m.RecentlyViewed })),
-  { ssr: false }
-)
 
 interface PageProps {
   params: { id: string }
@@ -47,18 +35,6 @@ export default async function ProductPage({ params }: PageProps) {
         inventory={product.product_inventory || []} 
         images={product.product_images || []} 
       />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <TrackProductView product={product as any} />
-        
-        {/* Horizontal scroll sections */}
-        <RelatedProducts
-          productId={product.id}
-          category={product.category}
-        />
-        
-        <RecentlyViewed currentProductId={product.id} />
-      </div>
     </div>
   )
 }
