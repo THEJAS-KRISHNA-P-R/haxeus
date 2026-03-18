@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * PWA Utilities
@@ -21,59 +21,42 @@ export function registerServiceWorker() {
         scope: '/'
       })
 
-      console.log('✅ Service Worker registered:', registration.scope)
-
       // Check for updates every hour
       setInterval(() => {
         registration.update()
       }, 60 * 60 * 1000)
-
-      // Request notification permission
-      if ('Notification' in window && Notification.permission === 'default') {
-        // Will prompt user later with context
-      }
     } catch (error) {
-      console.error('❌ Service Worker registration failed:', error)
+      console.error('Service Worker registration failed:', (error as Error).message ?? 'Unknown error')
     }
   })
 }
 
 export async function subscribeToPushNotifications(userId: string): Promise<boolean> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.log('Push notifications not supported')
     return false
   }
 
   try {
     const registration = await navigator.serviceWorker.ready
-
-    // Request permission
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') {
-      console.log('Notification permission denied')
       return false
     }
 
-    // Subscribe to push
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
     })
 
-    // Send subscription to server
     await fetch('/api/push-subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        subscription
-      })
+      body: JSON.stringify({ userId, subscription })
     })
 
-    console.log('✅ Subscribed to push notifications')
     return true
   } catch (error) {
-    console.error('❌ Push subscription failed:', error)
+    console.error('Push subscription failed:', (error as Error).message ?? 'Unknown error')
     return false
   }
 }
@@ -89,26 +72,23 @@ export async function unsubscribeFromPushNotifications(): Promise<boolean> {
 
     if (subscription) {
       await subscription.unsubscribe()
-      console.log('✅ Unsubscribed from push notifications')
       return true
     }
 
     return false
   } catch (error) {
-    console.error('❌ Unsubscribe failed:', error)
+    console.error('Unsubscribe failed:', (error as Error).message ?? 'Unknown error')
     return false
   }
 }
 
-// Add to Home Screen
-let deferredPrompt: any = null
-
+// Add to Home Screen — uses typed global from types/global.d.ts
 export function setupAddToHomeScreen(onPromptAvailable?: () => void) {
   if (typeof window === 'undefined') return
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault()
-    deferredPrompt = e
+    window.deferredPrompt = e as BeforeInstallPromptEvent
 
     if (onPromptAvailable) {
       onPromptAvailable()
@@ -116,35 +96,30 @@ export function setupAddToHomeScreen(onPromptAvailable?: () => void) {
   })
 
   window.addEventListener('appinstalled', () => {
-    console.log('✅ PWA installed')
-    deferredPrompt = null
+    window.deferredPrompt = null
   })
 }
 
 export async function showAddToHomeScreen(): Promise<boolean> {
-  if (!deferredPrompt) {
-    console.log('Add to home screen not available')
+  if (typeof window === 'undefined' || !window.deferredPrompt) {
     return false
   }
 
-  deferredPrompt.prompt()
-  const { outcome } = await deferredPrompt.userChoice
-
-  console.log(`User response: ${outcome}`)
-  deferredPrompt = null
+  const prompt = window.deferredPrompt
+  await prompt.prompt()
+  const { outcome } = await prompt.userChoice
+  window.deferredPrompt = null
 
   return outcome === 'accepted'
 }
 
 // Offline detection
-export function useOnlineStatus() {
-  if (typeof window === 'undefined') {
-    return true
-  }
+export function useOnlineStatus(): boolean {
+  const [isOnline, setIsOnline] = useState(
+    typeof window !== 'undefined' ? navigator.onLine : true
+  )
 
-  const [isOnline, setIsOnline] = React.useState(navigator.onLine)
-
-  React.useEffect(() => {
+  useEffect(() => {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
 
@@ -161,37 +136,36 @@ export function useOnlineStatus() {
 }
 
 // Background sync for offline orders
-export async function queueOfflineOrder(orderData: any): Promise<void> {
+interface OfflineOrderData {
+  [key: string]: unknown
+}
+
+export async function queueOfflineOrder(orderData: OfflineOrderData): Promise<void> {
   if (!('serviceWorker' in navigator)) {
     throw new Error('Service Worker not supported')
   }
 
   try {
-    // Store order in IndexedDB
     const db = await openDB()
     const transaction = db.transaction(['pending-orders'], 'readwrite')
     const store = transaction.objectStore('pending-orders')
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const request = store.add({
         ...orderData,
         id: Date.now().toString(),
         createdAt: new Date().toISOString()
       })
-      request.onsuccess = () => resolve(request.result)
+      request.onsuccess = () => resolve()
       request.onerror = () => reject(request.error)
     })
 
-    // Register sync if available
     const registration = await navigator.serviceWorker.ready
-    if ('sync' in registration) {
-      await (registration as any).sync.register('sync-orders')
-      console.log('✅ Order queued for sync')
-    } else {
-      console.log('✅ Order saved offline (background sync not available)')
+    if (registration.sync) {
+      await registration.sync.register('sync-orders')
     }
   } catch (error) {
-    console.error('❌ Failed to queue order:', error)
+    console.error('Failed to queue order:', (error as Error).message ?? 'Unknown error')
     throw error
   }
 }
@@ -219,7 +193,7 @@ export function isPWAInstalled(): boolean {
 
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
   )
 }
 
@@ -238,7 +212,7 @@ export async function shareProduct(data: {
     return true
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
-      console.error('Share failed:', error)
+      console.error('Share failed:', (error as Error).message ?? 'Unknown error')
     }
     return false
   }
@@ -246,36 +220,39 @@ export async function shareProduct(data: {
 
 // Periodic background sync (if supported)
 export async function registerPeriodicSync(): Promise<boolean> {
-  if (!('serviceWorker' in navigator) || !('periodicSync' in navigator.serviceWorker)) {
-    console.log('Periodic sync not supported')
+  if (!('serviceWorker' in navigator)) {
     return false
   }
 
   try {
     const registration = await navigator.serviceWorker.ready
-    const status = await (navigator as any).permissions.query({
-      name: 'periodic-background-sync'
+
+    if (!registration.periodicSync) {
+      return false
+    }
+
+    const status = await navigator.permissions.query({
+      name: 'periodic-background-sync' as PermissionName
     })
 
     if (status.state === 'granted') {
-      await (registration as any).periodicSync.register('check-updates', {
-        minInterval: 24 * 60 * 60 * 1000 // Once per day
+      await registration.periodicSync.register('check-updates', {
+        minInterval: 24 * 60 * 60 * 1000
       })
-      console.log('✅ Periodic sync registered')
       return true
     }
 
     return false
   } catch (error) {
-    console.error('❌ Periodic sync registration failed:', error)
+    console.error('Periodic sync registration failed:', (error as Error).message ?? 'Unknown error')
     return false
   }
 }
 
 // React hook for easy integration
 export function usePWA() {
-  const [isInstalled, setIsInstalled] = React.useState(false)
-  const [canInstall, setCanInstall] = React.useState(false)
+  const [isInstalled, setIsInstalled] = useState(false)
+  const [canInstall, setCanInstall] = useState(false)
   const isOnline = useOnlineStatus()
 
   useEffect(() => {
@@ -294,5 +271,3 @@ export function usePWA() {
     install: showAddToHomeScreen
   }
 }
-
-import React from 'react'

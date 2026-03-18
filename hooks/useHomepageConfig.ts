@@ -68,36 +68,35 @@ export function useHomepageConfig(): UseHomepageConfigReturn {
   }, [supabase])
 
   // REALTIME DISABLED — re-enable when needed
-  // useEffect(() => {
-  //   const channel = supabase
-  //     .channel("homepage_config_changes")
-  //     .on(
-  //       "postgres_changes",
-  //       {
-  //         event: "UPDATE",
-  //         schema: "public",
-  //         table: "store_settings",
-  //         filter: "key=eq.homepage_config"
-  //       },
-  //       (payload) => {
-  //         if (payload.new?.value) {
-  //           setConfig(deepMerge(DEFAULT_HOMEPAGE_CONFIG, payload.new.value as any))
-  //         }
-  //       }
-  //     )
-  //     .subscribe((status, err) => {
-  //       if (status === 'SUBSCRIBED') {
-  //         // console.log('Subscribed to homepage config changes');
-  //       }
-  //       if (err) {
-  //         setError('Realtime subscription failed');
-  //       }
-  //     })
+  /*
+  useEffect(() => {
+    const channel = supabase
+      .channel("homepage_config_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "store_settings",
+          filter: `key=eq.homepage_config`
+        },
+        (payload) => {
+          if (payload.new?.value) {
+            setConfig(deepMerge(DEFAULT_HOMEPAGE_CONFIG, payload.new.value as any))
+          }
+        }
+      )
+      .subscribe((status, err) => {
+        if (err) {
+          setError('Realtime subscription failed');
+        }
+      })
 
-  //   return () => {
-  //     supabase.removeChannel(channel)
-  //   }
-  // }, [supabase])
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase])
+  */
 
   return { config, loading, error, updateConfig }
 }

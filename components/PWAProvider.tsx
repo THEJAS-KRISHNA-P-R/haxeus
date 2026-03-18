@@ -9,11 +9,9 @@ import { registerServiceWorker } from '@/lib/pwa'
  */
 export function PWAProvider() {
   useEffect(() => {
+    
     // Register service worker
     registerServiceWorker()
-    
-    // Log PWA status
-    console.log('🚀 PWA initialized')
   }, [])
 
   return null // This component doesn't render anything

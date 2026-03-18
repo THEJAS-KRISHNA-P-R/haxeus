@@ -1,48 +1,19 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { invalidate } from "@/lib/redis";
-
-async function getAuthClient() {
-    const cookieStore = await cookies();
-    return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { get: (name) => cookieStore.get(name)?.value } }
-    );
-}
-
-function getServiceClient() {
-    return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        { cookies: { getAll: () => [], setAll: () => {} } }
-    );
-}
+import { verifyAdminRequest } from "@/lib/admin-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(
     request: Request,
     { params }: { params: { id: string } }
 ) {
-    // Cookie client for auth check, service client for DB writes
-    const supabaseAuth = await getAuthClient();
-    const supabase = getServiceClient();
-
-    const { data: { user } } = await supabaseAuth.auth.getUser();
-    if (!user) {
-        return new NextResponse("Unauthorized", { status: 401 });
+    const auth = await verifyAdminRequest();
+    if (!auth.authorized) {
+        return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
-    const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+    const supabase = getSupabaseAdmin();
 
-    if (!roleData) {
-        return new NextResponse("Forbidden", { status: 403 });
-    }
 
     const { id: preorderId } = params;
     const { initial_stock_per_size = 0 } = await request.json();

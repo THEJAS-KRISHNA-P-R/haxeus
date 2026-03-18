@@ -1,8 +1,7 @@
-// Service Worker for PWA
-// Handles offline functionality, caching, and push notifications
-
-const CACHE_NAME = 'haxeus-v1'
-const RUNTIME_CACHE = 'haxeus-runtime-v1'
+// Service Worker for HAXEUS PWA (v1.1)
+// handles site updates and offline fallbacks
+const CACHE_NAME = 'haxeus-v1.1'
+const RUNTIME_CACHE = 'haxeus-runtime-v1.1'
 
 // Assets to cache on install
 const PRECACHE_URLS = [

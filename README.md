@@ -63,11 +63,10 @@ Visit [http://localhost:3000](http://localhost:3000)
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 
-### Backend
+### Backend & Caching
 - **Database**: Supabase (PostgreSQL 15)
-- **Authentication**: Supabase Auth (email/password, OAuth)
-- **Storage**: Supabase Storage for product images
-- **Security**: Row Level Security (RLS) policies
+- **Caching**: **Upstash Redis** (Admin role cache + Rate limiting)
+- **Security**: Row Level Security (RLS) + Redis signature verification
 
 ---
 
@@ -78,6 +77,11 @@ Create `.env.local` in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Caching (Optional - App will use No-Op Stub if missing)
+REDIS_URL=rediss://default:password@your-redis-host:port
+ADMIN_CACHE_SECRET=your-random-secret-key
 ```
 
 Get these from your Supabase project dashboard at [supabase.com](https://supabase.com)

@@ -123,7 +123,6 @@ export default function EditProductPage() {
   async function handleSave() {
     setSaving(true)
     try {
-      console.log("=== STARTING PRODUCT SAVE ===")
 
       // Verify user is logged in
       const {
@@ -141,7 +140,6 @@ export default function EditProductPage() {
 
       if (productId === "new") {
         // Create new product
-        console.log("Creating new product...")
         const { data: newProduct, error: productError } = await supabase
           .from("products")
           .insert([
@@ -168,7 +166,6 @@ export default function EditProductPage() {
           .single()
 
         if (productError) throw productError
-        console.log("Product created:", newProduct)
 
         // Insert images
         if (formData.images.length > 0) {
@@ -184,7 +181,6 @@ export default function EditProductPage() {
             .insert(imagesWithProductId)
 
           if (imagesError) throw imagesError
-          console.log("Images inserted:", imagesWithProductId.length)
         }
 
         // Insert inventory
@@ -204,21 +200,9 @@ export default function EditProductPage() {
             .insert(inventoryWithProductId)
 
           if (inventoryError) throw inventoryError
-          console.log("Inventory inserted:", inventoryWithProductId.length)
         }
       } else {
         // Update existing product
-        console.log("Updating product with ID:", productId)
-        console.log("Data to update:", {
-          name: formData.name,
-          description: formData.description,
-          price: formData.price,
-          category: formData.category,
-          colors: formData.colors,
-          available_sizes: availableSizes,
-          total_stock: totalStock,
-          tagline: formData.tagline || null,
-        })
 
         const { data: updateResult, error: productError } = await supabase
           .from("products")
@@ -247,11 +231,8 @@ export default function EditProductPage() {
           console.error("Product update error:", productError)
           throw productError
         }
-        console.log("Product update result:", updateResult)
-        console.log("Product updated successfully!")
 
         // Update images - delete old first
-        console.log("Deleting old images for product:", productId)
         const { error: imageDeleteError } = await supabase
           .from("product_images")
           .delete()
@@ -260,8 +241,6 @@ export default function EditProductPage() {
         if (imageDeleteError) {
           console.error("Image delete error:", imageDeleteError)
           // Don't throw - continue with insert attempt
-        } else {
-          console.log("Old images deleted successfully")
         }
 
         // Insert new images
@@ -272,7 +251,6 @@ export default function EditProductPage() {
             display_order: index,
             is_primary: img.is_primary,
           }))
-          console.log("Inserting new images:", imagesWithProductId)
 
           const { data: imageInsertResult, error: imagesError } = await supabase
             .from("product_images")
@@ -280,14 +258,11 @@ export default function EditProductPage() {
             .select()
 
           if (imagesError) {
-            console.error("Image insert error:", imagesError)
             throw imagesError
           }
-          console.log("Images inserted:", imageInsertResult)
         }
 
         // Update inventory - delete old first
-        console.log("Deleting old inventory for product:", productId)
         const { error: invDeleteError } = await supabase
           .from("product_inventory")
           .delete()
@@ -296,8 +271,6 @@ export default function EditProductPage() {
         if (invDeleteError) {
           console.error("Inventory delete error:", invDeleteError)
           // Don't throw - continue with insert attempt
-        } else {
-          console.log("Old inventory deleted successfully")
         }
 
         // Insert new inventory
@@ -311,7 +284,6 @@ export default function EditProductPage() {
             reserved_quantity: 0,
             sold_quantity: 0,
           }))
-          console.log("Inserting new inventory:", inventoryWithProductId)
 
           const { data: invInsertResult, error: inventoryError } = await supabase
             .from("product_inventory")
@@ -319,25 +291,20 @@ export default function EditProductPage() {
             .select()
 
           if (inventoryError) {
-            console.error("Inventory insert error:", inventoryError)
             throw inventoryError
           }
-          console.log("Inventory inserted:", invInsertResult)
         }
       }
 
-      console.log("Redirecting to /admin/products")
       router.refresh()
       router.push("/admin/products")
-    } catch (error: any) {
-      console.error("=== ERROR SAVING PRODUCT ===")
-      console.error("Error:", error)
+    } catch (error) {
+      console.error("Error saving product:", (error as Error).message ?? "Unknown error")
 
-      const errorMsg = error.message || "Unknown error occurred"
-      alert(`Failed to save product: ${errorMsg}\n\nCheck console for details.`)
+      const errorMsg = (error as Error).message || "Unknown error occurred"
+      alert(`Failed to save product: ${errorMsg}`)
     } finally {
       setSaving(false)
-      console.log("=== SAVE PROCESS COMPLETE ===")
     }
   }
 
@@ -423,13 +390,23 @@ export default function EditProductPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="category" className={isDark ? "text-white/60" : "text-black/60"}>Category</Label>
-                <Input
+                <select
                   id="category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="e.g., apparel"
-                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
-                />
+                  className={`w-full px-3 py-2.5 rounded-xl border text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-[#e93a3a]/50 ${
+                    isDark
+                      ? "border-white/[0.10] text-white bg-[#1a1a1a]"
+                      : "border-black/[0.10] text-black bg-white"
+                  }`}
+                >
+                  <option value="tshirt">T-Shirt</option>
+                  <option value="jersey">Jersey</option>
+                  <option value="hoodie">Hoodie</option>
+                  <option value="shorts">Shorts</option>
+                  <option value="accessories">Accessories</option>
+                  <option value="apparel">Apparel</option>
+                </select>
               </div>
             </div>
 

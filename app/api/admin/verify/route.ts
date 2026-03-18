@@ -1,10 +1,16 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
+import { verifyAdminRequest } from "@/lib/admin-auth";
+import { requireAdmin, getAdminEmail } from "@/lib/admin";
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
-import { requireAdmin, getAdminEmail } from "@/lib/admin"
 
 export async function GET() {
     try {
+        const auth = await verifyAdminRequest();
+        if (!auth.authorized) {
+            return NextResponse.json({ authorized: false }, { status: auth.status });
+        }
+
         const cookieStore = await cookies()
         const supabase = createServerClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,11 +23,6 @@ export async function GET() {
             return NextResponse.json({ authorized: false }, { status: 401 })
         }
 
-        const isAdmin = await requireAdmin(user.id)
-        if (!isAdmin) {
-            return NextResponse.json({ authorized: false }, { status: 403 })
-        }
-
         const email = await getAdminEmail(user.id)
 
         return NextResponse.json({
@@ -32,3 +33,4 @@ export async function GET() {
         return NextResponse.json({ authorized: false }, { status: 500 })
     }
 }
+

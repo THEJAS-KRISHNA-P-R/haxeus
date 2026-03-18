@@ -34,6 +34,7 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState("default")
   const [priceRange, setPriceRange] = useState("all")
+  const [category, setCategory] = useState("all")
   const searchParams = useSearchParams()
   const searchQuery = searchParams?.get("search") || ""
 
@@ -90,6 +91,10 @@ function ProductsContent() {
       )
     }
 
+    if (category !== "all") {
+      filtered = filtered.filter(p => p.category === category)
+    }
+
     if (priceRange !== "all") {
       filtered = filtered.filter((product) => {
         if (priceRange === "under-600") return product.price < 600
@@ -143,8 +148,22 @@ function ProductsContent() {
                 <SelectItem value="above-3000">Above ₹3,000</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-[110px] sm:w-[130px] bg-card border border-theme h-8 text-xs text-theme focus:ring-0">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-theme text-theme">
+                <SelectItem value="all">All Items</SelectItem>
+                <SelectItem value="tshirt">T-Shirts</SelectItem>
+                <SelectItem value="jersey">Jerseys</SelectItem>
+                <SelectItem value="hoodie">Hoodies</SelectItem>
+                <SelectItem value="shorts">Shorts</SelectItem>
+                <SelectItem value="accessories">Accessories</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[110px] sm:w-[140px] bg-card border border-theme h-8 text-xs text-theme">
+              <SelectTrigger className="w-[110px] sm:w-[140px] bg-card border border-theme h-8 text-xs text-theme focus:ring-0">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent className="bg-card border-theme text-theme">
@@ -154,11 +173,11 @@ function ProductsContent() {
                 <SelectItem value="name">A → Z</SelectItem>
               </SelectContent>
             </Select>
-            {(searchQuery || priceRange !== "all" || sortBy !== "default") && (
+            {(searchQuery || priceRange !== "all" || category !== "all" || sortBy !== "default") && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => { setPriceRange("all"); setSortBy("default"); window.history.pushState({}, "", "/products") }}
+                onClick={() => { setPriceRange("all"); setCategory("all"); setSortBy("default"); window.history.pushState({}, "", "/products") }}
                 className="text-[var(--accent)] hover:bg-[var(--accent)]/10 text-xs h-8 px-2"
               >
                 Clear

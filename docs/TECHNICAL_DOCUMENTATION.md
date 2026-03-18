@@ -2,7 +2,7 @@
 
 ## 1. Architecture Overview
 
-HAXEUS is a server-side rendered (SSR) e-commerce application built with **Next.js 15** (App Router), **TypeScript**, and **Supabase** as the backend-as-a-service. Payments are processed via **Razorpay**. The app uses **Tailwind CSS** with a custom design system for styling and **Framer Motion** for animations.
+HAXEUS is a high-performance e-commerce application built with **Next.js 15** (App Router), leveraging **React Server Components (RSC)** for the homepage and core data-heavy views. It integrates **Supabase** (Postgres + Auth + Storage), **Razorpay** (Payments), and a **Redis-backed Admin Cache** for low-latency session validation.
 
 ### Tech Stack
 
@@ -14,7 +14,8 @@ HAXEUS is a server-side rendered (SSR) e-commerce application built with **Next.
 | Auth           | Supabase Auth (Email/Password, OTP) |
 | Storage        | Supabase Storage (product images)    |
 | Payments       | Razorpay                            |
-| Rate Limiting  | Upstash Redis                       |
+| Rate Limiting  | Upstash Redis (with Local No-Op Fallback) |
+| Admin Caching  | Upstash Redis                      |
 | Styling        | Tailwind CSS                        |
 | Animations     | Framer Motion                       |
 | Deployment     | Vercel                              |
@@ -27,22 +28,19 @@ HAXEUS is a server-side rendered (SSR) e-commerce application built with **Next.
 │   ├── api/                 # API routes (payment, orders, auth)
 │   ├── products/[id]/       # Product detail pages (dynamic)
 │   ├── checkout/            # Checkout flow
-│   ├── orders/[id]/         # Order tracking
-│   ├── privacy-policy/      # Legal pages
-│   ├── terms-conditions/
-│   ├── returns-refunds/
-│   └── shipping-policy/
+│   ├── page.tsx             # Homepage (RSC - Server Component)
+│   └── ...
 ├── components/              # Reusable UI components
-│   ├── admin/               # Admin-specific components (AdminUI)
+│   ├── home/                # Homepage orchestrator (Client)
+│   ├── sections/            # Homepage sections (Hero, Products, etc.)
+│   ├── admin/               # Admin-specific components
 │   ├── ui/                  # Shadcn/UI primitives
 │   └── *.tsx                # Feature components
 ├── lib/                     # Utilities and service clients
-│   ├── supabase.ts          # Supabase client initialization
-│   ├── razorpay.ts          # Razorpay client
-│   ├── redis.ts             # Upstash Redis rate limiter
-│   ├── email.ts             # Email and newsletter service
-│   ├── coupons.ts           # Coupon validation logic
-│   └── utils.ts             # cn(), sanitizeText(), sanitizeEmail()
+│   ├── supabase-server.ts   # Server-side Supabase client (RSC/API)
+│   ├── admin-queries.ts     # Centralized admin Supabase helpers
+│   ├── redis.ts             # Redis client with No-Op Stub class
+│   └── ...
 ├── hooks/                   # Custom React hooks
 └── docs/                    # Documentation
 ```
@@ -60,6 +58,11 @@ HAXEUS is a server-side rendered (SSR) e-commerce application built with **Next.
 - `app/admin/layout.tsx` wraps all admin pages.
 - A server-side `requireAdmin()` guard checks authentication and role before rendering.
 - Unauthorized users are redirected to the login page.
+
+### Managed Session Caching
+- Admin roles are cached in Redis to avoid redundant DB lookups on every page load.
+- If Redis is unavailable, the system transparently falls back to Supabase.
+- Cache keys are HMAC-signed manually for integrity.
 
 ---
 
@@ -113,9 +116,9 @@ HAXEUS is a server-side rendered (SSR) e-commerce application built with **Next.
 - Applied to: newsletter subscription, order creation address fields.
 
 ### Rate Limiting
-- Implemented via `rateLimit()` function using Upstash Redis.
-- Applied per-IP and per-user on payment and order endpoints.
-- **Developer Experience**: In `development` mode, limits are relaxed (100 req/hour) for the Newsletter and Contact APIs to facilitate testing. In production, strict limits apply (5 for newsletter, 3 for contact).
+- Implemented via `rateLimit()` function in `lib/redis.ts`.
+- **Resilience**: The app uses a `RedisNoOpStub` class. If `REDIS_URL` is missing (Local Dev), the app continues to function with caching disabled but zero crashes.
+- **Developer Experience**: In `development` mode, limits are relaxed for the Newsletter and Contact APIs.
 
 ### CSRF Protection
 - Origin header validation on all POST API routes.
