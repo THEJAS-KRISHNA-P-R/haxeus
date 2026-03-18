@@ -12,7 +12,6 @@ import { supabase } from "@/lib/supabase"
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Overview" },
   { href: "/admin/homepage", icon: Globe, label: "Homepage" },
-  { href: "/admin/promo-popups", icon: Tag, label: "Promos" },
   { href: "/admin/orders", icon: ShoppingBag, label: "Orders" },
   { href: "/admin/products", icon: Package, label: "Products" },
   { href: "/admin/storage", icon: HardDrive, label: "Storage" },

@@ -11,6 +11,7 @@ const PRECACHE_URLS = [
   '/orders',
   '/offline',
   '/manifest.json',
+  '/favi/favicon-96x96.png',
   '/favi/web-app-manifest-192x192.png',
   '/favi/web-app-manifest-512x512.png'
 ]
@@ -162,80 +163,4 @@ self.addEventListener('notificationclick', (event) => {
   )
 })
 
-// Background sync for offline orders
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-orders') {
-    event.waitUntil(syncOrders())
-  }
-})
-
-async function syncOrders() {
-  // Get pending orders from IndexedDB and sync with server
-  try {
-    const db = await openDB()
-    const pendingOrders = await db.getAll('pending-orders')
-
-    for (const order of pendingOrders) {
-      try {
-        const response = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
-        })
-
-        if (response.ok) {
-          await db.delete('pending-orders', order.id)
-        }
-      } catch (error) {
-        console.error('Failed to sync order:', error)
-      }
-    }
-  } catch (error) {
-    console.error('Sync failed:', error)
-  }
-}
-
-// IndexedDB helper
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('haxeus-db', 1)
-
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result)
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result
-      if (!db.objectStoreNames.contains('pending-orders')) {
-        db.createObjectStore('pending-orders', { keyPath: 'id' })
-      }
-    }
-  })
-}
-
-// Periodic background sync (if supported)
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'check-updates') {
-    event.waitUntil(checkForUpdates())
-  }
-})
-
-async function checkForUpdates() {
-  try {
-    // Check for product updates, price changes, etc.
-    const response = await fetch('/api/updates')
-    if (response.ok) {
-      const updates = await response.json()
-
-      if (updates.priceDrops && updates.priceDrops.length > 0) {
-        // Show notification for price drops on wishlisted items
-        self.registration.showNotification('Price Drop Alert! 🔥', {
-          body: `${updates.priceDrops.length} item(s) in your wishlist are now cheaper!`,
-          icon: '/icons/icon-192x192.png',
-          data: { url: '/wishlist' }
-        })
-      }
-    }
-  } catch (error) {
-    console.error('Update check failed:', error)
-  }
-}
+// Service Worker cleanup complete
