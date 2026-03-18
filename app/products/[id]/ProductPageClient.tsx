@@ -7,7 +7,19 @@ import { ShoppingCart, Zap, Shield, Truck, RotateCcw } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
 import type { Product } from "@/lib/supabase"
+import { TrackProductView } from "@/components/TrackProductView"
+
+const RelatedProducts = dynamic(
+  () => import("@/components/RelatedProducts").then(m => ({ default: m.RelatedProducts })),
+  { ssr: false }
+)
+
+const RecentlyViewed = dynamic(
+  () => import("@/components/RecentlyViewed").then(m => ({ default: m.RecentlyViewed })),
+  { ssr: false }
+)
 
 interface ProductPageClientProps {
   product: any // We'll use any or a combined type from Supabase
@@ -231,6 +243,18 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
           )}
         </div>
 
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <TrackProductView product={product as any} />
+        
+        {/* Horizontal scroll sections */}
+        <RelatedProducts
+          productId={product.id}
+          category={product.category}
+        />
+        
+        <RecentlyViewed currentProductId={product.id} />
       </div>
     </div>
   )
