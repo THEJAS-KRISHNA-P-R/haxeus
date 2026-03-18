@@ -23,12 +23,10 @@ export async function sendEmail({
 }) {
     const key = process.env.RESEND_API_KEY
     if (!key) {
-        console.log('RESEND_API_KEY not set — skipping email:', subject, 'to:', to)
         return { success: true }
     }
 
     // Masked logging for debugging (only showing first 5 chars)
-    console.log(`[Resend] Attempting to send email. Key starts with: ${key.substring(0, 5)}... (length: ${key.length})`)
 
     const client = getResendClient()
     if (!client) {

@@ -11,7 +11,7 @@ test.describe('Checkout Flow', () => {
     await expect(page.locator('[data-testid="orders-table"], .group.overflow-hidden').first()).toBeVisible({ timeout: 10_000 }).catch(() => {});
     await page.screenshot({ path: 'playwright-output/checkout-01-products.png', fullPage: true });
 
-    const messages1 = page.on('console', (m) => { if (m.type() === 'error') console.log('[console error]', m.text()); });
+    const messages1 = page.on('console', (m) => { if (m.type() === 'error') {}; });
 
     // Step 2: Click first product card
     const firstProduct = page.locator('a[href^="/products/"]').first();
@@ -63,7 +63,7 @@ test.describe('Checkout Flow', () => {
     const payBtn = page.locator('button').filter({ hasText: /pay\s*₹/i }).first();
     const razorpayBtn = page.locator('[data-testid="razorpay-button"], button').filter({ hasText: /pay/i }).first();
     const btnVisible = (await payBtn.count() > 0) || (await razorpayBtn.count() > 0);
-    console.log('[checkout] Pay button visible:', btnVisible);
+
 
     await page.screenshot({ path: 'playwright-output/checkout-07-pay-button.png', fullPage: true });
   });

@@ -101,7 +101,6 @@ export async function POST(request: Request) {
             .eq('id', email.id)
 
           successCount++
-          console.log(`Sent email ${email.id} to ${email.recipient_email}`)
         }
       } catch (emailError) {
         // Mark as failed

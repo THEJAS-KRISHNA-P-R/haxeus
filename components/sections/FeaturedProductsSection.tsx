@@ -1,88 +1,101 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useTheme } from "next-themes"
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
+import { scrollReveal } from "@/lib/animations"
+import { ProductCard } from "@/components/ui/ProductCard"
 import type { FeaturedProductsConfig } from "@/types/homepage"
 import type { Product } from "@/lib/supabase"
+import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { hoverScale, tapScale } from "@/lib/animations"
 
 interface FeaturedProductsSectionProps {
   config: FeaturedProductsConfig
   products: Product[]
+  loading?: boolean
+  isDark?: boolean
 }
 
-export function FeaturedProductsSection({ config, products }: FeaturedProductsSectionProps) {
-  const { theme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  const isDark = mounted && (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches))
+const accentColors = ["#e7bf04", "#c03c9d", "#07e4e1"]
 
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  }
-
-  const desktopGridClass = config.count >= 6 ? "lg:grid-cols-3" : "lg:grid-cols-3"
+export function FeaturedProductsSection({ 
+  config, 
+  products, 
+  loading = false,
+  isDark = true 
+}: FeaturedProductsSectionProps) {
+  const heading = config.heading ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading
+  const headingAccent = config.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading_accent
+  const subtext = config.subtext ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.subtext
 
   return (
-    <section className="py-24">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className={`text-4xl lg:text-5xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>
-            {config.heading} <span className="text-[#e93a3a]">{config.heading_accent}</span>
-          </h2>
-          <p className={`mt-4 text-lg ${isDark ? 'text-white/65' : 'text-black/65'} max-w-2xl mx-auto`}>
-            {config.subtext}
-          </p>
-        </div>
-        
+    <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
         <motion.div
-          className={`grid grid-cols-1 md:grid-cols-2 ${desktopGridClass} gap-8`}
-          variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, margin: "-100px" }}
+          variants={scrollReveal}
+          className="text-center mb-16"
         >
-          {products.map(product => (
-            <motion.div key={product.id} variants={itemVariants}>
-              <Link href={`/products/${product.id}`} className="block group">
-                <div className={`rounded-2xl overflow-hidden border ${isDark ? 'bg-white/[0.03] border-white/[0.07]' : 'bg-black/[0.02] border-black/[0.07]'}`}>
-                  <div className="aspect-square overflow-hidden">
-                    <Image
-                      src={product.front_image || '/placeholder.svg'}
-                      alt={product.name}
-                      width={500}
-                      height={500}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      style={{ width: 'auto', height: 'auto' }}
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-black'}`}>{product.name}</h3>
-                    <p className="text-[#e93a3a] font-bold mt-1">₹{product.price}</p>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+          <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>
+            {heading} <span style={{ color: "var(--accent)" }}>{headingAccent}</span>
+          </h2>
+          <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-white/80">
+            {subtext}
+          </p>
         </motion.div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-[var(--bg-elevated)] rounded-2xl overflow-hidden animate-pulse">
+                <div className="aspect-square bg-[var(--text)]/5" />
+                <div className="p-6 space-y-3">
+                  <div className="h-6 bg-[var(--text)]/5 rounded w-3/4" />
+                  <div className="h-8 bg-[var(--text)]/5 rounded w-1/2" />
+                  <div className="h-12 bg-[var(--text)]/5 rounded-full w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-6xl mb-6"
+            />
+            <h3 className="text-3xl font-bold text-theme mb-4">Coming Soon!</h3>
+            <p className="text-lg text-white/70 max-w-md mx-auto mb-8">
+              We&apos;re working on bringing you amazing products. Stay tuned!
+            </p>
+            <Link href="/contact">
+              <motion.div whileHover={hoverScale} whileTap={tapScale}>
+                <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-8 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[var(--accent)]/20">
+                  Get Notified
+                </Button>
+              </motion.div>
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 text-left">
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product as any}
+                index={index}
+                accentColor={accentColors[index % 3]}
+                variant="default"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

@@ -1,35 +1,17 @@
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-import { requireAdmin } from "@/lib/admin"
+import { verifyAdminRequest } from "@/lib/admin-auth"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
-async function getClients() {
-  const cookieStore = await cookies()
-  
-  const supabaseAuth = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll() } }
-  )
-
-  const supabaseAdmin = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll: () => [], setAll: () => {} } }
-  )
-
-  return { supabaseAuth, supabaseAdmin }
-}
 
 export async function GET(request: Request) {
   try {
-    const { supabaseAuth, supabaseAdmin } = await getClients()
+    const auth = await verifyAdminRequest()
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
 
-    const { data: { user } } = await supabaseAuth.auth.getUser()
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const supabaseAdmin = getSupabaseAdmin()
 
-    const isAdmin = await requireAdmin(user.id)
-    if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
     const { searchParams } = new URL(request.url)
     const bucket = searchParams.get("bucket") ?? ""
@@ -75,13 +57,13 @@ export async function GET(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { supabaseAuth, supabaseAdmin } = await getClients()
+    const auth = await verifyAdminRequest()
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
 
-    const { data: { user } } = await supabaseAuth.auth.getUser()
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const supabaseAdmin = getSupabaseAdmin()
 
-    const isAdmin = await requireAdmin(user.id)
-    if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
     const { bucket, paths } = await request.json()
 

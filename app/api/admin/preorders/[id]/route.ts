@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { invalidate } from "@/lib/redis";
-import { requireAdminRoute } from "@/lib/admin-route";
+import { verifyAdminRequest } from "@/lib/admin-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function PATCH(
     request: Request,
     { params }: { params: { id: string } }
 ) {
-    const { supabaseAdmin, errorResponse } = await requireAdminRoute();
-    if (errorResponse) return errorResponse;
+    const auth = await verifyAdminRequest();
+    if (!auth.authorized) {
+        return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+
 
     const { id } = params;
     const body = await request.json();
@@ -51,8 +57,13 @@ export async function DELETE(
     request: Request,
     { params }: { params: { id: string } }
 ) {
-    const { supabaseAdmin, errorResponse } = await requireAdminRoute();
-    if (errorResponse) return errorResponse;
+    const auth = await verifyAdminRequest();
+    if (!auth.authorized) {
+        return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+
 
     const { id } = params;
 

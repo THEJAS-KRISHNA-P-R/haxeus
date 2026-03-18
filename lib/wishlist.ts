@@ -14,7 +14,6 @@ export async function addToWishlist(productId: number): Promise<boolean> {
       return false
     }
 
-    console.log("Adding to wishlist:", { userId: user.id, productId })
 
     const { data, error } = await supabase.from("wishlist").insert([
       {
@@ -28,7 +27,6 @@ export async function addToWishlist(productId: number): Promise<boolean> {
       return false
     }
 
-    console.log("Successfully added to wishlist:", data)
     return true
   } catch (error) {
     console.error("Error adding to wishlist:", error)
@@ -50,7 +48,6 @@ export async function removeFromWishlist(productId: number): Promise<boolean> {
       return false
     }
 
-    console.log("Removing from wishlist:", { userId: user.id, productId })
 
     const { data, error } = await supabase
       .from("wishlist")
@@ -64,7 +61,6 @@ export async function removeFromWishlist(productId: number): Promise<boolean> {
       return false
     }
 
-    console.log("Successfully removed from wishlist:", data)
     return true
   } catch (error) {
     console.error("Error removing from wishlist:", error)

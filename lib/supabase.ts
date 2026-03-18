@@ -32,7 +32,7 @@ export interface Product {
   available_sizes: string[]
   colors?: string[]
   total_stock: number
-  category?: string
+  category: string | null
   slug?: string
   is_active?: boolean
   created_at?: string

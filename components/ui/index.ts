@@ -1,0 +1,43 @@
+// components/ui/index.ts
+// Barrel file for all UI primitives — enables cleaner imports:
+// import { ProductCard, Toggle } from "@/components/ui"
+
+// Custom HAXEUS components
+export { ProductCard } from "./ProductCard"
+export { ProductCardCompact } from "./ProductCardCompact"
+export { Toggle } from "./Toggle"
+export { GlassInput } from "./GlassInput"
+export { ShimmerButton } from "./ShimmerButton"
+export { SpotlightCard } from "./SpotlightCard"
+export { default as ShinyText } from "./ShinyText"
+export { default as SplitText } from "./SplitText"
+
+// shadcn/ui primitives
+export { Button, buttonVariants } from "./button"
+export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card"
+export { Badge, badgeVariants } from "./badge"
+export { Input } from "./input"
+export { Label } from "./label"
+export { Textarea } from "./textarea"
+export { Checkbox } from "./checkbox"
+export { Switch } from "./switch"
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs"
+export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./dialog"
+export { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./sheet"
+export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./dropdown-menu"
+export { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./table"
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion"
+export { Alert, AlertDescription, AlertTitle } from "./alert"
+export { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog"
+export { Avatar, AvatarFallback, AvatarImage } from "./avatar"
+export { Separator } from "./separator"
+export { Skeleton } from "./skeleton"
+export { ScrollArea, ScrollBar } from "./scroll-area"
+export { Progress } from "./progress"
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip"
+export { Popover, PopoverContent, PopoverTrigger } from "./popover"
+export { RadioGroup, RadioGroupItem } from "./radio-group"
+export { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "./drawer"
+// Note: sonner.tsx exports Toaster (shadcn wrapper) — already included above via Toaster
+export { Toaster } from "./toaster"

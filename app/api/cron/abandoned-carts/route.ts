@@ -44,15 +44,9 @@ export async function GET(request: Request) {
     // Process abandoned carts
     const result = await processAbandonedCarts(supabase)
 
-    // Log results
-    console.log('Abandoned cart cron job completed:', {
-      timestamp: new Date().toISOString(),
-      stage1Sent: result.stage1Sent,
-      stage2Sent: result.stage2Sent,
-      stage3Sent: result.stage3Sent,
-      totalSent: result.stage1Sent + result.stage2Sent + result.stage3Sent,
-      errors: result.errors
-    })
+    if (result.errors.length > 0) {
+      console.error('[cron] Found errors in abandoned cart processing:', result.errors)
+    }
 
     return NextResponse.json({
       success: true,

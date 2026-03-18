@@ -10,8 +10,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { hoverScale, tapScale, cardHover } from "@/lib/animations"
 import { WishlistButton } from "@/components/WishlistButton"
-// We'll import type Product from "@/lib/supabase" since the prompt used sizes_available vs available_sizes
 import type { Product } from "@/lib/supabase"
+import { isSupabaseStorageUrl } from "@/lib/storage-utils"
 
 interface ProductCardProps {
   product: Product
@@ -19,10 +19,6 @@ interface ProductCardProps {
   accentColor?: string
   variant?: "default" | "preorder"
   onPreorderClick?: (product: Product) => void
-}
-
-export function isSupabaseStorageUrl(url?: string) {
-  return typeof url === "string" && url.includes(".supabase.co/storage/v1/")
 }
 
 export function ProductCard({

@@ -59,12 +59,8 @@ export default function NewProductPage() {
   async function handleSave() {
     setSaving(true)
     try {
-      console.log("=== CREATING NEW PRODUCT ===")
-      console.log("Form Data:", formData)
 
-      // Verify user is logged in
       const { data: { user } } = await supabase.auth.getUser()
-      console.log("Current User:", user?.email, "UUID:", user?.id)
 
       if (!user) {
         alert("You must be logged in to add products")
@@ -76,7 +72,6 @@ export default function NewProductPage() {
       const totalStock = formData.inventory.reduce((sum, inv) => sum + inv.stock_quantity, 0)
       const availableSizes = formData.inventory.map(inv => inv.size)
 
-      console.log("Inserting product into database...")
 
       // Create product
       const { data: insertResult, error: productError } = await supabase
@@ -100,23 +95,11 @@ export default function NewProductPage() {
         })
         .select('id')
 
-      if (productError) {
-        console.error("Product insert error:", productError)
-        console.error("Error details:", {
-          code: productError.code,
-          message: productError.message,
-          details: productError.details,
-          hint: productError.hint,
-        })
-        throw productError
-      }
+      if (productError) throw productError
 
-      console.log("Insert result:", insertResult)
       const newProductId = insertResult?.[0]?.id
-      console.log("Product created with ID:", newProductId)
 
       if (!newProductId) {
-        console.warn("Product created but couldn't get ID - redirecting anyway")
         router.refresh()
         router.push("/admin/products")
         return
@@ -130,7 +113,6 @@ export default function NewProductPage() {
           display_order: index,
           is_primary: img.is_primary,
         }))
-        console.log("Inserting images:", imagesWithProductId)
 
         const { data: imgResult, error: imagesError } = await supabase
           .from("product_images")
@@ -139,8 +121,6 @@ export default function NewProductPage() {
 
         if (imagesError) {
           console.error("Images insert error:", imagesError)
-        } else {
-          console.log("Images inserted:", imgResult)
         }
       }
 
@@ -155,7 +135,6 @@ export default function NewProductPage() {
           reserved_quantity: 0,
           sold_quantity: 0,
         }))
-        console.log("Inserting inventory:", inventoryWithProductId)
 
         const { data: invResult, error: inventoryError } = await supabase
           .from("product_inventory")
@@ -164,17 +143,12 @@ export default function NewProductPage() {
 
         if (inventoryError) {
           console.error("Inventory insert error:", inventoryError)
-        } else {
-          console.log("Inventory inserted:", invResult)
         }
       }
 
-      console.log("Product creation complete! Redirecting...")
       router.refresh()
       router.push("/admin/products")
     } catch (error: any) {
-      console.error("=== ERROR CREATING PRODUCT ===")
-      console.error("Error:", error)
       const errorMsg = error.message || "Unknown error occurred"
       alert(`Failed to create product: ${errorMsg}`)
     } finally {
@@ -230,13 +204,23 @@ export default function NewProductPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="category" className={isDark ? "text-white/60" : "text-black/60"}>Category</Label>
-                <Input
+                <select
                   id="category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="e.g., apparel"
-                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
-                />
+                  className={`w-full px-3 py-2.5 rounded-xl border text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-[#e93a3a]/50 ${
+                    isDark
+                      ? "border-white/[0.10] text-white bg-[#1a1a1a]"
+                      : "border-black/[0.10] text-black bg-white"
+                  }`}
+                >
+                  <option value="tshirt">T-Shirt</option>
+                  <option value="jersey">Jersey</option>
+                  <option value="hoodie">Hoodie</option>
+                  <option value="shorts">Shorts</option>
+                  <option value="accessories">Accessories</option>
+                  <option value="apparel">Apparel</option>
+                </select>
               </div>
             </div>
 

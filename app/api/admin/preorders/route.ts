@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { invalidate } from "@/lib/redis";
-import { requireAdminRoute } from "@/lib/admin-route";
+import { verifyAdminRequest } from "@/lib/admin-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET(request: Request) {
-    const { supabaseAdmin, errorResponse } = await requireAdminRoute();
-    if (errorResponse) return errorResponse;
+    const auth = await verifyAdminRequest();
+    if (!auth.authorized) {
+        return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+
 
     const { data, error } = await supabaseAdmin.rpc('get_preorder_items_with_counts');
 
@@ -17,8 +23,13 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-    const { supabaseAdmin, errorResponse } = await requireAdminRoute();
-    if (errorResponse) return errorResponse;
+    const auth = await verifyAdminRequest();
+    if (!auth.authorized) {
+        return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+
 
     const body = await request.json();
 

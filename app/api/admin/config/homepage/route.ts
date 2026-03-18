@@ -1,43 +1,20 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+
 import { deepMerge } from "@/lib/deep-merge";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults";
 import { invalidate } from "@/lib/redis";
 import type { HomepageConfig } from "@/types/homepage";
 
+import { verifyAdminRequest } from "@/lib/admin-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
+
 export async function PATCH(request: Request) {
-  const cookieStore = await cookies();
-
-  // ── Cookie-based client for auth check ──
-  const supabaseAuth = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get: (name) => cookieStore.get(name)?.value } }
-  );
-
-  // ── Service role client for DB ops ──
-  const supabaseAdmin = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll: () => [], setAll: () => {} } }
-  );
-
-  const { data: { user } } = await supabaseAuth.auth.getUser();
-  if (!user) {
-    return new NextResponse("Unauthorized", { status: 401 });
+  const auth = await verifyAdminRequest();
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  const { data: roleData } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "admin")
-    .maybeSingle();
-
-  if (!roleData) {
-    return new NextResponse("Forbidden", { status: 403 });
-  }
+  const supabaseAdmin = getSupabaseAdmin();
 
   try {
     const body = await request.json();

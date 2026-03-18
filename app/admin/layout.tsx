@@ -4,13 +4,15 @@ import Link from "next/link"
 import { useEffect, useState, useRef, useCallback } from "react"
 import {
   LayoutDashboard, ShoppingBag, Package, Users,
-  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X, Mail, ShoppingCart, HardDrive
+  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X, Mail, ShoppingCart, HardDrive, Globe
 } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { supabase } from "@/lib/supabase"
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Overview" },
+  { href: "/admin/homepage", icon: Globe, label: "Homepage" },
+  { href: "/admin/promo-popups", icon: Tag, label: "Promos" },
   { href: "/admin/orders", icon: ShoppingBag, label: "Orders" },
   { href: "/admin/products", icon: Package, label: "Products" },
   { href: "/admin/storage", icon: HardDrive, label: "Storage" },
@@ -446,7 +448,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* -- MAIN CONTENT -- */}
       <main
         style={{ background: "var(--bg)" }}
-        className="ml-64 pt-24 min-h-screen px-8"
+        className="ml-64 pt-24 min-h-screen px-8 max-w-[1600px] mx-auto"
       >
         {children}
 

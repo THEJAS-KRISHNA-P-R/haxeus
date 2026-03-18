@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { cached } from "@/lib/redis";
-import { requireAdminRoute } from "@/lib/admin-route";
+import { verifyAdminRequest } from "@/lib/admin-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export const revalidate = 0;
 
 async function getTrendingProducts(supabaseAdmin: any) {
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -43,8 +45,13 @@ async function getTrendingProducts(supabaseAdmin: any) {
 
 export async function GET() {
   try {
-    const { supabaseAdmin, errorResponse } = await requireAdminRoute();
-    if (errorResponse) return errorResponse;
+    const auth = await verifyAdminRequest();
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+
 
     const products = await cached(
       "products:trending",
