@@ -15,7 +15,6 @@ import GlassSurface from "@/components/GlassSurface"
 import { StaggeredMenu } from "@/components/StaggeredMenu"
 import type { StaggeredMenuItem } from "@/components/StaggeredMenu"
 import { cn } from "@/lib/utils"
-import { useDeviceTier } from "@/hooks/useDeviceTier"
 
 // Isolated component that uses useSearchParams — wrapped in Suspense inside Navbar
 function NavbarSearchSync({ onSync }: { onSync: (q: string) => void }) {
@@ -32,7 +31,6 @@ import { ThemeToggle } from "@/components/ThemeToggle"
 
 export function Navbar() {
   const { theme } = useTheme()
-  const tier = useDeviceTier()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -48,16 +46,13 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const isHome = pathname === "/"
-
-  const isLowTier = tier === "low"
-
   const desktopNavbarGlassProps = {
     brightness: 100,
     opacity: 0.85,
-    blur: isLowTier ? 0 : 20,
-    backgroundOpacity: isLowTier ? 0.4 : 0.15, // Slightly higher opacity if no blur
+    blur: 20, // Increased for premium feel on desktop
+    backgroundOpacity: 0.15,
     saturation: 1.1,
-    distortionScale: isLowTier ? 0 : -18,
+    distortionScale: -18,
     redOffset: 0,
     greenOffset: 0,
     blueOffset: 0,
@@ -65,9 +60,9 @@ export function Navbar() {
   const mobileNavbarGlassProps = {
     brightness: 100,
     opacity: 0.88,
-    blur: isLowTier ? 0 : 8,
-    backgroundOpacity: isLowTier ? 0.4 : 0.15,
-    distortionScale: isLowTier ? 0 : -15,
+    blur: 8, // Reduced for mobile performance
+    backgroundOpacity: 0.15,
+    distortionScale: -15,
     redOffset: 0,
     greenOffset: 0,
     blueOffset: 0,

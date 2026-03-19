@@ -5,8 +5,6 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { useTheme } from "@/components/ThemeProvider"
 import { useState, useEffect } from "react"
-import { getAnimationProps } from "@/lib/animations"
-import { useDeviceTier } from "@/hooks/useDeviceTier"
 import type { Product } from "@/lib/supabase"
 import { isSupabaseStorageUrl } from "@/lib/storage-utils"
 
@@ -17,7 +15,6 @@ interface ProductCardCompactProps {
 
 export function ProductCardCompact({ product, index = 0 }: ProductCardCompactProps) {
   const { theme } = useTheme()
-  const tier = useDeviceTier()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const isDark = !mounted ? true : theme === "dark"
@@ -26,19 +23,18 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
 
   return (
     <motion.div
-      {...getAnimationProps({
-        initial: { opacity: 0, y: 12 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, amount: 0.1 },
-        transition: { duration: 0.4, ease: "easeOut" }
-      })}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className="flex-shrink-0 w-[180px] sm:w-44"
     >
       <Link href={`/products/${product.id}`} className="block group">
 
         {/* Image */}
-        <div className={`relative w-full aspect-square rounded-xl overflow-hidden mb-2.5 ${isDark ? "bg-white/[0.04]" : "bg-black/[0.04]"
-          }`}>
+        <div className={`relative w-full aspect-square rounded-xl overflow-hidden mb-2.5 ${
+          isDark ? "bg-white/[0.04]" : "bg-black/[0.04]"
+        }`}>
           <Image
             src={image}
             alt={product.name}
@@ -68,10 +64,11 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
         </div>
 
         {/* Name */}
-        <p className={`text-xs sm:text-sm font-semibold leading-tight truncate transition-colors ${isDark
+        <p className={`text-xs sm:text-sm font-semibold leading-tight truncate transition-colors ${
+          isDark
             ? "text-white group-hover:text-white/70"
             : "text-black group-hover:text-black/60"
-          }`}>
+        }`}>
           {product.name}
         </p>
 

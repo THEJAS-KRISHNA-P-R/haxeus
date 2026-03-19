@@ -1,8 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { scrollReveal, getAnimationProps } from "@/lib/animations"
-import { useDeviceTier } from "@/hooks/useDeviceTier"
+import { scrollReveal } from "@/lib/animations"
 import { ProductCard } from "@/components/ui/ProductCard"
 import type { PreorderSectionConfig } from "@/types/homepage"
 import type { Product } from "@/lib/supabase"
@@ -16,25 +15,22 @@ interface PreorderSectionProps {
 
 const accentColors = ["#e7bf04", "#c03c9d", "#07e4e1"]
 
-export function PreorderSection({
-  config,
-  products,
+export function PreorderSection({ 
+  config, 
+  products, 
   isDark = true,
-  onPreorderClick
+  onPreorderClick 
 }: PreorderSectionProps) {
-  const tier = useDeviceTier()
   if (products.length === 0) return null
 
   return (
     <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 text-center">
         <motion.div
-          {...getAnimationProps({
-            initial: "hidden",
-            whileInView: "visible",
-            viewport: { once: true, margin: "-100px" },
-            variants: scrollReveal
-          })}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={scrollReveal}
           className="mb-16"
         >
           <div className="text-xs tracking-[0.25em] font-medium uppercase text-[var(--accent)] mb-2">COMING SOON</div>

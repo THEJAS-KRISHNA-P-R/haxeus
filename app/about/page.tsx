@@ -6,8 +6,6 @@ import Link from 'next/link';
 import {
   Palette, Shirt, Truck, Recycle, Heart, Users, Sparkles, ArrowDown
 } from 'lucide-react';
-import { getAnimationProps } from '@/lib/animations';
-import { useDeviceTier } from '@/hooks/useDeviceTier';
 
 const SparklesCore = dynamic(
   () => import('@/components/ui/sparkles').then(m => m.SparklesCore),
@@ -18,13 +16,12 @@ const values = [
   {
     icon: Shirt,
     title: '240gsm Heavyweight',
-    desc: 'Our tees and hoodies are made from premium 240gsm cotton for that perfect drape and durability.',
-  },
+    desc: 'Our tees and hoodies are made from premium 240gsm cotton for that perfect drape and durability.',},
   {
     icon: Truck,
     title: 'Ships in 48h',
     desc: 'Order today, we ship within 48 hours. Pan-India delivery in 7-10      days.',
-  },
+  },  
   {
     icon: Heart,
     title: 'Community Driven',
@@ -47,9 +44,6 @@ const fadeUp = {
 };
 
 export default function AboutPage() {
-  const tier = useDeviceTier();
-  const isLowTier = tier === 'low';
-
   return (
     <main className="bg-theme text-theme transition-colors duration-300">
 
@@ -117,12 +111,10 @@ export default function AboutPage() {
       <section className="py-24 px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <motion.div
-            {...getAnimationProps({
-              initial: "hidden",
-              whileInView: "visible",
-              viewport: { once: true, margin: "-80px" },
-              variants: stagger
-            })}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
             className="space-y-6"
           >
             <motion.h2
@@ -153,11 +145,9 @@ export default function AboutPage() {
       <section className="py-20 px-6 lg:px-8 bg-card transition-colors duration-300">
         <div className="max-w-3xl mx-auto">
           <motion.h2
-            {...getAnimationProps({
-              initial: { opacity: 0, y: 20 },
-              whileInView: { opacity: 1, y: 0 },
-              viewport: { once: true }
-            })}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             className="text-3xl md:text-4xl font-black mb-12 text-center"
           >
             The Journey
@@ -166,12 +156,10 @@ export default function AboutPage() {
             {timeline.map((t, i) => (
               <motion.div
                 key={i}
-                {...getAnimationProps({
-                  initial: { opacity: 0, x: -20 },
-                  whileInView: { opacity: 1, x: 0 },
-                  viewport: { once: true },
-                  transition: { delay: i * 0.15 }
-                })}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
                 className="relative pl-8"
               >
                 <div className="absolute left-[-9px] top-1 w-4 h-4 rounded-full bg-[var(--accent)] border-4 border-theme" />
@@ -204,12 +192,10 @@ export default function AboutPage() {
           </motion.p>
 
           <motion.div
-            {...getAnimationProps({
-              variants: stagger,
-              initial: "hidden",
-              whileInView: "visible",
-              viewport: { once: true, margin: "-50px" }
-            })}
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {values.map((v) => (
