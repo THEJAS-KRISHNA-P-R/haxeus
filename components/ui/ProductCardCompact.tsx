@@ -27,7 +27,7 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex-shrink-0 w-36 sm:w-44"
+      className="flex-shrink-0 w-[180px] sm:w-44"
     >
       <Link href={`/products/${product.id}`} className="block group">
 
@@ -39,7 +39,7 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
             src={image}
             alt={product.name}
             fill
-            sizes="(max-width: 640px) 144px, 176px"
+            sizes="(max-width: 640px) 180px, 176px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               const t = e.target as HTMLImageElement

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
+import { AnimatePresence, motion } from "framer-motion"
 import { useTheme } from "@/components/ThemeProvider"
-import { Shield, Truck, RotateCcw } from "lucide-react"
+import { Shield, Truck, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
@@ -62,7 +63,8 @@ export function ProductPageClient({
     ? images.map(img => img.image_url)
     : [p.front_image || "/placeholder.svg"]
 
-  const [activeImage, setActiveImage] = useState(allImages[0])
+  const [activeIndex, setActiveIndex] = useState(0)
+  const activeImage = allImages[activeIndex]
   const [selectedSize, setSelectedSize] = useState("")
   const [addingToCart, setAddingToCart] = useState(false)
   const [sizesExpanded, setSizesExpanded] = useState(false)
@@ -108,8 +110,22 @@ export function ProductPageClient({
     const checkMobile = () => setIsMobile(window.innerWidth < 640)
     checkMobile()
     window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+
+    // Keyboard navigation
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        setActiveIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1))
+      } else if (e.key === "ArrowRight") {
+        setActiveIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1))
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      window.removeEventListener("resize", checkMobile)
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [allImages.length])
 
   // Out-of-stock check — preorders are never OOS
   const isSelectedSizeOutOfStock = !p.is_preorder && selectedSize
@@ -171,19 +187,81 @@ export function ProductPageClient({
       <div className="grid grid-cols-1 lg:grid-cols-[55%_45%] gap-8 lg:gap-12 items-start">
 
         {/* Left — image gallery */}
-        <div className="lg:sticky lg:top-[88px] lg:scale-[0.85] lg:origin-top">
-          <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black">
-            <Image
-              src={activeImage}
-              alt={product.name}
-              fill
-              sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-cover"
-              onError={(e) => {
-                const t = e.target as HTMLImageElement
-                t.src = "/placeholder.svg"
-              }}
-            />
+        <div className="lg:sticky lg:top-[88px] lg:scale-[0.85] lg:origin-top group">
+          <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black touch-pan-y">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="relative w-full h-full"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(_e, { offset, velocity }) => {
+                  const swipe = Math.abs(offset.x) > 50 || Math.abs(velocity.x) > 500
+                  if (swipe) {
+                    if (offset.x > 0) {
+                      setActiveIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1))
+                    } else {
+                      setActiveIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1))
+                    }
+                  }
+                }}
+              >
+                <Image
+                  src={activeImage}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 55vw"
+                  className="object-cover pointer-events-none"
+                  priority
+                  onError={(e) => {
+                    const t = e.target as HTMLImageElement
+                    t.src = "/placeholder.svg"
+                  }}
+                />
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Arrows */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1))}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-md text-white transition-all opacity-0 group-hover:opacity-100 hidden sm:block z-10"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={() => setActiveIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1))}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-md text-white transition-all opacity-0 group-hover:opacity-100 hidden sm:block z-10"
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+
+            {/* Pagination Dots */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveIndex(i)}
+                    className={cn(
+                      "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                      activeIndex === i ? "bg-white w-4" : "bg-white/40 hover:bg-white/60"
+                    )}
+                    aria-label={`Go to image ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {allImages.length > 1 && (
@@ -191,9 +269,9 @@ export function ProductPageClient({
               {allImages.map((img, i) => (
                 <button
                   key={i}
-                  onClick={() => setActiveImage(img)}
+                  onClick={() => setActiveIndex(i)}
                   className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors ${
-                    activeImage === img
+                    activeIndex === i
                       ? "border-[#e93a3a]"
                       : isDark ? "border-white/[0.10]" : "border-black/[0.10]"
                   }`}
@@ -359,11 +437,9 @@ export function ProductPageClient({
 
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <TrackProductView product={p} />
-        <RelatedProducts productId={p.id} category={p.category || 'Streetwear'} />
-        <RecentlyViewed currentProductId={p.id} />
-      </div>
+      <TrackProductView product={p} />
+      <RelatedProducts productId={p.id} category={p.category || 'Streetwear'} />
+      <RecentlyViewed currentProductId={p.id} />
     </div>
   )
 }

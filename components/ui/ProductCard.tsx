@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation"
 import { useTheme } from "@/components/ThemeProvider"
 import { Heart, ShoppingCart } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useCart } from "@/contexts/CartContext"
+import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
@@ -31,6 +33,8 @@ export function ProductCard({
 }: ProductCardProps) {
   const router = useRouter()
   const { theme } = useTheme()
+  const { addItem } = useCart()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [wishlisted, setWishlisted] = useState(() => {
     try {
@@ -55,6 +59,25 @@ export function ProductCard({
       localStorage.setItem("haxeus_preorder_wishlist", JSON.stringify(updated))
       setWishlisted(!wishlisted)
     } catch {}
+  }
+  
+  async function handleAddToCart(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    try {
+      await addItem({
+        productId: product.id,
+        size: "S", // Default size for quick-add from card
+        quantity: 1,
+        is_preorder: product.is_preorder
+      })
+      toast({ title: "Added to cart", description: product.name })
+      router.push("/cart")
+    } catch (err: any) {
+      // If adding fails (e.g. size S out of stock), redirect to product page to pick size
+      router.push(`/products/${product.id}`)
+    }
   }
 
   const isPreorderData = product.is_preorder && product.preorder_status !== "stopped"
@@ -193,7 +216,10 @@ export function ProductCard({
 
                 <div className="flex-1">
                   {is_preorder ? (
-                    <div className="w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all border-none flex items-center justify-center">
+                    <div 
+                      onClick={handleAddToCart}
+                      className="w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all border-none flex items-center justify-center cursor-pointer"
+                    >
                       Pre-Order Now
                     </div>
                   ) : total_stock === 0 ? (
@@ -206,6 +232,7 @@ export function ProductCard({
                     </div>
                   ) : (
                     <div
+                      onClick={handleAddToCart}
                       className="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold rounded-full bg-[var(--accent)] text-white hover:opacity-90 transition-all text-center cursor-pointer"
                     >
                       Add to Cart

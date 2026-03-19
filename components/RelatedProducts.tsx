@@ -34,9 +34,8 @@ export function RelatedProducts({ productId, category }: RelatedProductsProps) {
 
   return (
     <section className="relative py-16 border-t border-white/[0.05] dark:border-white/[0.05] border-black/[0.05]">
+      {/* Header - Centered with container grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <p className="text-xs tracking-[0.25em] font-medium uppercase text-[#e7bf04] mb-1">
@@ -75,15 +74,17 @@ export function RelatedProducts({ productId, category }: RelatedProductsProps) {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Scroll container */}
+      {/* TRUE EDGE TO EDGE SCROLL CONTAINER - BREAKS OUT OF GRID */}
+      <div className="w-full">
         {loading ? (
           // Skeleton
-          <div className="flex gap-3 sm:gap-4 overflow-hidden">
-            {[1,2,3,4,5].map(i => (
+          <div className="flex gap-5 sm:gap-4 overflow-hidden px-[10px]">
+            {[1, 2, 3, 4, 5].map(i => (
               <div
                 key={i}
-                className={`flex-shrink-0 w-36 sm:w-44 rounded-xl animate-pulse ${
+                className={`flex-shrink-0 w-[180px] sm:w-44 rounded-xl animate-pulse ${
                   isDark ? "bg-white/[0.04]" : "bg-black/[0.04]"
                 }`}
                 style={{ height: 220 }}
@@ -93,7 +94,7 @@ export function RelatedProducts({ productId, category }: RelatedProductsProps) {
         ) : (
           <div
             ref={scrollRef}
-            className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 scroll-smooth hide-scrollbar"
+            className="flex gap-6 sm:gap-5 overflow-x-auto pb-3 scroll-smooth hide-scrollbar px-[10px]"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {products.map((product, index) => (
