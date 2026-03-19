@@ -414,7 +414,7 @@ export function ProductPageClient({
                 {p.description}
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-theme pt-6">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 border-t border-theme pt-6">
                 <div className="flex flex-col items-center text-center p-3">
                   <Truck className="w-6 h-6 mb-2 text-[var(--accent)]" />
                   <span className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-white/40" : "text-black/40"}`}>Shipping</span>
