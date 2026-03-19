@@ -16,11 +16,15 @@ import {
 } from "@/components/admin/AdminUI";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
-    paid: { label: "Paid", color: "text-emerald-500", dot: "bg-emerald-500" },
-    pending: { label: "Pending", color: "text-orange-500", dot: "bg-orange-500" },
-    shipped: { label: "Shipped", color: "text-blue-500", dot: "bg-blue-500" },
-    delivered: { label: "Delivered", color: "text-emerald-500", dot: "bg-emerald-500" },
-    cancelled: { label: "Cancelled", color: "text-rose-500", dot: "bg-rose-500" },
+    paid:       { label: "Paid",       color: "text-emerald-500", dot: "bg-emerald-500" },
+    confirmed:  { label: "Confirmed",  color: "text-emerald-500", dot: "bg-emerald-500" },
+    pending:    { label: "Pending",    color: "text-orange-500",  dot: "bg-orange-500"  },
+    preorder:   { label: "Pre-Order",  color: "text-yellow-400",  dot: "bg-yellow-400"  },
+    processing: { label: "Processing", color: "text-blue-400",    dot: "bg-blue-400"    },
+    shipped:    { label: "Shipped",    color: "text-blue-500",    dot: "bg-blue-500"    },
+    delivered:  { label: "Delivered",  color: "text-emerald-500", dot: "bg-emerald-500" },
+    cancelled:  { label: "Cancelled",  color: "text-rose-500",    dot: "bg-rose-500"    },
+    refunded:   { label: "Refunded",   color: "text-orange-400",  dot: "bg-orange-400"  },
 };
 
 export default function OrdersContent() {
@@ -48,6 +52,20 @@ export default function OrdersContent() {
         }
     }
 
+    async function updateOrderStatus(orderId: string, newStatus: string) {
+        try {
+            const { error } = await supabase
+                .from("orders")
+                .update({ status: newStatus })
+                .eq("id", orderId);
+            if (!error) {
+                setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+            }
+        } catch (err) {
+            console.error("Error updating order status:", err);
+        }
+    }
+
     function exportCSV() {
         const cols = ["ID", "Customer", "Email", "Date", "Total", "Status"];
         const rows = filtered.map((o) => [
@@ -66,9 +84,10 @@ export default function OrdersContent() {
     }
 
     const filtered = orders.filter((o) => {
-        const status = o.payment_status ?? o.status ?? "pending";
+        const status = o.status ?? "pending";
         const matchSearch =
             o.id.toLowerCase().includes(search.toLowerCase()) ||
+            (o.order_number ?? "").toLowerCase().includes(search.toLowerCase()) ||
             (o.shipping_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
             (o.shipping_email ?? "").toLowerCase().includes(search.toLowerCase());
         const matchFilter = filter === "all" || status === filter;
@@ -107,12 +126,12 @@ export default function OrdersContent() {
                         }}
                         className="flex gap-1 p-1 rounded-full w-fit"
                     >
-                        {["all", "pending", "paid", "shipped", "delivered", "cancelled"].map((s) => (
+                    {["all", "pending", "confirmed", "preorder", "processing", "shipped", "delivered", "cancelled"].map((s) => (
                             <button
                                 key={s}
                                 onClick={() => setFilter(s)}
                                 className={cn(
-                                    "px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.05em] transition-all duration-200",
+                                    "px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.05em] transition-all duration-200",
                                     filter === s
                                         ? "bg-[var(--text)] text-[var(--bg)] shadow-lg"
                                         : "text-[var(--text-3)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text)]"
@@ -137,8 +156,8 @@ export default function OrdersContent() {
                     ) : (
                         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                             <div className="min-w-[800px]">
-                            <AdminTableHeader cols="grid-cols-[1.5fr_2fr_1.5fr_1fr_1.2fr_1.2fr_0.5fr] !py-4">
-                                <div>Order ID</div>
+                            <AdminTableHeader cols="grid-cols-[1.5fr_2fr_1.5fr_1fr_1.2fr_1.2fr_1fr] !py-4">
+                                <div>Order</div>
                                 <div>Customer</div>
                                 <div>Date</div>
                                 <div>Items</div>
@@ -163,13 +182,18 @@ export default function OrdersContent() {
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: i * 0.02 }}
                                             >
-                                                <AdminTableRow cols="grid-cols-[1.5fr_2fr_1.5fr_1fr_1.2fr_1.2fr_0.5fr]" className="items-center py-4">
+                                            <AdminTableRow cols="grid-cols-[1.5fr_2fr_1.5fr_1fr_1.2fr_1.2fr_1fr]" className="items-center py-4">
                                                     <div style={{ color: "var(--text)" }} className="font-bold text-xs font-mono">
-                                                        #{order.id.slice(-8).toUpperCase()}
+                                                        {order.order_number ?? `#${order.id.slice(-8).toUpperCase()}`}
                                                     </div>
                                                     <div>
                                                         <div style={{ color: "var(--text)" }} className="font-bold text-xs truncate max-w-[180px]">{order.shipping_name ?? "—"}</div>
                                                         <div style={{ color: "var(--text-3)" }} className="text-[10px] truncate max-w-[180px]">{order.shipping_email ?? ""}</div>
+                                                        {order.is_preorder && (
+                                                            <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold tracking-wider uppercase bg-yellow-400/20 text-yellow-400">
+                                                                PRE-ORDER
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div style={{ color: "var(--text-2)" }} className="text-xs font-medium">
                                                         {new Date(order.created_at).toLocaleDateString("en-IN", {
@@ -187,15 +211,26 @@ export default function OrdersContent() {
                                                     <div>
                                                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border", s.color)}
                                                             style={{
-                                                                background: `color-mix(in srgb, ${s.color.includes('rose') ? '#f43f5e' : s.color.includes('emerald') ? '#10b981' : s.color.includes('orange') ? '#f59e0b' : '#3b82f6'} 10%, transparent)`,
-                                                                borderColor: `color-mix(in srgb, ${s.color.includes('rose') ? '#f43f5e' : s.color.includes('emerald') ? '#10b981' : s.color.includes('orange') ? '#f59e0b' : '#3b82f6'} 20%, transparent)`
+                                                                background: `color-mix(in srgb, ${s.color.includes('rose') ? '#f43f5e' : s.color.includes('emerald') ? '#10b981' : s.color.includes('orange') ? '#f59e0b' : s.color.includes('yellow') ? '#facc15' : '#3b82f6'} 10%, transparent)`,
+                                                                borderColor: `color-mix(in srgb, ${s.color.includes('rose') ? '#f43f5e' : s.color.includes('emerald') ? '#10b981' : s.color.includes('orange') ? '#f59e0b' : s.color.includes('yellow') ? '#facc15' : '#3b82f6'} 20%, transparent)`
                                                             }}
                                                         >
                                                             <div className={cn("w-1 h-1 rounded-full", s.dot)} />
                                                             {s.label}
                                                         </span>
                                                     </div>
-                                                    <div className="text-right">
+                                                    {/* Status update dropdown */}
+                                                    <div className="text-right flex items-center justify-end gap-1">
+                                                        <select
+                                                            value={order.status ?? "pending"}
+                                                            onChange={e => updateOrderStatus(order.id, e.target.value)}
+                                                            className="text-[9px] font-bold uppercase tracking-wider bg-transparent border border-[var(--border)] rounded-lg px-2 py-1 cursor-pointer text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+                                                            style={{ background: "var(--bg-elevated)" }}
+                                                        >
+                                                            {["pending","confirmed","preorder","processing","shipped","delivered","cancelled","refunded"].map(st => (
+                                                                <option key={st} value={st}>{st}</option>
+                                                            ))}
+                                                        </select>
                                                         <Link href={`/admin/orders/${order.id}`}>
                                                             <button
                                                                 style={{ color: "var(--text-3)" }}
@@ -221,10 +256,10 @@ export default function OrdersContent() {
                     style={{ borderTop: "1px solid var(--border)" }}
                     className="flex flex-wrap divide-x"
                 >
-                    {["all", "pending", "paid", "shipped", "delivered", "cancelled"].map((s) => {
+                {["all", "pending", "confirmed", "preorder", "processing", "shipped", "delivered", "cancelled"].map((s) => {
                         const count = s === "all"
                             ? orders.length
-                            : orders.filter((o) => (o.payment_status ?? o.status) === s).length;
+                            : orders.filter((o) => (o.status ?? "pending") === s).length;
                         const config = STATUS_CONFIG[s] || { color: "var(--text-3)" };
                         const isActive = filter === s;
 

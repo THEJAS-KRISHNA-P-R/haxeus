@@ -14,19 +14,19 @@ export async function sendEmail({
     to,
     subject,
     html,
-    from = 'HAXEUS <orders@haxeus.in>'
+    from = `HAXEUS <${process.env.FROM_EMAIL ?? 'orders@haxeus.in'}>`,
+    replyTo,
 }: {
     to: string
     subject: string
     html: string
     from?: string
+    replyTo?: string
 }) {
     const key = process.env.RESEND_API_KEY
     if (!key) {
         return { success: true }
     }
-
-    // Masked logging for debugging (only showing first 5 chars)
 
     const client = getResendClient()
     if (!client) {
@@ -34,7 +34,13 @@ export async function sendEmail({
     }
 
     try {
-        const { data, error } = await client.emails.send({ from, to, subject, html })
+        const { data, error } = await client.emails.send({
+            from,
+            to,
+            subject,
+            html,
+            ...(replyTo ? { replyTo } : {}),
+        })
         if (error) throw error
         return { success: true, data }
     } catch (err) {

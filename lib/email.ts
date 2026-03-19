@@ -57,8 +57,16 @@ export async function sendOrderConfirmationEmail(data: {
   orderId: string
   customerEmail: string
   customerName: string
-  items: Array<{ name: string; size?: string; quantity: number; price: number }>
+  items: Array<{
+    name: string
+    size?: string
+    quantity: number
+    price: number
+    is_preorder?: boolean
+    expected_date?: string | null
+  }>
   totalAmount: number
+  shipping?: number
   shippingAddress: {
     fullName: string
     addressLine1: string
@@ -66,14 +74,22 @@ export async function sendOrderConfirmationEmail(data: {
     city: string
     state: string
     pincode: string
-    phone: string
+    phone?: string
   }
+  isPreorder?: boolean
 }) {
+  const subtotal = data.items.reduce((s, i) => s + i.price * i.quantity, 0)
+  const shippingAmt = data.shipping ?? 0
+
   const itemsHtml = data.items.map((item) => `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.07);">
         <div style="font-size:14px;font-weight:700;color:#ffffff;">${item.name}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;letter-spacing:1px;text-transform:uppercase;">Size: ${item.size || "N/A"} &nbsp;·&nbsp; Qty: ${item.quantity}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;letter-spacing:1px;text-transform:uppercase;">
+          Size: ${item.size || "N/A"} &nbsp;·&nbsp; Qty: ${item.quantity}
+          ${item.is_preorder ? `&nbsp;<span style="color:#e7bf04;">PRE-ORDER</span>` : ""}
+        </div>
+        ${item.is_preorder && item.expected_date ? `<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:3px;">Ships ${item.expected_date}</div>` : ""}
       </td>
       <td style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.07);text-align:right;font-size:14px;color:#ffffff;">
         ₹${(item.price * item.quantity).toLocaleString("en-IN")}
@@ -82,13 +98,17 @@ export async function sendOrderConfirmationEmail(data: {
   `).join("")
 
   const addr = data.shippingAddress
+  const isPreorder = data.isPreorder ?? false
 
   const content = card(`
-    <p style="margin:0 0 6px;font-size:11px;letter-spacing:3px;color:#e93a3a;text-transform:uppercase;">Order Confirmed</p>
+    <p style="margin:0 0 6px;font-size:11px;letter-spacing:3px;color:#e93a3a;text-transform:uppercase;">${isPreorder ? "Pre-Order Confirmed" : "Order Confirmed"}</p>
     <h1 style="margin:0 0 4px;font-size:28px;font-weight:800;color:#ffffff;">Thanks, ${data.customerName.split(" ")[0]}.</h1>
-    <p style="margin:0 0 0;font-size:14px;color:rgba(255,255,255,0.4);">Order #${data.orderId.substring(0, 8).toUpperCase()}</p>
+    <p style="margin:0 0 0;font-size:14px;color:rgba(255,255,255,0.4);">Order #${data.orderId}</p>
     ${divider()}
-    <p style="margin:0 0 20px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">We're on it. Your order is being prepared and you'll receive a shipping update once it's on the way.</p>
+    <p style="margin:0 0 20px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">${isPreorder
+      ? "Your pre-order is locked in. We'll ship it as soon as it's ready and you'll receive a tracking update."
+      : "We're on it. Your order is being prepared and you'll receive a shipping update once it's on the way."
+    }</p>
 
     <!-- Items -->
     <div style="background-color:#0a0a0a;border-radius:12px;padding:24px;margin-bottom:24px;">
@@ -96,8 +116,16 @@ export async function sendOrderConfirmationEmail(data: {
       <table width="100%" cellpadding="0" cellspacing="0">
         ${itemsHtml}
         <tr>
-          <td style="padding-top:16px;font-size:14px;font-weight:700;color:#ffffff;">Total</td>
-          <td style="padding-top:16px;text-align:right;font-size:16px;font-weight:800;color:#e93a3a;">₹${data.totalAmount.toLocaleString("en-IN")}</td>
+          <td style="padding-top:12px;font-size:13px;color:rgba(255,255,255,0.4);">Subtotal</td>
+          <td style="padding-top:12px;text-align:right;font-size:13px;color:rgba(255,255,255,0.6);">₹${subtotal.toLocaleString("en-IN")}</td>
+        </tr>
+        <tr>
+          <td style="padding-top:6px;font-size:13px;color:rgba(255,255,255,0.4);">Shipping</td>
+          <td style="padding-top:6px;text-align:right;font-size:13px;color:${shippingAmt === 0 ? "#4ade80" : "rgba(255,255,255,0.6)"}">${shippingAmt === 0 ? "FREE" : `₹${shippingAmt}`}</td>
+        </tr>
+        <tr>
+          <td style="padding-top:12px;font-size:14px;font-weight:700;color:#ffffff;border-top:1px solid rgba(255,255,255,0.07);">Total</td>
+          <td style="padding-top:12px;text-align:right;font-size:16px;font-weight:800;color:#e93a3a;border-top:1px solid rgba(255,255,255,0.07);">₹${data.totalAmount.toLocaleString("en-IN")}</td>
         </tr>
       </table>
     </div>
@@ -108,19 +136,22 @@ export async function sendOrderConfirmationEmail(data: {
       <p style="margin:0;font-size:14px;font-weight:700;color:#ffffff;">${addr.fullName}</p>
       <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">
         ${addr.addressLine1}${addr.addressLine2 ? ", " + addr.addressLine2 : ""}<br>
-        ${addr.city}, ${addr.state} — ${addr.pincode}<br>
-        ${addr.phone}
+        ${addr.city}, ${addr.state} — ${addr.pincode}
+        ${addr.phone ? `<br>${addr.phone}` : ""}
       </p>
     </div>
 
     <div style="text-align:center;">
-      ${ctaButton("https://haxeus.in/orders", "Track Your Order")}
+      ${ctaButton(`${process.env.NEXT_PUBLIC_APP_URL ?? "https://haxeus.in"}/orders`, "View Your Order")}
     </div>
   `)
 
   return sendEmail({
     to: data.customerEmail,
-    subject: `Order Confirmed — #${data.orderId.substring(0, 8).toUpperCase()}`,
+    replyTo: process.env.SUPPORT_EMAIL ?? "support@haxeus.in",
+    subject: isPreorder
+      ? `Pre-Order Confirmed — ${data.orderId} · HAXEUS`
+      : `Order Confirmed — ${data.orderId} · HAXEUS`,
     html: emailWrapper(content),
   })
 }
