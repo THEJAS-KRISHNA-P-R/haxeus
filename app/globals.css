@@ -11,6 +11,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force GPU compositing on scroll containers */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent layout thrashing on animated elements */
+.motion-card {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Disable scroll-snap everywhere — causes stutter */
+* {
+  scroll-snap-type: none !important;
+}
+
 /* Mobile tap targets — min 44px for accessibility */
 @media (pointer: coarse) {
   .touch-target {

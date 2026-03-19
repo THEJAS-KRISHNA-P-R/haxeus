@@ -4,8 +4,8 @@ export function Footer() {
   return (
     <footer style={{ background: "var(--bg-card)", borderTop: "1px solid var(--border)" }} className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-10" />
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 sm:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-8 sm:mb-12">
           <div className="col-span-2 md:col-span-1">
             <span className="font-display text-2xl tracking-widest text-[var(--accent)]">HAXEUS</span>
             <p style={{ color: "var(--text-2)" }} className="mt-3 text-sm leading-relaxed max-w-xs">
@@ -26,7 +26,7 @@ export function Footer() {
           ].map((col) => (
             <div key={col.title}>
               <h4 className="text-xs font-bold text-[var(--accent-yellow)]/60 uppercase tracking-[0.2em] mb-4">{col.title}</h4>
-              <ul className="space-y-2.5">
+              <ul className="space-y-1.5 sm:space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link href={link.href} style={{ color: "var(--text-2)" }} className="text-sm hover:text-[var(--accent)] transition-colors duration-300">
@@ -38,7 +38,7 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div style={{ borderColor: "var(--border)" }} className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div style={{ borderColor: "var(--border)" }} className="pt-6 sm:pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
           <p style={{ color: "var(--text-2)" }} className="text-xs">© 2026 HAXEUS. All rights reserved.</p>
           <p style={{ color: "var(--text-2)" }} className="text-xs opacity-70">Made with obsession in India</p>
         </div>

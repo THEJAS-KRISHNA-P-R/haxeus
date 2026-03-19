@@ -94,6 +94,7 @@ const nextConfig = {
       "@radix-ui/react-popover",
       "@radix-ui/react-icons",
       "@supabase/supabase-js",
+      "@tanstack/react-query",
     ],
   },
   outputFileTracingIncludes: {
