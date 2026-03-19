@@ -11,15 +11,18 @@ import type { Product } from "@/lib/supabase"
 interface RelatedProductsProps {
   productId: number
   category: string | null
+  initialData?: any[]
 }
 
-export function RelatedProducts({ productId, category }: RelatedProductsProps) {
+export function RelatedProducts({ productId, category, initialData = [] }: RelatedProductsProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const isDark = !mounted ? true : theme === "dark"
 
-  const { data: rawRelated = [], isLoading: loading } = useRelatedProducts(productId.toString(), category || "Streetwear")
+  const { data: rawRelated = [], isLoading: loading } = useRelatedProducts(productId.toString(), category || "Streetwear", {
+    initialData: initialData.length > 0 ? initialData : undefined
+  })
   const products = rawRelated as Product[]
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -30,7 +33,16 @@ export function RelatedProducts({ productId, category }: RelatedProductsProps) {
     scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" })
   }
 
-  if (!loading && products.length === 0) return null
+  // Debug logs to trace why sections might be missing
+  useEffect(() => {
+    if (mounted) {
+      console.log(`[RelatedProducts] Section mounted. Loaded products: ${products.length}, Loading state: ${loading}, Initial data present: ${!!initialData?.length}`)
+    }
+  }, [mounted, products.length, loading, initialData])
+
+  if (mounted && !loading && !initialData?.length && products.length === 0) {
+    return null
+  }
 
   return (
     <section className="relative py-16 border-t border-white/[0.05] dark:border-white/[0.05] border-black/[0.05]">

@@ -69,22 +69,31 @@ export function Navbar() {
   }
 
   useEffect(() => {
+    let mounted = true
     const initSession = async () => {
       try {
         const { data, error } = await supabase.auth.getSession()
-        if (error) throw error
-        setUser(data.session?.user ?? null)
+        if (error) {
+          if (error.name !== "AuthSessionMissingError") {
+            console.error("Auth init error:", error.message)
+          }
+          if (mounted) setUser(null)
+          return
+        }
+        if (mounted) setUser(data.session?.user ?? null)
       } catch (err) {
-        console.error("Auth init error:", err)
-        setUser(null)
+        if (mounted) setUser(null)
       }
     }
     initSession()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null)
+      if (mounted) setUser(session?.user ?? null)
     })
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const handleSearch = useCallback((value: string) => {

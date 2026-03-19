@@ -29,12 +29,14 @@ interface ProductPageClientProps {
   product: any
   inventory: any[]
   images: any[]
+  relatedProducts?: any[]
 }
 
 export function ProductPageClient({ 
   product: initialProduct, 
   inventory: initialInventory, 
-  images 
+  images,
+  relatedProducts = []
 }: ProductPageClientProps) {
   // Use React Query for session-level caching
   // Passes initial server-fetched data for instant first-render
@@ -189,13 +191,13 @@ export function ProductPageClient({
         {/* Left — image gallery */}
         <div className="lg:sticky lg:top-[88px] lg:scale-[0.85] lg:origin-top group">
           <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black touch-pan-y">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeIndex}
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 1, x: 0 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
+                exit={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0 }}
                 className="relative w-full h-full"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
@@ -213,7 +215,7 @@ export function ProductPageClient({
               >
                 <Image
                   src={activeImage}
-                  alt={product.name}
+                  alt={p.name}
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
                   className="object-cover pointer-events-none"
@@ -438,7 +440,11 @@ export function ProductPageClient({
       </div>
 
       <TrackProductView product={p} />
-      <RelatedProducts productId={p.id} category={p.category || 'Streetwear'} />
+      <RelatedProducts 
+        productId={p.id} 
+        category={p.category || 'Streetwear'} 
+        initialData={relatedProducts}
+      />
       <RecentlyViewed currentProductId={p.id} />
     </div>
   )

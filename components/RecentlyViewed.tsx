@@ -23,8 +23,22 @@ export function RecentlyViewed({ currentProductId }: RecentlyViewedProps) {
   // Exclude current product
   const items = recentlyViewed.filter(p => p.id !== currentProductId)
 
+  // Debug logs to trace why sections might be missing
+  useEffect(() => {
+    if (mounted) {
+      console.log(`[RecentlyViewed] Section mounted. Loaded items: ${items.length}`)
+    }
+  }, [mounted, items.length])
+
   // Don't render until mounted (Zustand persist hydrates after mount)
-  if (!mounted || items.length === 0) return null
+  if (mounted && items.length === 0) {
+    return null
+  }
+
+  if (!mounted) {
+    // Return a minimal placeholder height to avoid layout shift, but don't show content yet
+    return <div style={{ minHeight: 100 }} />
+  }
 
   function scroll(dir: "left" | "right") {
     if (!scrollRef.current) return

@@ -15,16 +15,24 @@ interface ProductCardCompactProps {
 
 export function ProductCardCompact({ product, index = 0 }: ProductCardCompactProps) {
   const { theme } = useTheme()
+  const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  const isDark = !mounted ? true : theme === "dark"
 
+  useEffect(() => {
+    setMounted(true)
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const isDark = !mounted ? true : theme === "dark"
   const image = product.front_image ?? "/placeholder.svg"
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={!mounted || isMobile ? false : { opacity: 0, y: 12 }}
+      whileInView={!mounted || isMobile ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="flex-shrink-0 w-[180px] sm:w-44"
