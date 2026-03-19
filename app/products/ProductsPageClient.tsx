@@ -23,7 +23,9 @@ import {
   staggerFast,
   hoverScale,
   tapScale,
+  getAnimationProps,
 } from "@/lib/animations"
+import { useDeviceTier } from "@/hooks/useDeviceTier"
 import { ProductCard } from "@/components/ui/ProductCard"
 
 import type { Product } from "@/lib/supabase"
@@ -38,6 +40,7 @@ function ProductsContent() {
   const [category, setCategory] = useState("all")
   const searchParams = useSearchParams()
   const searchQuery = searchParams?.get("search") || ""
+  const tier = useDeviceTier()
 
   // Map raw data to include images/sizes (preserving existing logic)
   const products = useMemo(() => {
@@ -214,9 +217,11 @@ function ProductsContent() {
             </motion.div>
           ) : (
             <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={staggerFast}
+              {...getAnimationProps({
+                initial: "hidden",
+                animate: "visible",
+                variants: staggerFast
+              })}
               className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
             >
               {filteredProducts.map((product, index) => (

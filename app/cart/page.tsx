@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils"
 import { FreeShippingBar } from "@/components/ui/FreeShippingBar"
 import { ChevronRight, ArrowLeft, Tag, ChevronDown, Trash2, Truck, ShieldCheck, RotateCcw } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { getAnimationProps } from "@/lib/animations"
+import { useDeviceTier } from "@/hooks/useDeviceTier"
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem } = useCart()
@@ -20,6 +22,7 @@ export default function CartPage() {
   const router = useRouter()
   const { theme } = useTheme()
   const { settings } = useStoreSettings()
+  const tier = useDeviceTier()
   const [mounted, setMounted] = useState(false)
   const [showCoupon, setShowCoupon] = useState(false)
   const [couponCode, setCouponCode] = useState("")
@@ -312,9 +315,11 @@ export default function CartPage() {
                   <AnimatePresence>
                     {showCoupon && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
+                        {...getAnimationProps({
+                          initial: { opacity: 0, height: 0 },
+                          animate: { opacity: 1, height: "auto" },
+                          exit: { opacity: 0, height: 0 }
+                        })}
                         className="overflow-hidden"
                       >
                         <div className="flex gap-2 mt-2.5">
