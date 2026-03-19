@@ -69,9 +69,18 @@ export function Navbar() {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
-      setUser(data.session?.user ?? null)
-    })
+    const initSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession()
+        if (error) throw error
+        setUser(data.session?.user ?? null)
+      } catch (err) {
+        console.error("Auth init error:", err)
+        setUser(null)
+      }
+    }
+    initSession()
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null)
     })
@@ -298,8 +307,18 @@ export function Navbar() {
           onMenuOpen={() => setIsMenuOpen(true)}
           onMenuClose={() => setIsMenuOpen(false)}
           customFooter={
-            <div className="flex items-center justify-between px-2 py-3">
-              <span className="text-sm font-bold tracking-widest text-[#e93a3a]">HAXEUS</span>
+            <div className="px-2 py-4 border-t border-white/5 mt-4">
+              <div className="flex flex-col gap-4">
+                <span className="text-sm font-bold tracking-widest text-[#e93a3a]">HAXEUS</span>
+                <div className="flex flex-wrap gap-x-6 gap-y-2">
+                  <Link href="/terms-conditions" className="text-[10px] uppercase tracking-wider text-white/40 hover:text-[#e93a3a] transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    Terms
+                  </Link>
+                  <Link href="/privacy-policy" className="text-[10px] uppercase tracking-wider text-white/40 hover:text-[#e93a3a] transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    Privacy Policy
+                  </Link>
+                </div>
+              </div>
             </div>
           }
         />
@@ -395,11 +414,16 @@ export function Navbar() {
                   </button>
 
                   <Link
-                    href={user ? "/profile" : "/auth"}
-                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
-                    aria-label={user ? "Profile" : "Sign in"}
+                    href="/cart"
+                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center relative", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
+                    aria-label="Cart"
                   >
-                    <User className="h-5 w-5" />
+                    <ShoppingCart className="h-5 w-5" />
+                    {totalItems > 0 && (
+                      <span className="absolute top-1 right-1 bg-[#e93a3a] text-white text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center font-bold">
+                        {totalItems > 9 ? "9+" : totalItems}
+                      </span>
+                    )}
                   </Link>
 
                   <button

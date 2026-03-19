@@ -28,9 +28,14 @@ export function PreorderModal({ item, isOpen, onClose }: PreorderModalProps) {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setEmail(user.email || "")
+      try {
+        const { data, error } = await supabase.auth.getUser()
+        if (error) throw error
+        if (data?.user) {
+          setEmail(data.user.email || "")
+        }
+      } catch (err) {
+        console.error("Auth check error in PreorderModal:", err)
       }
     }
     checkUser()

@@ -1,5 +1,6 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { X } from 'lucide-react';
 import './StaggeredMenu.css';
 
 export interface StaggeredMenuItem {
@@ -409,6 +410,15 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       )}
 
       <aside id="staggered-menu-panel" ref={panelRef} className="staggered-menu-panel" aria-hidden={!open}>
+        {/* Mobile Close Button */}
+        <button 
+          className="absolute top-6 right-6 p-3 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 transition-all z-20 md:hidden"
+          onClick={toggleMenu}
+          aria-label="Close menu"
+        >
+          <X size={24} className="text-white/70" />
+        </button>
+
         <div className="sm-panel-inner">
           <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
             {items && items.length ? (
