@@ -1,166 +1,124 @@
-// Service Worker for HAXEUS PWA (v1.1)
-// handles site updates and offline fallbacks
-const CACHE_NAME = 'haxeus-v1.2'
-const RUNTIME_CACHE = 'haxeus-runtime-v1.2'
+// HAXEUS Service Worker (v1.3)
+// Objective: Network-first for dynamic content, Cache-first for assets & images.
+// Improved handling for Next.js and Supabase assets.
 
-// Assets to cache on install
-const PRECACHE_URLS = [
-  '/',
-  '/products',
-  '/cart',
-  '/orders',
+const CACHE_NAME = 'haxeus-static-v1.3'
+const IMAGE_CACHE = 'haxeus-images-v1.3'
+const MAX_IMAGES = 100 // Cache trimming limit
+
+const PRECACHE_ASSETS = [
   '/offline',
   '/manifest.json',
   '/favi/favicon-96x96.png',
-  '/favi/web-app-manifest-192x192.png',
-  '/favi/web-app-manifest-512x512.png'
+  '/favi/apple-touch-icon.png'
 ]
 
-// Install event - cache essential assets
+// 1. Install — Precache core UI
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
   )
+  self.skipWaiting()
 })
 
-// Activate event - clean up old caches
+// 2. Activate — Clean up legacy caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then(cacheNames => {
-        return Promise.all(
-          cacheNames
-            .filter(cacheName => cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE)
-            .map(cacheName => caches.delete(cacheName))
-        )
-      })
-      .then(() => self.clients.claim())
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME && key !== IMAGE_CACHE)
+          .map((key) => caches.delete(key))
+      )
+    })
   )
+  self.clients.claim()
 })
 
-// Fetch event - network first, then cache fallback
+// 3. Fetch Strategy
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
-  // Skip cross-origin requests
-  if (url.origin !== location.origin) {
+  // A. Skip non-GET, Next.js internals, and browser extensions
+  if (
+    request.method !== 'GET' ||
+    url.pathname.startsWith('/_next/') ||
+    url.protocol.startsWith('chrome-extension')
+  ) {
     return
   }
 
-  // API requests and Product pages - network only/first
-  if (url.pathname.startsWith('/api/') || url.pathname.includes('/products/')) {
-    event.respondWith(fetch(request))
-    return
-  }
-
-  // Images - cache first
-  if (request.destination === 'image') {
+  // B. Image Strategy (Cache First)
+  if (request.destination === 'image' || url.pathname.match(/\.(png|jpg|jpeg|webp|gif|svg|avif)$/)) {
     event.respondWith(
-      caches.match(request)
-        .then(cachedResponse => {
-          if (cachedResponse) {
-            return cachedResponse
-          }
-          return fetch(request).then(response => {
-            if (response.status === 200) {
-              const responseClone = response.clone()
-              caches.open(RUNTIME_CACHE).then(cache => {
-                cache.put(request, responseClone)
-              })
+      caches.open(IMAGE_CACHE).then((cache) => {
+        return cache.match(request).then((cached) => {
+          if (cached) return cached
+          return fetch(request).then((response) => {
+            if (response.ok) {
+              cache.put(request, response.clone())
+              trimCache(IMAGE_CACHE, MAX_IMAGES)
             }
             return response
           })
         })
-        .catch(() => {
-          return new Response('Image not available offline', { status: 503 })
-        })
+      })
     )
     return
   }
 
-  // Pages - network first, cache fallback
+  // C. Page/API Strategy (Network First)
   event.respondWith(
     fetch(request)
-      .then(response => {
-        if (response.status === 200) {
-          const responseClone = response.clone()
-          caches.open(RUNTIME_CACHE).then(cache => {
-            cache.put(request, responseClone)
-          })
+      .then((response) => {
+        if (response.ok && request.mode === 'navigate') {
+          const copy = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
         }
         return response
       })
       .catch(() => {
-        return caches.match(request)
-          .then(cachedResponse => {
-            if (cachedResponse) {
-              return cachedResponse
-            }
-            // Fallback to offline page
-            if (request.mode === 'navigate') {
-              return caches.match('/offline')
-            }
-            return new Response('Offline', { status: 503 })
-          })
+        return caches.match(request).then((cached) => {
+          if (cached) return cached
+          if (request.mode === 'navigate') return caches.match('/offline')
+          return new Response('Offline', { status: 503 })
+        })
       })
   )
 })
 
-// Push notification event
+// Cache trimming helper
+async function trimCache(cacheName, maxItems) {
+  const cache = await caches.open(cacheName)
+  const keys = await cache.keys()
+  if (keys.length > maxItems) {
+    await cache.delete(keys[0])
+    trimCache(cacheName, maxItems)
+  }
+}
+
+// Push notifications
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {}
-
   const options = {
-    body: data.body || 'New notification from HAXEUS',
+    body: data.body || 'New update from HAXEUS',
     icon: '/favi/favicon-96x96.png',
     badge: '/favi/favicon-96x96.png',
-    image: data.image,
-    data: {
-      url: data.url || '/',
-      dateOfArrival: Date.now()
-    },
-    actions: [
-      { action: 'view', title: 'View' },
-      { action: 'close', title: 'Close' }
-    ],
-    tag: data.tag || 'general',
-    requireInteraction: false,
-    vibrate: [200, 100, 200]
+    data: { url: data.url || '/' }
   }
-
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'HAXEUS', options)
-  )
+  event.waitUntil(self.registration.showNotification(data.title || 'HAXEUS', options))
 })
 
-// Notification click event
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-
-  if (event.action === 'close') {
-    return
-  }
-
-  const urlToOpen = event.notification.data?.url || '/'
-
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then(windowClients => {
-        // Check if there's already a window open
-        for (let client of windowClients) {
-          if (client.url === urlToOpen && 'focus' in client) {
-            return client.focus()
-          }
-        }
-        // Open new window
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen)
-        }
-      })
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      const url = event.notification.data.url
+      for (const client of clients) {
+        if (client.url === url && 'focus' in client) return client.focus()
+      }
+      return self.clients.openWindow(url)
+    })
   )
 })
-
-// Service Worker cleanup complete

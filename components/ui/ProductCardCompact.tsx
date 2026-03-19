@@ -41,12 +41,19 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
             fill
             sizes="(max-width: 640px) 144px, 176px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
-            unoptimized={isSupabaseStorageUrl(image)}
             onError={(e) => {
               const t = e.target as HTMLImageElement
               t.src = "/placeholder.svg"
             }}
           />
+
+          {!product.is_preorder && (product.total_stock === 0) && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-[5]">
+              <span className="px-2 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-black/80 text-white/70 border border-white/20">
+                Sold Out
+              </span>
+            </div>
+          )}
 
           {/* Preorder badge — only if preorder */}
           {product.is_preorder && product.preorder_status === "active" && (

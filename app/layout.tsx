@@ -11,6 +11,7 @@ import { LightPillarBackground } from "@/components/LightPillarBackground"
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { QueryProvider } from "@/components/QueryProvider"
 import type { Metadata, Viewport } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -115,25 +116,27 @@ export default function RootLayout({
         <OrganizationJsonLd />
         <WebsiteJsonLd />
         <ThemeProvider>
-          <CartProvider>
-            <PWAProvider />
+          <QueryProvider>
+            <CartProvider>
+              <PWAProvider />
 
-            {/* Fixed viewport background — behind everything */}
-            <LightPillarBackground />
+              {/* Fixed viewport background — behind everything */}
+              <LightPillarBackground />
 
-            {/* Fixed navbar — above everything */}
-            <ConditionalNavbar />
+              {/* Fixed navbar — above everything */}
+              <ConditionalNavbar />
 
-            {/* Scrollable content — sits above the fixed background */}
-            <main className="relative min-h-screen" style={{ zIndex: 1 }}>
-              {children}
-            </main>
+              {/* Scrollable content — sits above the fixed background */}
+              <main className="relative min-h-screen" style={{ zIndex: 1 }}>
+                {children}
+              </main>
 
-            <ConditionalFooter />
-            <Toaster />
-            <Analytics />
-            <SpeedInsights />
-          </CartProvider>
+              <ConditionalFooter />
+              <Toaster />
+              <Analytics />
+              <SpeedInsights />
+            </CartProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
