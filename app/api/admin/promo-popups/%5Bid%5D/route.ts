@@ -6,8 +6,9 @@ import type { PromoPopup } from "@/types/promo-popup";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await props.params
   const auth = await verifyAdminRequest();
   if (!auth.authorized) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -16,7 +17,6 @@ export async function PATCH(
   const supabaseAdmin = getSupabaseAdmin();
 
 
-  const { id } = await params;
   const updates = await request.json();
 
   const { data: currentData, error: fetchError } = await supabaseAdmin
@@ -59,8 +59,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await props.params
   const auth = await verifyAdminRequest();
   if (!auth.authorized) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -68,8 +69,6 @@ export async function DELETE(
 
   const supabaseAdmin = getSupabaseAdmin();
 
-
-  const { id } = await params;
 
   const { data: currentData, error: fetchError } = await supabaseAdmin
     .from("store_settings")

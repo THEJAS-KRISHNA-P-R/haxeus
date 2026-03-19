@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 import { ShoppingCart, Zap, Shield, Truck, RotateCcw } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
@@ -36,10 +36,7 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
 
   useEffect(() => setMounted(true), [])
 
-  const isDark = !mounted ? true : (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = !mounted ? true : theme === "dark"
 
   const allImages = images.length > 0 
     ? images.map(img => img.image_url) 
@@ -107,7 +104,6 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
               fill
               sizes="(max-width: 1024px) 100vw, 55vw"
               className="object-cover"
-              priority
               onError={(e) => {
                 const t = e.target as HTMLImageElement
                 t.src = "/placeholder.svg"

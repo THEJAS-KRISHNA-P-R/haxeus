@@ -5,8 +5,9 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await props.params
     const auth = await verifyAdminRequest();
     if (!auth.authorized) {
         return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -15,7 +16,6 @@ export async function PATCH(
     const supabaseAdmin = getSupabaseAdmin();
 
 
-    const { id } = params;
     const body = await request.json();
 
     // 1. Fetch item to check status
@@ -55,17 +55,15 @@ export async function PATCH(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await props.params
     const auth = await verifyAdminRequest();
     if (!auth.authorized) {
         return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const supabaseAdmin = getSupabaseAdmin();
-
-
-    const { id } = params;
 
     const { error } = await supabaseAdmin
         .from("preorder_items")

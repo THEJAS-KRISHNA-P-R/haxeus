@@ -26,7 +26,7 @@ export async function getProductInventory(productId: number): Promise<ProductInv
 export async function checkStockAvailability(
   productId: number,
   size: string,
-  quantity: number
+  quantity: number // This is the quantity to check/reserve/decrement, usually stays 'quantity' in API params
 ): Promise<{ available: boolean; currentStock: number; isLowStock: boolean }> {
   const { data, error } = await supabase
     .from('product_inventory')
@@ -52,7 +52,7 @@ export async function checkStockAvailability(
 export async function reserveStock(
   productId: number,
   size: string,
-  quantity: number
+  quantity: number // This is the quantity to check/reserve/decrement, usually stays 'quantity' in API params
 ): Promise<boolean> {
   // Reserve stock during checkout (15 min timer)
   const { error } = await supabase.rpc('reserve_product_stock', {
@@ -67,7 +67,7 @@ export async function reserveStock(
 export async function releaseReservedStock(
   productId: number,
   size: string,
-  quantity: number
+  quantity: number // This is the quantity to check/reserve/decrement, usually stays 'quantity' in API params
 ): Promise<boolean> {
   // Release reserved stock if checkout abandoned
   const { error } = await supabase.rpc('release_product_stock', {
@@ -95,7 +95,7 @@ export async function getLowStockProducts(): Promise<any[]> {
 export async function decrementInventory(
   productId: number,
   size: string,
-  quantity: number
+  quantity: number // This is the quantity to check/reserve/decrement, usually stays 'quantity' in API params
 ): Promise<boolean> {
   const { error } = await supabase.rpc('decrement_inventory_rpc', {
     p_product_id: productId,
@@ -134,11 +134,11 @@ export async function updateInventoryQuantity(
 }
 
 export async function bulkUpdateInventory(
-  updates: Array<{ productId: number; size: string; quantity: number }>
+  updates: Array<{ productId: number; size: string; stock_quantity: number }>
 ): Promise<boolean> {
   try {
     for (const update of updates) {
-      await updateInventoryQuantity(update.productId, update.size, update.quantity)
+      await updateInventoryQuantity(update.productId, update.size, update.stock_quantity)
     }
     return true
   } catch (error) {

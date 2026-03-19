@@ -9,7 +9,7 @@ export function TrackProductView({ product }: { product: Product }) {
 
   useEffect(() => {
     addViewed(product)
-  }, [product.id, addViewed, product])  // only re-track if product ID changes
+  }, [product.id, addViewed])  // only re-track if product ID changes
 
   return null  // renders nothing
 }

@@ -69,61 +69,11 @@ function AdminSearch() {
     const statuses = ["paid", "pending", "shipped", "delivered", "cancelled"]
     const matchedStatus = statuses.find(s => s.startsWith(safeTerm))
 
-    // 3. Parallel Database Search
-    const [ordersRes, productsRes, couponsRes, customersRes] = await Promise.all([
-      supabase.from("orders")
-        .select("id, email, total_amount, status")
-        .or(matchedStatus ? `status.eq.${matchedStatus}` : `email.ilike.%${safeTerm}%,id.ilike.%${safeTerm}%`)
-        .limit(matchedStatus ? 8 : 4),
-      supabase.from("products")
-        .select("id, name, price, is_active")
-        .ilike("name", `%${safeTerm}%`)
-        .limit(4),
-      supabase.from("coupons")
-        .select("id, code, discount_type, discount_value, is_active")
-        .ilike("code", `%${safeTerm}%`)
-        .limit(3),
-      supabase.from("profiles")
-        .select("id, full_name, email")
-        .or(`full_name.ilike.%${safeTerm}%,email.ilike.%${safeTerm}%`)
-        .limit(4)
-    ])
+    const res = await fetch(`/api/admin/search?q=${encodeURIComponent(term)}`)
+    if (!res.ok) { setLoading(false); return }
+    const { results: dbResults } = await res.json()
 
-    const r: SearchResult[] = [...navResults]
-
-    ordersRes.data?.forEach(o => r.push({
-      type: "order",
-      id: o.id,
-      title: `Order #${o.id.slice(-8).toUpperCase()}`,
-      subtitle: `${o.email} · ₹${o.total_amount} · ${o.status.toUpperCase()}`,
-      href: `/admin/orders?id=${o.id}`,
-    }))
-
-    productsRes.data?.forEach(p => r.push({
-      type: "product",
-      id: String(p.id),
-      title: p.name,
-      subtitle: `₹${p.price} · ${p.is_active ? "Active" : "Inactive"}`,
-      href: `/admin/products/${p.id}`,
-    }))
-
-    customersRes.data?.forEach(c => r.push({
-      type: "customer",
-      id: c.id,
-      title: c.full_name || "Unknown Customer",
-      subtitle: c.email,
-      href: `/admin/users?email=${encodeURIComponent(c.email)}`,
-    }))
-
-    couponsRes.data?.forEach(c => r.push({
-      type: "coupon",
-      id: String(c.id),
-      title: c.code,
-      subtitle: `${c.discount_type === "percentage" ? c.discount_value + "% off" : "₹" + c.discount_value + " off"} · ${c.is_active ? "Active" : "Paused"}`,
-      href: `/admin/coupons`,
-    }))
-
-    setResults(r)
+    setResults([...navResults, ...dbResults])
     setLoading(false)
   }, [])
 
@@ -271,16 +221,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         // Also fetch unread message count
         const fetchMessages = async () => {
           try {
-            const { count, error } = await supabase
-              .from('contact_messages')
-              .select('*', { count: 'exact', head: true })
-              .eq('status', 'unread')
-            
-            if (!error && count !== null) {
+            const res = await fetch('/api/admin/messages/count')
+            if (res.ok) {
+              const { count } = await res.json()
               setUnreadMsgCount(count)
             }
           } catch (err) {
-            console.warn("Could not fetch unread messages (table might be missing)")
+            console.warn("Could not fetch unread messages")
           }
         }
         fetchMessages()

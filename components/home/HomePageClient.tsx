@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 import dynamic from "next/dynamic"
 import { usePromoPopups } from "@/hooks/usePromoPopups"
 import { PreorderModal } from "@/components/PreorderModal"
@@ -40,10 +40,7 @@ export function HomePageClient({
     setMounted(true)
   }, [])
 
-  const isDark = !mounted ? true : (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = !mounted ? true : theme === "dark"
 
   const isSectionVisible = (sectionKey: string, visible = true) => {
     return visible !== false && !config.hidden_sections?.includes(sectionKey as any)

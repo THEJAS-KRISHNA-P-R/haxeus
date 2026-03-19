@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
     const auth = await verifyAdminRequest();
     if (!auth.authorized) {
@@ -15,7 +15,7 @@ export async function POST(
     const supabase = getSupabaseAdmin();
 
 
-    const { id: preorderId } = params;
+    const { id: preorderId } = await props.params;
     const { initial_stock_per_size = 0 } = await request.json();
 
     // 1. Fetch preorder item
@@ -54,7 +54,7 @@ export async function POST(
     const inventoryToInsert = preorderItem.sizes_available.map(size => ({
         product_id: newProduct.id,
         size,
-        quantity: initial_stock_per_size,
+        stock_quantity: initial_stock_per_size,
     }));
 
     const { error: inventoryError } = await supabase

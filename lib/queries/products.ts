@@ -8,7 +8,7 @@ function createClient() {
     );
 }
 
-export const getFeaturedProducts = cache(async () => {
+export const getFeaturedProducts = async () => {
     const supabase = createClient();
     const { data, error } = await supabase
         .from('products')
@@ -43,4 +43,4 @@ export const getFeaturedProducts = cache(async () => {
         });
     }
     return [];
-});
+};

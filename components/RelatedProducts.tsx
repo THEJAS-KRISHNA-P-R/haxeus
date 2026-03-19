@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 import { ProductCardCompact } from "@/components/ui/ProductCardCompact"
 import type { Product } from "@/lib/supabase"
 
@@ -16,10 +16,7 @@ export function RelatedProducts({ productId, category }: RelatedProductsProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const isDark = !mounted ? true : (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = !mounted ? true : theme === "dark"
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)

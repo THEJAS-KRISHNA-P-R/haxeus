@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 import { X, CheckCircle, AlertTriangle, Loader } from "lucide-react"
 import type { Product } from "@/lib/supabase"
 import { supabase } from "@/lib/supabase"
@@ -19,10 +19,7 @@ export function PreorderModal({ item, isOpen, onClose }: PreorderModalProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const isDark = !mounted ? true : (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = !mounted ? true : theme === "dark"
 
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")

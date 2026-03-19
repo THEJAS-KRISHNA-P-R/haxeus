@@ -40,15 +40,19 @@ function ProfileContent() {
   const [addresses, setAddresses] = useState<UserAddress[]>([])
   const [wishlist, setWishlist] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState("orders")
+  const [hasLoaded, setHasLoaded] = useState(false)
 
   useEffect(() => {
-    loadUserData()
+    if (!hasLoaded) {
+      loadUserData()
+      setHasLoaded(true)
+    }
     // Check if there's a tab parameter in the URL
     const tab = searchParams?.get("tab")
     if (tab) {
       setActiveTab(tab)
     }
-  }, [searchParams])
+  }, [searchParams, hasLoaded])
 
   async function loadUserData() {
     try {
@@ -98,7 +102,7 @@ function ProfileContent() {
         .select(
           `
           *,
-          product:products (
+          products (
             id,
             name,
             price,
@@ -108,7 +112,7 @@ function ProfileContent() {
         )
         .eq("user_id", user.id)
 
-      setWishlist((wishlistData as any) || [])
+      setWishlist((wishlistData as any)?.filter((item: any) => item?.product) || [])
     } catch (error) {
       console.error("Error loading user data:", error)
     } finally {
@@ -237,14 +241,14 @@ function ProfileContent() {
                               className="object-cover"
                             />
                           </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-sm text-theme">
-                              {item.product.name}
-                            </p>
-                            <p className="text-sm text-theme-2">
-                              Size: {item.size} • Qty: {item.quantity}
-                            </p>
-                          </div>
+                          <Link href={`/products/${item.product_id}`} className="flex-1 group">
+                             <p className="font-medium text-sm text-theme group-hover:text-[var(--accent)] transition-colors">
+                               {item.product.name}
+                             </p>
+                             <p className="text-sm text-theme-2">
+                               Size: {item.size} • Qty: {item.quantity}
+                             </p>
+                          </Link>
                           <p className="font-semibold text-theme">
                             ₹{Number(item.price).toLocaleString("en-IN")}
                           </p>

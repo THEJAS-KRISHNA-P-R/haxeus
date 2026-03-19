@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Copy } from "lucide-react"
 import type { ExitPopupConfig } from "@/types/homepage"

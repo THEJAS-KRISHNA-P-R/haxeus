@@ -18,7 +18,7 @@ export async function getProductById(
       is_preorder, preorder_status, expected_date,
       max_preorders, preorder_count,
       product_images (image_url, is_primary, display_order),
-      product_inventory (size, quantity)
+      product_inventory (size, stock_quantity, color, reserved_quantity)
     `)
     .eq("id", id)
     .maybeSingle()

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/Toggle"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 
 export default function NewAddressPage() {
   const router = useRouter()
