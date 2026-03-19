@@ -79,28 +79,34 @@ export function HomePageClient({
 
         {/* Newsletter Section */}
         {isSectionVisible("newsletter", config.newsletter.visible) && (
-          <NewsletterSection config={config.newsletter} isDark={isDark} />
+          <div style={{ contentVisibility: "auto", containIntrinsicSize: "0 400px" }}>
+            <NewsletterSection config={config.newsletter} isDark={isDark} />
+          </div>
         )}
 
         {/* Featured Products Section */}
         {isSectionVisible("featured_products", config.featured_products.visible) && (
-          <FeaturedProductsSection 
-            config={config.featured_products} 
-            products={featuredProducts} 
-            isDark={isDark}
-          />
+          <div style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
+            <FeaturedProductsSection 
+              config={config.featured_products} 
+              products={featuredProducts} 
+              isDark={isDark}
+            />
+          </div>
         )}
 
         {/* Testimonials */}
         {isSectionVisible("testimonials") && (
-          <section className="relative z-10 border-t border-theme">
+          <section className="relative z-10 border-t border-theme" style={{ contentVisibility: "auto", containIntrinsicSize: "0 600px" }}>
             <DynamicTestimonials />
           </section>
         )}
 
         {/* About Section */}
         {isSectionVisible("about", config.about.visible) && (
-          <AboutSection config={config.about} isDark={isDark} />
+          <div style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
+            <AboutSection config={config.about} isDark={isDark} />
+          </div>
         )}
       </div>
 

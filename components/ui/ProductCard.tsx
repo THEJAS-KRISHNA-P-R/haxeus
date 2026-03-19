@@ -60,16 +60,19 @@ export function ProductCard({
   const isPreorderData = product.is_preorder && product.preorder_status !== "stopped"
   const isSoldOut = product.preorder_status === "sold_out"
 
+  // Sanitize data — only use what's needed for the card
+  const { id, name, price, description, front_image, is_preorder, total_stock } = product;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, ease: "easeOut", delay: index * 0.05 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       whileHover={{ y: -10 }}
-      className="snap-start h-full"
+      className="h-full"
     >
-      <Link href={`/products/${product.id}`} className="block h-full">
+      <Link href={`/products/${id}`} className="block h-full">
         <Card className="group overflow-hidden bg-card shadow-none hover:shadow-md border-0 h-full transition-all cursor-pointer flex flex-col">
           
           {/* Image zone */}
@@ -80,8 +83,8 @@ export function ProductCard({
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
               <Image
-                src={product.front_image || "/placeholder.svg"}
-                alt={product.name}
+                src={front_image || "/placeholder.svg"}
+                alt={name}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                 className="object-cover"
@@ -107,21 +110,18 @@ export function ProductCard({
                     whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <WishlistButton
-                      productId={product.id}
-                      variant="ghost"
-                      size="sm"
-                      className="bg-card text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 shadow-md"
-                    />
+                    <div className="bg-card text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 shadow-md p-2 rounded-full cursor-pointer flex items-center justify-center" onClick={toggleWishlist}>
+                      <Heart size={16} className={wishlisted ? "fill-red-500 text-red-500" : ""} />
+                    </div>
                   </motion.div>
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     whileHover={{ y: 0, opacity: 1, scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Button size="sm" className="bg-[var(--accent)] hover:opacity-90 shadow-md" onClick={(e) => e.stopPropagation()}>
-                      <ShoppingCart className="w-4 h-4" />
-                    </Button>
+                    <div className="bg-[var(--accent)] hover:opacity-90 shadow-md p-2 rounded-full cursor-pointer flex items-center justify-center" onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/products/${id}`); }}>
+                      <ShoppingCart className="w-4 h-4 text-white" />
+                    </div>
                   </motion.div>
                 </div>
               )}
@@ -156,69 +156,62 @@ export function ProductCard({
             )}
           </div>
 
-          {/* Content zone */}
-          <CardContent className="p-4">
-            {/* Name */}
-            <Shuffle
-              text={product.name}
-              tag="h3"
-              className="text-base font-semibold mb-1 text-theme"
-              duration={0.4}
-              shuffleTimes={1}
-            />
+          <CardContent className="p-2 sm:p-4">
+            <div className="flex-1 flex flex-col min-h-[88px] sm:min-h-[122px]">
+              {/* Name */}
+              <div className="mb-0 sm:mb-1 text-left">
+                <h3 className="text-sm sm:text-lg font-bold text-theme truncate">
+                  {name}
+                </h3>
+              </div>
 
-            {/* Description snippet */}
-            {product.description && (
-              <p className={`text-xs mb-3 line-clamp-2 ${isDark ? "text-white/40" : "text-black/40"}`}>
-                {product.description}
-              </p>
-            )}
-
-            {/* Price and CTA row */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex flex-col">
-                <p className="text-xl font-bold text-theme leading-none">
-                  ₹{product.price.toLocaleString("en-IN")}
-                </p>
-                {!product.is_preorder && product.total_stock === 0 && (
-                  <span className={`mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase border w-fit ${
-                    isDark
-                      ? "bg-white/[0.06] text-white/40 border-white/[0.08]"
-                      : "bg-black/[0.05] text-black/40 border-black/[0.08]"
-                  }`}>
-                    Sold Out
-                  </span>
+              {/* Description snippet */}
+              <div className="flex-grow text-left">
+                {description && (
+                  <p className={`text-[10px] sm:text-[12px] mb-1.5 sm:mb-3 line-clamp-2 sm:line-clamp-3 leading-tight sm:leading-relaxed ${isDark ? "text-white/40" : "text-black/40"}`}>
+                    {description}
+                  </p>
                 )}
               </div>
 
-              <div className="flex-1 max-w-[140px]">
-                {product.is_preorder ? (
-                  <Link href={`/products/${product.id}`}>
-                    <Button className="w-full py-2.5 h-auto text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all">
-                      Pre-Order Now
-                    </Button>
-                  </Link>
-                ) : product.total_stock === 0 ? (
-                  <Link href={`/products/${product.id}`}>
-                    <Button className={`w-full py-2.5 h-auto text-xs font-semibold rounded-full transition-all ${
+              {/* Price and CTA row */}
+              <div className="flex items-center justify-between gap-1.5 sm:gap-4 mt-auto pt-1.5 sm:pt-3 border-t border-theme/5">
+                <div className="flex flex-col shrink-0">
+                  <p className="text-base sm:text-xl font-bold text-theme leading-none">
+                    ₹{price.toLocaleString("en-IN")}
+                  </p>
+                  {!is_preorder && total_stock === 0 && (
+                    <span className={`mt-1 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold tracking-widest uppercase border w-fit ${
                       isDark
-                        ? "bg-white/[0.04] text-white/30 border border-white/[0.06]"
-                        : "bg-black/[0.03] text-black/30 border border-black/[0.06]"
+                        ? "bg-white/[0.06] text-white/40 border-white/[0.08]"
+                        : "bg-black/[0.05] text-black/40 border-black/[0.08]"
                     }`}>
-                      View Details
-                    </Button>
-                  </Link>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault()
-                      router.push(`/products/${product.id}`)
-                    }}
-                    className="w-full py-2.5 text-xs font-bold rounded-full bg-[var(--accent)] text-white hover:opacity-90 transition-all shadow-sm shadow-[var(--accent)]/10"
-                  >
-                    Add to Cart
-                  </button>
-                )}
+                      Out
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  {is_preorder ? (
+                    <div className="w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all border-none flex items-center justify-center">
+                      Pre-Order Now
+                    </div>
+                  ) : total_stock === 0 ? (
+                    <div className={`w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-semibold rounded-full transition-all border-none flex items-center justify-center ${
+                      isDark
+                        ? "bg-white/[0.06] text-white/40 border-white/[0.08]"
+                        : "bg-black/[0.05] text-black/40 border-black/[0.08]"
+                    }`}>
+                      View
+                    </div>
+                  ) : (
+                    <div
+                      className="w-full py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-bold rounded-full bg-[var(--accent)] text-white hover:opacity-90 transition-all text-center cursor-pointer"
+                    >
+                      Add to Cart
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

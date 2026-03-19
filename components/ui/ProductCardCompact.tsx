@@ -25,8 +25,8 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.35, delay: index * 0.06 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className="flex-shrink-0 w-36 sm:w-44"
     >
       <Link href={`/products/${product.id}`} className="block group">

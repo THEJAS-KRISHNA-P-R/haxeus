@@ -112,7 +112,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} style={{ touchAction: "pan-y" }}>
         <OrganizationJsonLd />
         <WebsiteJsonLd />
         <ThemeProvider>

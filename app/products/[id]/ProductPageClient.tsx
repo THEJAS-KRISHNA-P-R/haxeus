@@ -241,7 +241,7 @@ export function ProductPageClient({
             </h3>
             <div className="relative">
               <div 
-                className="flex flex-nowrap gap-3 overflow-x-auto pb-4 pt-1 -mx-1 px-1 hide-scrollbar scroll-smooth snap-x" 
+                className="flex flex-nowrap gap-3 overflow-x-auto pb-4 pt-1 -mx-1 px-1 hide-scrollbar scroll-smooth" 
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {(sizesExpanded ? sizesToDisplay : sizesToDisplay.slice(0, isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE))
@@ -253,7 +253,7 @@ export function ProductPageClient({
                         onClick={() => setSelectedSize(size)}
                         disabled={!isAvailable}
                         className={cn(
-                          "flex-shrink-0 w-12 h-12 rounded-xl border flex items-center justify-center text-sm font-bold transition-all snap-start",
+                          "flex-shrink-0 w-12 h-12 rounded-xl border flex items-center justify-center text-sm font-bold transition-all",
                           selectedSize === size
                             ? "bg-[#e93a3a] border-[#e93a3a] text-white shadow-lg shadow-[#e93a3a]/20"
                             : isAvailable

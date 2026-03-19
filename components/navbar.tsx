@@ -49,7 +49,7 @@ export function Navbar() {
   const desktopNavbarGlassProps = {
     brightness: 100,
     opacity: 0.85,
-    blur: 14,
+    blur: 20, // Increased for premium feel on desktop
     backgroundOpacity: 0.15,
     saturation: 1.1,
     distortionScale: -18,
@@ -60,7 +60,7 @@ export function Navbar() {
   const mobileNavbarGlassProps = {
     brightness: 100,
     opacity: 0.88,
-    blur: 12,
+    blur: 8, // Reduced for mobile performance
     backgroundOpacity: 0.15,
     distortionScale: -15,
     redOffset: 0,

@@ -268,7 +268,7 @@ const LightPillar: React.FC<LightPillarProps> = ({
         }
 
         let lastTime = performance.now();
-        const fps = effectiveQuality === 'low' ? 30 : 60;
+        const fps = (isMobileDevice || effectiveQuality === 'low') ? 30 : 60;
         const frame = 1000 / fps;
 
         const animate = (now: number) => {
