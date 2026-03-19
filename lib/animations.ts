@@ -1,4 +1,32 @@
 import { Variants } from "framer-motion"
+import { getDeviceTier } from "@/lib/device-capability"
+
+export function getAnimationProps(props: {
+  initial?: any
+  animate?: any
+  whileInView?: any
+  whileHover?: any
+  whileTap?: any
+  transition?: any
+  viewport?: any
+  exit?: any
+  variants?: Variants
+}) {
+  if (typeof window === "undefined") return props
+
+  const tier = getDeviceTier()
+
+  if (tier === "low") {
+    return {
+      initial: false,
+      animate: props.animate,
+      variants: props.variants,
+      // No whileInView or viewport observers on low-tier
+    }
+  }
+
+  return props
+}
 
 // Optimized animation variants for better performance
 export const fadeIn: Variants = {
