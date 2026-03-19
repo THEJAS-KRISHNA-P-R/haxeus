@@ -62,15 +62,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (hasFetchedUser) return
       setHasFetchedUser(true)
 
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      setUserId(user?.id || null)
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser()
+        if (error) throw error
+        setUser(user)
+        setUserId(user?.id || null)
 
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user || null)
-        setUserId(session?.user?.id || null)
-      })
-      subscription = data.subscription
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+          setUser(session?.user || null)
+          setUserId(session?.user?.id || null)
+        })
+        subscription = data.subscription
+      } catch (err) {
+        console.error('[CartContext] Auth error:', err)
+        setUser(null)
+        setUserId(null)
+      }
     }
 
     getUser()
@@ -94,9 +101,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', userId)
 
       if (error) throw error
-      setWishlist(data.map(item => item.product_id))
+      setWishlist(data?.map(item => item.product_id) || [])
     } catch (err) {
       console.error('[CartContext] Error loading wishlist:', err)
+      setWishlist([])
     }
   }
 
