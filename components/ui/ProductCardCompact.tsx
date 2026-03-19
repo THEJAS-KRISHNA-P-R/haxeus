@@ -50,7 +50,7 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
 
           {/* Preorder badge — only if preorder */}
           {product.is_preorder && product.preorder_status === "active" && (
-            <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-[#e7bf04]/20 text-[#e7bf04]">
+            <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#eab308]/20 text-[#eab308] border border-[#eab308]/30">
               Pre
             </span>
           )}
@@ -66,7 +66,7 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
         </p>
 
         {/* Price */}
-        <p className="text-xs sm:text-sm font-bold text-[var(--accent)] mt-0.5">
+        <p className="text-xs sm:text-sm font-bold text-theme-2 mt-0.5">
           ₹{product.price.toLocaleString("en-IN")}
         </p>
 

@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useTheme } from "@/components/ThemeProvider"
-import { ShoppingCart, Zap, Shield, Truck, RotateCcw } from "lucide-react"
+import { Shield, Truck, RotateCcw } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-import type { Product } from "@/lib/supabase"
 import { TrackProductView } from "@/components/TrackProductView"
+import { SocialProof } from "@/components/SocialProof"
 
 const RelatedProducts = dynamic(
   () => import("@/components/RelatedProducts").then(m => ({ default: m.RelatedProducts })),
@@ -22,7 +23,7 @@ const RecentlyViewed = dynamic(
 )
 
 interface ProductPageClientProps {
-  product: any // We'll use any or a combined type from Supabase
+  product: any
   inventory: any[]
   images: any[]
 }
@@ -38,55 +39,113 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
 
   const isDark = !mounted ? true : theme === "dark"
 
-  const allImages = images.length > 0 
-    ? images.map(img => img.image_url) 
+  const allImages = images.length > 0
+    ? images.map(img => img.image_url)
     : [product.front_image || "/placeholder.svg"]
-  
+
   const [activeImage, setActiveImage] = useState(allImages[0])
   const [selectedSize, setSelectedSize] = useState("")
   const [addingToCart, setAddingToCart] = useState(false)
+  const [sizesExpanded, setSizesExpanded] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  const sizes = ["S", "M", "L", "XL"]
-  const availableSizes = inventory
-    .filter(inv => inv.stock_quantity > 0)
-    .map(inv => inv.size)
+  const MOBILE_VISIBLE = 4
+  const DESKTOP_VISIBLE = 6
 
+  // Define standard size order for sorting
+  const sizeOrder = ["3XS", "2XS", "XS", "S", "M", "L", "XL", "2XL", "XXL", "3XL", "XXXL", "4XL", "XXXXL"]
+
+  // Extract all unique sizes from inventory and sort them logically
+  const allAvailableSizes = Array.from(new Set(inventory.map(inv => inv.size)))
+    .sort((a, b) => {
+      const indexA = sizeOrder.indexOf(a.toUpperCase())
+      const indexB = sizeOrder.indexOf(b.toUpperCase())
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b)
+      if (indexA === -1) return 1
+      if (indexB === -1) return -1
+      return indexA - indexB
+    })
+
+  // Helper to format size for display (e.g. XXL -> 2XL)
+  const formatSize = (size: string) => {
+    const s = size.toUpperCase()
+    if (s === "XXXL") return "3XL"
+    if (s === "XXXXL") return "4XL"
+    if (s === "XXL") return "2XL"
+    return size
+  }
+
+  // Final sizes to display based on product type
+  const sizesToDisplay = allAvailableSizes.length > 0 ? allAvailableSizes : []
+
+  // For preorders, all sizes in inventory are available. For normal, only those with stock > 0.
+  const availableSizes = product.is_preorder
+    ? sizesToDisplay
+    : inventory.filter(inv => inv.stock_quantity > 0).map(inv => inv.size)
+
+  // Size selection is now manual to prevent accidental 'S' size orders
   useEffect(() => {
-    if (availableSizes.length > 0) {
-      setSelectedSize(availableSizes[0])
-    } else {
-      setSelectedSize(sizes[0])
-    }
-  }, [inventory])
+    // Detect mobile for size selector
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
-  const handleAddToCart = async () => {
+  // Out-of-stock check — preorders are never OOS
+  const isOutOfStock = product.is_preorder
+    ? false
+    : selectedSize
+      ? (inventory.find(i => i.size === selectedSize)?.stock_quantity ?? 0) === 0
+      : false
+
+  async function handleAddToCart(type: "preorder" | "normal") {
     if (!selectedSize) {
-      toast({ title: "Please select a size", variant: "destructive" })
+      toast({
+        title: "Size required",
+        description: "Please select a size before adding to cart",
+        variant: "destructive",
+      })
       return
     }
     setAddingToCart(true)
     try {
-      await addItem(product.id, selectedSize, 1)
-      toast({ title: "Added to cart!", description: `${product.name} added.` })
+      await addItem({
+        productId: product.id,
+        size: selectedSize,
+        color: "",
+        quantity: 1,
+        is_preorder: type === "preorder",
+        preorder_expected_date: type === "preorder" ? (product.expected_date ?? null) : null,
+      })
+      toast({ title: "Added to cart!", description: product.name })
+      if (type === "preorder") {
+        router.push("/cart")
+      }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" })
     } finally {
-      setAddingToCart(false)
+      setTimeout(() => setAddingToCart(false), 600)
     }
   }
 
-  const handleBuyNow = async () => {
+  async function handleBuyNow() {
     if (!selectedSize) {
-      toast({ title: "Please select a size", variant: "destructive" })
+      toast({
+        title: "Size required",
+        description: "Please select a size to proceed to buy",
+        variant: "destructive",
+      })
       return
     }
     setAddingToCart(true)
     try {
-      await addItem(product.id, selectedSize, 1)
-      router.push("/checkout")
+      await handleAddToCart("normal")
+      router.push("/cart")
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" })
-      setAddingToCart(false)
+      // handleAddToCart already shows a toast for errors, but we can add one here too if needed
+    } finally {
+      setTimeout(() => setAddingToCart(false), 600)
     }
   }
 
@@ -96,7 +155,6 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
 
         {/* Left — image gallery */}
         <div className="lg:sticky lg:top-[88px]">
-          {/* Main image */}
           <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black">
             <Image
               src={activeImage}
@@ -111,9 +169,8 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
             />
           </div>
 
-          {/* Thumbnail strip — only if multiple images */}
           {allImages.length > 1 && (
-            <div className="flex gap-2 mt-3 overflow-x-auto pb-1 hide-scrollbar" style={{ scrollbarWidth: "none" }}>
+            <div className="flex gap-2 mt-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
               {allImages.map((img, i) => (
                 <button
                   key={i}
@@ -121,7 +178,7 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
                   className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors ${
                     activeImage === img
                       ? "border-[#e93a3a]"
-                      : (isDark ? "border-white/[0.10]" : "border-black/[0.10]")
+                      : isDark ? "border-white/[0.10]" : "border-black/[0.10]"
                   }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
@@ -134,90 +191,130 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
         {/* Right — product details */}
         <div className="flex flex-col gap-6">
           {/* Name */}
-          <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
-            isDark ? "text-white" : "text-black"
-          }`}>
+          <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${isDark ? "text-white" : "text-black"}`}>
             {product.name}
           </h1>
 
-          {/* Price */}
+          {/* Social proof — reviews or preorder count */}
+          <SocialProof product={product} />
+
+          {/* Price + badge */}
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold text-[var(--accent)]">
+            <span className="text-3xl font-bold text-theme-2">
               ₹{product.price.toLocaleString("en-IN")}
             </span>
             {product.is_preorder && product.preorder_status === "active" && (
-              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#e7bf04]/20 text-[#e7bf04]">
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#eab308]/20 text-[#eab308] border border-[#eab308]/30">
                 PRE-ORDER
               </span>
             )}
           </div>
 
-          {/* Expected date — if preorder */}
+          {/* Expected date — preorder */}
           {product.is_preorder && product.expected_date && (
-            <p className={`text-sm ${isDark ? "text-white/50" : "text-black/50"}`}>
+            <p className={`text-sm -mt-3 ${isDark ? "text-white/50" : "text-black/50"}`}>
               Expected: {product.expected_date}
             </p>
           )}
 
           {/* Size selector */}
           <div>
-            <p className={`text-sm font-semibold mb-2.5 ${isDark ? "text-white/70" : "text-black/70"}`}>
-              Size
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {sizes.map(size => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  disabled={!availableSizes.includes(size)}
-                  className={`w-12 h-12 rounded-xl border text-sm font-semibold transition-all ${
-                    selectedSize === size
-                      ? "border-[#e93a3a] bg-[#e93a3a]/10 text-[#e93a3a]"
-                      : availableSizes.includes(size)
-                        ? (isDark
-                            ? "border-white/[0.12] text-white hover:border-white/[0.30]"
-                            : "border-black/[0.12] text-black hover:border-black/[0.30]")
-                        : (isDark
-                            ? "border-white/[0.04] text-white/20 cursor-not-allowed"
-                            : "border-black/[0.04] text-black/20 cursor-not-allowed")
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+            <h3 className={`text-sm font-bold uppercase tracking-widest mb-4 ${isDark ? "text-white/40" : "text-black/40"}`}>
+              Select Size
+            </h3>
+            <div className="relative">
+              <div 
+                className="flex flex-nowrap gap-3 overflow-x-auto pb-4 pt-1 -mx-1 px-1 hide-scrollbar scroll-smooth snap-x" 
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {(sizesExpanded ? sizesToDisplay : sizesToDisplay.slice(0, isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE))
+                  .map((size) => {
+                    const isAvailable = availableSizes.includes(size)
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        disabled={!isAvailable}
+                        className={cn(
+                          "flex-shrink-0 w-12 h-12 rounded-xl border flex items-center justify-center text-sm font-bold transition-all snap-start",
+                          selectedSize === size
+                            ? "bg-[#e93a3a] border-[#e93a3a] text-white shadow-lg shadow-[#e93a3a]/20"
+                            : isAvailable
+                              ? isDark
+                                ? "bg-white/[0.04] border-white/10 text-white hover:border-white/30"
+                                : "bg-black/[0.04] border-black/10 text-black hover:border-black/30"
+                              : isDark
+                                ? "bg-transparent border-white/5 text-white/20 cursor-not-allowed"
+                                : "bg-transparent border-black/5 text-black/20 cursor-not-allowed"
+                        )}
+                      >
+                        {formatSize(size)}
+                      </button>
+                    )
+                  })
+                }
+
+                {/* +N more button — only show when not expanded and there are hidden sizes */}
+                {!sizesExpanded && sizesToDisplay.length > (isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE) && (
+                  <button
+                    onClick={() => setSizesExpanded(true)}
+                    className={`flex-shrink-0 h-12 px-3 rounded-xl border text-xs font-bold transition-all whitespace-nowrap ${
+                      isDark
+                        ? "border-white/10 text-white/50 hover:border-white/30 hover:text-white bg-white/[0.03]"
+                        : "border-black/10 text-black/50 hover:border-black/30 hover:text-black bg-black/[0.02]"
+                    }`}
+                  >
+                    +{sizesToDisplay.length - (isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE)} more
+                  </button>
+                )}
+              </div>
             </div>
+            {!selectedSize && (
+              <p className={`text-[10px] uppercase tracking-widest font-bold mt-2 animate-pulse ${isDark ? "text-white/30" : "text-black/30"}`}>
+                Select a size to continue
+              </p>
+            )}
           </div>
 
           {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          {product.is_preorder ? (
             <button
-              onClick={handleAddToCart}
+              onClick={() => handleAddToCart("preorder")}
               disabled={addingToCart}
-              className="flex-1 py-4 rounded-full bg-[#e93a3a] hover:bg-[#ff4a4a] text-white font-bold tracking-wide shadow-lg shadow-[#e93a3a]/20 transition-colors disabled:opacity-50"
+              className="w-full py-4 rounded-full bg-gradient-to-r from-[#eab308] to-[#facc15] hover:from-[#facc15] hover:to-[#fde047] text-black font-bold tracking-wide text-lg shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {addingToCart ? "..." : "Add to Cart"}
+              {addingToCart ? "Adding..." : "Pre-Order — Add to Cart"}
             </button>
-            <button
-              onClick={handleBuyNow}
-              disabled={addingToCart}
-              className={`flex-1 py-4 rounded-full border font-bold tracking-wide transition-colors disabled:opacity-50 ${
-                isDark
-                  ? "border-white/[0.15] text-white hover:bg-white/[0.06]"
-                  : "border-black/[0.15] text-black hover:bg-black/[0.06]"
-              }`}
-            >
-              Buy Now
-            </button>
-          </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => handleAddToCart("normal")}
+                disabled={!selectedSize || isOutOfStock || addingToCart}
+                className={`flex-1 py-4 rounded-full border font-bold tracking-wide text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "border-white/[0.15] text-white hover:bg-white/[0.06]"
+                    : "border-black/[0.15] text-black hover:bg-black/[0.06]"
+                }`}
+              >
+                  {isOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Add to Cart"}
+              </button>
+              <button
+                onClick={handleBuyNow}
+                disabled={isOutOfStock || addingToCart}
+                className="flex-1 py-4 rounded-full bg-[#e93a3a] hover:bg-[#ff4a4a] text-white font-bold tracking-wide text-lg shadow-lg shadow-[#e93a3a]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Buy Now"}
+              </button>
+            </div>
+          )}
 
-          {/* Description */}
+          {/* Description + trust markers */}
           {product.description && (
             <div className="space-y-4">
               <p className={`text-sm leading-relaxed ${isDark ? "text-white/65" : "text-black/65"}`}>
                 {product.description}
               </p>
-              
-              {/* Trust markers */}
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-theme pt-6">
                 <div className="flex flex-col items-center text-center p-3">
                   <Truck className="w-6 h-6 mb-2 text-[var(--accent)]" />
@@ -243,13 +340,7 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <TrackProductView product={product as any} />
-        
-        {/* Horizontal scroll sections */}
-        <RelatedProducts
-          productId={product.id}
-          category={product.category}
-        />
-        
+        <RelatedProducts productId={product.id} category={product.category} />
         <RecentlyViewed currentProductId={product.id} />
       </div>
     </div>

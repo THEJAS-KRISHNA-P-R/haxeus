@@ -15,7 +15,8 @@ import { ImageGalleryManager } from "@/components/admin/ImageGalleryManager"
 import { SizeInventoryManager } from "@/components/admin/SizeInventoryManager"
 import { cn } from "@/lib/utils"
 import { Toggle } from "@/components/ui/Toggle"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { Star, Trash2, Plus, X } from "lucide-react"
 
 interface ProductFormData {
   name: string
@@ -49,6 +50,14 @@ export default function EditProductPage() {
   const [expectedDate, setExpectedDate] = useState("")
   const [maxPreorders, setMaxPreorders] = useState<string>("")
   
+  const [reviews, setReviews] = useState<any[]>([])
+  const [showAddReview, setShowAddReview] = useState(false)
+  const [newReview, setNewReview] = useState({
+    reviewer_name: "",
+    rating: 5,
+    body: "",
+    verified_purchase: true
+  })
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
@@ -112,6 +121,15 @@ export default function EditProductPage() {
       setPreorderStatus(product.preorder_status ?? "active")
       setExpectedDate(product.expected_date ?? "")
       setMaxPreorders(product.max_preorders?.toString() ?? "")
+
+      // Load reviews
+      const { data: revs } = await supabase
+        .from("product_reviews")
+        .select("*")
+        .eq("product_id", productId)
+        .order("created_at", { ascending: false })
+      
+      setReviews(revs || [])
     } catch (error) {
       console.error("Error loading product:", error)
       alert("Failed to load product")
@@ -335,6 +353,48 @@ export default function EditProductPage() {
   function updateColors(colorsString: string) {
     const colorsArray = colorsString.split(",").map((c) => c.trim()).filter(c => c)
     setFormData({ ...formData, colors: colorsArray })
+  }
+
+  async function handleAddReview() {
+    if (!newReview.reviewer_name || !newReview.body) {
+      alert("Please fill in name and review body")
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      const { data, error } = await supabase
+        .from("product_reviews")
+        .insert([{
+          product_id: Number(productId),
+          reviewer_name: newReview.reviewer_name,
+          rating: newReview.rating,
+          body: newReview.body,
+          verified_purchase: newReview.verified_purchase,
+          user_id: user?.id
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+      setReviews([data, ...reviews])
+      setShowAddReview(false)
+      setNewReview({ reviewer_name: "", rating: 5, body: "", verified_purchase: true })
+    } catch (err: any) {
+      alert(`Failed to add review: ${err.message}`)
+    }
+  }
+
+  async function handleDeleteReview(id: string) {
+    if (!window.confirm("Delete this review?")) return
+    try {
+      const { error } = await supabase.from("product_reviews").delete().eq("id", id)
+      if (error) throw error
+      setReviews(reviews.filter(r => r.id !== id))
+    } catch (err: any) {
+      alert(`Error: ${err.message}`)
+    }
   }
 
   if (!mounted) return null
@@ -565,6 +625,130 @@ export default function EditProductPage() {
             </motion.div>
           )}
         </div>
+
+        {/* Reviews Section */}
+        {productId !== "new" && (
+          <div className={`rounded-2xl border p-5 ${
+            isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-black/[0.01] border-black/[0.07]"
+          }`}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-black"}`}>Product Reviews</h3>
+                <p className={`text-xs mt-0.5 ${isDark ? "text-white/40" : "text-black/40"}`}>
+                  Manually seed or manage customer reviews for this product.
+                </p>
+              </div>
+              <Button 
+                onClick={() => setShowAddReview(!showAddReview)}
+                variant="outline" 
+                size="sm" 
+                className={`gap-2 ${isDark ? "border-white/10 text-white" : "border-black/10 text-black"}`}
+              >
+                {showAddReview ? <X size={14} /> : <Plus size={14} />}
+                {showAddReview ? "Cancel" : "Add Review"}
+              </Button>
+            </div>
+
+            <AnimatePresence>
+              {showAddReview && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-8 p-5 rounded-xl bg-white/[0.03] border border-white/[0.05] overflow-hidden"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold opacity-60">Reviewer Name</Label>
+                      <Input 
+                        value={newReview.reviewer_name}
+                        onChange={e => setNewReview({ ...newReview, reviewer_name: e.target.value })}
+                        placeholder="e.g. Rahul S."
+                        className="bg-transparent"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold opacity-60">Rating (1-5)</Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        {[1, 2, 3, 4, 5].map(s => (
+                          <button 
+                            key={s} 
+                            onClick={() => setNewReview({ ...newReview, rating: s })}
+                            className="p-1 transition-transform border border-transparent active:scale-95"
+                          >
+                            <Star size={20} className={s <= newReview.rating ? "text-[#e7bf04] fill-[#e7bf04]" : "text-white/10"} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2 space-y-2">
+                      <Label className="text-xs font-semibold opacity-60">Review Body</Label>
+                      <Textarea 
+                        value={newReview.body}
+                        onChange={e => setNewReview({ ...newReview, body: e.target.value })}
+                        placeholder="What did the customer say?"
+                        rows={3}
+                        className="bg-transparent"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-white/5 sm:col-span-2">
+                      <div className="flex items-center gap-3">
+                        <Toggle 
+                          checked={newReview.verified_purchase}
+                          onChange={v => setNewReview({ ...newReview, verified_purchase: v })}
+                          size="sm"
+                        />
+                        <span className="text-xs font-medium opacity-60">Verified Purchase</span>
+                      </div>
+                      <Button onClick={handleAddReview} size="sm" className="bg-[#e93a3a] hover:bg-[#ff4a4a] text-white">
+                        Submit Review
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Review List */}
+            <div className="space-y-4">
+              {reviews.length === 0 ? (
+                <div className="py-8 text-center border-2 border-dashed border-white/[0.05] rounded-xl">
+                  <p className="text-sm opacity-30 italic">No reviews yet. Use the button above to seed some.</p>
+                </div>
+              ) : (
+                reviews.map((r) => (
+                  <div key={r.id} className="flex gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold">{r.reviewer_name}</p>
+                          {r.verified_purchase && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[8px] font-bold uppercase tracking-wider">
+                              Verified
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} size={10} className={s <= r.rating ? "text-[#e7bf04] fill-[#e7bf04]" : "text-white/10"} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs opacity-60 leading-relaxed italic">&quot;{r.body}&quot;</p>
+                      <p className="text-[10px] opacity-20 mt-2">{new Date(r.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleDeleteReview(r.id)}
+                      className="p-2 h-fit rounded-lg hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pb-8">

@@ -2,14 +2,16 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-
 import { checkStockAvailability } from '@/lib/inventory'
 
 export interface CartItem {
   id: string
   product_id: number
   size: string
+  color: string
   quantity: number
+  is_preorder: boolean
+  preorder_expected_date: string | null
   product: {
     id: number
     name: string
@@ -18,9 +20,18 @@ export interface CartItem {
   }
 }
 
+export interface AddToCartInput {
+  productId: number
+  size: string
+  color?: string
+  quantity: number
+  is_preorder?: boolean
+  preorder_expected_date?: string | null
+}
+
 interface CartContextType {
   items: CartItem[]
-  addItem: (productId: number, size: string, quantity: number) => Promise<void>
+  addItem: (input: AddToCartInput) => Promise<void>
   removeItem: (itemId: string) => Promise<void>
   updateQuantity: (itemId: string, quantity: number) => Promise<void>
   clearCart: () => Promise<void>
@@ -63,7 +74,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     getUser()
-    
+
     return () => {
       if (subscription) subscription.unsubscribe()
     }
@@ -81,7 +92,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         .from('wishlist')
         .select('product_id')
         .eq('user_id', userId)
-      
+
       if (error) throw error
       setWishlist(data.map(item => item.product_id))
     } catch (err) {
@@ -93,7 +104,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!userId) return
 
     const isListed = wishlist.includes(productId)
-    
+
     // Optimistic update
     if (isListed) {
       setWishlist(wishlist.filter(id => id !== productId))
@@ -115,7 +126,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err) {
       console.error('[CartContext] Error toggling wishlist:', err)
-      // Revert optimism on error
       loadWishlist()
     }
   }
@@ -137,7 +147,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const productIds = cartItems.map(item => item.product_id)
           const { data: products, error: productsError } = await supabase
             .from('products')
-            .select('id, name, price, front_image')
+            .select('id, name, price, front_image, is_preorder, expected_date')
             .in('id', productIds)
 
           if (productsError) throw productsError
@@ -148,8 +158,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               id: item.id,
               product_id: item.product_id,
               size: item.size,
+              color: item.color ?? '',
               quantity: item.quantity,
-              product: product || {
+              is_preorder: item.is_preorder ?? product?.is_preorder ?? false,
+              preorder_expected_date: item.preorder_expected_date ?? product?.expected_date ?? null,
+              product: product ? {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                front_image: product.front_image
+              } : {
                 id: item.product_id,
                 name: 'Unknown Product',
                 price: 0,
@@ -163,7 +181,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setItems([])
         }
       } else {
-        const localCart = localStorage.getItem('guestCart')
+        const localCart = localStorage.getItem('haxeus-cart')
         if (localCart) {
           setItems(JSON.parse(localCart))
         } else {
@@ -172,7 +190,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Error loading cart:', error)
-      const localCart = localStorage.getItem('guestCart')
+      const localCart = localStorage.getItem('haxeus-cart')
       if (localCart) {
         setItems(JSON.parse(localCart))
       }
@@ -181,30 +199,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const addItem = async (productId: number, size: string, quantity: number) => {
+  const addItem = async (input: AddToCartInput) => {
+    const {
+      productId,
+      size,
+      color = '',
+      quantity,
+      is_preorder = false,
+      preorder_expected_date = null,
+    } = input
+
     try {
-      // 1. Check stock first
-      const stock = await checkStockAvailability(productId, size, quantity)
-      if (!stock.available) {
-        throw new Error(stock.currentStock > 0
-          ? `Only ${stock.currentStock} items left in stock for size ${size}.`
-          : `Size ${size} is currently out of stock.`
-        )
+      // Only check stock for non-preorder items
+      if (!is_preorder) {
+        const stock = await checkStockAvailability(productId, size, quantity)
+        if (!stock.available) {
+          throw new Error(
+            stock.currentStock > 0
+              ? `Only ${stock.currentStock} items left in stock for size ${size}.`
+              : `Size ${size} is currently out of stock.`
+          )
+        }
       }
 
-      // 2. Fetch product details
+      // Fetch product details
       const { data: product, error: productError } = await supabase
         .from('products')
         .select('id, name, price, front_image')
         .eq('id', productId)
-        .single()
+        .maybeSingle()
 
       if (productError || !product) {
         throw new Error('Product not found')
       }
 
       if (userId) {
-        const { data: existingItem, error: checkError } = await supabase
+        const { data: existingItem } = await supabase
           .from('cart_items')
           .select('*')
           .eq('user_id', userId)
@@ -212,56 +242,58 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           .eq('size', size)
           .maybeSingle()
 
-        if (checkError && checkError.code !== 'PGRST116') throw checkError
-
         if (existingItem) {
-          const { error: updateError } = await supabase
+          await supabase
             .from('cart_items')
             .update({ quantity: existingItem.quantity + quantity })
             .eq('id', existingItem.id)
-
-          if (updateError) throw updateError
         } else {
-          const { error: insertError } = await supabase
+          await supabase
             .from('cart_items')
             .insert({
               user_id: userId,
               product_id: productId,
               size,
-              quantity
+              color,
+              quantity,
+              is_preorder,
+              preorder_expected_date,
             })
-
-          if (insertError) throw insertError
         }
 
         await loadCart()
       } else {
-        const existingItemIndex = items.findIndex(
+        // Guest cart — optimistic update + localStorage
+        const existingIdx = items.findIndex(
           item => item.product_id === productId && item.size === size
         )
 
         let newItems: CartItem[]
-        if (existingItemIndex > -1) {
-          newItems = [...items]
-          newItems[existingItemIndex].quantity += quantity
+        if (existingIdx > -1) {
+          newItems = items.map((item, i) =>
+            i === existingIdx ? { ...item, quantity: item.quantity + quantity } : item
+          )
         } else {
           const newItem: CartItem = {
             id: `guest-${Date.now()}`,
             product_id: productId,
             size,
+            color,
             quantity,
+            is_preorder,
+            preorder_expected_date,
             product: {
               id: product.id,
               name: product.name,
               price: product.price,
-              front_image: product.front_image
-            }
+              front_image: product.front_image,
+            },
           }
           newItems = [...items, newItem]
         }
 
         setItems(newItems)
-        localStorage.setItem('guestCart', JSON.stringify(newItems))
+        localStorage.setItem('haxeus-cart', JSON.stringify(newItems))
       }
     } catch (error: any) {
       console.error('Error adding item to cart:', error)
@@ -272,18 +304,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeItem = async (itemId: string) => {
     try {
       if (userId) {
-        const { error } = await supabase
+        await supabase
           .from('cart_items')
           .delete()
           .eq('id', itemId)
           .eq('user_id', userId)
 
-        if (error) throw error
         await loadCart()
       } else {
         const newItems = items.filter(item => item.id !== itemId)
         setItems(newItems)
-        localStorage.setItem('guestCart', JSON.stringify(newItems))
+        localStorage.setItem('haxeus-cart', JSON.stringify(newItems))
       }
     } catch (error) {
       console.error('Error removing item:', error)
@@ -292,24 +323,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateQuantity = async (itemId: string, quantity: number) => {
-    if (quantity < 1) return
+    if (quantity < 1) {
+      // Treat as remove when quantity goes to 0
+      await removeItem(itemId)
+      return
+    }
 
     try {
       if (userId) {
-        const { error } = await supabase
+        await supabase
           .from('cart_items')
           .update({ quantity })
           .eq('id', itemId)
           .eq('user_id', userId)
 
-        if (error) throw error
         await loadCart()
       } else {
         const newItems = items.map(item =>
           item.id === itemId ? { ...item, quantity } : item
         )
         setItems(newItems)
-        localStorage.setItem('guestCart', JSON.stringify(newItems))
+        localStorage.setItem('haxeus-cart', JSON.stringify(newItems))
       }
     } catch (error) {
       console.error('Error updating quantity:', error)
@@ -320,15 +354,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clearCart = async () => {
     try {
       if (userId) {
-        const { error } = await supabase
+        await supabase
           .from('cart_items')
           .delete()
           .eq('user_id', userId)
-
-        if (error) throw error
       }
       setItems([])
-      localStorage.removeItem('guestCart')
+      localStorage.removeItem('haxeus-cart')
     } catch (error) {
       console.error('Error clearing cart:', error)
       throw error
@@ -336,7 +368,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
+  const totalPrice = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 
   return (
     <CartContext.Provider
@@ -353,7 +385,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         userId,
         wishlist,
         toggleWishlist,
-        isWishlisted
+        isWishlisted,
       }}
     >
       {children}
