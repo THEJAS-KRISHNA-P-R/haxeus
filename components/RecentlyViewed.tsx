@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
-import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
 import { useProductHistory } from "@/lib/stores/product-history"
 import { ProductCardCompact } from "@/components/ui/ProductCardCompact"
@@ -34,9 +34,8 @@ export function RecentlyViewed({ currentProductId }: RecentlyViewedProps) {
 
   return (
     <section className="relative py-16 border-t border-white/[0.05] dark:border-white/[0.05] border-black/[0.05]">
+      {/* Header - Centered with container grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <p className="text-xs tracking-[0.25em] font-medium uppercase text-[#07e4e1] mb-1">
@@ -48,19 +47,6 @@ export function RecentlyViewed({ currentProductId }: RecentlyViewedProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Clear history */}
-            <button
-              onClick={clearHistory}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                isDark
-                  ? "text-white/30 hover:text-white/60 hover:bg-white/[0.04]"
-                  : "text-black/30 hover:text-black/60 hover:bg-black/[0.04]"
-              }`}
-            >
-              <Trash2 size={13} />
-              Clear
-            </button>
-
             {/* Scroll arrows */}
             {items.length > 3 && (
               <div className="flex gap-2">
@@ -88,11 +74,13 @@ export function RecentlyViewed({ currentProductId }: RecentlyViewedProps) {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Scroll container */}
+      {/* TRUE EDGE TO EDGE SCROLL CONTAINER - BREAKS OUT OF GRID */}
+      <div className="w-full">
         <div
           ref={scrollRef}
-          className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 scroll-smooth hide-scrollbar"
+          className="flex gap-5 sm:gap-4 overflow-x-auto pb-3 scroll-smooth hide-scrollbar px-[10px]"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {items.map((product, index) => (
