@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
-import dynamic from "next/dynamic"
 import { fetchProductById } from "@/lib/fetch-product"
+import { fetchRelatedProducts } from "@/lib/fetch-related"
 import { ProductPageClient } from "./ProductPageClient"
 
 interface PageProps {
@@ -11,7 +11,6 @@ export async function generateMetadata({ params }: PageProps) {
   const { id } = await params
   const product = await fetchProductById(Number(id))
   if (!product) {
-    console.warn(`[generateMetadata] Product ${id} not found`)
     return { title: "Product Not Found — HAXEUS" }
   }
 
@@ -27,12 +26,17 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function ProductPage({ params }: PageProps) {
   const { id } = await params
   const productId = Number(id)
-  const product = await fetchProductById(productId)
+  
+  // Fetch product and related products in parallel to eliminate waterfall
+  const productPromise = fetchProductById(productId)
+  const [product] = await Promise.all([productPromise])
 
   if (!product) {
-    console.error(`[ProductPage] Product ${id} not found in DB`)
     notFound()
   }
+
+  // Fetch related products after we have the category
+  const relatedProducts = await fetchRelatedProducts(productId, product.category || 'Streetwear')
 
   return (
     <div className="min-h-screen bg-theme transition-colors duration-300">
@@ -40,6 +44,7 @@ export default async function ProductPage({ params }: PageProps) {
         product={product} 
         inventory={product.product_inventory || []} 
         images={product.product_images || []} 
+        relatedProducts={relatedProducts}
       />
     </div>
   )

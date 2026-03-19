@@ -64,9 +64,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const { data: { user }, error } = await supabase.auth.getUser()
-        if (error) throw error
-        setUser(user)
-        setUserId(user?.id || null)
+        if (error) {
+          if (error.name !== "AuthSessionMissingError") {
+            console.error("[CartContext] Auth error:", error.message)
+          }
+          setUser(null)
+          setUserId(null)
+        } else {
+          setUser(user)
+          setUserId(user?.id || null)
+        }
 
         const { data } = supabase.auth.onAuthStateChange((_event, session) => {
           setUser(session?.user || null)
@@ -74,7 +81,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         })
         subscription = data.subscription
       } catch (err) {
-        console.error('[CartContext] Auth error:', err)
+        // Silently catch library-level throws
         setUser(null)
         setUserId(null)
       }
