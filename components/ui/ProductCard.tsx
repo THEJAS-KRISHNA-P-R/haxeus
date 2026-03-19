@@ -11,9 +11,8 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { hoverScale, tapScale, cardHover, cardTap, getAnimationProps } from "@/lib/animations"
+import { hoverScale, tapScale } from "@/lib/animations"
 import { WishlistButton } from "@/components/WishlistButton"
-import { useDeviceTier } from "@/hooks/useDeviceTier"
 import type { Product } from "@/lib/supabase"
 import Shuffle from "@/components/Shuffle"
 
@@ -33,7 +32,6 @@ export function ProductCard({
   onPreorderClick
 }: ProductCardProps) {
   const router = useRouter()
-  const tier = useDeviceTier()
   const { theme } = useTheme()
   const { addItem } = useCart()
   const { toast } = useToast()
@@ -60,13 +58,13 @@ export function ProductCard({
         : [...ids, product.id]
       localStorage.setItem("haxeus_preorder_wishlist", JSON.stringify(updated))
       setWishlisted(!wishlisted)
-    } catch { }
+    } catch {}
   }
-
+  
   async function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-
+    
     try {
       await addItem({
         productId: product.id,
@@ -90,18 +88,16 @@ export function ProductCard({
 
   return (
     <motion.div
-      {...getAnimationProps({
-        initial: { opacity: 0, y: 20 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { duration: 0.4, ease: "easeOut" }
-      })}
-      whileHover={tier === "low" ? {} : { y: -10 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      whileHover={{ y: -10 }}
       className="h-full"
     >
       <Link href={`/products/${id}`} className="block h-full">
         <Card className="group overflow-hidden bg-card shadow-none hover:shadow-md border-0 h-full transition-all cursor-pointer flex flex-col">
-
+          
           {/* Image zone */}
           <div className="aspect-square relative bg-black overflow-hidden hide-transform">
             <motion.div
@@ -163,10 +159,11 @@ export function ProductCard({
             {/* Preorder badge — top left */}
             {isPreorderData && (
               <div className="absolute top-3 left-3 z-10">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wider uppercase backdrop-blur-sm ${isSoldOut
+                <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wider uppercase backdrop-blur-sm ${
+                  isSoldOut
                     ? "bg-red-500/20 text-red-500"
                     : "bg-[#e7bf04]/20 text-[#e7bf04]"
-                  }`}>
+                }`}>
                   {isSoldOut ? "Sold Out" : "Pre-Order"}
                 </span>
               </div>
@@ -207,10 +204,11 @@ export function ProductCard({
                     ₹{price.toLocaleString("en-IN")}
                   </p>
                   {!is_preorder && total_stock === 0 && (
-                    <span className={`mt-1 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold tracking-widest uppercase border w-fit ${isDark
+                    <span className={`mt-1 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold tracking-widest uppercase border w-fit ${
+                      isDark
                         ? "bg-white/[0.06] text-white/40 border-white/[0.08]"
                         : "bg-black/[0.05] text-black/40 border-black/[0.08]"
-                      }`}>
+                    }`}>
                       Out
                     </span>
                   )}
@@ -218,17 +216,18 @@ export function ProductCard({
 
                 <div className="flex-1">
                   {is_preorder ? (
-                    <div
+                    <div 
                       onClick={handleAddToCart}
                       className="w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all border-none flex items-center justify-center cursor-pointer"
                     >
                       Pre-Order Now
                     </div>
                   ) : total_stock === 0 ? (
-                    <div className={`w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-semibold rounded-full transition-all border-none flex items-center justify-center ${isDark
+                    <div className={`w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-semibold rounded-full transition-all border-none flex items-center justify-center ${
+                      isDark
                         ? "bg-white/[0.06] text-white/40 border-white/[0.08]"
                         : "bg-black/[0.05] text-black/40 border-black/[0.08]"
-                      }`}>
+                    }`}>
                       View
                     </div>
                   ) : (

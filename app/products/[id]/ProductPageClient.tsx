@@ -31,18 +31,18 @@ interface ProductPageClientProps {
   images: any[]
 }
 
-export function ProductPageClient({
-  product: initialProduct,
-  inventory: initialInventory,
-  images
+export function ProductPageClient({ 
+  product: initialProduct, 
+  inventory: initialInventory, 
+  images 
 }: ProductPageClientProps) {
   // Use React Query for session-level caching
   // Passes initial server-fetched data for instant first-render
-  const { data: product } = useProduct(initialProduct.id.toString(), {
-    initialData: initialProduct
+  const { data: product } = useProduct(initialProduct.id.toString(), { 
+    initialData: initialProduct 
   })
-  const { data: inventory = [] } = useProductInventory(initialProduct.id.toString(), {
-    initialData: initialInventory
+  const { data: inventory = [] } = useProductInventory(initialProduct.id.toString(), { 
+    initialData: initialInventory 
   })
 
   // Explicit type safety for usage in component
@@ -270,10 +270,11 @@ export function ProductPageClient({
                 <button
                   key={i}
                   onClick={() => setActiveIndex(i)}
-                  className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors ${activeIndex === i
+                  className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors ${
+                    activeIndex === i
                       ? "border-[#e93a3a]"
                       : isDark ? "border-white/[0.10]" : "border-black/[0.10]"
-                    }`}
+                  }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -317,8 +318,8 @@ export function ProductPageClient({
               Select Size
             </h3>
             <div className="relative">
-              <div
-                className="flex flex-nowrap gap-3 overflow-x-auto pb-4 pt-1 -mx-1 px-1 hide-scrollbar scroll-smooth"
+              <div 
+                className="flex flex-nowrap gap-3 overflow-x-auto pb-4 pt-1 -mx-1 px-1 hide-scrollbar scroll-smooth" 
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {(sizesExpanded ? sizesToDisplay : sizesToDisplay.slice(0, isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE))
@@ -352,10 +353,11 @@ export function ProductPageClient({
                 {!sizesExpanded && sizesToDisplay.length > (isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE) && (
                   <button
                     onClick={() => setSizesExpanded(true)}
-                    className={`flex-shrink-0 h-12 px-3 rounded-xl border text-xs font-bold transition-all whitespace-nowrap ${isDark
+                    className={`flex-shrink-0 h-12 px-3 rounded-xl border text-xs font-bold transition-all whitespace-nowrap ${
+                      isDark
                         ? "border-white/10 text-white/50 hover:border-white/30 hover:text-white bg-white/[0.03]"
                         : "border-black/10 text-black/50 hover:border-black/30 hover:text-black bg-black/[0.02]"
-                      }`}
+                    }`}
                   >
                     +{sizesToDisplay.length - (isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE)} more
                   </button>
@@ -383,20 +385,22 @@ export function ProductPageClient({
               <button
                 onClick={() => handleAddToCart("normal")}
                 disabled={!selectedSize || isSelectedSizeOutOfStock || addingToCart}
-                className={`flex-1 py-4 rounded-full border font-bold tracking-wide text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed ${isDark
+                className={`flex-1 py-4 rounded-full border font-bold tracking-wide text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isDark
                     ? "border-white/[0.15] text-white hover:bg-white/[0.06]"
                     : "border-black/[0.15] text-black hover:bg-black/[0.06]"
-                  }`}
+                }`}
               >
-                {isSelectedSizeOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Add to Cart"}
+                  {isSelectedSizeOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Add to Cart"}
               </button>
               <button
                 onClick={handleBuyNow}
                 disabled={!selectedSize || isSelectedSizeOutOfStock || addingToCart}
-                className={`flex-1 py-4 rounded-full font-bold tracking-wide text-lg shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed ${isDark
+                className={`flex-1 py-4 rounded-full font-bold tracking-wide text-lg shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isDark
                     ? "bg-white text-black hover:bg-white/90 shadow-white/10"
                     : "bg-black text-white hover:bg-black/90 shadow-black/10"
-                  }`}
+                }`}
               >
                 {isSelectedSizeOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Buy Now"}
               </button>
@@ -410,7 +414,7 @@ export function ProductPageClient({
                 {p.description}
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-theme pt-6">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 border-t border-theme pt-6">
                 <div className="flex flex-col items-center text-center p-3">
                   <Truck className="w-6 h-6 mb-2 text-[var(--accent)]" />
                   <span className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-white/40" : "text-black/40"}`}>Shipping</span>

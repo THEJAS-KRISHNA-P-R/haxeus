@@ -4,8 +4,7 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { staggerContainer, fadeInRight, hoverScale, tapScale, getAnimationProps } from "@/lib/animations"
-import { useDeviceTier } from "@/hooks/useDeviceTier"
+import { staggerContainer, fadeInRight, hoverScale, tapScale } from "@/lib/animations"
 import type { AboutConfig } from "@/types/homepage"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
 
@@ -15,8 +14,6 @@ interface AboutSectionProps {
 }
 
 export function AboutSection({ config, isDark = true }: AboutSectionProps) {
-  const tier = useDeviceTier()
-  const isLowTier = tier === "low"
   const imageUrl = config.image_url ?? DEFAULT_HOMEPAGE_CONFIG.about.image_url
   const heading = config.heading ?? DEFAULT_HOMEPAGE_CONFIG.about.heading
   const headingAccent = config.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_accent
@@ -32,12 +29,10 @@ export function AboutSection({ config, isDark = true }: AboutSectionProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div
-            {...getAnimationProps({
-              initial: { opacity: 0, x: -50 },
-              whileInView: { opacity: 1, x: 0 },
-              viewport: { once: true },
-              transition: { duration: 0.8 }
-            })}
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
             className="relative h-64 sm:h-80 lg:h-[500px]"
           >
             <motion.div
@@ -62,12 +57,10 @@ export function AboutSection({ config, isDark = true }: AboutSectionProps) {
           </motion.div>
 
           <motion.div
-            {...getAnimationProps({
-              initial: "hidden",
-              whileInView: "visible",
-              viewport: { once: true },
-              variants: staggerContainer
-            })}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
           >
             <motion.div variants={fadeInRight}>
               <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 break-words ${isDark ? "text-white" : "text-black"}`}>
@@ -96,10 +89,8 @@ export function AboutSection({ config, isDark = true }: AboutSectionProps) {
                   <motion.div
                     className="w-3 h-3 rounded-full mr-3 flex-shrink-0"
                     style={{ backgroundColor: feature.color }}
-                    {...getAnimationProps({
-                      animate: { scale: [1, 1.2, 1] },
-                      transition: { duration: 2, repeat: Infinity, delay: index * 0.2 }
-                    })}
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
                   />
                   <span className="font-semibold text-white/80">{feature.label}</span>
                 </motion.div>

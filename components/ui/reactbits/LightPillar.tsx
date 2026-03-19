@@ -2,7 +2,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { useDeviceTier } from "@/hooks/useDeviceTier"
 import './LightPillar.css';
 
 interface LightPillarProps {
@@ -47,7 +46,6 @@ const LightPillar: React.FC<LightPillarProps> = ({
     const timeRef = useRef<number>(0);
     const isVisibleRef = useRef<boolean>(true);
     const [webGLSupported, setWebGLSupported] = useState<boolean>(true);
-    const tier = useDeviceTier();
 
     useEffect(() => {
         try {
@@ -334,23 +332,8 @@ const LightPillar: React.FC<LightPillarProps> = ({
         glowAmount, pillarWidth, pillarHeight, noiseIntensity,
         pillarRotation, webGLSupported, quality]);
 
-    if (!webGLSupported || tier === "low") {
-        return (
-            <div
-                className={`fixed inset-0 pointer-events-none ${className}`}
-                style={{
-                    background: `
-            radial-gradient(
-              ellipse 60% 80% at 65% 50%,
-              rgba(7, 228, 225, 0.06) 0%,
-              transparent 70%
-            )
-          `,
-                    zIndex: 0,
-                    mixBlendMode
-                }}
-            />
-        )
+    if (!webGLSupported) {
+        return <div className={`light-pillar-fallback ${className}`} style={{ mixBlendMode }} />;
     }
 
     return (

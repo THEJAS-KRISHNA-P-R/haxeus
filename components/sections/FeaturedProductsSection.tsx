@@ -1,8 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { scrollReveal, getAnimationProps } from "@/lib/animations"
-import { useDeviceTier } from "@/hooks/useDeviceTier"
+import { scrollReveal } from "@/lib/animations"
 import { ProductCard } from "@/components/ui/ProductCard"
 import type { FeaturedProductsConfig } from "@/types/homepage"
 import type { Product } from "@/lib/supabase"
@@ -20,13 +19,12 @@ interface FeaturedProductsSectionProps {
 
 const accentColors = ["#e7bf04", "#c03c9d", "#07e4e1"]
 
-export function FeaturedProductsSection({
-  config,
-  products,
+export function FeaturedProductsSection({ 
+  config, 
+  products, 
   loading = false,
-  isDark = true
+  isDark = true 
 }: FeaturedProductsSectionProps) {
-  const tier = useDeviceTier()
   const heading = config.heading ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading
   const headingAccent = config.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading_accent
   const subtext = config.subtext ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.subtext
@@ -35,12 +33,10 @@ export function FeaturedProductsSection({
     <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
         <motion.div
-          {...getAnimationProps({
-            initial: "hidden",
-            whileInView: "visible",
-            viewport: { once: true, margin: "-100px" },
-            variants: scrollReveal
-          })}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={scrollReveal}
           className="text-center mb-16"
         >
           <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>
