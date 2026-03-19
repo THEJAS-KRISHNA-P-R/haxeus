@@ -1,7 +1,7 @@
 // Service Worker for HAXEUS PWA (v1.1)
 // handles site updates and offline fallbacks
-const CACHE_NAME = 'haxeus-v1.1'
-const RUNTIME_CACHE = 'haxeus-runtime-v1.1'
+const CACHE_NAME = 'haxeus-v1.2'
+const RUNTIME_CACHE = 'haxeus-runtime-v1.2'
 
 // Assets to cache on install
 const PRECACHE_URLS = [
@@ -50,8 +50,8 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // API requests - network only
-  if (url.pathname.startsWith('/api/')) {
+  // API requests and Product pages - network only/first
+  if (url.pathname.startsWith('/api/') || url.pathname.includes('/products/')) {
     event.respondWith(fetch(request))
     return
   }

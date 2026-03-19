@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 import { useProductHistory } from "@/lib/stores/product-history"
 import { ProductCardCompact } from "@/components/ui/ProductCardCompact"
 
@@ -15,10 +15,7 @@ export function RecentlyViewed({ currentProductId }: RecentlyViewedProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const isDark = !mounted ? true : (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = !mounted ? true : theme === "dark"
 
   const { recentlyViewed, clearHistory } = useProductHistory()
   const scrollRef = useRef<HTMLDivElement>(null)

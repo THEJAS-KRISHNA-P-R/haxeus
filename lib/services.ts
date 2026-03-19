@@ -205,7 +205,7 @@ export const ProductService = {
             .select(`
         *,
         product_images (id, image_url, is_primary, display_order, alt_text),
-        product_inventory (id, size, quantity, low_stock_threshold)
+        product_inventory (id, size, stock_quantity, color, reserved_quantity, low_stock_threshold)
       `)
             .eq("is_active", true)
 
@@ -236,7 +236,7 @@ export const ProductService = {
             .select(`
         *,
         product_images (id, image_url, is_primary, display_order, alt_text),
-        product_inventory (id, size, quantity, low_stock_threshold),
+        product_inventory (id, size, stock_quantity, color, reserved_quantity, low_stock_threshold),
         product_relations!product_relations_product_id_fkey (
           related_product:products!product_relations_related_product_id_fkey (
             id, name, price, front_image,
@@ -269,7 +269,7 @@ export const ProductService = {
     async getStock(productId: number, size: string) {
         const { data, error } = await supabase
             .from("product_inventory")
-            .select("quantity, low_stock_threshold")
+            .select("stock_quantity, low_stock_threshold")
             .eq("product_id", productId)
             .eq("size", size)
             .single()
@@ -282,7 +282,7 @@ export const ProductService = {
     async getInventory(productId: number) {
         const { data, error } = await supabase
             .from("product_inventory")
-            .select("size, quantity, low_stock_threshold")
+            .select("size, stock_quantity, low_stock_threshold")
             .eq("product_id", productId)
             .order("size")
 
@@ -448,9 +448,9 @@ export const WishlistService = {
             .select(`
         *,
         products (
-          id, name, price, compare_price, front_image, is_active,
+          id, name, price, front_image, is_active,
           product_images (image_url, is_primary),
-          product_inventory (size, quantity)
+          product_inventory (size, stock_quantity, color, reserved_quantity)
         )
       `)
             .eq("user_id", user.id)

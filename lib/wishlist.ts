@@ -86,9 +86,18 @@ export async function isInWishlist(productId: number): Promise<boolean> {
       .select("id")
       .eq("user_id", user.id)
       .eq("product_id", productId)
-      .single()
+      .maybeSingle()
+    
+    if (error) {
+      if (error.code.startsWith('4')) {
+        console.warn("[wishlist] client error on check:", error.message)
+        return false
+      }
+      console.error("[wishlist] check error:", error.message)
+      return false
+    }
 
-    return !error && !!data
+    return !!data
   } catch (error) {
     return false
   }
@@ -112,7 +121,7 @@ export async function getWishlist() {
       .select(
         `
         *,
-        product:products (
+        products (
           id,
           name,
           price,

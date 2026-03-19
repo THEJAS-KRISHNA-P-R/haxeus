@@ -6,6 +6,7 @@ import { Button } from "./ui/button"
 import { addToWishlist, removeFromWishlist, isInWishlist } from "@/lib/wishlist"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
+import { useCart } from "@/contexts/CartContext"
 
 interface WishlistButtonProps {
   productId: number
@@ -23,9 +24,9 @@ export function WishlistButton({
   className = "",
 }: WishlistButtonProps) {
   const router = useRouter()
+  const { user } = useCart()
   const [inWishlist, setInWishlist] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<any>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -35,11 +36,6 @@ export function WishlistButton({
 
   async function checkUser() {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
-
       if (user) {
         const inList = await isInWishlist(productId)
         setInWishlist(inList)

@@ -14,39 +14,9 @@ import {
 } from "@/components/admin/AdminUI";
 
 async function fetchDashboardStats(period: "7d" | "30d" | "90d") {
-    const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
-    const since = new Date(Date.now() - days * 86_400_000).toISOString();
-
-    const [ordersRes, customersRes, recentRes, topRes] = await Promise.all([
-        supabase.from("orders").select("id, total_amount, payment_status, created_at").gte("created_at", since),
-        supabase.from("orders").select("user_id").gte("created_at", since),
-        supabase.from("orders")
-            .select("id, created_at, total_amount, payment_status, shipping_name")
-            .order("created_at", { ascending: false })
-            .limit(5),
-        supabase.from("order_items").select("product_id, products(id, name, front_image)").limit(200),
-    ]);
-
-    const orders = ordersRes.data ?? [];
-    const unique = new Set((customersRes.data ?? []).map((o: any) => o.user_id));
-
-    const tally: Record<string, { id: string; name: string; image_url: string; sales: number }> = {};
-    for (const item of (topRes.data ?? []) as any[]) {
-        const p = item.products;
-        if (!p) continue;
-        if (!tally[p.id]) tally[p.id] = { id: p.id, name: p.name, image_url: p.front_image ?? "", sales: 0 };
-        tally[p.id].sales++;
-    }
-    const topProducts = Object.values(tally).sort((a, b) => b.sales - a.sales).slice(0, 5);
-
-    return {
-        totalRevenue: orders.filter((o: any) => o.payment_status === "paid").reduce((s: number, o: any) => s + Number(o.total_amount), 0),
-        totalOrders: orders.length,
-        totalCustomers: unique.size,
-        pendingOrders: orders.filter((o: any) => o.payment_status === "pending").length,
-        recentOrders: recentRes.data ?? [],
-        topProducts,
-    };
+    const res = await fetch(`/api/admin/stats?period=${period}`);
+    if (!res.ok) throw new Error("Failed to fetch stats");
+    return res.json();
 }
 
 export default function DashboardClient() {

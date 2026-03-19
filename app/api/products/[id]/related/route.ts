@@ -3,11 +3,12 @@ import { NextResponse } from "next/server"
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await props.params
   const supabase = await createClient()
 
-  const productId = parseInt(params.id)
+  const productId = parseInt(id)
   if (isNaN(productId)) {
     return NextResponse.json({ error: "Invalid id" }, { status: 400 })
   }
@@ -31,11 +32,11 @@ export async function GET(
       id, name, price, front_image, category,
       is_preorder, preorder_status, expected_date,
       max_preorders, preorder_count,
-      product_images (image_url, is_primary, display_order)
+      product_images (image_url, is_primary, display_order),
+      product_inventory (size, stock_quantity, color)
     `)
-    .eq("category", current.category ?? "tshirt")
+    .eq("category", current.category ?? "apparel")
     .neq("id", productId)
-    .or("is_preorder.eq.false,preorder_status.neq.stopped")
     .order("id", { ascending: false })
     .limit(8)
 
@@ -48,11 +49,11 @@ export async function GET(
         id, name, price, front_image, category,
         is_preorder, preorder_status, expected_date,
         max_preorders, preorder_count,
-        product_images (image_url, is_primary, display_order)
+        product_images (image_url, is_primary, display_order),
+        product_inventory (size, stock_quantity, color)
       `)
       .neq("id", productId)
       .not("id", "in", `(${results.map(r => r.id).join(",") || "0"})`)
-      .or("is_preorder.eq.false,preorder_status.neq.stopped")
       .order("id", { ascending: false })
       .limit(8 - results.length)
 

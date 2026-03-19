@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/ThemeProvider"
 import { useState, useEffect } from "react"
 import type { Product } from "@/lib/supabase"
 import { isSupabaseStorageUrl } from "@/lib/storage-utils"
@@ -17,10 +17,7 @@ export function ProductCardCompact({ product, index = 0 }: ProductCardCompactPro
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const isDark = !mounted ? true : (
-    theme === "dark" ||
-    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+  const isDark = !mounted ? true : theme === "dark"
 
   const image = product.front_image ?? "/placeholder.svg"
 

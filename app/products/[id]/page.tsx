@@ -4,12 +4,16 @@ import { fetchProductById } from "@/lib/fetch-product"
 import { ProductPageClient } from "./ProductPageClient"
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const product = await fetchProductById(Number(params.id))
-  if (!product) return { title: "Product Not Found — HAXEUS" }
+  const { id } = await params
+  const product = await fetchProductById(Number(id))
+  if (!product) {
+    console.warn(`[generateMetadata] Product ${id} not found`)
+    return { title: "Product Not Found — HAXEUS" }
+  }
 
   return {
     title: `${product.name} — HAXEUS`,
@@ -21,10 +25,12 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function ProductPage({ params }: PageProps) {
-  const productId = Number(params.id)
+  const { id } = await params
+  const productId = Number(id)
   const product = await fetchProductById(productId)
 
   if (!product) {
+    console.error(`[ProductPage] Product ${id} not found in DB`)
     notFound()
   }
 

@@ -27,6 +27,11 @@ interface CartContextType {
   totalItems: number
   totalPrice: number
   isLoading: boolean
+  user: any
+  userId: string | null
+  wishlist: number[]
+  toggleWishlist: (productId: number) => Promise<void>
+  isWishlisted: (productId: number) => boolean
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -34,25 +39,88 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [hasFetchedUser, setHasFetchedUser] = useState(false)
+  const [wishlist, setWishlist] = useState<number[]>([])
 
   useEffect(() => {
+    let subscription: any = null
+
     const getUser = async () => {
+      if (hasFetchedUser) return
+      setHasFetchedUser(true)
+
       const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
       setUserId(user?.id || null)
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user || null)
         setUserId(session?.user?.id || null)
       })
-
-      return () => subscription.unsubscribe()
+      subscription = data.subscription
     }
+
     getUser()
-  }, [])
+    
+    return () => {
+      if (subscription) subscription.unsubscribe()
+    }
+  }, [hasFetchedUser])
 
   useEffect(() => {
     loadCart()
+    loadWishlist()
   }, [userId])
+
+  const loadWishlist = async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select('product_id')
+        .eq('user_id', userId)
+      
+      if (error) throw error
+      setWishlist(data.map(item => item.product_id))
+    } catch (err) {
+      console.error('[CartContext] Error loading wishlist:', err)
+    }
+  }
+
+  const toggleWishlist = async (productId: number) => {
+    if (!userId) return
+
+    const isListed = wishlist.includes(productId)
+    
+    // Optimistic update
+    if (isListed) {
+      setWishlist(wishlist.filter(id => id !== productId))
+    } else {
+      setWishlist([...wishlist, productId])
+    }
+
+    try {
+      if (isListed) {
+        await supabase
+          .from('wishlist')
+          .delete()
+          .eq('user_id', userId)
+          .eq('product_id', productId)
+      } else {
+        await supabase
+          .from('wishlist')
+          .insert({ user_id: userId, product_id: productId })
+      }
+    } catch (err) {
+      console.error('[CartContext] Error toggling wishlist:', err)
+      // Revert optimism on error
+      loadWishlist()
+    }
+  }
+
+  const isWishlisted = (productId: number) => wishlist.includes(productId)
 
   const loadCart = async () => {
     setIsLoading(true)
@@ -280,7 +348,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         totalItems,
         totalPrice,
-        isLoading
+        isLoading,
+        user,
+        userId,
+        wishlist,
+        toggleWishlist,
+        isWishlisted
       }}
     >
       {children}
