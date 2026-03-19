@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
 import { ShoppingCart, SlidersHorizontal } from "lucide-react"
+import { useProducts } from "@/hooks/useProductQueries"
 import { WishlistButton } from "@/components/WishlistButton"
 import {
   Select,
@@ -30,55 +31,22 @@ import type { Product } from "@/lib/supabase"
 
 
 function ProductsContent() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: rawData = [], isLoading: loading } = useProducts()
+  const rawProducts = rawData as Product[]
   const [sortBy, setSortBy] = useState("default")
   const [priceRange, setPriceRange] = useState("all")
   const [category, setCategory] = useState("all")
   const searchParams = useSearchParams()
   const searchQuery = searchParams?.get("search") || ""
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
-
-  const fetchProducts = async () => {
-    setLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from("products")
-        .select(`
-          *,
-          product_images (
-            image_url,
-            is_primary,
-            display_order
-          )
-        `)
-        .order("id")
-
-      if (error) throw error
-
-      if (data && data.length > 0) {
-        const mappedProducts = data.map(product => {
-          const primaryImg = product.product_images?.find((img: any) => img.is_primary)
-          const firstImg = product.product_images?.[0]
-          const galleryImage = primaryImg?.image_url || firstImg?.image_url
-
-          return {
-            ...product,
-            front_image: galleryImage || product.front_image || "/placeholder.svg",
-            sizes: product.available_sizes || product.sizes || ["S", "M", "L", "XL"],
-          }
-        })
-        setProducts(mappedProducts)
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Map raw data to include images/sizes (preserving existing logic)
+  const products = useMemo(() => {
+    return rawProducts.map(p => ({
+      ...p,
+      front_image: p.front_image || "/placeholder.svg",
+      sizes: p.available_sizes || (p as any).sizes || ["S", "M", "L", "XL"],
+    }))
+  }, [rawProducts])
 
   const filteredProducts = useMemo(() => {
     let filtered = [...products]

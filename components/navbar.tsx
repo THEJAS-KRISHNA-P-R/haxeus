@@ -120,7 +120,7 @@ export function Navbar() {
 
       {/* ── DESKTOP FLOATING PILL ─────────────────────────────────── */}
       <div
-        className="hidden md:flex fixed top-4 z-[200] w-[780px] max-w-[calc(100vw-2rem)]"
+        className="hidden md:flex fixed top-4 z-[60] w-[780px] max-w-[calc(100vw-2rem)]"
         style={{ left: '50%', transform: 'translate(-50%, 0) translateZ(0)', willChange: 'transform' }}
       >
         <GlassSurface
@@ -283,7 +283,7 @@ export function Navbar() {
       </div>
 
       {/* ── MOBILE STAGGERED MENU OVERLAY ────────────────────────── */}
-      <div className={`md:hidden fixed inset-0 z-[210] ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+      <div className={`md:hidden fixed inset-0 z-[70] ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         <StaggeredMenu
           position="right"
           items={menuItems}
@@ -307,7 +307,7 @@ export function Navbar() {
 
       {/* ── MOBILE TOP BAR ───────────────────────────────────────── */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-[200] px-3 pt-safe px-safe"
+        className="md:hidden fixed top-0 left-0 right-0 z-[60] px-3 pt-safe px-safe"
         style={{ willChange: 'transform', transform: 'translateZ(0)', paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
       >
         <AnimatePresence mode="wait">

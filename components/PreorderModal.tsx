@@ -86,14 +86,14 @@ export function PreorderModal({ item, isOpen, onClose }: PreorderModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] flex items-center justify-center"
           onClick={onClose}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className={`relative rounded-2xl p-8 max-w-md w-full mx-4 ${isDark ? 'bg-[#0a0a0a]' : 'bg-[#f5f4f0]'}`}
+            className={`relative rounded-2xl p-8 max-w-md w-full mx-4 z-[71] ${isDark ? 'bg-[#0a0a0a]' : 'bg-[#f5f4f0]'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <button onClick={onClose} className={`absolute top-4 right-4 ${isDark ? 'text-white/50' : 'text-black/55'} hover:text-[#e93a3a]`}>

@@ -79,11 +79,11 @@ export function ExitIntentPopup({ config }: ExitPopupProps) {
       {visible && (
         <>
           <div
-            className="fixed inset-0 z-[100]"
+            className="fixed inset-0 z-[70]"
             style={{ backgroundColor: `rgba(0,0,0,${config.overlay_opacity || 0.75})` }}
             onClick={handleDismiss}
           />
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[71] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.92, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

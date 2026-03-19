@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
 import { ProductCardCompact } from "@/components/ui/ProductCardCompact"
+import { useRelatedProducts } from "@/hooks/useProductQueries"
 import type { Product } from "@/lib/supabase"
 
 interface RelatedProductsProps {
@@ -18,18 +19,10 @@ export function RelatedProducts({ productId, category }: RelatedProductsProps) {
   useEffect(() => setMounted(true), [])
   const isDark = !mounted ? true : theme === "dark"
 
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: rawRelated = [], isLoading: loading } = useRelatedProducts(productId.toString(), category || "Streetwear")
+  const products = rawRelated as Product[]
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    setLoading(true)
-    fetch(`/api/products/${productId}/related`)
-      .then(r => r.json())
-      .then(({ related }) => setProducts(related ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [productId])
 
   function scroll(dir: "left" | "right") {
     if (!scrollRef.current) return

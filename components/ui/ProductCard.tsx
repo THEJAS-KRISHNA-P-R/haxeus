@@ -1,17 +1,18 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+import { useTheme } from "@/components/ThemeProvider"
+import { Heart, ShoppingCart } from "lucide-react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Heart, ShoppingCart } from "lucide-react"
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { hoverScale, tapScale, cardHover } from "@/lib/animations"
+import { hoverScale, tapScale } from "@/lib/animations"
 import { WishlistButton } from "@/components/WishlistButton"
 import type { Product } from "@/lib/supabase"
-import { isSupabaseStorageUrl } from "@/lib/storage-utils"
+import Shuffle from "@/components/Shuffle"
 
 interface ProductCardProps {
   product: Product
@@ -28,15 +29,19 @@ export function ProductCard({
   variant = "default",
   onPreorderClick
 }: ProductCardProps) {
+  const router = useRouter()
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [wishlisted, setWishlisted] = useState(() => {
-    // Only use local wishlist state for the preorder variant alternative heart,
-    // otherwise the canonical card uses the WishlistButton component directly
     try {
       const stored = localStorage.getItem("haxeus_preorder_wishlist")
       const ids: number[] = stored ? JSON.parse(stored) : []
       return ids.includes(product.id)
     } catch { return false }
   })
+
+  useEffect(() => setMounted(true), [])
+  const isDark = !mounted ? true : theme === "dark"
 
   function toggleWishlist(e: React.MouseEvent) {
     e.preventDefault()
@@ -54,7 +59,6 @@ export function ProductCard({
 
   const isPreorderData = product.is_preorder && product.preorder_status !== "stopped"
   const isSoldOut = product.preorder_status === "sold_out"
-  const sizes = (product as any).sizes || (product as any).available_sizes || ["S", "M", "L", "XL"]
 
   return (
     <motion.div
@@ -82,7 +86,6 @@ export function ProductCard({
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                 className="object-cover"
                 priority={index < 4}
-                unoptimized={isSupabaseStorageUrl(product.front_image)}
                 onError={(e) => {
                   const t = e.target as HTMLImageElement
                   t.src = "/placeholder.svg"
@@ -154,81 +157,70 @@ export function ProductCard({
           </div>
 
           {/* Content zone */}
-          <CardContent className="p-3 sm:p-5 flex flex-col flex-1">
-            <motion.h3
-              className="text-base sm:text-xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 hover:text-[var(--accent)] line-clamp-1"
-              whileHover={{ x: 5 }}
-              transition={{ duration: 0.2 }}
-            >
-              {product.name}
-            </motion.h3>
+          <CardContent className="p-4">
+            {/* Name */}
+            <Shuffle
+              text={product.name}
+              tag="h3"
+              className="text-base font-semibold mb-1 text-theme"
+              duration={0.4}
+              shuffleTimes={1}
+            />
 
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-2 sm:mb-3 line-clamp-2 leading-relaxed">
-              {product.description || "Premium streetwear"}
-            </p>
+            {/* Description snippet */}
+            {product.description && (
+              <p className={`text-xs mb-3 line-clamp-2 ${isDark ? "text-white/40" : "text-black/40"}`}>
+                {product.description}
+              </p>
+            )}
 
-
-            <div className="mt-auto">
-              <div className="flex items-center gap-2 mb-2">
-                <motion.span
-                  className="text-base sm:text-xl font-bold text-slate-900 dark:text-white"
-                  whileHover={{ scale: 1.1, color: "var(--accent)" }}
-                >
+            {/* Price and CTA row */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col">
+                <p className="text-xl font-bold text-theme leading-none">
                   ₹{product.price.toLocaleString("en-IN")}
-                </motion.span>
-                
-                {variant === "preorder" && product.preorder_count > 0 && (
-                  <span className="text-xs text-slate-500 dark:text-white/40 ml-auto">
-                    {product.preorder_count}
-                    {product.max_preorders ? ` / ${product.max_preorders}` : ""} reserved
+                </p>
+                {!product.is_preorder && product.total_stock === 0 && (
+                  <span className={`mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase border w-fit ${
+                    isDark
+                      ? "bg-white/[0.06] text-white/40 border-white/[0.08]"
+                      : "bg-black/[0.05] text-black/40 border-black/[0.08]"
+                  }`}>
+                    Sold Out
                   </span>
                 )}
               </div>
 
-              {/* Progress bar — only for preorders with a max */}
-              {variant === "preorder" && product.max_preorders && (
-                <div className="mb-4">
-                  <div className="h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-[#e7bf04] transition-all duration-500"
-                      style={{ width: `${Math.min(100, (product.preorder_count / product.max_preorders) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Preorder Variant CTA area */}
-              {variant === "preorder" && (
-                <div className="flex gap-2">
-                  <motion.div whileHover={hoverScale} whileTap={tapScale} className="flex-1">
-                    <Button
-                      disabled={isSoldOut}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (!isSoldOut) onPreorderClick?.(product);
-                      }}
-                      className="w-full bg-[var(--accent)] text-white hover:opacity-90 py-5 text-sm sm:text-base font-semibold rounded-full shadow-md shadow-[var(--accent)]/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSoldOut ? "Sold Out" : "Pre-Order Now"}
+              <div className="flex-1 max-w-[140px]">
+                {product.is_preorder ? (
+                  <Link href={`/products/${product.id}`}>
+                    <Button className="w-full py-2.5 h-auto text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all">
+                      Pre-Order Now
                     </Button>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <button
-                      onClick={toggleWishlist}
-                      className={`h-full px-4 rounded-full border transition-all ${
-                        wishlisted
-                          ? "border-[#c03c9d] text-[#c03c9d] bg-[#c03c9d]/10"
-                          : "border-black/[0.12] dark:border-white/[0.12] text-slate-500 dark:text-white/50 hover:border-[#c03c9d] hover:text-[#c03c9d]"
-                      }`}
-                    >
-                      <Heart size={18} fill={wishlisted ? "#c03c9d" : "none"} />
-                    </button>
-                  </motion.div>
-                </div>
-              )}
+                  </Link>
+                ) : product.total_stock === 0 ? (
+                  <Link href={`/products/${product.id}`}>
+                    <Button className={`w-full py-2.5 h-auto text-xs font-semibold rounded-full transition-all ${
+                      isDark
+                        ? "bg-white/[0.04] text-white/30 border border-white/[0.06]"
+                        : "bg-black/[0.03] text-black/30 border border-black/[0.06]"
+                    }`}>
+                      View Details
+                    </Button>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      router.push(`/products/${product.id}`)
+                    }}
+                    className="w-full py-2.5 text-xs font-bold rounded-full bg-[var(--accent)] text-white hover:opacity-90 transition-all shadow-sm shadow-[var(--accent)]/10"
+                  >
+                    Add to Cart
+                  </button>
+                )}
+              </div>
             </div>
-            
           </CardContent>
         </Card>
       </Link>

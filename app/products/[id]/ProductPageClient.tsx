@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import { TrackProductView } from "@/components/TrackProductView"
 import { SocialProof } from "@/components/SocialProof"
+import { useProduct, useProductInventory } from "@/hooks/useProductQueries"
+import { Product, ProductInventory } from "@/lib/supabase"
 
 const RelatedProducts = dynamic(
   () => import("@/components/RelatedProducts").then(m => ({ default: m.RelatedProducts })),
@@ -28,7 +30,24 @@ interface ProductPageClientProps {
   images: any[]
 }
 
-export function ProductPageClient({ product, inventory, images }: ProductPageClientProps) {
+export function ProductPageClient({ 
+  product: initialProduct, 
+  inventory: initialInventory, 
+  images 
+}: ProductPageClientProps) {
+  // Use React Query for session-level caching
+  // Passes initial server-fetched data for instant first-render
+  const { data: product } = useProduct(initialProduct.id.toString(), { 
+    initialData: initialProduct 
+  })
+  const { data: inventory = [] } = useProductInventory(initialProduct.id.toString(), { 
+    initialData: initialInventory 
+  })
+
+  // Explicit type safety for usage in component
+  const p = (product || initialProduct) as Product
+  const inv = (inventory || initialInventory) as ProductInventory[]
+
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const { addItem } = useCart()
@@ -41,7 +60,7 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
 
   const allImages = images.length > 0
     ? images.map(img => img.image_url)
-    : [product.front_image || "/placeholder.svg"]
+    : [p.front_image || "/placeholder.svg"]
 
   const [activeImage, setActiveImage] = useState(allImages[0])
   const [selectedSize, setSelectedSize] = useState("")
@@ -56,7 +75,7 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
   const sizeOrder = ["3XS", "2XS", "XS", "S", "M", "L", "XL", "2XL", "XXL", "3XL", "XXXL", "4XL", "XXXXL"]
 
   // Extract all unique sizes from inventory and sort them logically
-  const allAvailableSizes = Array.from(new Set(inventory.map(inv => inv.size)))
+  const allAvailableSizes = Array.from(new Set(inv.map(inv => inv.size)))
     .sort((a, b) => {
       const indexA = sizeOrder.indexOf(a.toUpperCase())
       const indexB = sizeOrder.indexOf(b.toUpperCase())
@@ -79,9 +98,9 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
   const sizesToDisplay = allAvailableSizes.length > 0 ? allAvailableSizes : []
 
   // For preorders, all sizes in inventory are available. For normal, only those with stock > 0.
-  const availableSizes = product.is_preorder
+  const availableSizes = p.is_preorder
     ? sizesToDisplay
-    : inventory.filter(inv => inv.stock_quantity > 0).map(inv => inv.size)
+    : inv.filter(inv => inv.stock_quantity > 0).map(inv => inv.size)
 
   // Size selection is now manual to prevent accidental 'S' size orders
   useEffect(() => {
@@ -93,11 +112,9 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
   }, [])
 
   // Out-of-stock check — preorders are never OOS
-  const isOutOfStock = product.is_preorder
-    ? false
-    : selectedSize
-      ? (inventory.find(i => i.size === selectedSize)?.stock_quantity ?? 0) === 0
-      : false
+  const isSelectedSizeOutOfStock = !p.is_preorder && selectedSize
+    ? (inv.find(i => i.size === selectedSize)?.stock_quantity ?? 0) === 0
+    : false
 
   async function handleAddToCart(type: "preorder" | "normal") {
     if (!selectedSize) {
@@ -111,14 +128,14 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
     setAddingToCart(true)
     try {
       await addItem({
-        productId: product.id,
+        productId: p.id,
         size: selectedSize,
         color: "",
         quantity: 1,
         is_preorder: type === "preorder",
-        preorder_expected_date: type === "preorder" ? (product.expected_date ?? null) : null,
+        preorder_expected_date: type === "preorder" ? (p.expected_date ?? null) : null,
       })
-      toast({ title: "Added to cart!", description: product.name })
+      toast({ title: "Added to cart!", description: p.name })
       if (type === "preorder") {
         router.push("/cart")
       }
@@ -154,7 +171,7 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
       <div className="grid grid-cols-1 lg:grid-cols-[55%_45%] gap-8 lg:gap-12 items-start">
 
         {/* Left — image gallery */}
-        <div className="lg:sticky lg:top-[88px]">
+        <div className="lg:sticky lg:top-[88px] lg:scale-[0.85] lg:origin-top">
           <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black">
             <Image
               src={activeImage}
@@ -192,18 +209,18 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
         <div className="flex flex-col gap-6">
           {/* Name */}
           <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${isDark ? "text-white" : "text-black"}`}>
-            {product.name}
+            {p.name}
           </h1>
 
           {/* Social proof — reviews or preorder count */}
-          <SocialProof product={product} />
+          <SocialProof product={p} />
 
           {/* Price + badge */}
           <div className="flex items-center gap-3">
             <span className="text-3xl font-bold text-theme-2">
-              ₹{product.price.toLocaleString("en-IN")}
+              ₹{p.price.toLocaleString("en-IN")}
             </span>
-            {product.is_preorder && product.preorder_status === "active" && (
+            {p.is_preorder && p.preorder_status === "active" && (
               <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#eab308]/20 text-[#eab308] border border-[#eab308]/30">
                 PRE-ORDER
               </span>
@@ -211,9 +228,9 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
           </div>
 
           {/* Expected date — preorder */}
-          {product.is_preorder && product.expected_date && (
+          {p.is_preorder && p.expected_date && (
             <p className={`text-sm -mt-3 ${isDark ? "text-white/50" : "text-black/50"}`}>
-              Expected: {product.expected_date}
+              Expected: {p.expected_date}
             </p>
           )}
 
@@ -277,7 +294,7 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
           </div>
 
           {/* CTA buttons */}
-          {product.is_preorder ? (
+          {p.is_preorder ? (
             <button
               onClick={() => handleAddToCart("preorder")}
               disabled={addingToCart}
@@ -289,30 +306,34 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => handleAddToCart("normal")}
-                disabled={!selectedSize || isOutOfStock || addingToCart}
+                disabled={!selectedSize || isSelectedSizeOutOfStock || addingToCart}
                 className={`flex-1 py-4 rounded-full border font-bold tracking-wide text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                   isDark
                     ? "border-white/[0.15] text-white hover:bg-white/[0.06]"
                     : "border-black/[0.15] text-black hover:bg-black/[0.06]"
                 }`}
               >
-                  {isOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Add to Cart"}
+                  {isSelectedSizeOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Add to Cart"}
               </button>
               <button
                 onClick={handleBuyNow}
-                disabled={isOutOfStock || addingToCart}
-                className="flex-1 py-4 rounded-full bg-[#e93a3a] hover:bg-[#ff4a4a] text-white font-bold tracking-wide text-lg shadow-lg shadow-[#e93a3a]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!selectedSize || isSelectedSizeOutOfStock || addingToCart}
+                className={`flex-1 py-4 rounded-full font-bold tracking-wide text-lg shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-white text-black hover:bg-white/90 shadow-white/10"
+                    : "bg-black text-white hover:bg-black/90 shadow-black/10"
+                }`}
               >
-                {isOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Buy Now"}
+                {isSelectedSizeOutOfStock ? "Out of Stock" : addingToCart ? "Adding..." : "Buy Now"}
               </button>
             </div>
           )}
 
           {/* Description + trust markers */}
-          {product.description && (
+          {p.description && (
             <div className="space-y-4">
               <p className={`text-sm leading-relaxed ${isDark ? "text-white/65" : "text-black/65"}`}>
-                {product.description}
+                {p.description}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-theme pt-6">
@@ -339,9 +360,9 @@ export function ProductPageClient({ product, inventory, images }: ProductPageCli
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <TrackProductView product={product as any} />
-        <RelatedProducts productId={product.id} category={product.category} />
-        <RecentlyViewed currentProductId={product.id} />
+        <TrackProductView product={p} />
+        <RelatedProducts productId={p.id} category={p.category || 'Streetwear'} />
+        <RecentlyViewed currentProductId={p.id} />
       </div>
     </div>
   )

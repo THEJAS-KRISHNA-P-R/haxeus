@@ -44,7 +44,7 @@ export function SocialProofToast() {
 
     return (
         <div
-            className={`fixed bottom-24 left-6 z-40 max-w-xs bg-[#111] rounded-xl shadow-md shadow-black/10 shadow-black/20 border border-white/[0.04] border-white/[0.06] px-4 py-3 transition-all duration-500 ${visible
+            className={`fixed bottom-24 left-6 z-[80] max-w-xs bg-[#111] rounded-xl shadow-md shadow-black/10 shadow-black/20 border border-white/[0.04] border-white/[0.06] px-4 py-3 transition-all duration-500 ${visible
                     ? "translate-x-0 opacity-100"
                     : "-translate-x-full opacity-0 pointer-events-none"
                 }`}

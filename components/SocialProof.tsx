@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Star } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { useProductReviews } from "@/hooks/useProductQueries"
 import { useTheme } from "@/components/ThemeProvider"
 import { cn } from "@/lib/utils"
+import { ProductReview } from "@/lib/supabase"
 
 interface ReviewSummary {
   count: number
@@ -18,25 +19,19 @@ interface SocialProofProps {
 export function SocialProof({ product }: SocialProofProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [reviews, setReviews] = useState<ReviewSummary | null>(null)
-
   useEffect(() => setMounted(true), [])
-
   const isDark = !mounted ? true : theme === "dark"
 
-  useEffect(() => {
-    if (product.is_preorder) return // preorders use preorder_count
+  const { data: reviewsData = [] as ProductReview[] } = useProductReviews(product.id.toString(), {
+    enabled: !!product.id && !product.is_preorder
+  })
 
-    supabase
-      .from("product_reviews")
-      .select("rating")
-      .eq("product_id", product.id)
-      .then(({ data }) => {
-        if (!data || data.length === 0) return
-        const avg = data.reduce((sum: number, r: any) => sum + r.rating, 0) / data.length
-        setReviews({ count: data.length, average: Math.round(avg * 10) / 10 })
-      })
-  }, [product.id, product.is_preorder])
+  const reviews = useMemo(() => {
+    const rd = reviewsData as ProductReview[]
+    if (rd.length === 0) return null
+    const avg = rd.reduce((sum, r) => sum + r.rating, 0) / rd.length
+    return { count: rd.length, average: Math.round(avg * 10) / 10 }
+  }, [reviewsData])
 
   if (!mounted) return null
 
