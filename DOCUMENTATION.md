@@ -178,7 +178,7 @@ SELECT * FROM user_roles WHERE role = 'admin';
 **Email System:**
 - `email_queue` - Emails to be sent
 - `email_templates` - Email templates
-- `newsletter_subscribers` - Newsletter list
+- `newsletter_subscribers` - Newsletter list (status: subscribed/unsubscribed)
 
 **Marketing & Analytics:**
 - `coupons` - Discount codes
@@ -297,33 +297,32 @@ Permissions are enforced via Row Level Security (RLS) policies.
 
 ### Email Setup
 
-The email system uses Supabase Edge Functions to send emails asynchronously.
+The email system uses **Resend** for high-reliability delivery. Welcome emails and order confirmations are sent via API during the request lifecycle for immediate feedback, while larger batches or background tasks use the Edge Functions.
 
 **Email Types:**
 - `welcome` - Sent when user signs up
 - `order_confirmation` - Sent when order is placed
 - `shipping_update` - Sent when order status changes
 - `newsletter_welcome` - Sent when subscribing to newsletter
+- `newsletter_unsubscribe` - Confirmation of unsubscription
 
-### Configure Email Provider
-
-#### Option 1: Resend (Recommended)
+### Configure Email Provider (Resend)
 
 1. Sign up at [resend.com](https://resend.com)
 2. Get your API key
-3. Add to Edge Function environment:
-   ```bash
+3. Add to your environment variables:
+   ```env
    RESEND_API_KEY=re_your_api_key_here
    ```
 
-#### Option 2: SendGrid
+### Newsletter Logic
+The newsletter system supports **re-subscription**. If a user was previously unsubscribed, submitting the form again will re-activate their status (`subscribed: true`) and send a new welcome email.
 
-1. Sign up at [sendgrid.com](https://sendgrid.com)
-2. Get your API key
-3. Add to Edge Function environment:
-   ```bash
-   SENDGRID_API_KEY=SG.your_api_key_here
-   ```
+### Unsubscribe Flow
+Every email includes a personalized unsubscribe link.
+- **Route**: `/unsubscribe?email=user@example.com`
+- **API**: `/api/newsletter/unsubscribe` (POST)
+- This updates the `newsletter_subscribers` table, setting `subscribed` to `false` and recording the `unsubscribed_at` timestamp.
 
 ### Welcome Email Trigger
 
@@ -399,24 +398,7 @@ supabase functions deploy process-emails
    - Add custom domain in Vercel settings
    - Update DNS records as instructed
 
-### Deploy to Netlify
-
-1. **Build Settings:**
-   ```toml
-   # netlify.toml (already included)
-   [build]
-     command = "npm run build"
-     publish = ".next"
-   
-   [[plugins]]
-     package = "@netlify/plugin-nextjs"
-   ```
-
-2. **Deploy:**
-   - Connect repository to Netlify
-   - Add environment variables
-   - Deploy
-
+## Deployment: Vercel (see Vercel dashboard)
 ### Environment Variables
 
 Required for all deployments:
@@ -424,6 +406,9 @@ Required for all deployments:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SITE_URL=https://haxeuz.in (Required for absolute links in emails/auth)
+RESEND_API_KEY=re_your_key
+CRON_SECRET=your-random-token
 ```
 
 Optional for email:

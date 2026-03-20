@@ -66,14 +66,22 @@ function AuthForm() {
       return
     }
 
+    // Fire-and-forget welcome email — never block signup on failure
+    fetch("/api/auth/welcome", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name: name || null }),
+    }).catch(() => {})
+
     setSuccess("Check your email for a confirmation link.")
     setLoading(false)
   }
 
   const handleGoogle = async () => {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${redirectTo}` },
+      options: { redirectTo: `${siteUrl}/auth/callback?redirect=${redirectTo}` },
     })
   }
 

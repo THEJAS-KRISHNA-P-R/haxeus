@@ -79,9 +79,7 @@ export function HomePageClient({
 
         {/* Newsletter Section */}
         {isSectionVisible("newsletter", config.newsletter.visible) && (
-          <div style={{ contentVisibility: "auto", containIntrinsicSize: "0 400px" }}>
-            <NewsletterSection config={config.newsletter} isDark={isDark} />
-          </div>
+          <NewsletterSection config={config.newsletter} isDark={isDark} />
         )}
 
         {/* Featured Products Section */}

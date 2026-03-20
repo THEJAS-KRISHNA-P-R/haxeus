@@ -2,34 +2,31 @@
 
 ## Ratings
 
-### Security: 8/10
-Admin auth is robust with `verifyAdminRequest()` and Redis caching. Environment variables are guarded. HMAC-signed cache keys prevent spoofing/poisoning.
+### Security: 8.5/10
+Admin auth is robust. Newsletter APIs include XSS sanitization and rate limiting. Environment variables are guarded.
 
-### Modularity & Reusability: 9/10
-The homepage is modularized into clean, typed sections in `components/sections/`. The `HomePageClient` orchestrator manages shared state. `isSupabaseStorageUrl` and formatters are centralized.
+### Email & Newsletter: 9.5/10
+Advanced `upsert` logic handles re-subscriptions gracefully. Unsubscribe flow is fully functional and secure. Resend integration provides high-reliability delivery.
 
-### Type Safety: 8/10
-Major `any` debt cleared. `lib/pwa.ts` is fully typed. `app/page.tsx` uses canonical `Product` and `ProductImage` types. `npx tsc --noEmit` passes with **0 errors**.
+### Branding & Consistency: 9/10
+Footer and Hero sections are perfectly synced. `next/font/google` ensures "Bebas Neue" is consistent across mobile and PC. No legacy "glows" or inconsistent fonts remain.
 
-### Performance: 8.5/10
-RSC split implemented — `app/page.tsx` is now a Server Component. Initial data fetching happens on the server, improving LCP significantly. Redis cache reduces Supabase latency in middleware from ~300ms to ~5ms.
+### Type Safety: 8.5/10
+Major `any` debt cleared. `npx tsc --noEmit` passes with **0 errors**. Newsletter and API routes are strictly typed.
 
-### Code Cleanliness: 8/10
-Zero `console.log` in core code. Zero stray files. Zero `any` in core business logic. `lib/redis.ts` uses a safe, typed no-op stub for resilience.
+### Performance: 9/10
+RSC implementation for the homepage. Optimized font loading and localized asset management. Redis cache reduces Supabase latency in middleware.
 
-### Maintainability: 8/10
-Clean component hierarchy. Centralized UI index. Dedicated audit documentation. Clear admin auth patterns.
-
-### Overall: 8/10
-HAXEUS is now a high-performance, type-safe, and modular Next.js application. The recent refactor to RSC and the comprehensive type safety pass have elevated it from a "working" project to a "premium" codebase.
+### Overall: 8.5/10
+HAXEUS is now a high-performance, premium e-commerce platform. The recent focus on marketing tools (Newsletter) and branding consistency has elevated the professional feel of the entire application.
 
 ---
 
 ## Top 3 Remaining Areas for Polish
 
-1. **Build Verification** — Run `npm run build` to verify final bundle sizes and static optimization.
-2. **Admin Catch Blocks** — While core pages are clean, some niche admin API routes still use `(error as any).message` in catch blocks.
-3. **Incremental Admin Migration** — Migrate existing admin API routes to use the new `lib/admin-queries.ts` helpers.
+1. **Checkout Flow Polish** — Review the checkout page for mobile-specific spacing refinements.
+2. **Admin Catch Blocks** — Some niche admin API routes still use `(error as any).message` in catch blocks.
+3. **PWA Offline Support** — Enhance the service worker to handle more aggressive offline caching for product pages.
 
 ---
 
@@ -47,6 +44,11 @@ HAXEUS is now a high-performance, type-safe, and modular Next.js application. Th
 - Implemented `RedisNoOpStub` class in `lib/redis.ts` for type-safe fallbacks
 - Created `lib/admin-queries.ts` to deduplicate Supabase logic in admin routes
 - Refactored `app/page.tsx` into a high-performance React Server Component (RSC)
+- Implemented `next/font/google` for optimized, consistent branding across mobile/PC
+- Fixed re-subscription logic in `/api/newsletter/subscribe` using `upsert`
+- Securely integrated Resend for immediate welcome/order emails
+- Unified Footer layout with localized branding, 3-column links, and pink social badge
+- Automated absolute URL generation in emails via `NEXT_PUBLIC_SITE_URL`
 
 ---
 

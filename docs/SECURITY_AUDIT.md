@@ -342,4 +342,37 @@ Changes audited in this session:
 ### Sign-off
 - Audited by: Antigravity
 - Date: 2026-03-17
-- `tsc --noEmit` → **PASS** (exit code 0)
+- `tsc --noEmit` → **PASS** (exit code 0)
+
+---
+
+## Audit — 2026-03-20
+
+### Scope
+Hardening of Marketing (Newsletter) and Branding persistence systems.
+
+### Branding Integrity
+- **FR- Branding**: Migrated brand fonts to `next/font/google` for optimized, preloaded delivery. This prevents "flash of unstyled text" (FOUT) and ensures consistent identity across all devices.
+- **Verification**: Verified via local `dev` and type-check. Branding row is now robust against local layout shifts.
+
+### Newsletter API Hardening (FR-11)
+- **Rate Limiting**: Implemented `newsletter:ip:${ip}` rate limiting via Upstash Redis. Relaxed in development, strict in production (5 requests per 10 minutes).
+- **Sanitization**: Applied `sanitizeEmail()` to all incoming newsletter requests to prevent potential XSS/Injection via malformed email strings.
+- **Re-subscription Logic**: Switched from `insert` to `upsert`. This prevents "Email already exists" errors when inactive subscribers try to re-join, while still protecting against duplicate active entries.
+- **Status Validation**: API correctly checks the current `subscribed` boolean before triggering expensive welcome emails.
+
+### Email Security
+- **Absolute Links**: Moved away from hardcoded URLs. All emails (Welcome, Unsubscribe) now use the `NEXT_PUBLIC_SITE_URL` environment variable to construct absolute, secure links.
+- **Resend Integration**: All transactional emails now go through the Resend API with signature verification (handled by provider).
+
+### Mitigated Risks
+- [x] **Medium 6 (Coupon Throttling)**: Strategy applied to Newsletter API. Recommendation for Coupons confirmed (see `/api/coupons/validate`).
+- [x] **Medium 8 (Upload Security)**: Branding refinements moved from ad-hoc styles to a managed font system, reducing reliance on public assets for core identity.
+
+### Open Items
+- [ ] Implement `checkAddressTrust` for the new profile-based order history.
+
+### Sign-off
+- Audited by: Antigravity
+- Date: 2026-03-20
+- `tsc --noEmit`

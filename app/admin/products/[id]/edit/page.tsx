@@ -44,6 +44,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [sendingAlert, setSendingAlert] = useState(false)
 
   const [isPreorder, setIsPreorder] = useState(false)
   const [preorderStatus, setPreorderStatus] = useState<"active" | "sold_out" | "stopped">("active")
@@ -323,6 +324,28 @@ export default function EditProductPage() {
       alert(`Failed to save product: ${errorMsg}`)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSendDropAlert() {
+    if (!window.confirm(`Send drop alert for "${formData.name}" to all subscribers?`)) return
+
+    setSendingAlert(true)
+    try {
+      const res = await fetch("/api/admin/send-drop-alert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: Number(productId) })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      alert(data.sent > 0
+        ? `✅ Drop alert sent to ${data.sent} subscribers`
+        : "No active subscribers — alert not sent")
+    } catch (err) {
+      alert(`Failed to send alert: ${(err as Error).message}`)
+    } finally {
+      setSendingAlert(false)
     }
   }
 
@@ -751,7 +774,7 @@ export default function EditProductPage() {
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pb-8">
+        <div className="flex flex-wrap justify-end gap-3 pb-8">
           <Link href="/admin/products">
             <Button variant="outline" className={isDark ? "border-white/[0.06] hover:bg-white/5 text-white" : "border-black/[0.06] hover:bg-black/5 text-black"}>
               Cancel
@@ -766,6 +789,15 @@ export default function EditProductPage() {
             >
               {deleting ? "Deleting..." : "Delete Product"}
             </Button>
+          )}
+          {productId !== "new" && (
+            <button
+              onClick={handleSendDropAlert}
+              disabled={sendingAlert}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black font-bold text-sm transition-colors disabled:opacity-50"
+            >
+              {sendingAlert ? "Sending..." : "📢 Send Drop Alert"}
+            </button>
           )}
           <Button
             onClick={handleSave}

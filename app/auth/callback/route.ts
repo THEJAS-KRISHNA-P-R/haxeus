@@ -37,15 +37,16 @@ export async function GET(request: NextRequest) {
             const diffSeconds = (now.getTime() - createdAt.getTime()) / 1000
 
             if (diffSeconds < 10) {
-                await sendWelcomeEmail(
-                    data.user.email!,
-                    data.user.user_metadata?.full_name ||
-                    data.user.user_metadata?.name ||
-                    data.user.email?.split("@")[0]
-                ).catch(console.error)
+                await sendWelcomeEmail({
+                    email: data.user.email!,
+                    name: data.user.user_metadata?.full_name ||
+                        data.user.user_metadata?.name ||
+                        data.user.email?.split("@")[0]
+                }).catch(console.error)
             }
         }
     }
 
-    return NextResponse.redirect(`${origin}${redirect}`)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin
+    return NextResponse.redirect(`${siteUrl}${redirect}`)
 }

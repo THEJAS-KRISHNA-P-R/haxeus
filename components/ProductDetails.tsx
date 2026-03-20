@@ -37,7 +37,11 @@ export default function ProductDetails({ product }: { product: Product }) {
     
     setLoading(true);
     try {
-      await addItem(product.id, selectedSize, quantity);
+      await addItem({
+        productId: product.id,
+        size: selectedSize,
+        quantity: quantity
+      });
       
       toast({
         title: "Added to Cart",
