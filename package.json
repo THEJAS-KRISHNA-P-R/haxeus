@@ -97,8 +97,6 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@netlify/functions": "^5.1.0",
-    "@netlify/plugin-nextjs": "^5.14.4",
     "@next/bundle-analyzer": "^15.4.5",
     "@playwright/test": "^1.58.2",
     "@types/node": "^22",

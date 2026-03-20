@@ -51,17 +51,22 @@ export function NewsletterSection({ config, isDark = true }: NewsletterSectionPr
   }
 
   return (
-    <section className="relative py-20 md:py-32 flex items-center z-10 border-t border-theme overflow-x-hidden">
+    <section className="relative py-24 md:py-40 flex items-center z-10 border-t border-theme overflow-x-hidden bg-black/20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 w-full">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8 }}
+          className="mb-12"
         >
-          <h2 className={`text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 leading-snug sm:leading-relaxed ${isDark ? "text-white" : "text-black"}`}>
-            {heading}
+          <span className="text-[var(--accent)] text-sm font-bold tracking-[0.3em] uppercase mb-4 block">Newsletter</span>
+          <h2 className={`text-3xl sm:text-4xl lg:text-6xl font-black mb-6 leading-tight tracking-tighter ${isDark ? "text-white" : "text-black"}`}>
+            JOIN THE <span className="italic">MOVEMENT.</span>
           </h2>
+          <p className={`text-lg max-w-2xl mx-auto mb-10 ${isDark ? "text-white/60" : "text-black/60"}`}>
+            {subtext}
+          </p>
         </motion.div>
 
         <motion.div
@@ -69,60 +74,62 @@ export function NewsletterSection({ config, isDark = true }: NewsletterSectionPr
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center mt-8 mb-8"
+          className="relative max-w-xl mx-auto mb-16"
         >
-          <Link href="/products">
-            <motion.div whileHover={hoverScale} whileTap={tapScale}>
-              <Button size="lg" className="bg-theme text-theme border border-theme hover:bg-card-2 px-10 py-6 rounded-full text-lg font-semibold shadow-lg">
-                {ctaText}
+          <div className="flex flex-col sm:flex-row gap-3 p-2 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-md shadow-2xl focus-within:border-[var(--accent)]/50 transition-all">
+            <input
+              type="email"
+              placeholder="Your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              className={`flex-1 px-6 py-4 bg-transparent outline-none text-lg min-w-0 ${isDark ? "text-white placeholder:text-white/20" : "text-black placeholder:text-black/20"}`}
+            />
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={handleSubmit}
+                disabled={status === "loading"}
+                className="bg-[var(--accent)] hover:opacity-90 text-white px-10 h-full py-4 rounded-full font-bold text-lg whitespace-nowrap shadow-xl shadow-[var(--accent)]/20 active:shadow-none transition-all disabled:opacity-50 w-full sm:w-auto"
+              >
+                {status === "loading" ? "..." : "Join the List"}
               </Button>
             </motion.div>
-          </Link>
+          </div>
+
+          {status === "success" && (
+            <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-sm mt-4 text-emerald-400 font-bold tracking-wide uppercase italic">
+              Verification link sent to your inbox.
+            </motion.p>
+          )}
+          {status === "duplicate" && (
+            <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-sm mt-4 text-[#e7bf04] font-bold tracking-wide uppercase italic">
+              You&apos;re already on the list.
+            </motion.p>
+          )}
+          {status === "error" && (
+            <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-sm mt-4 text-red-500 font-bold tracking-wide uppercase italic">
+              Something went wrong. Try again.
+            </motion.p>
+          )}
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex max-w-[calc(100%-2rem)] sm:max-w-md mx-auto shadow-2xl rounded-full overflow-hidden bg-[var(--bg-elevated)]/80 backdrop-blur-sm"
-        >
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            className={`flex-1 px-6 py-4 bg-transparent focus:outline-none text-lg min-w-0 ${isDark ? "text-white placeholder:text-white/30" : "text-black placeholder:text-black/30"}`}
-          />
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              onClick={handleSubmit}
-              disabled={status === "loading"}
-              className="bg-[var(--accent)] hover:opacity-90 text-white px-8 h-full rounded-full font-semibold whitespace-nowrap disabled:opacity-50"
-            >
-              {status === "loading" ? "..." : "Subscribe"}
-            </Button>
+        {/* Dynamic CTA if configured */}
+        {ctaText && ctaText !== "Shop Now" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.6 }}
+          >
+            <Link href="/products">
+              <motion.div whileHover={hoverScale} whileTap={tapScale} className="inline-block mt-4">
+                <Button variant="link" className="text-white/40 hover:text-[var(--accent)] transition-colors text-sm font-bold uppercase tracking-widest">
+                  {ctaText} →
+                </Button>
+              </motion.div>
+            </Link>
           </motion.div>
-        </motion.div>
-        {status === "success" && (
-          <p className="text-sm mt-3 text-emerald-400 font-medium">You&apos;re in! Welcome to the movement.</p>
         )}
-        {status === "duplicate" && (
-          <p className="text-sm mt-3 text-[#e7bf04] font-medium">Already subscribed! You&apos;re part of the crew.</p>
-        )}
-        {status === "error" && (
-          <p className="text-sm mt-3 text-[var(--accent)] font-medium">Something went wrong. Try again.</p>
-        )}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-sm mt-4 text-white/70"
-        >
-          {subtext}
-        </motion.p>
       </div>
     </section>
   )

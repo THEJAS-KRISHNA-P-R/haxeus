@@ -1,6 +1,6 @@
 import type React from "react"
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { Inter, Bebas_Neue } from "next/font/google"
 import { ConditionalNavbar } from "@/components/ConditionalNavbar"
 import { ConditionalFooter } from "@/components/ConditionalFooter"
 import { Toaster } from "@/components/ui/toaster"
@@ -14,7 +14,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { QueryProvider } from "@/components/QueryProvider"
 import type { Metadata, Viewport } from "next"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-bebas" })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 const SITE_NAME = "HAXEUS"
@@ -112,7 +113,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className} style={{ touchAction: "pan-y" }}>
+      <body className={`${inter.variable} ${bebas.variable} font-sans`} style={{ touchAction: "pan-y" }}>
         <OrganizationJsonLd />
         <WebsiteJsonLd />
         <ThemeProvider>

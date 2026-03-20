@@ -109,9 +109,11 @@ HAXEUS is a standalone e-commerce web application deployed on Vercel, using Supa
 - **FR-10.3**: Delete inappropriate reviews.
 
 ### 3.11 Newsletter (FR-11)
-- **FR-11.1**: Email subscription form on homepage.
-- **FR-11.2**: Duplicate email handling (graceful message).
-- **FR-11.3**: Welcome email queued on subscription.
+- **FR-11.1**: Email subscription form on homepage and footer.
+- **FR-11.2**: Re-subscription support: Former subscribers can re-join via `upsert` logic.
+- **FR-11.3**: Unsubscribe flow: Every email must contain a secure unsubscribe link.
+- **FR-11.4**: Duplicate handling: Active subscribers receive a graceful message.
+- **FR-11.5**: Welcome email triggered immediately upon successful signup.
 
 ---
 
@@ -162,12 +164,13 @@ HAXEUS is a standalone e-commerce web application deployed on Vercel, using Supa
 
 ### 5.1 External Interfaces
 
-| System | Protocol | Purpose |
-|--------|----------|---------|
-| Supabase | REST/WebSocket | Database, Auth, Storage |
-| Razorpay | REST | Payment processing |
-| Upstash Redis | REST | Rate limiting |
-| Vercel | HTTPS | Hosting, CDN, Serverless |
+| System        | Protocol             | Purpose                               |
+|---------------|----------------------|---------------------------------------|
+| Supabase      | REST/WebSocket       | Database, Auth, Storage               |
+| Razorpay      | REST                 | Payment processing                    |
+| Resend        | REST                 | Email sending (transactional, welcome)|
+| Upstash Redis | REST                 | Rate limiting                         |
+| Vercel        | HTTPS                | Hosting, CDN, Serverless              |
 
 ### 5.2 User Interface
 - Custom design system with CSS variables for theming.

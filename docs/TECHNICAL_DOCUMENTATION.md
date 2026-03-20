@@ -14,10 +14,8 @@ HAXEUS is a high-performance e-commerce application built with **Next.js 15** (A
 | Auth           | Supabase Auth (Email/Password, OTP) |
 | Storage        | Supabase Storage (product images)    |
 | Payments       | Razorpay                            |
+| Email          | Resend (Direct API + Edge Functions) |
 | Rate Limiting  | Upstash Redis (with Local No-Op Fallback) |
-| Admin Caching  | Upstash Redis                      |
-| Styling        | Tailwind CSS                        |
-| Animations     | Framer Motion                       |
 | Deployment     | Vercel                              |
 
 ### Directory Structure

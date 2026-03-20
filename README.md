@@ -59,6 +59,7 @@ Visit [http://localhost:3000](http://localhost:3000)
 - **Framework**: Next.js 15 (App Router) with React 19
 - **Language**: TypeScript 5
 - **Styling**: Tailwind CSS 3.4
+- **Fonts**: **next/font/google** (Bebas Neue, DM Sans, Inter) — Optimized for all devices
 - **UI Components**: shadcn/ui (Radix UI primitives)
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
@@ -78,6 +79,11 @@ Create `.env.local` in the root directory:
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Email & Site Configuration
+RESEND_API_KEY=re_your_api_key
+NEXT_PUBLIC_SITE_URL=https://haxeus.in
+CRON_SECRET=your-random-cron-secret
 
 # Caching (Optional - App will use No-Op Stub if missing)
 REDIS_URL=rediss://default:password@your-redis-host:port
@@ -137,7 +143,8 @@ See [DOCUMENTATION.md](DOCUMENTATION.md) for detailed deployment instructions.
 - **User Authentication**: Email/password + OAuth
 - **Order Tracking**: Real-time order status updates
 - **Admin Dashboard**: Manage products, orders, and users
-- **Email System**: Automated welcome and order emails
+- **Email System**: Automated welcome and order emails (via Resend)
+- **Newsletter**: Advanced signup with re-subscription & unsubscribe support
 - **Loyalty Program**: Earn and redeem points
 - **Coupons**: Discount codes and promotions
 - **Reviews**: Customer ratings and reviews

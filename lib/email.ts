@@ -1,58 +1,393 @@
-import { sendEmail } from "./resend"
+import { Resend } from "resend"
 
-// ─── Shared layout wrapper ────────────────────────────────────────────────────
-function emailWrapper(content: string) {
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 20px;">
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+const FROM_ORDERS  = `HAXEUS <${process.env.FROM_EMAIL ?? "orders@haxeus.in"}>`
+const FROM_UPDATES = `HAXEUS Updates <${process.env.UPDATES_EMAIL ?? "updates@haxeus.in"}>`
+const REPLY_TO     = process.env.SUPPORT_EMAIL ?? "support@haxeus.in"
+const APP_URL      = process.env.NEXT_PUBLIC_APP_URL ?? "https://haxeus.in"
+
+// ─── Shared HTML helpers ──────────────────────────────────────────────────────
+
+function emailHeader() {
+  return `
+    <div style="text-align:center;margin-bottom:40px;">
+      <h1 style="color:#e93a3a;font-size:28px;font-weight:900;letter-spacing:5px;margin:0;font-family:-apple-system,sans-serif;">
+        HAXEUS
+      </h1>
+      <p style="color:#444;font-size:11px;letter-spacing:3px;margin:5px 0 0;text-transform:uppercase;font-family:-apple-system,sans-serif;">
+        Art You Can Wear
+      </p>
+    </div>
+  `
+}
+
+function emailFooter(email?: string | null) {
+  const unsubscribeUrl = email 
+    ? `${APP_URL}/unsubscribe?email=${encodeURIComponent(email)}`
+    : `${APP_URL}/unsubscribe`
+
+  return `
+    <div style="border-top:1px solid #1a1a1a;padding-top:24px;text-align:center;margin-top:40px;">
+      <!-- Social -->
+      <div style="text-align:center;margin-bottom:16px;">
+        <a href="https://www.instagram.com/haxeus.in/"
+           style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:#111;border:1px solid #1a1a1a;border-radius:100px;padding:10px 20px;">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/240px-Instagram_icon.png"
+            width="16"
+            height="16"
+            alt="Instagram"
+            style="display:block;"
+          />
+          <span style="color:#888;font-size:13px;font-weight:600;">@haxeus.in</span>
+        </a>
+      </div>
+      <!-- Copyright -->
+      <p style="color:#333;font-size:11px;margin:0 0 8px;text-align:center;font-family:-apple-system,sans-serif;">
+        © 2026 HAXEUS. Made with obsession in India.
+        · <a href="${unsubscribeUrl}" style="color:#666;text-decoration:underline;">Unsubscribe</a>
+      </p>
+    </div>
+  `
+}
+
+function baseTemplate(content: string) {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta name="color-scheme" content="dark">
+    </head>
+    <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+      <div style="max-width:580px;margin:0 auto;padding:40px 24px;">
+        ${emailHeader()}
+        ${content}
+      </div>
+    </body>
+    </html>
+  `
+}
+
+// ─── 1. ORDER CONFIRMATION ────────────────────────────────────────────────────
+
+export interface OrderConfirmationParams {
+  order_number: string
+  customer_name: string
+  customer_email: string
+  items: Array<{
+    name: string
+    size: string
+    color?: string | null
+    quantity: number
+    price: number
+    is_preorder: boolean
+    expected_date?: string | null
+  }>
+  subtotal: number
+  shipping: number
+  total: number
+  shipping_address: {
+    name: string
+    address_1: string
+    address_2?: string | null
+    city: string
+    state: string
+    pincode: string
+  }
+  is_preorder: boolean
+}
+
+export async function sendOrderConfirmation(params: OrderConfirmationParams) {
+  const itemsHtml = params.items.map(item => `
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-
-          <!-- Logo -->
-          <tr>
-            <td align="center" style="padding:0 0 32px;">
-              <div style="font-size:26px;font-weight:900;letter-spacing:6px;color:#e93a3a;">HAXEUS</div>
-            </td>
-          </tr>
-
-          ${content}
-
-          <!-- Footer -->
-          <tr>
-            <td align="center" style="padding:32px 0 0;">
-              <p style="margin:0 0 6px;font-size:12px;color:rgba(255,255,255,0.25);">© 2026 HAXEUS. All rights reserved.</p>
-              <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.15);">haxeus.in</p>
-            </td>
-          </tr>
-
-        </table>
+      <td style="padding:14px 0;border-bottom:1px solid #1a1a1a;vertical-align:top;">
+        <p style="color:#ffffff;font-weight:700;margin:0 0 4px;font-size:14px;">${item.name}</p>
+        <p style="color:#666;font-size:12px;margin:0;">
+          Size: ${item.size}
+          ${item.color ? ` · ${item.color}` : ""}
+          · Qty: ${item.quantity}
+          ${item.is_preorder ? `
+            <span style="color:#e7bf04;margin-left:8px;font-weight:700;">PRE-ORDER</span>
+            ${item.expected_date ? `
+              <span style="color:#555;margin-left:4px;">· Ships ${item.expected_date}</span>
+            ` : ""}
+          ` : ""}
+        </p>
+      </td>
+      <td style="padding:14px 0;border-bottom:1px solid #1a1a1a;text-align:right;vertical-align:top;">
+        <p style="color:#ffffff;font-weight:600;margin:0;font-size:14px;">
+          ₹${(item.price * item.quantity).toLocaleString("en-IN")}
+        </p>
       </td>
     </tr>
-  </table>
-</body>
-</html>`
+  `).join("")
+
+  const content = `
+    <h2 style="color:#ffffff;font-size:20px;font-weight:700;margin:0 0 8px;">
+      ${params.is_preorder ? "Pre-Order Confirmed! 🎉" : "Order Confirmed! 🎉"}
+    </h2>
+    <p style="color:#666;font-size:14px;margin:0 0 28px;line-height:1.6;">
+      Hi ${params.customer_name},
+      ${params.is_preorder
+        ? " your pre-order is locked in. We'll ship it as soon as it's ready and you'll get an update email."
+        : " your order is confirmed and will be prepared shortly."
+      }
+    </p>
+
+    <!-- Order number -->
+    <div style="background:#111;border:1px solid #1a1a1a;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+      <p style="color:#555;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Order Number</p>
+      <p style="color:#e93a3a;font-size:22px;font-weight:700;margin:0;letter-spacing:2px;">${params.order_number}</p>
+    </div>
+
+    <!-- Items -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:4px;">
+      ${itemsHtml}
+    </table>
+
+    <!-- Totals -->
+    <div style="background:#111;border:1px solid #1a1a1a;border-radius:12px;padding:20px;margin:20px 0;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="color:#666;font-size:13px;padding:4px 0;">Subtotal</td>
+          <td style="color:#fff;font-size:13px;text-align:right;padding:4px 0;">₹${params.subtotal.toLocaleString("en-IN")}</td>
+        </tr>
+        <tr>
+          <td style="color:#666;font-size:13px;padding:4px 0;">Shipping</td>
+          <td style="font-size:13px;text-align:right;padding:4px 0;color:${params.shipping === 0 ? "#4ade80" : "#fff"};">
+            ${params.shipping === 0 ? "FREE" : `₹${params.shipping}`}
+          </td>
+        </tr>
+        <tr>
+          <td style="color:#fff;font-size:15px;font-weight:700;padding:12px 0 4px;border-top:1px solid #1a1a1a;">Total</td>
+          <td style="color:#e93a3a;font-size:18px;font-weight:700;text-align:right;padding:12px 0 4px;border-top:1px solid #1a1a1a;">
+            ₹${params.total.toLocaleString("en-IN")}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Shipping address -->
+    <div style="background:#111;border:1px solid #1a1a1a;border-radius:12px;padding:20px;margin-bottom:28px;">
+      <p style="color:#555;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 10px;">Shipping To</p>
+      <p style="color:#fff;margin:0;line-height:1.7;font-size:14px;">
+        ${params.shipping_address.name}<br/>
+        ${params.shipping_address.address_1}<br/>
+        ${params.shipping_address.address_2 ? params.shipping_address.address_2 + "<br/>" : ""}
+        ${params.shipping_address.city}, ${params.shipping_address.state} ${params.shipping_address.pincode}
+      </p>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:8px;">
+      <a href="${APP_URL}/orders"
+         style="display:inline-block;background:#e93a3a;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:0.5px;">
+        View Your Order
+      </a>
+    </div>
+
+    ${emailFooter(params.customer_email)}
+  `
+
+  await resend.emails.send({
+    from: FROM_ORDERS,
+    to: params.customer_email,
+    replyTo: REPLY_TO,
+    subject: params.is_preorder
+      ? `Pre-Order Confirmed — ${params.order_number} · HAXEUS`
+      : `Order Confirmed — ${params.order_number} · HAXEUS`,
+    html: baseTemplate(content)
+  })
 }
 
-function card(content: string) {
-  return `<tr>
-    <td style="background-color:#111111;border-radius:16px;padding:40px;border:1px solid rgba(255,255,255,0.07);">
-      ${content}
-    </td>
-  </tr>`
+// ─── 2. WELCOME EMAIL ─────────────────────────────────────────────────────────
+
+export interface WelcomeEmailParams {
+  email: string
+  name?: string | null
 }
 
-function divider() {
-  return `<div style="width:40px;height:2px;background-color:#e93a3a;margin:20px 0;"></div>`
+export async function sendWelcomeEmail(params: WelcomeEmailParams) {
+  const content = `
+    <h2 style="color:#ffffff;font-size:22px;font-weight:700;margin:0 0 16px;">
+      Welcome${params.name ? `, ${params.name}` : ""}.
+    </h2>
+    <p style="color:#666;font-size:14px;line-height:1.8;margin:0 0 28px;">
+      You're now part of something different. HAXEUS is built for those who
+      refuse to blend in — every drop is a limited piece of wearable art,
+      designed to say something without saying a word.
+    </p>
+
+    <!-- What to expect -->
+    <div style="background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:24px;margin-bottom:28px;">
+      <p style="color:#444;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 18px;">
+        What to expect
+      </p>
+
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="padding:8px 0;vertical-align:top;width:24px;">
+            <span style="color:#e93a3a;font-size:16px;line-height:1;">→</span>
+          </td>
+          <td style="padding:8px 0 8px 10px;">
+            <p style="color:#fff;margin:0;font-size:14px;line-height:1.5;">
+              <strong>Limited drops</strong>
+              <span style="color:#666;"> — each design has a hard cap. Once it's gone, it's gone.</span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;vertical-align:top;width:24px;">
+            <span style="color:#e93a3a;font-size:16px;line-height:1;">→</span>
+          </td>
+          <td style="padding:8px 0 8px 10px;">
+            <p style="color:#fff;margin:0;font-size:14px;line-height:1.5;">
+              <strong>Early access</strong>
+              <span style="color:#666;"> — subscribers hear about new drops before anyone else.</span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;vertical-align:top;width:24px;">
+            <span style="color:#e93a3a;font-size:16px;line-height:1;">→</span>
+          </td>
+          <td style="padding:8px 0 8px 10px;">
+            <p style="color:#fff;margin:0;font-size:14px;line-height:1.5;">
+              <strong>No spam</strong>
+              <span style="color:#666;"> — we only email when something real is happening.</span>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:8px;">
+      <a href="${APP_URL}/products"
+         style="display:inline-block;background:#e93a3a;color:#fff;padding:14px 40px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:0.5px;">
+        See Current Drops
+      </a>
+    </div>
+
+    ${emailFooter(params.email)}
+  `
+
+  await resend.emails.send({
+    from: FROM_UPDATES,
+    to: params.email,
+    replyTo: REPLY_TO,
+    subject: "Welcome to HAXEUS.",
+    html: baseTemplate(content)
+  })
 }
 
-function ctaButton(href: string, label: string) {
-  return `<a href="${href}" style="display:inline-block;background-color:#e93a3a;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;border-radius:100px;">${label}</a>`
+// ─── 3. DROP / UPDATE ALERT ───────────────────────────────────────────────────
+
+export interface DropAlertParams {
+  product_name: string
+  product_id: number
+  product_image: string
+  description: string
+  price: number
+  is_preorder: boolean
+  expected_date?: string | null
+  recipients: string[]
 }
 
-// ─── Order Confirmation ───────────────────────────────────────────────────────
+export async function sendDropAlert(params: DropAlertParams) {
+  const content = `
+    <!-- Drop label -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <span style="background:#e93a3a;color:#fff;padding:6px 20px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">
+        ${params.is_preorder ? "New Pre-Order" : "New Drop"}
+      </span>
+    </div>
+
+    <!-- Product image -->
+    ${params.product_image ? `
+      <div style="border-radius:16px;overflow:hidden;margin-bottom:24px;background:#111;line-height:0;">
+        <img
+          src="${params.product_image}"
+          alt="${params.product_name}"
+          style="width:100%;display:block;max-height:480px;object-fit:cover;"
+        />
+      </div>
+    ` : ""}
+
+    <!-- Product name -->
+    <h2 style="color:#ffffff;font-size:26px;font-weight:900;letter-spacing:2px;margin:0 0 12px;text-transform:uppercase;">
+      ${params.product_name}
+    </h2>
+
+    <!-- Description -->
+    <p style="color:#666;font-size:14px;line-height:1.8;margin:0 0 20px;">
+      ${params.description}
+    </p>
+
+    <!-- Price row -->
+    <div style="margin-bottom:28px;">
+      <span style="color:#e93a3a;font-size:26px;font-weight:700;">
+        ₹${params.price.toLocaleString("en-IN")}
+      </span>
+      ${params.is_preorder && params.expected_date ? `
+        <span style="background:#e7bf04;color:#000;padding:4px 14px;border-radius:100px;font-size:11px;font-weight:700;margin-left:12px;">
+          Ships ${params.expected_date}
+        </span>
+      ` : ""}
+    </div>
+
+    <!-- Scarcity line -->
+    <p style="color:#444;font-size:12px;margin:0 0 24px;text-align:center;letter-spacing:1px;text-transform:uppercase;">
+      Limited pieces — first come, first served
+    </p>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:8px;">
+      <a href="${APP_URL}/products/${params.product_id}"
+         style="display:inline-block;background:#e93a3a;color:#fff;padding:16px 48px;border-radius:100px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.5px;">
+        ${params.is_preorder ? "Pre-Order Now" : "Shop Now"}
+      </a>
+    </div>
+
+    ${emailFooter()}
+  `
+
+  const html = baseTemplate(content)
+  const subject = params.is_preorder
+    ? `New Pre-Order: ${params.product_name} — HAXEUS`
+    : `New Drop: ${params.product_name} — HAXEUS`
+
+  // Send in batches of 50 to respect Resend rate limits
+  const BATCH_SIZE = 50
+  for (let i = 0; i < params.recipients.length; i += BATCH_SIZE) {
+    const batch = params.recipients.slice(i, i + BATCH_SIZE)
+
+    await Promise.all(
+      batch.map(email =>
+        resend.emails.send({
+          from: FROM_UPDATES,
+          to: email,
+          replyTo: REPLY_TO,
+          subject,
+          html
+        })
+      )
+    )
+
+    // 1 second pause between batches — avoids Resend rate limit
+    if (i + BATCH_SIZE < params.recipients.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+  }
+}
+
+// ─── Legacy compat shims — keep existing call sites working ──────────────────
+// The payment/verify route uses sendOrderConfirmationEmail with old signature.
+// This shim maps old params → new params so both work without touching the route.
+
 export async function sendOrderConfirmationEmail(data: {
   orderId: string
   customerEmail: string
@@ -79,169 +414,67 @@ export async function sendOrderConfirmationEmail(data: {
   isPreorder?: boolean
 }) {
   const subtotal = data.items.reduce((s, i) => s + i.price * i.quantity, 0)
-  const shippingAmt = data.shipping ?? 0
-
-  const itemsHtml = data.items.map((item) => `
-    <tr>
-      <td style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.07);">
-        <div style="font-size:14px;font-weight:700;color:#ffffff;">${item.name}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;letter-spacing:1px;text-transform:uppercase;">
-          Size: ${item.size || "N/A"} &nbsp;·&nbsp; Qty: ${item.quantity}
-          ${item.is_preorder ? `&nbsp;<span style="color:#e7bf04;">PRE-ORDER</span>` : ""}
-        </div>
-        ${item.is_preorder && item.expected_date ? `<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:3px;">Ships ${item.expected_date}</div>` : ""}
-      </td>
-      <td style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.07);text-align:right;font-size:14px;color:#ffffff;">
-        ₹${(item.price * item.quantity).toLocaleString("en-IN")}
-      </td>
-    </tr>
-  `).join("")
-
-  const addr = data.shippingAddress
-  const isPreorder = data.isPreorder ?? false
-
-  const content = card(`
-    <p style="margin:0 0 6px;font-size:11px;letter-spacing:3px;color:#e93a3a;text-transform:uppercase;">${isPreorder ? "Pre-Order Confirmed" : "Order Confirmed"}</p>
-    <h1 style="margin:0 0 4px;font-size:28px;font-weight:800;color:#ffffff;">Thanks, ${data.customerName.split(" ")[0]}.</h1>
-    <p style="margin:0 0 0;font-size:14px;color:rgba(255,255,255,0.4);">Order #${data.orderId}</p>
-    ${divider()}
-    <p style="margin:0 0 20px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">${isPreorder
-      ? "Your pre-order is locked in. We'll ship it as soon as it's ready and you'll receive a tracking update."
-      : "We're on it. Your order is being prepared and you'll receive a shipping update once it's on the way."
-    }</p>
-
-    <!-- Items -->
-    <div style="background-color:#0a0a0a;border-radius:12px;padding:24px;margin-bottom:24px;">
-      <p style="margin:0 0 16px;font-size:11px;letter-spacing:2px;color:#e93a3a;text-transform:uppercase;">Your Items</p>
-      <table width="100%" cellpadding="0" cellspacing="0">
-        ${itemsHtml}
-        <tr>
-          <td style="padding-top:12px;font-size:13px;color:rgba(255,255,255,0.4);">Subtotal</td>
-          <td style="padding-top:12px;text-align:right;font-size:13px;color:rgba(255,255,255,0.6);">₹${subtotal.toLocaleString("en-IN")}</td>
-        </tr>
-        <tr>
-          <td style="padding-top:6px;font-size:13px;color:rgba(255,255,255,0.4);">Shipping</td>
-          <td style="padding-top:6px;text-align:right;font-size:13px;color:${shippingAmt === 0 ? "#4ade80" : "rgba(255,255,255,0.6)"}">${shippingAmt === 0 ? "FREE" : `₹${shippingAmt}`}</td>
-        </tr>
-        <tr>
-          <td style="padding-top:12px;font-size:14px;font-weight:700;color:#ffffff;border-top:1px solid rgba(255,255,255,0.07);">Total</td>
-          <td style="padding-top:12px;text-align:right;font-size:16px;font-weight:800;color:#e93a3a;border-top:1px solid rgba(255,255,255,0.07);">₹${data.totalAmount.toLocaleString("en-IN")}</td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- Shipping address -->
-    <div style="background-color:#0a0a0a;border-radius:12px;padding:24px;margin-bottom:32px;">
-      <p style="margin:0 0 12px;font-size:11px;letter-spacing:2px;color:#e93a3a;text-transform:uppercase;">Shipping To</p>
-      <p style="margin:0;font-size:14px;font-weight:700;color:#ffffff;">${addr.fullName}</p>
-      <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">
-        ${addr.addressLine1}${addr.addressLine2 ? ", " + addr.addressLine2 : ""}<br>
-        ${addr.city}, ${addr.state} — ${addr.pincode}
-        ${addr.phone ? `<br>${addr.phone}` : ""}
-      </p>
-    </div>
-
-    <div style="text-align:center;">
-      ${ctaButton(`${process.env.NEXT_PUBLIC_APP_URL ?? "https://haxeus.in"}/orders`, "View Your Order")}
-    </div>
-  `)
-
-  return sendEmail({
-    to: data.customerEmail,
-    replyTo: process.env.SUPPORT_EMAIL ?? "support@haxeus.in",
-    subject: isPreorder
-      ? `Pre-Order Confirmed — ${data.orderId} · HAXEUS`
-      : `Order Confirmed — ${data.orderId} · HAXEUS`,
-    html: emailWrapper(content),
+  return sendOrderConfirmation({
+    order_number: data.orderId,
+    customer_name: data.customerName,
+    customer_email: data.customerEmail,
+    items: data.items.map(item => ({
+      name: item.name,
+      size: item.size ?? "N/A",
+      color: null,
+      quantity: item.quantity,
+      price: item.price,
+      is_preorder: item.is_preorder ?? false,
+      expected_date: item.expected_date ?? null,
+    })),
+    subtotal,
+    shipping: data.shipping ?? 0,
+    total: data.totalAmount,
+    shipping_address: {
+      name: data.shippingAddress.fullName,
+      address_1: data.shippingAddress.addressLine1,
+      address_2: data.shippingAddress.addressLine2 ?? null,
+      city: data.shippingAddress.city,
+      state: data.shippingAddress.state,
+      pincode: data.shippingAddress.pincode,
+    },
+    is_preorder: data.isPreorder ?? false,
   })
 }
 
-// ─── Newsletter Welcome ───────────────────────────────────────────────────────
-export async function sendNewsletterWelcomeEmail(email: string, name?: string) {
-  const content = `
-    ${card(`
-      <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;color:#e93a3a;text-transform:uppercase;">Welcome to the movement</p>
-      <h1 style="margin:0 0 4px;font-size:28px;font-weight:800;color:#ffffff;line-height:1.2;">You're in.<br/>We don't blend in.</h1>
-      ${divider()}
-      <p style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">Hi ${name || "there"}, you're now on the list for early access to new drops, exclusive offers, and behind-the-scenes content before anyone else.</p>
-      <p style="margin:0 0 32px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">We refuse to blend in — and we know you do too.</p>
-      <div style="text-align:center;">${ctaButton("https://haxeus.in/products", "Shop the Collection")}</div>
-    `)}
+// ─── Additional legacy shims ─────────────────────────────────────────────────
+// Kept so existing call sites compile without changes.
 
-    <!-- Perks row -->
-    <tr><td style="padding:24px 0 0;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-          <td width="33%" style="padding:0 6px 0 0;vertical-align:top;">
-            <div style="background-color:#111111;border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.07);text-align:center;">
-              <div style="font-size:22px;margin-bottom:10px;">🔥</div>
-              <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#e93a3a;text-transform:uppercase;margin-bottom:6px;">Early Access</div>
-              <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;">First look at new drops before they go live.</div>
-            </div>
-          </td>
-          <td width="33%" style="padding:0 3px;vertical-align:top;">
-            <div style="background-color:#111111;border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.07);text-align:center;">
-              <div style="font-size:22px;margin-bottom:10px;">⚡</div>
-              <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#e93a3a;text-transform:uppercase;margin-bottom:6px;">Exclusive Offers</div>
-              <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;">Subscriber-only discounts and deals.</div>
-            </div>
-          </td>
-          <td width="33%" style="padding:0 0 0 6px;vertical-align:top;">
-            <div style="background-color:#111111;border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.07);text-align:center;">
-              <div style="font-size:22px;margin-bottom:10px;">🎯</div>
-              <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#e93a3a;text-transform:uppercase;margin-bottom:6px;">Behind the Scenes</div>
-              <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;">Design stories and culture content.</div>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
+export async function sendNewsletterWelcomeEmail(email: string, name?: string) {
+  return sendWelcomeEmail({ email, name: name ?? null })
+}
+
+export async function sendContactAutoReply(email: string, name: string) {
+  const content = `
+    <h2 style="color:#ffffff;font-size:20px;font-weight:700;margin:0 0 16px;">
+      We got your message, ${name.split(" ")[0]}.
+    </h2>
+    <p style="color:#666;font-size:14px;line-height:1.8;margin:0 0 24px;">
+      Thanks for reaching out. We've received your message and will get back to you within 24 hours.
+    </p>
+    <div style="text-align:center;margin-bottom:8px;">
+      <a href="${APP_URL}/products"
+         style="display:inline-block;background:#e93a3a;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px;">
+        Browse Collection
+      </a>
+    </div>
+    ${emailFooter()}
   `
 
-  return sendEmail({
+  await resend.emails.send({
+    from: FROM_ORDERS,
     to: email,
-    subject: "Welcome to HAXEUS",
-    html: emailWrapper(content),
-  })
-}
-
-// ─── Contact Auto-Reply ───────────────────────────────────────────────────────
-export async function sendContactAutoReply(email: string, name: string) {
-  const content = card(`
-    <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;color:#e93a3a;text-transform:uppercase;">Message Received</p>
-    <h1 style="margin:0 0 4px;font-size:26px;font-weight:800;color:#ffffff;">We got your message, ${name.split(" ")[0]}.</h1>
-    ${divider()}
-    <p style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">Thanks for reaching out. We've received your message and will get back to you within 24 hours.</p>
-    <p style="margin:0 0 32px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">In the meantime, feel free to browse the collection.</p>
-    <div style="text-align:center;">${ctaButton("https://haxeus.in/products", "Shop Collection")}</div>
-  `)
-
-  return sendEmail({
-    to: email,
+    replyTo: REPLY_TO,
     subject: "We got your message — HAXEUS",
-    html: emailWrapper(content),
+    html: baseTemplate(content),
   })
 }
 
-// ─── Account Welcome ──────────────────────────────────────────────────────────
-export async function sendWelcomeEmail(email: string, name?: string) {
-  const content = card(`
-    <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;color:#e93a3a;text-transform:uppercase;">Account Created</p>
-    <h1 style="margin:0 0 4px;font-size:26px;font-weight:800;color:#ffffff;">Welcome, ${name?.split(" ")[0] || "there"}.</h1>
-    ${divider()}
-    <p style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">Your HAXEUS account is ready. We're stoked to have you with us.</p>
-    <p style="margin:0 0 32px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">We refuse to blend in — and now you don't have to either.</p>
-    <div style="text-align:center;">${ctaButton("https://haxeus.in/products", "Shop Collection")}</div>
-  `)
-
-  return sendEmail({
-    to: email,
-    subject: "Welcome to HAXEUS",
-    html: emailWrapper(content),
-  })
-}
-
-// ─── Shipping Update ──────────────────────────────────────────────────────────
 export async function sendShippingUpdateEmail({
   orderId,
   customerEmail,
@@ -262,19 +495,28 @@ export async function sendShippingUpdateEmail({
 
   const s = statusLabel[status.toLowerCase()] ?? { emoji: "📋", message: `Your order status has been updated to ${status}.` }
 
-  const content = card(`
-    <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;color:#e93a3a;text-transform:uppercase;">Order Update</p>
-    <h1 style="margin:0 0 4px;font-size:26px;font-weight:800;color:#ffffff;">${s.emoji} ${status.charAt(0).toUpperCase() + status.slice(1)}</h1>
-    <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.3);">Order #${orderId.slice(0, 8).toUpperCase()}</p>
-    ${divider()}
-    <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">Hi ${customerName.split(" ")[0]},</p>
-    <p style="margin:0 0 32px;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;">${s.message}</p>
-    <div style="text-align:center;">${ctaButton(`https://haxeus.in/orders/${orderId}`, "View Order")}</div>
-  `)
+  const content = `
+    <h2 style="color:#ffffff;font-size:20px;font-weight:700;margin:0 0 8px;">
+      ${s.emoji} Order ${status.charAt(0).toUpperCase() + status.slice(1)}
+    </h2>
+    <p style="color:#666;font-size:13px;margin:0 0 16px;">Order #${orderId.slice(0, 8).toUpperCase()}</p>
+    <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 28px;">
+      Hi ${customerName.split(" ")[0]}, ${s.message}
+    </p>
+    <div style="text-align:center;margin-bottom:8px;">
+      <a href="${APP_URL}/orders/${orderId}"
+         style="display:inline-block;background:#e93a3a;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px;">
+        View Order
+      </a>
+    </div>
+    ${emailFooter()}
+  `
 
-  return sendEmail({
+  await resend.emails.send({
+    from: FROM_ORDERS,
     to: customerEmail,
-    subject: `Order ${status.charAt(0).toUpperCase() + status.slice(1)} — #${orderId.slice(0, 8).toUpperCase()}`,
-    html: emailWrapper(content),
+    replyTo: REPLY_TO,
+    subject: `Order ${status.charAt(0).toUpperCase() + status.slice(1)} — #${orderId.slice(0, 8).toUpperCase()} · HAXEUS`,
+    html: baseTemplate(content),
   })
 }

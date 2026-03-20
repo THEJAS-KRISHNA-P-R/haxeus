@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
+import { createClient } from "@supabase/supabase-js"
 import { rateLimit } from "@/lib/redis"
 import { sanitizeEmail } from "@/lib/utils"
 import { sendNewsletterWelcomeEmail } from "@/lib/email"
@@ -32,25 +32,45 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid email address format." }, { status: 400 })
         }
 
-        const supabase = createServerClient(
+        const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            { cookies: { getAll: () => [] } }
+            {
+              auth: {
+                autoRefreshToken: false,
+                persistSession: false
+              }
+            }
         )
 
-        const { error } = await supabase.from("newsletter_subscribers").insert({
-            email: cleanEmail,
-        })
+        // 1. Check if they already exist and are currently subscribed
+        const { data: existing } = await supabase
+            .from("newsletter_subscribers")
+            .select("subscribed")
+            .eq("email", cleanEmail)
+            .maybeSingle()
+
+        if (existing?.subscribed) {
+            return NextResponse.json({ error: "already_subscribed" }, { status: 400 })
+        }
+
+        // 2. Either insert new or re-activate existing unsubscribed record
+        const { error } = await supabase
+            .from("newsletter_subscribers")
+            .upsert({
+                email: cleanEmail,
+                subscribed: true,
+                unsubscribed_at: null,
+            }, {
+                onConflict: 'email'
+            })
 
         if (error) {
-            if (error.code === "23505") {
-                return NextResponse.json({ error: "already_subscribed" }, { status: 400 })
-            }
-            console.error("[newsletter_subscribe] Database insertion error:", error)
+            console.error("[newsletter_subscribe] Database subscription error:", error)
             return NextResponse.json({ error: "Failed to subscribe. Please try again later." }, { status: 500 })
         }
 
-        // Send newsletter welcome email
+        // Send newsletter welcome email (re-send if they re-join)
         await sendNewsletterWelcomeEmail(cleanEmail)
 
         return NextResponse.json({ success: true, message: "Subscribed successfully!" })
