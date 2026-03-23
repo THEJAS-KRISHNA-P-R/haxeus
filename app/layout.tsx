@@ -1,4 +1,5 @@
 import type React from "react"
+import Script from "next/script"
 import "./globals.css"
 import { Inter, Bebas_Neue } from "next/font/google"
 import { ConditionalNavbar } from "@/components/ConditionalNavbar"
@@ -112,6 +113,31 @@ export default function RootLayout({
             `,
           }}
         />
+        
+        {/* GA4 Tracking */}
+        {process.env.NEXT_PUBLIC_GA4_ID && (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA4_ID}`}
+            />
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA4_ID}', {
+                    page_path: window.location.pathname,
+                    send_page_view: true,
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
       <body className={`${inter.variable} ${bebas.variable} font-sans`} style={{ touchAction: "pan-y" }}>
         <OrganizationJsonLd />
