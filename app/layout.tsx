@@ -21,13 +21,13 @@ const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 const SITE_NAME = "HAXEUS"
 const SITE_DESCRIPTION =
-  "HAXEUS — Premium streetwear for those who move differently. Shop hoodies, tees, and premium apparel. Oversized fits, dark aesthetics, limited drops."
+  "Premium artistic streetwear from India. Graphic tees, oversized fits, and limited drops for those who wear their world."
 const OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL("https://www.haxeus.in"),
   title: {
-    default: `${SITE_NAME} — Premium Artistic Streetwear`,
+    default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -68,7 +68,8 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   robots: {
-    index: true, follow: true,
+    index: true,
+    follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
   applicationName: SITE_NAME,
@@ -76,7 +77,7 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
-    : undefined,
+    : { google: "REPLACE_AFTER_GSC_SETUP" },
 }
 
 export const viewport: Viewport = {

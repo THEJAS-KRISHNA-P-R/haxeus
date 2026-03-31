@@ -130,6 +130,26 @@ export function Navbar() {
     menuItems.push({ label: 'Sign In', ariaLabel: 'Sign in', link: '/auth' })
   }
 
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   return (
     <>
       <Suspense fallback={null}>
@@ -137,9 +157,14 @@ export function Navbar() {
       </Suspense>
 
       {/* ── DESKTOP FLOATING PILL ─────────────────────────────────── */}
-      <div
+      <motion.div
         className="hidden md:flex fixed top-4 z-[60] w-[780px] max-w-[calc(100vw-2rem)]"
-        style={{ left: '50%', transform: 'translate(-50%, 0) translateZ(0)', willChange: 'transform' }}
+        style={{ left: '50%', x: '-50%' }}
+        animate={{ 
+          y: isVisible ? 0 : -100,
+          opacity: isVisible ? 1 : 0
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         <GlassSurface
           width="100%"
@@ -174,12 +199,10 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
+                    "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 translate-z-0",
                     isActive(item.href)
                       ? "text-[#e93a3a]"
-                      : isDark
-                        ? "text-white/50 hover:text-white hover:bg-white/[0.07]"
-                        : "text-black/50 hover:text-black hover:bg-black/[0.05]"
+                      : "text-white/50 hover:text-white hover:bg-white/[0.07]"
                   )}
                 >
                   {item.label}
@@ -201,7 +224,7 @@ export function Navbar() {
                     className="overflow-hidden flex items-center"
                   >
                     <div className="relative w-full">
-                      <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5", isDark ? "text-white/40" : "text-black/40")} />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
                       <Input
                         type="text"
                         placeholder="Search…"
@@ -209,16 +232,11 @@ export function Navbar() {
                         onChange={(e) => handleSearch(e.target.value)}
                         onBlur={() => !searchQuery && setIsSearchOpen(false)}
                         autoFocus
-                        className={cn(
-                          "pl-8 pr-7 h-8 text-xs rounded-full border-none focus:ring-1 focus:ring-[#e93a3a]/50 placeholder:opacity-50",
-                          isDark
-                            ? "bg-white/[0.06] text-white placeholder:text-white/30"
-                            : "bg-black/[0.06] text-black placeholder:text-black/30"
-                        )}
+                        className="pl-8 pr-7 h-8 text-xs rounded-full border-none focus:ring-1 focus:ring-[#e93a3a]/50 placeholder:opacity-50 bg-white/[0.06] text-white placeholder:text-white/30"
                       />
                       <button
                         onClick={() => { setSearchQuery(""); setIsSearchOpen(false) }}
-                        className={cn("absolute right-2 top-1/2 -translate-y-1/2 transition-colors", isDark ? "text-white/30 hover:text-white/70" : "text-black/30 hover:text-black/70")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 transition-colors text-white/30 hover:text-white/70"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -230,12 +248,7 @@ export function Navbar() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     onClick={() => setIsSearchOpen(true)}
-                    className={cn(
-                      "p-2 rounded-full transition-all touch-target",
-                      isDark
-                        ? "text-white/45 hover:text-white hover:bg-white/[0.07]"
-                        : "text-black/45 hover:text-black hover:bg-black/[0.05]"
-                    )}
+                    className="p-2 rounded-full transition-all touch-target text-white/45 hover:text-white hover:bg-white/[0.07]"
                     aria-label="Search"
                   >
                     <Search className="h-4 w-4" />
@@ -245,12 +258,7 @@ export function Navbar() {
 
               <Link
                 href="/cart"
-                className={cn(
-                  "relative p-2 rounded-full transition-all touch-target flex items-center justify-center",
-                  isDark
-                    ? "text-white/45 hover:text-white hover:bg-white/[0.07]"
-                    : "text-black/45 hover:text-black hover:bg-black/[0.05]"
-                )}
+                className="relative p-2 rounded-full transition-all touch-target flex items-center justify-center text-white/45 hover:text-white hover:bg-white/[0.07]"
                 aria-label="Cart"
               >
                 <ShoppingCart className="h-4 w-4" />
@@ -263,12 +271,7 @@ export function Navbar() {
 
               <Link
                 href="/profile?tab=wishlist"
-                className={cn(
-                  "p-2 rounded-full transition-all touch-target flex items-center justify-center",
-                  isDark
-                    ? "text-white/45 hover:text-[#c03c9d] hover:bg-[#c03c9d]/[0.08]"
-                    : "text-black/45 hover:text-[#c03c9d] hover:bg-[#c03c9d]/[0.08]"
-                )}
+                className="p-2 rounded-full transition-all touch-target flex items-center justify-center text-white/45 hover:text-[#c03c9d] hover:bg-[#c03c9d]/[0.08]"
                 aria-label="Wishlist"
               >
                 <Heart className="h-4 w-4" />
@@ -277,12 +280,7 @@ export function Navbar() {
               {user ? (
                 <button
                   onClick={() => router.push("/profile")}
-                  className={cn(
-                    "p-2 rounded-full transition-all",
-                    isDark
-                      ? "text-white/45 hover:text-[#07e4e1] hover:bg-[#07e4e1]/[0.08]"
-                      : "text-black/45 hover:text-[#059e9b] hover:bg-[#059e9b]/[0.08]"
-                  )}
+                  className="p-2 rounded-full transition-all text-white/45 hover:text-[#07e4e1] hover:bg-[#07e4e1]/[0.08]"
                   aria-label="Profile"
                 >
                   <User className="h-4 w-4" />
@@ -298,7 +296,7 @@ export function Navbar() {
             </div>
           </div>
         </GlassSurface>
-      </div>
+      </motion.div>
 
       {/* ── MOBILE STAGGERED MENU OVERLAY ────────────────────────── */}
       <div className={`md:hidden fixed inset-0 z-[70] ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
@@ -334,9 +332,14 @@ export function Navbar() {
       </div>
 
       {/* ── MOBILE TOP BAR ───────────────────────────────────────── */}
-      <div
+      <motion.div
         className="md:hidden fixed top-0 left-0 right-0 z-[60] px-3 pt-safe px-safe"
-        style={{ willChange: 'transform', transform: 'translateZ(0)', paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+        style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+        animate={{ 
+          y: isVisible ? 0 : -100,
+          opacity: isVisible ? 1 : 0
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         <AnimatePresence mode="wait">
           {isSearchOpen ? (
@@ -356,7 +359,7 @@ export function Navbar() {
                 className="w-full glass-surface-fixed"
               >
                 <div className="flex items-center gap-2 w-full px-4">
-                  <Search className={isDark ? "text-white/40 shrink-0" : "text-black/40 shrink-0"} />
+                  <Search className="text-white/40 shrink-0" />
                   <Input
                     type="text"
                     placeholder="Search products…"
@@ -364,14 +367,11 @@ export function Navbar() {
                     onChange={(e) => handleSearch(e.target.value)}
                     onBlur={() => !searchQuery && setIsSearchOpen(false)}
                     autoFocus
-                    className={cn(
-                      "flex-1 h-7 text-sm bg-transparent border-none focus:ring-0 p-0",
-                      isDark ? "text-white placeholder:text-white/30" : "text-black placeholder:text-black/30"
-                    )}
+                    className="flex-1 h-7 text-sm bg-transparent border-none focus:ring-0 p-0 text-white placeholder:text-white/30"
                   />
                   <button
                     onClick={() => { setSearchQuery(""); setIsSearchOpen(false) }}
-                    className={isDark ? "text-white/30 hover:text-white/70" : "text-black/30 hover:text-black/70"}
+                    className="text-white/30 hover:text-white/70"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -416,7 +416,7 @@ export function Navbar() {
 
                   <button
                     onClick={() => setIsSearchOpen(true)}
-                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
+                    className="p-2 rounded-full transition-colors touch-target flex items-center justify-center text-white/40 hover:text-white/80"
                     aria-label="Search"
                   >
                     <Search className="h-5 w-5" />
@@ -424,7 +424,7 @@ export function Navbar() {
 
                   <Link
                     href="/cart"
-                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center relative", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
+                    className="p-2 rounded-full transition-colors touch-target flex items-center justify-center relative text-white/40 hover:text-white/80"
                     aria-label="Cart"
                   >
                     <ShoppingCart className="h-5 w-5" />
@@ -442,7 +442,7 @@ export function Navbar() {
                       )
                       btn?.click()
                     }}
-                    className={cn("p-2 rounded-full transition-colors touch-target flex items-center justify-center", isDark ? "text-white/40 hover:text-white/80" : "text-black/40 hover:text-black/80")}
+                    className="p-2 rounded-full transition-colors touch-target flex items-center justify-center text-white/40 hover:text-white/80"
                     aria-label="Menu"
                   >
                     <Menu className="h-5 w-5" />
@@ -452,7 +452,7 @@ export function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </>
   )
 }

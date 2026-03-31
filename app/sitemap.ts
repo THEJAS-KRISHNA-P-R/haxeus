@@ -2,7 +2,7 @@ import { MetadataRoute } from "next"
 import { createServerClient } from "@supabase/ssr"
 import { JOURNAL_POSTS } from "@/lib/journal"
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.haxeus.in"
 
 const STATIC_PAGES: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },

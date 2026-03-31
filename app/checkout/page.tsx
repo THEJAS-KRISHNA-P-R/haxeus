@@ -528,7 +528,7 @@ export default function CheckoutPage() {
                     {items.map(item => (
                       <div key={item.id} className="flex gap-3">
                         <div className={cn("relative h-14 w-14 rounded-xl overflow-hidden flex-shrink-0", isDark ? "bg-white/[0.05]" : "bg-black/[0.05]")}>
-                          <Image src={item.product.front_image || "/placeholder.svg"} alt={item.product.name} fill sizes="56px" className="object-cover" />
+                          <Image src={item.product.front_image || "/placeholder.svg"} alt={`${item.product.name} — HAXEUS streetwear`} fill sizes="56px" className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={cn("text-sm font-medium truncate", primary)}>{item.product.name}</p>

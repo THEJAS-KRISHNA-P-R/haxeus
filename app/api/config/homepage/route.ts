@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { redis, cached } from "@/lib/redis";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults";
-import { createClient } from "@/lib/supabase-server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export const revalidate = 0;
 
 async function getHomepageConfig() {
-  const supabase = await createClient();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("store_settings")
     .select("value")

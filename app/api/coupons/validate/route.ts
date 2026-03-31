@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
 import { redis, cached } from "@/lib/redis"
 import { CK, TTL } from "@/lib/cache-keys"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export async function POST(req: NextRequest) {
     let body: any
@@ -25,21 +24,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ valid: false, error: "Too many attempts. Wait a minute." }, { status: 429 })
     }
 
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() { return cookieStore.getAll() },
-                setAll(cookiesToSet) {
-                    try {
-                        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-                    } catch { }
-                },
-            },
-        }
-    )
+    const supabase = getSupabaseAdmin()
 
     const coupon = await cached(CK.coupon(code), TTL.COUPON, async () => {
         const { data } = await supabase

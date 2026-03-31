@@ -35,7 +35,7 @@ export default function CartPage() {
 
   const isDark = mounted && theme === "dark"
 
-  // Stock map — only needed for non-preorder items
+  // Stock map â€” only needed for non-preorder items
   const [stockMap, setStockMap] = useState<Record<string, number>>({})
 
   useEffect(() => {
@@ -78,50 +78,38 @@ export default function CartPage() {
     updateQuantity(item.id, item.quantity + 1)
   }
 
+  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+
   const handleApplyCoupon = async () => {
     if (!couponCode) return
     setIsApplying(true)
     try {
-      const { data, error } = await supabase
-        .from("coupons")
-        .select("*")
-        .eq("code", couponCode)
-        .eq("is_active", true)
-        .maybeSingle()
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode, cartTotal: subtotal }),
+      })
 
-      if (error || !data) {
-        toast({ title: "Invalid coupon", description: "This code does not exist or is expired.", variant: "destructive" })
+      const result = await response.json()
+
+      if (!response.ok || !result.valid || !result.coupon) {
+        toast({
+          title: "Invalid coupon",
+          description: result.error || "This code does not exist or is expired.",
+          variant: "destructive",
+        })
         return
       }
 
-      // Basic validation
-      const now = new Date()
-      if (data.valid_until && new Date(data.valid_until) < now) {
-        toast({ title: "Coupon expired", variant: "destructive" })
-        return
-      }
-      if (data.usage_limit && data.used_count >= data.usage_limit) {
-        toast({ title: "Coupon limit reached", variant: "destructive" })
-        return
-      }
-
-      const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-      if (subtotal < (data.min_purchase_amount || 0)) {
-        toast({ title: "Min purchase not met", description: `Spend ₹${data.min_purchase_amount} more to use this code.`, variant: "destructive" })
-        return
-      }
-
-      let discountVal = 0
-      if (data.discount_type === "percentage") {
-        discountVal = (subtotal * data.discount_value) / 100
-        if (data.max_discount_amount) discountVal = Math.min(discountVal, data.max_discount_amount)
-      } else {
-        discountVal = data.discount_value
-      }
-
+      const discountVal = Number(result.discount ?? 0)
       setDiscount(discountVal)
-      setAppliedCoupon({ id: data.id, code: data.code, type: data.discount_type, value: data.discount_value })
-      toast({ title: "Coupon applied!", description: `You saved ₹${discountVal.toLocaleString("en-IN")}` })
+      setAppliedCoupon({
+        id: result.coupon.id ?? result.coupon.code,
+        code: result.coupon.code,
+        type: result.coupon.discount_type,
+        value: result.coupon.discount_value,
+      })
+      toast({ title: "Coupon applied!", description: `You saved â‚¹${discountVal.toLocaleString("en-IN")}` })
     } catch (err) {
       toast({ title: "Error applying coupon", variant: "destructive" })
     } finally {
@@ -129,7 +117,6 @@ export default function CartPage() {
     }
   }
 
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const shipping = subtotal >= settings.free_shipping_above ? 0 : settings.shipping_rate
   const total = Math.max(0, subtotal - discount + shipping)
 
@@ -209,7 +196,7 @@ export default function CartPage() {
 
                       {/* Size + Color */}
                       <p className={cn("text-sm mt-0.5", isDark ? "text-white/50" : "text-black/50")}>
-                        {item.size}{item.color ? ` · ${item.color}` : ""}
+                        {item.size}{item.color ? ` Â· ${item.color}` : ""}
                       </p>
 
                       {/* Preorder badge */}
@@ -249,7 +236,7 @@ export default function CartPage() {
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className={cn("w-5 h-5 flex items-center justify-center text-lg leading-none", isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")}
                       >
-                        −
+                        âˆ’
                       </button>
                       <span className={cn("text-sm font-medium w-4 text-center", isDark ? "text-white" : "text-black")}>
                         {item.quantity}
@@ -262,7 +249,7 @@ export default function CartPage() {
                       </button>
                     </div>
                     <p className={cn("font-bold", isDark ? "text-white" : "text-black")}>
-                      ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                      â‚¹{(item.product.price * item.quantity).toLocaleString("en-IN")}
                     </p>
                   </div>
                 </div>
@@ -284,18 +271,18 @@ export default function CartPage() {
                 <div className="flex justify-between">
                   <span className={isDark ? "text-white/60" : "text-black/60"}>Subtotal</span>
                   <span className={cn("font-medium", isDark ? "text-white" : "text-black")}>
-                    ₹{subtotal.toLocaleString("en-IN")}
+                    â‚¹{subtotal.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className={isDark ? "text-white/60" : "text-black/60"}>Shipping</span>
                   <span className={cn("font-medium", shipping === 0 ? "text-emerald-400" : isDark ? "text-white" : "text-black")}>
-                    {shipping === 0 ? "FREE" : `₹${shipping}`}
+                    {shipping === 0 ? "FREE" : `â‚¹${shipping}`}
                   </span>
                 </div>
                 {shipping > 0 && (
                   <p className={cn("text-xs", isDark ? "text-white/35" : "text-black/35")}>
-                    Free shipping on orders above ₹{settings.free_shipping_above.toLocaleString("en-IN")}
+                    Free shipping on orders above â‚¹{settings.free_shipping_above.toLocaleString("en-IN")}
                   </p>
                 )}
 
@@ -343,25 +330,25 @@ export default function CartPage() {
                 <div className={cn("border-t pt-2.5", isDark ? "border-white/[0.07]" : "border-black/[0.07]")}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className={isDark ? "text-white/60" : "text-black/60"}>Subtotal</span>
-                    <span className={isDark ? "text-white" : "text-black"}>₹{subtotal.toLocaleString("en-IN")}</span>
+                    <span className={isDark ? "text-white" : "text-black"}>â‚¹{subtotal.toLocaleString("en-IN")}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-sm mb-1 text-emerald-400">
                       <span>Discount ({appliedCoupon?.code})</span>
-                      <span>−₹{discount.toLocaleString("en-IN")}</span>
+                      <span>âˆ’â‚¹{discount.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm mb-2.5">
                     <span className={isDark ? "text-white/60" : "text-black/60"}>Shipping</span>
                     <span className={cn(shipping === 0 ? "text-emerald-400" : isDark ? "text-white" : "text-black")}>
-                      {shipping === 0 ? "FREE" : `₹${shipping}`}
+                      {shipping === 0 ? "FREE" : `â‚¹${shipping}`}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center pt-2">
                     <span className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>Total</span>
                     <span className="font-extrabold text-2xl text-[#e93a3a]">
-                      ₹{total.toLocaleString("en-IN")}
+                      â‚¹{total.toLocaleString("en-IN")}
                     </span>
                   </div>
                 </div>

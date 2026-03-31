@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
 import { cached } from "@/lib/redis";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import type { PromoPopup } from "@/types/promo-popup";
 
 export const revalidate = 0;
 
 async function getPromoPopups() {
-  const supabase = await createClient();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("store_settings")
     .select("value")

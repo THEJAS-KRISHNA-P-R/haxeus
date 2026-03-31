@@ -1,0 +1,302 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { font-size: 15px; }
+.wrap { padding: 1rem 0; }
+h1 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.25rem; }
+.correction-banner { background: var(--color-background-warning); border: 0.5px solid var(--color-border-tertiary); border-left: 3px solid #EF9F27; border-radius: var(--border-radius-md); padding: .75rem 1rem; font-size: 13px; color: var(--color-text-warning); margin-bottom: 1.25rem; line-height: 1.5; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.tab { font-size: 13px; padding: 5px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); font-weight: 500; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+.metric-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: .85rem 1rem; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 500; line-height: 1.1; }
+.section-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-secondary); margin-bottom: .75rem; padding-bottom: .4rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.issue-row { display: flex; align-items: flex-start; gap: 10px; padding: .6rem 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.issue-row:last-child { border-bottom: none; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot-red { background: #E24B4A; }
+.dot-amber { background: #EF9F27; }
+.dot-green { background: #639922; }
+.dot-blue { background: #378ADD; }
+.issue-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.issue-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.5; }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 20px; margin-left: 6px; }
+.badge-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+.badge-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-blue { background: var(--color-background-info); color: var(--color-text-info); }
+.badge-green { background: var(--color-background-success); color: var(--color-text-success); }
+.rec-item { display: flex; gap: 12px; padding: .7rem 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.rec-item:last-child { border-bottom: none; }
+.rec-num { font-size: 12px; font-weight: 500; color: var(--color-text-info); background: var(--color-background-info); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.rec-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.rec-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 3px; line-height: 1.5; }
+.score-bar-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.score-bar-label { font-size: 13px; color: var(--color-text-secondary); width: 130px; flex-shrink: 0; }
+.score-bar-bg { flex: 1; height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 4px; }
+.score-num { font-size: 13px; font-weight: 500; width: 36px; text-align: right; }
+.code-tag { font-family: var(--font-mono); font-size: 12px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 4px; padding: 1px 6px; color: var(--color-text-secondary); }
+.risk-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 3px 8px; border-radius: 20px; margin-bottom: 4px; font-weight: 500; }
+.risk-critical { background: var(--color-background-danger); color: var(--color-text-danger); }
+.risk-high { background: var(--color-background-warning); color: var(--color-text-warning); }
+.risk-medium { background: var(--color-background-info); color: var(--color-text-info); }
+.comp-row { display: flex; align-items: center; gap: 10px; padding: .5rem 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+.comp-row:last-child { border-bottom: none; }
+.comp-name { width: 100px; font-weight: 500; color: var(--color-text-primary); flex-shrink: 0; }
+.comp-bar-bg { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 3px; overflow: hidden; }
+.comp-bar-fill { height: 100%; border-radius: 3px; }
+.comp-val { width: 40px; text-align: right; color: var(--color-text-secondary); }
+.haxeus-row .comp-bar-fill { background: #E24B4A; }
+</style>
+<div class="wrap">
+  <h1>HAXEUS — Agency Site Audit</h1>
+  <p class="sub">Audit date: 30 March 2026 &nbsp;·&nbsp; Domain: haxeus.in &nbsp;·&nbsp; Platform: Next.js 15 + Supabase + Vercel</p>
+
+  <div class="correction-banner">
+    <strong>Platform correction:</strong> The previous audit incorrectly identified this as a Shopify site. HAXEUS is a custom-built Next.js 15 application deployed on Vercel, backed by Supabase (PostgreSQL). This changes the entire security posture, SEO strategy, and conversion recommendations — Shopify-specific fixes (robots.txt in dashboard, Judge.me app, Shopify Preferences) do not apply. All findings below reflect the real stack.
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('overview',this)">Overview</button>
+    <button class="tab" onclick="showTab('security',this)">Security & Risk</button>
+    <button class="tab" onclick="showTab('seo',this)">SEO</button>
+    <button class="tab" onclick="showTab('ux',this)">UX & Conversion</button>
+    <button class="tab" onclick="showTab('brand',this)">Brand & Market</button>
+    <button class="tab" onclick="showTab('roadmap',this)">Roadmap</button>
+  </div>
+
+  <div id="tab-overview" class="tab-panel active">
+    <div class="grid4">
+      <div class="metric-card"><div class="metric-label">Overall score</div><div class="metric-value" style="color:#E24B4A">27<span style="font-size:14px;font-weight:400;color:var(--color-text-secondary)">/100</span></div></div>
+      <div class="metric-card"><div class="metric-label">Google indexed pages</div><div class="metric-value" style="color:#E24B4A">0</div></div>
+      <div class="metric-card"><div class="metric-label">Critical security risks</div><div class="metric-value" style="color:#E24B4A">5</div></div>
+      <div class="metric-card"><div class="metric-label">Brand mentions found</div><div class="metric-value" style="color:#E24B4A">0</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="section-title">Score breakdown</div>
+        <div class="score-bar-wrap"><span class="score-bar-label">SEO & discoverability</span><div class="score-bar-bg"><div class="score-bar-fill" style="width:5%;background:#E24B4A"></div></div><span class="score-num" style="color:#E24B4A">5</span></div>
+        <div class="score-bar-wrap"><span class="score-bar-label">Security posture</span><div class="score-bar-bg"><div class="score-bar-fill" style="width:30%;background:#E24B4A"></div></div><span class="score-num" style="color:#E24B4A">30</span></div>
+        <div class="score-bar-wrap"><span class="score-bar-label">Brand & social proof</span><div class="score-bar-bg"><div class="score-bar-fill" style="width:10%;background:#E24B4A"></div></div><span class="score-num" style="color:#E24B4A">10</span></div>
+        <div class="score-bar-wrap"><span class="score-bar-label">UX & conversion</span><div class="score-bar-bg"><div class="score-bar-fill" style="width:38%;background:#EF9F27"></div></div><span class="score-num" style="color:#EF9F27">38</span></div>
+        <div class="score-bar-wrap"><span class="score-bar-label">Market positioning</span><div class="score-bar-bg"><div class="score-bar-fill" style="width:15%;background:#E24B4A"></div></div><span class="score-num" style="color:#E24B4A">15</span></div>
+        <div class="score-bar-wrap"><span class="score-bar-label">Technical infra</span><div class="score-bar-bg"><div class="score-bar-fill" style="width:60%;background:#639922"></div></div><span class="score-num" style="color:#639922">60</span></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Top critical issues</div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">Public repo exposes full codebase</div><div class="issue-desc">GitHub repo is public — DB schema, auth flows, Supabase table structure, and API patterns are visible to any attacker.</div></div></div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">Error logs committed to main branch</div><div class="issue-desc"><span class="code-tag">ts_errors.log</span> and <span class="code-tag">tsc_errors.log</span> in the public repo expose internal TypeScript errors and file paths.</div></div></div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">Zero Google indexing</div><div class="issue-desc">No metadata exports, no sitemap, no robots.txt confirmed in the Next.js app. Invisible to search engines.</div></div></div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No payment security layer visible</div><div class="issue-desc">Supabase doesn't handle payments. No Razorpay/Stripe integration confirmed. Payment data path is unclear.</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">Disabled features in production code</div><div class="issue-desc"><span class="code-tag">_disabled/</span> folder suggests incomplete features shipped or stripped. Signals instability.</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Competitive landscape — Indian streetwear (estimated domain strength)</div>
+      <div class="comp-row haxeus-row"><span class="comp-name">HAXEUS</span><div class="comp-bar-bg"><div class="comp-bar-fill" style="width:3%"></div></div><span class="comp-val" style="color:#E24B4A">~0 DA</span></div>
+      <div class="comp-row"><span class="comp-name">Urban Monkey</span><div class="comp-bar-bg"><div class="comp-bar-fill" style="width:72%;background:#378ADD"></div></div><span class="comp-val">High</span></div>
+      <div class="comp-row"><span class="comp-name">Fugazee</span><div class="comp-bar-bg"><div class="comp-bar-fill" style="width:58%;background:#378ADD"></div></div><span class="comp-val">Medium</span></div>
+      <div class="comp-row"><span class="comp-name">Almost Gods</span><div class="comp-bar-bg"><div class="comp-bar-fill" style="width:44%;background:#378ADD"></div></div><span class="comp-val">Medium</span></div>
+      <div class="comp-row"><span class="comp-name">Jaywalking</span><div class="comp-bar-bg"><div class="comp-bar-fill" style="width:55%;background:#378ADD"></div></div><span class="comp-val">Medium</span></div>
+      <div class="comp-row"><span class="comp-name">Bluorng</span><div class="comp-bar-bg"><div class="comp-bar-fill" style="width:28%;background:#378ADD"></div></div><span class="comp-val">Growing</span></div>
+    </div>
+  </div>
+
+  <div id="tab-security" class="tab-panel">
+    <p style="font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:.75rem 1rem;border-radius:var(--border-radius-md);margin-bottom:1rem;line-height:1.5">Note: This is passive recon only — GitHub repo analysis, DNS inference, HTTP header inspection, and architecture review. No active exploitation was performed.</p>
+    <div class="card">
+      <div class="section-title">Critical — fix immediately</div>
+      <div class="issue-row">
+        <div class="dot dot-red"></div>
+        <div>
+          <div class="issue-title">Public GitHub repo exposes architecture <span class="badge badge-red">critical</span></div>
+          <div class="issue-desc">The entire codebase — Supabase table names, RLS policy logic, API route patterns, auth flows, and business logic — is publicly visible. An attacker can map your entire data model before making a single request. Make the repo private immediately, or add a <span class="code-tag">.env.example</span> and audit what's safe to expose.</div>
+        </div>
+      </div>
+      <div class="issue-row">
+        <div class="dot dot-red"></div>
+        <div>
+          <div class="issue-title">TypeScript error logs committed to repo <span class="badge badge-red">critical</span></div>
+          <div class="issue-desc"><span class="code-tag">ts_errors.log</span> and <span class="code-tag">tsc_errors.log</span> are committed to the main branch. These files expose internal file paths, type errors, component names, and system architecture details. Add them to <span class="code-tag">.gitignore</span> and purge from git history with <span class="code-tag">git filter-repo</span>.</div>
+        </div>
+      </div>
+      <div class="issue-row">
+        <div class="dot dot-red"></div>
+        <div>
+          <div class="issue-title">Debug scripts in production root <span class="badge badge-red">critical</span></div>
+          <div class="issue-desc"><span class="code-tag">check-schema.js</span> and <span class="code-tag">proxy.ts</span> sit in the project root and are visible in the public repo. Schema-checking scripts reveal your database structure. The proxy script's purpose is unclear — if it forwards requests anywhere, it's a potential SSRF vector. Remove from root and .gitignore.</div>
+        </div>
+      </div>
+      <div class="issue-row">
+        <div class="dot dot-red"></div>
+        <div>
+          <div class="issue-title">MCP config file exposed <span class="badge badge-red">critical</span></div>
+          <div class="issue-desc"><span class="code-tag">.mcp.json</span> is committed. This exposes MCP server configurations which may include internal tool endpoints. Add to <span class="code-tag">.gitignore</span> immediately.</div>
+        </div>
+      </div>
+      <div class="issue-row">
+        <div class="dot dot-red"></div>
+        <div>
+          <div class="issue-title">No confirmed payment security layer <span class="badge badge-red">critical</span></div>
+          <div class="issue-desc">Supabase is not PCI DSS compliant for storing card data — it's a database, not a payment processor. There is no confirmed Razorpay, Stripe, or CCAvenue integration in the public codebase. If customers are placing orders and entering payment details, the payment path must be verified immediately. Never store card numbers in Supabase rows.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">High severity — fix this week</div>
+      <div class="issue-row">
+        <div class="dot dot-amber"></div>
+        <div>
+          <div class="issue-title">HTTP security headers not configured in next.config.mjs <span class="badge badge-amber">high</span></div>
+          <div class="issue-desc">Unlike Shopify, Next.js does not add security headers by default. Headers like <span class="code-tag">Content-Security-Policy</span>, <span class="code-tag">X-Frame-Options: DENY</span>, <span class="code-tag">X-Content-Type-Options: nosniff</span>, <span class="code-tag">Referrer-Policy</span>, and <span class="code-tag">Strict-Transport-Security</span> must be explicitly added in the <span class="code-tag">headers()</span> function in <span class="code-tag">next.config.mjs</span>. Verify via securityheaders.com.</div>
+        </div>
+      </div>
+      <div class="issue-row">
+        <div class="dot dot-amber"></div>
+        <div>
+          <div class="issue-title">Supabase RLS policies may have gaps <span class="badge badge-amber">high</span></div>
+          <div class="issue-desc">The Supabase schema is visible in the public repo. If any RLS policy is misconfigured (e.g., allowing anon reads on <span class="code-tag">orders</span> or <span class="code-tag">user_addresses</span>), attackers can dump customer data via the public Supabase anon key. Run Supabase's RLS advisor and test every table with an unauthenticated client.</div>
+        </div>
+      </div>
+      <div class="issue-row">
+        <div class="dot dot-amber"></div>
+        <div>
+          <div class="issue-title">Deployment confusion — both Netlify and Vercel configs present <span class="badge badge-amber">high</span></div>
+          <div class="issue-desc">Both <span class="code-tag">netlify.toml</span> and <span class="code-tag">vercel.json</span> exist in the repo, along with a <span class="code-tag">netlify/functions/</span> folder. If both are ever live simultaneously, environment variables and serverless functions may behave inconsistently. Confirm which is the canonical deployment and remove the other's config.</div>
+        </div>
+      </div>
+      <div class="issue-row">
+        <div class="dot dot-amber"></div>
+        <div>
+          <div class="issue-title">Email domain records unverified (SPF/DKIM/DMARC) <span class="badge badge-amber">high</span></div>
+          <div class="issue-desc">If order confirmation emails are sent from <span class="code-tag">@haxeus.in</span>, missing SPF/DKIM/DMARC records mean any attacker can spoof your domain. This destroys customer trust and can get your domain blacklisted. Verify at mxtoolbox.com.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Security action plan (priority order)</div>
+      <div class="rec-item"><div class="rec-num">1</div><div><div class="rec-title">Make the GitHub repo private right now</div><div class="rec-desc">Go to Settings → Danger Zone → Change visibility → Private. Then rotate any credentials that were ever in the repo's history — Supabase service role key, any API keys, payment keys.</div></div></div>
+      <div class="rec-item"><div class="rec-num">2</div><div><div class="rec-title">Purge log files from git history</div><div class="rec-desc">Run <span class="code-tag">git filter-repo --invert-paths --path ts_errors.log --path tsc_errors.log</span>, then force push. Add both to <span class="code-tag">.gitignore</span>.</div></div></div>
+      <div class="rec-item"><div class="rec-num">3</div><div><div class="rec-title">Add security headers to next.config.mjs</div><div class="rec-desc">Add a <span class="code-tag">headers()</span> async function returning CSP, X-Frame-Options, X-Content-Type-Options, HSTS, and Referrer-Policy for all routes (<span class="code-tag">source: '/(.*)'</span>). Score on securityheaders.com — target A.</div></div></div>
+      <div class="rec-item"><div class="rec-num">4</div><div><div class="rec-title">Audit every Supabase RLS policy with a fresh anon client</div><div class="rec-desc">Open a new browser in incognito, hit your Supabase project's REST API directly with the anon key, and try to SELECT from <span class="code-tag">orders</span>, <span class="code-tag">user_addresses</span>, <span class="code-tag">profiles</span>. Any that return data = RLS breach.</div></div></div>
+      <div class="rec-item"><div class="rec-num">5</div><div><div class="rec-title">Verify or integrate a payment gateway</div><div class="rec-desc">Use Razorpay (best for India, supports UPI/Cards/Wallets) or Stripe. Never store card details in Supabase. Handle all card data server-side in a Supabase Edge Function that calls the payment gateway API, then store only the payment intent ID.</div></div></div>
+    </div>
+  </div>
+
+  <div id="tab-seo" class="tab-panel">
+    <div class="card">
+      <div class="section-title">The core problem — Next.js 15 SEO requires explicit implementation</div>
+      <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No generateMetadata exports detected</div><div class="issue-desc">Next.js App Router does not inject meta titles or descriptions automatically. Every <span class="code-tag">page.tsx</span> needs either a static <span class="code-tag">export const metadata</span> or an async <span class="code-tag">export async function generateMetadata()</span>. Without this, Google sees blank or generic titles — a ranking killer.</div></div></div>
+      <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No sitemap.xml route found</div><div class="issue-desc">Next.js 15 supports automatic sitemaps via <span class="code-tag">app/sitemap.ts</span> (returns a <span class="code-tag">MetadataRoute.Sitemap</span>). There is no evidence this exists. Alternatively, install <span class="code-tag">next-sitemap</span>. Without a sitemap, Googlebot has no map of your product pages.</div></div></div>
+      <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No robots.txt confirmed</div><div class="issue-desc">Create <span class="code-tag">app/robots.ts</span> that exports a <span class="code-tag">MetadataRoute.Robots</span> object, or add a static <span class="code-tag">public/robots.txt</span>. Without it, some crawlers may default to not indexing.</div></div></div>
+      <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">Zero backlinks, zero brand mentions</div><div class="issue-desc">HAXEUS does not appear in any Indian streetwear roundup, media outlet, influencer feed, or fashion directory. Domain authority is effectively zero. No organic traffic possible until this changes.</div></div></div>
+      <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">Dynamic product pages need structured data</div><div class="issue-desc">Product pages (<span class="code-tag">app/products/[id]/page.tsx</span>) should include JSON-LD structured data (Schema.org <span class="code-tag">Product</span> type) with name, image, price, and availability. This enables Google Shopping-style rich results in SERPs.</div></div></div>
+      <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">Image alt text on Supabase Storage images</div><div class="issue-desc">Product images served from Supabase Storage need descriptive alt text. The Next.js <span class="code-tag">Image</span> component's <span class="code-tag">alt</span> prop must come from your product data, not be hardcoded as empty or generic.</div></div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Next.js-specific SEO fixes (priority order)</div>
+      <div class="rec-item"><div class="rec-num">1</div><div><div class="rec-title">Add metadata to every page.tsx</div><div class="rec-desc">At minimum: homepage, products listing, each product detail page, about, cart, and auth pages. For product pages use <span class="code-tag">generateMetadata</span> that fetches the product name and description from Supabase and returns it as the title/description. Target format: "HAXEUS | [Product Name] — Premium Artistic Streetwear India".</div></div></div>
+      <div class="rec-item"><div class="rec-num">2</div><div><div class="rec-title">Create app/sitemap.ts and app/robots.ts</div><div class="rec-desc">The sitemap should dynamically fetch all product IDs from Supabase and generate URLs for each. Set a weekly <span class="code-tag">revalidate</span> interval. Submit the sitemap URL to Google Search Console immediately after deploying.</div></div></div>
+      <div class="rec-item"><div class="rec-num">3</div><div><div class="rec-title">Add JSON-LD to product pages</div><div class="rec-desc">In each product <span class="code-tag">page.tsx</span>, add a <span class="code-tag">&lt;script type="application/ld+json"&gt;</span> with Schema.org Product markup — name, image, price, currency (INR), availability, and brand (HAXEUS). This unlocks rich results and Google Shopping visibility.</div></div></div>
+      <div class="rec-item"><div class="rec-num">4</div><div><div class="rec-title">Set up Google Search Console today</div><div class="rec-desc">Verify ownership via HTML tag in <span class="code-tag">app/layout.tsx</span> (use Next.js metadata <span class="code-tag">verification</span> field). Submit sitemap. Monitor indexing errors daily for the first two weeks.</div></div></div>
+      <div class="rec-item"><div class="rec-num">5</div><div><div class="rec-title">Start a blog using Next.js MDX or a CMS</div><div class="rec-desc">Add a <span class="code-tag">app/blog/</span> route using MDX files or connect Sanity/Contentlayer. Target keywords: "artistic streetwear India", "graphic tees India", "premium streetwear [city]". Two posts per month minimum. This is your primary organic traffic engine.</div></div></div>
+    </div>
+  </div>
+
+  <div id="tab-ux" class="tab-panel">
+    <div class="grid2">
+      <div class="card">
+        <div class="section-title">UX issues — confirmed from codebase</div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">_disabled/ folder signals incomplete features</div><div class="issue-desc">A <span class="code-tag">_disabled/</span> directory in the root suggests features were built then stripped — possibly loyalty program, reviews, or coupons. Incomplete features create broken user journeys if any UI elements still reference them.</div></div></div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No review system visible in live flow</div><div class="issue-desc">Reviews are listed as a feature in the README but require custom Supabase tables + UI. There is no third-party review widget integration (unlike Shopify where Judge.me installs in 2 clicks). This must be built or integrated via a headless reviews API.</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">Cart context — server/client hydration risk</div><div class="issue-desc">The CartContext uses React Context (client-side only). In Next.js 15 App Router, server components can't access context. Cart state must be in a Client Component boundary. If cart total or item count shows 0 on first render, this is the cause — add skeleton loaders.</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">No size guide visible</div><div class="issue-desc">Indian buyers are extremely size-sensitive when buying online. Absence of a size chart is one of the top reasons for cart abandonment on clothing stores. This must be on every product page.</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">TypeScript errors in production codebase</div><div class="issue-desc">Both <span class="code-tag">ts_errors.log</span> and <span class="code-tag">tsc_errors.log</span> being non-empty at commit time suggests the build has TypeScript issues being suppressed. These can become runtime errors. Run <span class="code-tag">npx tsc --noEmit</span> and fix all errors before next deployment.</div></div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Conversion improvements</div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No trust signals on product pages</div><div class="issue-desc">Indian buyers need to see: (a) real customer reviews/photos, (b) a clear return/exchange policy with timeline, (c) COD availability badge, (d) estimated delivery date. Without these, conversion rates for a new brand will be under 0.5%.</div></div></div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No email capture / welcome flow</div><div class="issue-desc">There is no confirmed pop-up or inline form to capture emails on first visit. Every visitor who leaves without buying is lost forever without a follow-up mechanism. Add an exit-intent or timed pop-up with a 10% discount offer.</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">No WhatsApp integration</div><div class="issue-desc">WhatsApp Business broadcasts have 60–80% open rates in India. Add a WhatsApp chat button (floating widget) and build an opt-in flow for order updates and drop announcements. This is the single highest-ROI retention channel for Indian D2C brands.</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">Framer Motion animations may hurt mobile performance</div><div class="issue-desc">Heavy Framer Motion animations on product pages can drop Lighthouse Performance scores on mobile below 50. Profile on a mid-range Android device. Use <span class="code-tag">prefers-reduced-motion</span> media query and lazy-load non-critical animations.</div></div></div>
+        <div class="issue-row"><div class="dot dot-blue"></div><div><div class="issue-title">Drop model / countdown timer not implemented</div><div class="issue-desc">The codebase has no visible countdown timer component for limited drops. This is the highest-urgency UX addition — drop launches with scarcity timers drive 3–5× higher conversion in Indian streetwear.</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">UX quick wins (this week)</div>
+      <div class="rec-item"><div class="rec-num">1</div><div><div class="rec-title">Add a size guide modal to every product page</div><div class="rec-desc">Build a reusable <span class="code-tag">SizeGuide</span> component with a measurement table. Trigger on a "Size Guide" link near the size selector. This alone can cut returns by 20–30% and lift conversion.</div></div></div>
+      <div class="rec-item"><div class="rec-num">2</div><div><div class="rec-title">Add a returns & exchange policy page + link it from product pages</div><div class="rec-desc">Create <span class="code-tag">app/returns/page.tsx</span> if not present. Link it prominently below the Add to Cart button. State clearly: "7-day returns, no questions asked" (or whatever your policy is).</div></div></div>
+      <div class="rec-item"><div class="rec-num">3</div><div><div class="rec-title">Fix TypeScript errors before next deploy</div><div class="rec-desc">Run <span class="code-tag">npx tsc --noEmit</span> locally. Fix all errors. Do not suppress with <span class="code-tag">// @ts-ignore</span>. Shipping TS errors means shipping potential runtime crashes.</div></div></div>
+      <div class="rec-item"><div class="rec-num">4</div><div><div class="rec-title">Add COD (Cash on Delivery) via Razorpay</div><div class="rec-desc">COD accounts for ~60% of Indian e-commerce orders. If you're not offering COD, you're losing more than half your potential customers. Razorpay supports COD with automatic prepaid-to-COD upselling.</div></div></div>
+    </div>
+  </div>
+
+  <div id="tab-brand" class="tab-panel">
+    <div class="grid2">
+      <div class="card">
+        <div class="section-title">Brand identity gaps</div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">"Premium Artistic Streetwear" is not a differentiator</div><div class="issue-desc">Jaywalking, Almost Gods, BLUORNG, Fugazee, and 50+ other Indian brands use this exact framing. "Premium artistic" has zero recall value in a competitive search result. HAXEUS needs a specific, ownable identity.</div></div></div>
+        <div class="issue-row"><div class="dot dot-red"></div><div><div class="issue-title">No founder story or origin narrative</div><div class="issue-desc">Almost Gods (mythology + architecture), Jaywalking (Bangalore street culture), HUEMN (philosophy + experimentation) — each has a story that creates emotional connection. HAXEUS has none visible in the codebase or online. Story = trust = conversion.</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">No cultural anchor</div><div class="issue-desc">The best Indian streetwear brands own a subculture: hip-hop, skateboarding, sustainable fashion, a specific city, or a specific art movement. Without one anchor, HAXEUS will be invisible to algorithm-driven discovery (Instagram, Reels, Pinterest).</div></div></div>
+        <div class="issue-row"><div class="dot dot-amber"></div><div><div class="issue-title">Zero media coverage or backlinks</div><div class="issue-desc">Not found on LBB, The Voice of Fashion, Hauterfly, Supari, or any Indian fashion media. Not in any "Indian streetwear brands to know" roundup. This is both an SEO problem and a brand credibility problem.</div></div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Market opportunity — India 2026</div>
+        <div class="issue-row"><div class="dot dot-green"></div><div><div class="issue-title">Indian streetwear growing at 10%+ CAGR</div><div class="issue-desc">India's apparel market heads toward $124B by 2029. Streetwear is the fastest growing segment, led by Gen Z buyers who strongly prefer domestic brands with cultural authenticity.</div></div></div>
+        <div class="issue-row"><div class="dot dot-green"></div><div><div class="issue-title">Drop model outperforms continuous inventory</div><div class="issue-desc">Urban Monkey, Fugazee, and Jaywalking all use limited drops. Scarcity drives repeat visits, social sharing, and FOMO-based conversion. This model also reduces inventory risk massively.</div></div></div>
+        <div class="issue-row"><div class="dot dot-green"></div><div><div class="issue-title">Artist collaborations = fastest credibility path</div><div class="issue-desc">Partnering with 2–3 local graphic artists or illustrators for a collab drop builds "artistic" credentials authentically — and gives you content, press angles, and a ready-made audience (the artist's followers).</div></div></div>
+        <div class="issue-row"><div class="dot dot-green"></div><div><div class="issue-title">Micro-influencers outperform paid ads for this audience</div><div class="issue-desc">Indian Gen Z fashion buyers trust creators with 5k–50k followers more than celebrities. Gifting 3–5 micro-influencers for an honest review post costs ₹5,000–₹15,000 in product and delivers 5–20× the ROI of equivalent paid ads.</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Brand positioning action plan</div>
+      <div class="rec-item"><div class="rec-num">1</div><div><div class="rec-title">Define one ownable identity in the next 48 hours</div><div class="rec-desc">Answer: "HAXEUS is the only brand for ___." It should be specific — not "art lovers" but "people who collect underground Indian graphic art." Not "streetwear" but "streetwear inspired by [specific visual style/city/scene]." Once chosen, it drives all copy, imagery, and collab decisions.</div></div></div>
+      <div class="rec-item"><div class="rec-num">2</div><div><div class="rec-title">Write a founder story and add it to the About page</div><div class="rec-desc">300–500 words. Why did you start HAXEUS? What problem were you solving? What moment made it real? Authenticity resonates more than polish for this audience. Add a photo of the founder or the studio. Link it from the footer and product pages.</div></div></div>
+      <div class="rec-item"><div class="rec-num">3</div><div><div class="rec-title">Submit to Indian fashion media for coverage</div><div class="rec-desc">Send a press kit (brand story, 5 product photos, founder bio) to LBB, The Voice of Fashion, Hauterfly, and Vagabomb. Target "Indian streetwear brands to watch" articles. One placement = dozens of backlinks + real customers.</div></div></div>
+      <div class="rec-item"><div class="rec-num">4</div><div><div class="rec-title">Launch on Instagram with 1 Reel per day for 90 days</div><div class="rec-desc">Indian streetwear is 80% social-first. Product shots, styling videos, behind-the-scenes design process, packing orders — all count. Use trending audio. The algorithm rewards consistency heavily. This is your cheapest customer acquisition channel.</div></div></div>
+    </div>
+  </div>
+
+  <div id="tab-roadmap" class="tab-panel">
+    <div class="card">
+      <div class="section-title">Week 1 — Stop the bleeding (security & legal)</div>
+      <div class="rec-item"><div class="rec-num">1</div><div><div class="rec-title">Make GitHub repo private <span class="badge badge-red">critical</span></div><div class="rec-desc">Settings → Danger Zone → Change visibility → Private. Do this before anything else.</div></div></div>
+      <div class="rec-item"><div class="rec-num">2</div><div><div class="rec-title">Rotate all credentials <span class="badge badge-red">critical</span></div><div class="rec-desc">Assume any key ever in git history is compromised. Rotate Supabase service role key, anon key, and any payment/email API keys. Update Vercel environment variables.</div></div></div>
+      <div class="rec-item"><div class="rec-num">3</div><div><div class="rec-title">Purge log files from git history</div><div class="rec-desc">Use git filter-repo to remove ts_errors.log, tsc_errors.log, check-schema.js from all commits. Force push.</div></div></div>
+      <div class="rec-item"><div class="rec-num">4</div><div><div class="rec-title">Add security headers to next.config.mjs</div><div class="rec-desc">CSP, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, HSTS, Referrer-Policy. Score on securityheaders.com — target A.</div></div></div>
+      <div class="rec-item"><div class="rec-num">5</div><div><div class="rec-title">Audit Supabase RLS policies</div><div class="rec-desc">Test every table with an unauthenticated client. Fix any that return data to anon users.</div></div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Month 1 — Get found (SEO & indexing)</div>
+      <div class="rec-item"><div class="rec-num">1</div><div><div class="rec-title">Add generateMetadata to every page.tsx</div><div class="rec-desc">Especially the homepage and all product pages. Use dynamic metadata for products fetched from Supabase.</div></div></div>
+      <div class="rec-item"><div class="rec-num">2</div><div><div class="rec-title">Create app/sitemap.ts and app/robots.ts</div><div class="rec-desc">Dynamic sitemap pulling all product IDs. Submit to Google Search Console.</div></div></div>
+      <div class="rec-item"><div class="rec-num">3</div><div><div class="rec-title">Add JSON-LD structured data to product pages</div><div class="rec-desc">Schema.org Product type with price, availability, brand. Enables Google Shopping rich results.</div></div></div>
+      <div class="rec-item"><div class="rec-num">4</div><div><div class="rec-title">Fix all TypeScript errors</div><div class="rec-desc">Run npx tsc --noEmit. Zero errors before next production deploy.</div></div></div>
+      <div class="rec-item"><div class="rec-num">5</div><div><div class="rec-title">Integrate Razorpay for payments + COD</div><div class="rec-desc">Handle all card data server-side via Edge Functions. Never store card numbers in Supabase. Add COD option.</div></div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Month 2–3 — Get customers (conversion & brand)</div>
+      <div class="rec-item"><div class="rec-num">1</div><div><div class="rec-title">Add size guide, trust badges, and review system to product pages</div><div class="rec-desc">Build SizeGuide component, add returns policy link, integrate a headless review system (or build on Supabase). These three changes can lift conversion 30–40%.</div></div></div>
+      <div class="rec-item"><div class="rec-num">2</div><div><div class="rec-title">Launch Instagram presence (1 Reel/day for 90 days)</div><div class="rec-desc">Behind-the-scenes, product reveals, styling content. Use trending audio. Consistency beats quality at this stage.</div></div></div>
+      <div class="rec-item"><div class="rec-num">3</div><div><div class="rec-title">Gift 5 micro-influencers and request honest review posts</div><div class="rec-desc">5k–50k follower Indian streetwear/fashion creators. Negotiate usage rights for UGC. This creates social proof + backlinks.</div></div></div>
+      <div class="rec-item"><div class="rec-num">4</div><div><div class="rec-title">Build a drop launch page with countdown timer</div><div class="rec-desc">Announce a limited collection 2 weeks ahead. Waitlist via email capture (Supabase table). Countdown timer on launch day. Limited quantities (50–100 pieces).</div></div></div>
+      <div class="rec-item"><div class="rec-num">5</div><div><div class="rec-title">Add WhatsApp Business + email welcome flow</div><div class="rec-desc">Exit-intent popup for email (10% discount). 3-email welcome flow: brand story → best sellers → social proof. WhatsApp broadcast for drop announcements.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>

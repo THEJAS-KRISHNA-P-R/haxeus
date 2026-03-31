@@ -1,13 +1,28 @@
 import { createClient } from "@/lib/supabase-server"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import { HomePageClient } from "@/components/home/HomePageClient"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
 import { deepMerge } from "@/lib/deep-merge"
 import type { Product, ProductImage } from "@/lib/supabase"
 import type { HomepageConfig } from "@/types/homepage"
+import type { Metadata } from "next"
 
 // Force dynamic since we're using cookies in createClient for the homepage config
 export const dynamic = "force-dynamic"
 export const revalidate = 0
+
+export const metadata: Metadata = {
+  title: "Premium Artistic Streetwear India",
+  description:
+    "Shop limited-drop graphic tees and oversized streetwear. Artistic designs made in India. Free shipping above ₹999.",
+  alternates: { canonical: "https://www.haxeus.in" },
+  openGraph: {
+    url: "https://www.haxeus.in",
+    title: "HAXEUS — Premium Artistic Streetwear India",
+    description:
+      "Shop limited-drop graphic tees and oversized streetwear. Artistic designs made in India. Free shipping above ₹999.",
+  },
+}
 
 async function getHomepageConfig(supabase: any): Promise<HomepageConfig> {
   try {
@@ -114,9 +129,10 @@ async function getFeaturedProducts(supabase: any, config: HomepageConfig): Promi
 
 export default async function HomePage() {
   const supabase = await createClient()
+  const supabaseAdmin = getSupabaseAdmin()
   
   // Parallel fetching
-  const configPromise = getHomepageConfig(supabase)
+  const configPromise = getHomepageConfig(supabaseAdmin)
   const preordersPromise = getPreorderItems(supabase)
   
   const [config, preorderItems] = await Promise.all([

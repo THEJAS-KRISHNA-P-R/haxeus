@@ -351,7 +351,7 @@ async function sendAbandonedCartEmail(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'HAXEUS <orders@haxeus.in>',
+        from: `HAXEUS <${process.env.FROM_EMAIL ?? 'orders@haxeus.in'}>`,
         to: [email],
         subject: emailTemplate.subject,
         html: emailTemplate.html,

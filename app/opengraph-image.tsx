@@ -1,9 +1,18 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'HAXEUS — Premium Artistic T-Shirts';
+export const alt = 'HAXEUS â€” Premium Artistic T-Shirts';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+const SITE_HOST = (() => {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://haxeus.in";
+    try {
+        return new URL(siteUrl).host;
+    } catch {
+        return "haxeus.in";
+    }
+})();
 
 export default async function Image() {
     return new ImageResponse(
@@ -58,7 +67,7 @@ export default async function Image() {
                         color: 'rgba(255,255,255,0.3)',
                     }}
                 >
-                    haxeuz.netlify.app
+                    {SITE_HOST}
                 </div>
             </div>
         ),

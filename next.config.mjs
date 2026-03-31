@@ -1,48 +1,27 @@
 /** @type {import('next').NextConfig} */
 
-// ── Security headers (audit fix #7.1, #2.3, #13.1, #14.1) ──────────────────
 const securityHeaders = [
-  // Prevent clickjacking
-  { key: "X-Frame-Options", value: "DENY" },
-  // Prevent MIME sniffing
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  // Referrer leakage control
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  // Disable unused browser features
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-  // Force HTTPS for 2 years, include subdomains
-  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-  // DNS prefetch
-  { key: "X-DNS-Prefetch-Control", value: "on" },
-  // Content Security Policy
   {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Razorpay checkout + Next.js inline runtime scripts + Vercel Analytics
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com",
-      // Supabase realtime (wss) + Razorpay API + Vercel Insights
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com https://vitals.vercel-insights.com",
-      // Supabase Storage images + data URIs + blob for canvas
-      "img-src 'self' data: blob: https://*.supabase.co https://hebbkx1anhila5yf.public.blob.vercel-storage.com https://images.unsplash.com",
-      // Razorpay modal iframes
-      "frame-src https://api.razorpay.com",
-      // Inline styles used by Tailwind + Framer Motion
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
       "style-src 'self' 'unsafe-inline'",
-      // Fonts if any are self-hosted
-      "font-src 'self' data:",
-      // Workers for Three.js/WebGL
-      "worker-src 'self' blob:",
+      "img-src 'self' blob: data: https://*.supabase.co https://vercel.com",
+      "font-src 'self'",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live",
+      "frame-ancestors 'none'",
     ].join("; "),
   },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
 ]
 
 const nextConfig = {
   output: "standalone",
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  // Disable source maps in production (#7.4)
   productionBrowserSourceMaps: false,
   images: {
     formats: ["image/avif", "image/webp"],
@@ -78,11 +57,9 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
   poweredByHeader: false,
-  // Faster compilation
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  // Performance optimizations
   experimental: {
     optimizeCss: true,
     optimizePackageImports: [
@@ -100,7 +77,6 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/**": ["./node_modules/@img/**/*", "./node_modules/sharp/**/*"],
   },
-  // Security headers applied to all routes
   async headers() {
     return [
       {
@@ -109,7 +85,6 @@ const nextConfig = {
       },
     ]
   },
-  // Empty turbopack config — signals intentional use of Turbopack (Next.js 16 default)
   turbopack: {},
 }
 

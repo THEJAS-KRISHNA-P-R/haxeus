@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState, useId } from 'react';
 import './GlassSurface.css';
 
+import { useTheme } from "@/components/ThemeProvider";
+
 export interface GlassSurfaceProps {
   children?: React.ReactNode;
   width?: number | string;
@@ -57,7 +59,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   displace = 0,
   backgroundOpacity = 0,
   saturation = 1,
-  distortionScale = -180,
+  distortionScale = -6, // Reduced from -18 to -6 for mobile performance
   redOffset = 0,
   greenOffset = 10,
   blueOffset = 20,
@@ -68,6 +70,14 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   style = {},
   disableSvgFilter = false
 }) => {
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && theme === "dark";
   const id = useId();
   const filterId = `glass-filter-${id.replace(/:/g, '')}`;
   const redGradId = `red-grad-${id.replace(/:/g, '')}`;
@@ -191,8 +201,9 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
 
     const isWebkit = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
     const isFirefox = /Firefox/.test(navigator.userAgent);
+    const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    if (isWebkit || isFirefox) {
+    if (isWebkit || isFirefox || isMobile) {
       return false;
     }
 
@@ -210,6 +221,10 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     colorScheme: 'dark',
     '--glass-frost': backgroundOpacity,
     '--glass-saturation': saturation,
+    '--glass-blur': `${blur}px`,
+    '--glass-bg': 'rgba(10, 10, 10, 0.45)',
+    '--glass-border': 'rgba(255, 255, 255, 0.08)',
+    '--glass-highlight': 'rgba(255, 255, 255, 0.12)',
     '--filter-id': `url(#${filterId})`
   } as React.CSSProperties;
 

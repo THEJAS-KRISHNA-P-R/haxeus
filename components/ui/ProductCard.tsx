@@ -218,7 +218,7 @@ export function ProductCard({
                   {is_preorder ? (
                     <div 
                       onClick={handleAddToCart}
-                      className="w-full py-1.5 sm:py-2.5 h-auto text-[10px] sm:text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all border-none flex items-center justify-center cursor-pointer"
+                      className="w-full py-1.5 sm:py-2.5 h-auto text-[12px] sm:text-xs font-bold rounded-full bg-[#e7bf04] hover:bg-[#f0cc1a] text-black transition-all border-none flex items-center justify-center cursor-pointer"
                     >
                       Pre-Order Now
                     </div>

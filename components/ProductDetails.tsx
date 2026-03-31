@@ -66,7 +66,7 @@ export default function ProductDetails({ product }: { product: Product }) {
         <div className="relative w-full h-64 sm:h-80 md:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl bg-black">
           <Image 
             src={product.front_image || "/placeholder.svg"} 
-            alt={product.name} 
+            alt={`${product.name} — HAXEUS streetwear`}
             fill 
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-contain" 

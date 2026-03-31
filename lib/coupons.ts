@@ -1,4 +1,7 @@
-import { supabase, Coupon } from './supabase'
+import "server-only"
+
+import { Coupon } from './supabase'
+import { getSupabaseAdmin } from "./supabase-admin"
 
 /**
  * Coupons & Discounts System
@@ -18,6 +21,8 @@ export async function validateCoupon(
   discountAmount?: number
   error?: string
 }> {
+  const supabase = getSupabaseAdmin()
+
   // Get coupon
   const { data: coupon, error } = await supabase
     .from('coupons')
@@ -86,6 +91,8 @@ export async function validateCoupon(
 }
 
 export async function applyCoupon(couponId: string, userId: string, orderId: string, discountAmount: number) {
+  const supabase = getSupabaseAdmin()
+
   // Record usage
   await supabase
     .from('coupon_usage')
@@ -101,6 +108,7 @@ export async function applyCoupon(couponId: string, userId: string, orderId: str
 }
 
 export async function getActiveCoupons(): Promise<Coupon[]> {
+  const supabase = getSupabaseAdmin()
   const { data, error } = await supabase
     .from('coupons')
     .select('*')
@@ -126,6 +134,8 @@ export async function createCoupon(coupon: {
   validFrom?: Date
   validUntil?: Date
 }): Promise<{ success: boolean; couponId?: string; error?: string }> {
+  const supabase = getSupabaseAdmin()
+
   // Check if code already exists
   const { data: existing } = await supabase
     .from('coupons')
@@ -161,6 +171,7 @@ export async function createCoupon(coupon: {
 }
 
 export async function deactivateCoupon(couponId: string): Promise<boolean> {
+  const supabase = getSupabaseAdmin()
   const { error } = await supabase
     .from('coupons')
     .update({ is_active: false })
@@ -170,6 +181,7 @@ export async function deactivateCoupon(couponId: string): Promise<boolean> {
 }
 
 export async function getCouponUsageStats(couponId: string) {
+  const supabase = getSupabaseAdmin()
   const { data: coupon } = await supabase
     .from('coupons')
     .select('*')
