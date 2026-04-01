@@ -9,9 +9,11 @@ import {
   ArrowRight,
   Hash
 } from "lucide-react";
+import { isValidEmail } from "@/lib/validation";
 
 export default function ContactForm() {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -21,6 +23,14 @@ export default function ContactForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage(null);
+
+        if (!isValidEmail(formData.email)) {
+            setErrorMessage("Please enter a valid email address.");
+            setStatus("error");
+            return;
+        }
+
         setStatus("loading");
 
         try {
@@ -207,7 +217,7 @@ export default function ContactForm() {
 
                             {status === "error" && (
                                 <p className="text-center text-red-500 text-xs font-black uppercase tracking-widest mt-4 font-bold">
-                                    Failed to send. Please check your connection.
+                                    {errorMessage || "Failed to send. Please check your connection."}
                                 </p>
                             )}
                         </motion.form>

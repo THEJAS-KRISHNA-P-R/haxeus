@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { hoverScale, tapScale } from "@/lib/animations"
+import { isValidEmail } from "@/lib/validation"
 import type { NewsletterConfig } from "@/types/homepage"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
 
@@ -21,7 +22,10 @@ export function NewsletterSection({ config, isDark = true }: NewsletterSectionPr
   const ctaText = config.cta_text ?? DEFAULT_HOMEPAGE_CONFIG.newsletter.cta_text
 
   const handleSubmit = async () => {
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return
+    if (!isValidEmail(email)) {
+      setStatus("error")
+      return
+    }
     setStatus("loading")
     try {
       const res = await fetch("/api/newsletter/subscribe", {

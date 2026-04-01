@@ -3,6 +3,8 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { useEffect, useState, type FormEvent } from "react"
 
+import { isValidEmail } from "@/lib/validation"
+
 const STORAGE_KEY = "haxeus-email-capture-dismissed"
 
 export function EmailCapturePopup() {
@@ -35,6 +37,12 @@ export function EmailCapturePopup() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.")
+      return
+    }
+
     setIsSubmitting(true)
     setError(null)
 

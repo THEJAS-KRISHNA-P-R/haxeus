@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { Mail, Check, AlertCircle } from "lucide-react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-import { Mail, Check, AlertCircle } from "lucide-react"
+import { isValidEmail } from "@/lib/validation"
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState("")
@@ -14,15 +15,7 @@ export function NewsletterSignup() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    if (!email) {
-      setStatus("error")
-      setMessage("Please enter your email address")
-      return
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
+    if (!isValidEmail(email)) {
       setStatus("error")
       setMessage("Please enter a valid email address")
       return
