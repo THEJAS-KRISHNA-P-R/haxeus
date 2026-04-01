@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState, useId } from 'react';
 import './GlassSurface.css';
 
-import { useTheme } from "@/components/ThemeProvider";
 
 export interface GlassSurfaceProps {
   children?: React.ReactNode;
@@ -70,14 +69,8 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   style = {},
   disableSvgFilter = false
 }) => {
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
-  const isDark = mounted && theme === "dark";
   const id = useId();
   const filterId = `glass-filter-${id.replace(/:/g, '')}`;
   const redGradId = `red-grad-${id.replace(/:/g, '')}`;

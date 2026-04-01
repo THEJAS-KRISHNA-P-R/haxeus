@@ -8,13 +8,28 @@ interface BeforeInstallPromptEvent extends Event {
 
 interface Window {
   deferredPrompt: BeforeInstallPromptEvent | null
+  dataLayer: unknown[]
+  gtag: (
+    command: 'config' | 'event' | 'js' | 'set',
+    targetId: string,
+    config?: Record<string, unknown>
+  ) => void;
+  fbq: {
+    (...args: unknown[]): void;
+    q?: unknown[];
+    loaded?: boolean;
+  };
+  Razorpay: new (options: Record<string, unknown>) => {
+    open(): void;
+    on(event: string, callback: (response: Record<string, unknown>) => void): void;
+  };
 }
 
 interface ServiceWorkerRegistration {
-  sync?: {
+  readonly sync?: {
     register(tag: string): Promise<void>
   }
-  periodicSync?: {
+  readonly periodicSync?: {
     register(tag: string, options?: { minInterval: number }): Promise<void>
   }
 }

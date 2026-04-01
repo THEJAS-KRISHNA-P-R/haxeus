@@ -1,7 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
-import type { Container, Engine } from "@tsparticles/engine";
 import { loadSlim } from "@tsparticles/slim";
 import { motion, useAnimation } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -54,7 +53,7 @@ export const SparklesCore = (props: ParticlesProps) => {
             <Particles
                 id={id || "tsparticles"}
                 className={"h-full w-full"}
-                particlesLoaded={async (container) => {
+                particlesLoaded={async () => {
                     controls.start({
                         opacity: 1,
                         transition: {

@@ -7,8 +7,10 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+import { formatPrice as formatPriceInternal } from "./currency"
+
 export function formatPrice(amount: number): string {
-  return `₹${amount.toLocaleString("en-IN")}`
+  return formatPriceInternal(amount)
 }
 
 export function formatDate(dateStr: string): string {

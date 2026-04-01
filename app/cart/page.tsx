@@ -11,10 +11,12 @@ import { useTheme } from "@/components/ThemeProvider"
 import { useStoreSettings } from "@/hooks/useStoreSettings"
 import { cn } from "@/lib/utils"
 import { FreeShippingBar } from "@/components/ui/FreeShippingBar"
-import { ChevronRight, ArrowLeft, Tag, ChevronDown, Trash2, Truck, ShieldCheck, RotateCcw } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { formatPrice, CURRENCY_SYMBOL } from "@/lib/currency"
+import { ChevronRight, ArrowLeft, Tag, ChevronDown, Trash2 } from "lucide-react"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
 export default function CartPage() {
+  const prefersReducedMotion = useReducedMotion()
   const { items, updateQuantity, removeItem } = useCart()
   const { toast } = useToast()
   const router = useRouter()
@@ -109,7 +111,7 @@ export default function CartPage() {
         type: result.coupon.discount_type,
         value: result.coupon.discount_value,
       })
-      toast({ title: "Coupon applied!", description: `You saved â‚¹${discountVal.toLocaleString("en-IN")}` })
+      toast({ title: "Coupon applied!", description: `You saved ${formatPrice(discountVal)}` })
     } catch (err) {
       toast({ title: "Error applying coupon", variant: "destructive" })
     } finally {
@@ -165,7 +167,7 @@ export default function CartPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+        <div className="grid grid-cols-1 gap-6 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_360px]">
 
           {/* Cart Items */}
           <div className="space-y-3">
@@ -194,9 +196,9 @@ export default function CartPage() {
                         </p>
                       </Link>
 
-                      {/* Size + Color */}
-                      <p className={cn("text-sm mt-0.5", isDark ? "text-white/50" : "text-black/50")}>
-                        {item.size}{item.color ? ` Â· ${item.color}` : ""}
+                      <p className={cn("mt-1 text-sm", isDark ? "text-white/60" : "text-black/60")}>
+                        {item.size}
+                        {item.color ? ` / ${item.color}` : ""}
                       </p>
 
                       {/* Preorder badge */}
@@ -236,7 +238,7 @@ export default function CartPage() {
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className={cn("w-5 h-5 flex items-center justify-center text-lg leading-none", isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")}
                       >
-                        âˆ’
+                        -
                       </button>
                       <span className={cn("text-sm font-medium w-4 text-center", isDark ? "text-white" : "text-black")}>
                         {item.quantity}
@@ -249,7 +251,7 @@ export default function CartPage() {
                       </button>
                     </div>
                     <p className={cn("font-bold", isDark ? "text-white" : "text-black")}>
-                      â‚¹{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                      {formatPrice(item.product.price * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -257,11 +259,9 @@ export default function CartPage() {
             ))}
           </div>
 
-          {/* Free Shipping Progress Bar */}
-          <FreeShippingBar subtotal={subtotal} />
-
           {/* Order Summary */}
-          <div className="lg:sticky lg:top-24 h-fit">
+          <div className="h-fit space-y-4 lg:sticky lg:top-24">
+            <FreeShippingBar subtotal={subtotal} />
             <div className={cn(card, "p-5")}>
               <h3 className={cn("font-bold text-lg mb-4", isDark ? "text-white" : "text-black")}>
                 Order Summary
@@ -271,18 +271,18 @@ export default function CartPage() {
                 <div className="flex justify-between">
                   <span className={isDark ? "text-white/60" : "text-black/60"}>Subtotal</span>
                   <span className={cn("font-medium", isDark ? "text-white" : "text-black")}>
-                    â‚¹{subtotal.toLocaleString("en-IN")}
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className={isDark ? "text-white/60" : "text-black/60"}>Shipping</span>
                   <span className={cn("font-medium", shipping === 0 ? "text-emerald-400" : isDark ? "text-white" : "text-black")}>
-                    {shipping === 0 ? "FREE" : `â‚¹${shipping}`}
+                    {shipping === 0 ? "FREE" : `${CURRENCY_SYMBOL}${shipping}`}
                   </span>
                 </div>
                 {shipping > 0 && (
                   <p className={cn("text-xs", isDark ? "text-white/35" : "text-black/35")}>
-                    Free shipping on orders above â‚¹{settings.free_shipping_above.toLocaleString("en-IN")}
+                    Free shipping on orders above {formatPrice(settings.free_shipping_above)}
                   </p>
                 )}
 
@@ -299,9 +299,11 @@ export default function CartPage() {
                   <AnimatePresence>
                     {showCoupon && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
+                        initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
+                        exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0 }}
+                        transition={prefersReducedMotion ? { duration: 0 } : undefined}
+                        layout="position"
                         className="overflow-hidden"
                       >
                         <div className="flex gap-2 mt-2.5">
@@ -330,25 +332,25 @@ export default function CartPage() {
                 <div className={cn("border-t pt-2.5", isDark ? "border-white/[0.07]" : "border-black/[0.07]")}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className={isDark ? "text-white/60" : "text-black/60"}>Subtotal</span>
-                    <span className={isDark ? "text-white" : "text-black"}>â‚¹{subtotal.toLocaleString("en-IN")}</span>
+                    <span className={isDark ? "text-white" : "text-black"}>{formatPrice(subtotal)}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-sm mb-1 text-emerald-400">
                       <span>Discount ({appliedCoupon?.code})</span>
-                      <span>âˆ’â‚¹{discount.toLocaleString("en-IN")}</span>
+                      <span>\u2212{formatPrice(discount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm mb-2.5">
                     <span className={isDark ? "text-white/60" : "text-black/60"}>Shipping</span>
                     <span className={cn(shipping === 0 ? "text-emerald-400" : isDark ? "text-white" : "text-black")}>
-                      {shipping === 0 ? "FREE" : `â‚¹${shipping}`}
+                      {shipping === 0 ? "FREE" : `${CURRENCY_SYMBOL}${shipping}`}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center pt-2">
                     <span className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>Total</span>
                     <span className="font-extrabold text-2xl text-[#e93a3a]">
-                      â‚¹{total.toLocaleString("en-IN")}
+                      {formatPrice(total)}
                     </span>
                   </div>
                 </div>
@@ -364,23 +366,17 @@ export default function CartPage() {
                 </div>
               </button>
 
+              <p className={cn("text-xs text-center mt-3", isDark ? "text-white/35" : "text-black/40")}>
+                Need the details? Read our{" "}
+                <Link href="/returns-refunds" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+                  replacements policy
+                </Link>
+                .
+              </p>
+
               <p className={cn("text-[10px] text-center mt-3", isDark ? "text-white/30" : "text-black/30")}>
                 By proceeding, you agree to our <Link href="/terms-conditions" className="underline underline-offset-2 hover:opacity-70 transition-opacity">Terms of Service</Link>
               </p>
-            </div>
-
-            {/* Trust badges */}
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {[
-                { icon: <Truck className="h-4 w-4 text-[#e93a3a]" />, label: "Fast shipping" },
-                { icon: <ShieldCheck className="h-4 w-4 text-emerald-500" />, label: "Secure payment" },
-                { icon: <RotateCcw className="h-4 w-4 text-blue-500" />, label: "10-day returns" },
-              ].map(b => (
-                <div key={b.label} className={cn("rounded-xl p-3 text-center flex flex-col items-center justify-center", isDark ? "bg-white/[0.02] border border-white/[0.06]" : "bg-white border border-black/[0.07]")}>
-                  <div className="mb-1">{b.icon}</div>
-                  <p className={cn("text-[10px] font-semibold", isDark ? "text-white/40" : "text-black/40")}>{b.label}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>

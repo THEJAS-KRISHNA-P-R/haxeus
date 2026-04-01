@@ -3,15 +3,30 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     ShoppingBag, Users, DollarSign, Clock,
-    CheckCircle, XCircle, ArrowUpRight, TrendingUp, ShoppingCart
+    CheckCircle, TrendingUp, ShoppingCart
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+
 import { cn } from "@/lib/utils";
 import {
     AdminCard,
     AdminPageHeader,
     AdminButton
 } from "@/components/admin/AdminUI";
+import { Order } from "@/types/supabase";
+
+interface DashboardStats {
+    totalRevenue: number
+    totalOrders: number
+    totalCustomers: number
+    pendingOrders: number
+    recentOrders: Partial<Order>[]
+    topProducts: Array<{
+        id: string | number
+        name: string
+        image_url: string | null
+        sales: number
+    }>
+}
 
 async function fetchDashboardStats(period: "7d" | "30d" | "90d") {
     const res = await fetch(`/api/admin/stats?period=${period}`);
@@ -21,7 +36,7 @@ async function fetchDashboardStats(period: "7d" | "30d" | "90d") {
 
 export default function DashboardClient() {
     const [period, setPeriod] = useState<"7d" | "30d" | "90d">("7d");
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -143,14 +158,14 @@ export default function DashboardClient() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--border)]">
-                                {stats.recentOrders.map((o: any) => (
+                                {stats.recentOrders.map((o) => (
                                     <tr key={o.id} className="hover:bg-[var(--bg-elevated)] transition-colors group cursor-pointer" onClick={() => (window.location.href = `/admin/orders?id=${o.id}`)}>
                                         <td className="px-6 py-4 font-mono text-[10px] text-[var(--text-3)]">
-                                            #{o.id.slice(-8).toUpperCase()}
+                                            #{o.id?.toString().slice(-8).toUpperCase()}
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-xs font-bold">{o.shipping_name || "Guest User"}</p>
-                                            <p className="text-[10px] text-[var(--text-3)]">{new Date(o.created_at).toLocaleDateString()}</p>
+                                            <p className="text-[10px] text-[var(--text-3)]">{o.created_at ? new Date(o.created_at).toLocaleDateString() : 'N/A'}</p>
                                         </td>
                                         <td className="px-6 py-4 text-xs font-black">₹{o.total_amount}</td>
                                         <td className="px-6 py-4 text-xs">
@@ -181,7 +196,7 @@ export default function DashboardClient() {
                         <p className="text-[10px] text-[var(--text-3)] font-bold mt-0.5">MOST DEMANDED PRODUCTS</p>
                     </div>
                     <div className="p-4 space-y-3 flex-1">
-                        {stats.topProducts.map((p: any, i: number) => (
+                        {stats.topProducts.map((p, i: number) => (
                             <div
                                 key={p.id}
                                 className="flex items-center gap-4 p-3 rounded-2xl bg-[var(--bg-elevated)]/50 border border-[var(--border)] hover:border-[var(--text-3)] transition-all cursor-pointer group"

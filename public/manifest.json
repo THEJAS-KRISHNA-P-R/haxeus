@@ -4,8 +4,8 @@
   "description": "Premium streetwear and fashion e-commerce store featuring unique designs and quality apparel",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#667eea",
+  "background_color": "#080808",
+  "theme_color": "#080808",
   "orientation": "portrait-primary",
   "icons": [
     {

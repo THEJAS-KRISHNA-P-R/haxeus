@@ -14,7 +14,6 @@ export interface ShuffleProps {
     tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
     textAlign?: React.CSSProperties['textAlign'];
     onShuffleComplete?: () => void;
-    shuffleTimes?: number;
     animationMode?: 'random' | 'evenodd';
     stagger?: number;
     colorFrom?: string;
@@ -35,7 +34,6 @@ const Shuffle: React.FC<ShuffleProps> = ({
     tag = 'h3',
     textAlign = 'left',
     onShuffleComplete,
-    shuffleTimes = 1,
     animationMode = 'evenodd',
     stagger = 0.02,
     triggerOnce = false,
@@ -55,7 +53,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
         }
 
         // Split text into characters
-        const chars = text.split('').map((char, i) => {
+        const chars = text.split('').map((char) => {
             const span = document.createElement('span');
             span.textContent = char === ' ' ? '\u00A0' : char;
             span.className = 'shuffle-char';
@@ -78,7 +76,6 @@ const Shuffle: React.FC<ShuffleProps> = ({
         if (triggerOnce && hasAnimated.current) return;
 
         const chars = charsRef.current;
-        const rolls = Math.max(1, shuffleTimes);
 
         // Reset positions
         gsap.set(chars, {

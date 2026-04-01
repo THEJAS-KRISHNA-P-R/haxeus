@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, Download, Eye, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
@@ -54,12 +54,31 @@ export default function OrdersContent() {
 
     async function updateOrderStatus(orderId: string, newStatus: string) {
         try {
+            const isDelivered = newStatus === "delivered";
+            const confirmDelivered = isDelivered
+                ? window.confirm("Mark this order as delivered only after India Post / post-office confirmation. Continue?")
+                : true;
+
+            if (!confirmDelivered) {
+                return;
+            }
+
+            const timestamp = new Date().toISOString();
             const { error } = await supabase
                 .from("orders")
-                .update({ status: newStatus })
+                .update({
+                    status: newStatus,
+                    delivered_at: isDelivered ? timestamp : null,
+                    updated_at: timestamp,
+                })
                 .eq("id", orderId);
             if (!error) {
-                setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+                setOrders(prev => prev.map(o => o.id === orderId ? {
+                    ...o,
+                    status: newStatus,
+                    delivered_at: isDelivered ? timestamp : null,
+                    updated_at: timestamp,
+                } : o));
             }
         } catch (err) {
             console.error("Error updating order status:", err);
@@ -141,6 +160,9 @@ export default function OrdersContent() {
                             </button>
                         ))}
                     </div>
+                    <p style={{ color: "var(--text-3)" }} className="w-full text-[10px] font-bold uppercase tracking-[0.12em]">
+                        Mark delivered only after India Post or post-office confirmation. Delivered orders unlock verified product reviews.
+                    </p>
                 </div>
 
                 {/* Table Content */}
@@ -260,7 +282,6 @@ export default function OrdersContent() {
                         const count = s === "all"
                             ? orders.length
                             : orders.filter((o) => (o.status ?? "pending") === s).length;
-                        const config = STATUS_CONFIG[s] || { color: "var(--text-3)" };
                         const isActive = filter === s;
 
                         return (

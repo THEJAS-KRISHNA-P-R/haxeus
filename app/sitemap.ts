@@ -1,56 +1,49 @@
-import { MetadataRoute } from "next"
-import { createServerClient } from "@supabase/ssr"
-import { JOURNAL_POSTS } from "@/lib/journal"
+import { MetadataRoute } from 'next'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.haxeus.in"
-
-const STATIC_PAGES: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
-    { url: `${SITE_URL}/products`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${SITE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${SITE_URL}/journal`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
-    { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/size-guide`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/shipping-policy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/privacy-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${SITE_URL}/returns-refunds`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${SITE_URL}/terms-conditions`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-]
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://haxeus.in'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    let productPages: MetadataRoute.Sitemap = []
+  const supabase = getSupabaseAdmin()
 
-    try {
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            { cookies: { getAll: () => [] } }
-        )
+  // 1. Fetch all products
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, updated_at')
 
-        const { data: products } = await supabase
-            .from("products")
-            .select("id, updated_at")
-            .eq("is_active", true)
-            .order("updated_at", { ascending: false })
+  // 2. Define static routes
+  const staticRoutes = [
+    '',
+    '/products',
+    '/about',
+    '/blog',
+    '/contact',
+    '/shipping-returns',
+    '/privacy-policy',
+    '/terms-of-service',
+  ].map((route) => ({
+    url: `${SITE_URL}${route}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily' as const,
+    priority: route === '' ? 1 : 0.8,
+  }))
 
-        if (products?.length) {
-            productPages = products.map((product) => ({
-                url: `${SITE_URL}/products/${product.id}`,
-                lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
-                changeFrequency: "weekly" as const,
-                priority: 0.8,
-            }))
-        }
-    } catch (err) {
-        console.error("[sitemap] Failed to fetch products:", err)
-    }
+  // 3. Map products to sitemap entries
+  const productRoutes = (products || []).map((product) => ({
+    url: `${SITE_URL}/products/${product.id}`,
+    lastModified: new Date(product.updated_at || Date.now()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }))
 
-    const journalPages: MetadataRoute.Sitemap = JOURNAL_POSTS.map((post) => ({
-        url: `${SITE_URL}/journal/${post.slug}`,
-        lastModified: new Date(post.publishedAt),
-        changeFrequency: "monthly" as const,
-        priority: 0.5,
-    }))
+  // 4. Map blog posts (Currently static map from blog/page.tsx logic)
+  const blogSlugs = ['indian-streetwear-brands-2026'] // Sync with POST_MAP
+  const blogRoutes = blogSlugs.map((slug) => ({
+    url: `${SITE_URL}/blog/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }))
 
-    return [...STATIC_PAGES, ...productPages, ...journalPages]
+  return [...staticRoutes, ...productRoutes, ...blogRoutes]
 }

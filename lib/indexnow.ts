@@ -5,7 +5,7 @@
 //   import { notifySearchEngines, notifyProductUpdate } from '@/lib/indexnow'
 //   await notifySearchEngines([`https://haxeus.in/products/${product.slug}`])
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in").replace(/\/$/, "")
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY
 
 const ENGINES = [
@@ -14,27 +14,34 @@ const ENGINES = [
 ]
 
 export async function notifySearchEngines(urls: string[]): Promise<void> {
-    if (!INDEXNOW_KEY) return // Silently skip if not configured
+    if (!INDEXNOW_KEY) return 
 
-    const payload = {
-        host: SITE_URL.replace("https://", ""),
-        key: INDEXNOW_KEY,
-        keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
-        urlList: urls.slice(0, 10_000), // IndexNow max
-    }
+    try {
+        const url = new URL(SITE_URL)
+        const payload = {
+            host: url.hostname,
+            key: INDEXNOW_KEY,
+            keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
+            urlList: urls.slice(0, 10_000),
+        }
 
-    // Fire-and-forget — don't block product saves on SEO ping
-    void Promise.allSettled(
-        ENGINES.map((engine) =>
-            fetch(engine, {
-                method: "POST",
-                headers: { "Content-Type": "application/json; charset=utf-8" },
-                body: JSON.stringify(payload),
-            }).catch(() => { })
+        // Fire-and-forget — don't block product saves on SEO ping
+        void Promise.allSettled(
+            ENGINES.map((engine) =>
+                fetch(engine, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json; charset=utf-8" },
+                    body: JSON.stringify(payload),
+                }).catch((err: unknown) => {
+                    console.error(`IndexNow ping to ${engine} failed:`, err instanceof Error ? err.message : String(err))
+                })
+            )
         )
-    )
+    } catch (err: unknown) {
+        console.error('IndexNow notification failed:', err instanceof Error ? err.message : String(err))
+    }
 }
 
-export async function notifyProductUpdate(slugOrId: string): Promise<void> {
+export async function notifyProductUpdate(slugOrId: string | number): Promise<void> {
     await notifySearchEngines([`${SITE_URL}/products/${slugOrId}`])
 }

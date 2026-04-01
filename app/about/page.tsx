@@ -5,9 +5,9 @@ export const metadata: Metadata = {
   title: "About HAXEUS",
   description:
     "The story behind HAXEUS — premium artistic streetwear from India. Born from a rebellion against boring merch.",
-  alternates: { canonical: "https://www.haxeus.in/about" },
+  alternates: { canonical: "https://haxeus.in/about" },
   openGraph: {
-    url: "https://www.haxeus.in/about",
+    url: "https://haxeus.in/about",
     title: "About HAXEUS | Premium Artistic Streetwear India",
     description:
       "The story behind HAXEUS — premium artistic streetwear from India. Born from a rebellion against boring merch.",

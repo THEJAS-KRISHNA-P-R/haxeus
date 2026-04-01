@@ -98,11 +98,9 @@ export default function DarkVeil({
     const ref = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         const canvas = ref.current as HTMLCanvasElement;
-        const parent = canvas.parentElement as HTMLElement;
 
         // Detect mobile for performance optimization
         const isMobile = window.innerWidth <= 768;
-        const effectiveResolution = isMobile ? Math.min(resolutionScale, 0.5) : resolutionScale;
 
         const renderer = new Renderer({
             dpr: Math.min(window.devicePixelRatio, isMobile ? 1 : 2),

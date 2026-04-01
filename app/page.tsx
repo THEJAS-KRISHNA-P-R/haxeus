@@ -1,11 +1,15 @@
 import { createClient } from "@/lib/supabase-server"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
+import { getActiveDrop } from "@/lib/drops"
 import { HomePageClient } from "@/components/home/HomePageClient"
+import { TrustSignals } from "@/components/TrustSignals"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
 import { deepMerge } from "@/lib/deep-merge"
-import type { Product, ProductImage } from "@/lib/supabase"
+import type { Product, ProductImage } from "@/types/supabase"
 import type { HomepageConfig } from "@/types/homepage"
+import { SupabaseClient } from "@supabase/supabase-js"
 import type { Metadata } from "next"
+import { CURRENCY_SYMBOL } from "@/lib/currency"
 
 // Force dynamic since we're using cookies in createClient for the homepage config
 export const dynamic = "force-dynamic"
@@ -14,17 +18,17 @@ export const revalidate = 0
 export const metadata: Metadata = {
   title: "Premium Artistic Streetwear India",
   description:
-    "Shop limited-drop graphic tees and oversized streetwear. Artistic designs made in India. Free shipping above ₹999.",
-  alternates: { canonical: "https://www.haxeus.in" },
+    `Shop limited-drop graphic tees and oversized streetwear. Artistic designs made in India. Free shipping above ${CURRENCY_SYMBOL}999.`,
+  alternates: { canonical: "https://haxeus.in" },
   openGraph: {
-    url: "https://www.haxeus.in",
+    url: "https://haxeus.in",
     title: "HAXEUS — Premium Artistic Streetwear India",
     description:
-      "Shop limited-drop graphic tees and oversized streetwear. Artistic designs made in India. Free shipping above ₹999.",
+      `Shop limited-drop graphic tees and oversized streetwear. Artistic designs made in India. Free shipping above ${CURRENCY_SYMBOL}999.`,
   },
 }
 
-async function getHomepageConfig(supabase: any): Promise<HomepageConfig> {
+async function getHomepageConfig(supabase: SupabaseClient): Promise<HomepageConfig> {
   try {
     const { data, error } = await supabase
       .from("store_settings")
@@ -43,7 +47,7 @@ async function getHomepageConfig(supabase: any): Promise<HomepageConfig> {
   return DEFAULT_HOMEPAGE_CONFIG
 }
 
-async function getPreorderItems(supabase: any): Promise<Product[]> {
+async function getPreorderItems(supabase: SupabaseClient): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from("products")
@@ -59,10 +63,13 @@ async function getPreorderItems(supabase: any): Promise<Product[]> {
 
     if (error) throw error
     
+    const products = data as any[] | null
+    
     // Map images
-    return (data || []).map((product: any) => {
-      const primaryImg = product.product_images?.find((img: any) => img.is_primary)
-      const firstImg = product.product_images?.[0]
+    return (products || []).map((product) => {
+      const images = product.product_images as ProductImage[] | undefined
+      const primaryImg = images?.find((img) => img.is_primary)
+      const firstImg = images?.[0]
       const galleryImage = primaryImg?.image_url || firstImg?.image_url
 
       return {
@@ -76,7 +83,7 @@ async function getPreorderItems(supabase: any): Promise<Product[]> {
   }
 }
 
-async function getFeaturedProducts(supabase: any, config: HomepageConfig): Promise<Product[]> {
+async function getFeaturedProducts(supabase: SupabaseClient, config: HomepageConfig): Promise<Product[]> {
   try {
     const mode = config.featured_products.selection_mode
     const count = config.featured_products.count ?? 3
@@ -109,10 +116,13 @@ async function getFeaturedProducts(supabase: any, config: HomepageConfig): Promi
     const { data, error } = await query
     if (error) throw error
 
-    if (data && data.length > 0) {
-      return (data as any[]).map((product) => {
-        const primaryImg = product.product_images?.find((img: any) => img.is_primary)
-        const firstImg = product.product_images?.[0]
+    const products = data as any[] | null
+
+    if (products && products.length > 0) {
+      return products.map((product) => {
+        const images = product.product_images as ProductImage[] | undefined
+        const primaryImg = images?.find((img) => img.is_primary)
+        const firstImg = images?.[0]
         const galleryImage = primaryImg?.image_url || firstImg?.image_url
 
         return {
@@ -134,20 +144,26 @@ export default async function HomePage() {
   // Parallel fetching
   const configPromise = getHomepageConfig(supabaseAdmin)
   const preordersPromise = getPreorderItems(supabase)
+  const activeDropPromise = getActiveDrop()
   
-  const [config, preorderItems] = await Promise.all([
+  const [config, preorderItems, activeDrop] = await Promise.all([
     configPromise,
-    preordersPromise
+    preordersPromise,
+    activeDropPromise,
   ])
 
   // Featured products depend on config
   const featuredProducts = await getFeaturedProducts(supabase, config)
 
   return (
-    <HomePageClient 
-      config={config}
-      featuredProducts={featuredProducts}
-      preorderItems={preorderItems}
-    />
+    <div className="flex flex-col gap-0">
+      <HomePageClient 
+        config={config}
+        featuredProducts={featuredProducts}
+        preorderItems={preorderItems}
+        activeDrop={activeDrop}
+      />
+      <TrustSignals />
+    </div>
   )
 }

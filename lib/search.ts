@@ -9,6 +9,12 @@ import { supabase, Product } from './supabase'
  * - Relevance scoring
  */
 
+export interface SearchFacets {
+  categories: string[]
+  sizes: string[]
+  priceRange: { min: number; max: number }
+}
+
 export async function searchProducts(
   query: string,
   options?: {
@@ -174,7 +180,7 @@ export async function advancedProductSearch(
   query: string,
   filters: ProductFilters,
   pagination: { limit: number; offset: number }
-): Promise<{ products: any[]; totalCount: number; facets: any }> {
+): Promise<{ products: Product[]; totalCount: number; facets: SearchFacets }> {
   let dbQuery = supabase.from('products_with_ratings').select('*', { count: 'exact' })
 
   // Text search
@@ -230,20 +236,28 @@ export async function advancedProductSearch(
 
   if (error) {
     console.error('Error in advanced search:', error)
-    return { products: [], totalCount: 0, facets: {} }
+    return { 
+      products: [], 
+      totalCount: 0, 
+      facets: { categories: [], sizes: [], priceRange: { min: 0, max: 0 } } 
+    }
   }
 
   // Calculate facets (for filter UI)
   const facets = await calculateFacets(query, filters)
 
   return {
-    products: data || [],
+    products: (data || []).map(p => ({
+      ...p,
+      averageRating: p.average_rating || 5, // Map view column to interface property
+      total_stock: p.total_stock ?? 0,
+    })),
     totalCount: count || 0,
     facets
   }
 }
 
-async function calculateFacets(query: string, appliedFilters: ProductFilters) {
+async function calculateFacets(query: string, _appliedFilters: ProductFilters): Promise<SearchFacets> {
   // Get all matching products (without current filters)
   let baseQuery = supabase.from('products').select('category, price, available_sizes')
 
@@ -255,7 +269,7 @@ async function calculateFacets(query: string, appliedFilters: ProductFilters) {
 
   const { data } = await baseQuery
 
-  if (!data) return {}
+  if (!data) return { categories: [], sizes: [], priceRange: { min: 0, max: 0 } }
 
   // Calculate available facets
   const categories = new Set<string>()

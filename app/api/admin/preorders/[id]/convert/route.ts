@@ -51,7 +51,7 @@ export async function POST(
     }
 
     // 3. Create inventory
-    const inventoryToInsert = preorderItem.sizes_available.map(size => ({
+    const inventoryToInsert = preorderItem.sizes_available.map((size: string) => ({
         product_id: newProduct.id,
         size,
         stock_quantity: initial_stock_per_size,

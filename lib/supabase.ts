@@ -5,15 +5,42 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
-// Database Types
-
 // Product Image (Gallery support)
 export interface ProductImage {
-  id: string
+  id: string | number
   product_id: number
   image_url: string
   display_order: number
   is_primary: boolean
+  alt_text?: string
+  created_at?: string
+}
+
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned' | 'refunded'
+export type PaymentStatus = 'pending' | 'authorized' | 'paid' | 'failed' | 'refunded'
+
+export interface UserProfile {
+  id: string
+  full_name: string | null
+  email?: string | null
+  avatar_url: string | null
+  loyalty_points: number
+  loyalty_tier: 'bronze' | 'silver' | 'gold' | 'platinum'
+  created_at?: string
+  updated_at?: string
+}
+
+export interface UserAddress {
+  id: string
+  user_id: string
+  full_name: string
+  line1: string
+  line2?: string
+  city: string
+  state: string
+  pincode: string
+  phone: string
+  is_default: boolean
   created_at?: string
 }
 
@@ -22,31 +49,61 @@ export interface Product {
   name: string
   description: string
   price: number
+  compare_price?: number
   // Legacy fields (deprecated - use images instead)
   front_image?: string
   back_image?: string
   // New gallery-based images
   images?: ProductImage[]
+  product_images?: ProductImage[] // Alias often used in queries
   // Size-specific inventory
   inventory?: ProductInventory[]
+  product_inventory?: ProductInventory[] // Actual table name link
   available_sizes: string[]
   colors?: string[]
   total_stock: number
   category: string | null
+  category_id?: number
   slug?: string
+  tags?: string[]
   is_active?: boolean
+  is_featured?: boolean
+  avg_rating?: number
+  review_count?: number
   created_at?: string
   updated_at?: string
-  
-  // Preorder fields
+  // Preorder support
   is_preorder?: boolean
-  preorder_status?: "active" | "sold_out" | "stopped" | null
-  expected_date?: string | null
-  max_preorders?: number | null
+  preorder_status?: 'upcoming' | 'active' | 'shipping' | 'completed' | 'stopped' | 'sold_out'
+  expected_date?: string
+  max_preorders?: number
   preorder_count?: number
-  
-  // Custom label/tagline for product page
-  tagline?: string | null
+  // Added relation fields for nested queries
+  product_variants?: ProductVariant[]
+}
+
+export interface ProductVariant {
+  id: string
+  product_id: number
+  size: string
+  color?: string
+  sku?: string
+  price_override?: number
+  stock_quantity: number
+  created_at?: string
+}
+
+export interface ProductInventory {
+  id: string
+  product_id: number
+  size: string
+  stock_quantity: number
+  reserved_quantity: number
+  sold_quantity: number
+  low_stock_threshold: number
+  color?: string
+  sku?: string
+  updated_at?: string
 }
 
 export interface CartItem {
@@ -64,88 +121,65 @@ export interface Order {
   id: string
   user_id: string
   total_amount: number
-  status: string
-  shipping_address?: any
-  shipping_name?: string
-  shipping_email?: string
-  order_number?: string
-  coupon_code?: string
-  discount_amount?: number
-  loyalty_points_used?: number
-  loyalty_points_earned?: number
-  tracking_number?: string
-  shipping_carrier?: string
-  estimated_delivery_date?: string
-  delivered_at?: string
-  payment_status?: string
+  subtotal_amount?: number
+  shipping_amount?: number
+  tax_amount?: number
+  status: OrderStatus
+  shipping_name: string
+  shipping_email: string
+  shipping_address: {
+    line1: string
+    line2?: string
+    city: string
+    state: string
+    pincode: string
+    phone: string
+  }
+  payment_status: PaymentStatus
+  payment_method?: string
   razorpay_order_id?: string
   razorpay_payment_id?: string
-  payment_verified_at?: string
-  payment_method?: string
+  tracking_id?: string
+  tracking_url?: string
+  estimated_delivery?: string
+  discount_code?: string
+  discount_amount?: number
   created_at?: string
   updated_at?: string
+  delivered_at?: string
+  tracking_number?: string
+  order_items?: OrderItem[]
 }
 
 export interface OrderItem {
   id: string
   order_id: string
-  product_id: number | null
+  product_id: number
   size: string
   quantity: number
   price: number
-  product_name?: string | null
-  product_image?: string | null
   created_at?: string
   product?: Product
-}
-
-export interface UserAddress {
-  id: string
-  user_id: string
-  full_name: string
-  phone: string
-  address_line1: string
-  address_line2?: string
-  city: string
-  state: string
-  pincode: string
-  is_default: boolean
-  created_at?: string
-  updated_at?: string
+  product_name?: string | null
+  product_image?: string | null
 }
 
 export interface WishlistItem {
   id: string
   user_id: string
   product_id: number
-  notify_price_drop?: boolean
-  notify_back_in_stock?: boolean
-  price_at_addition?: number
-  created_at?: string
+  added_at?: string
   product?: Product
 }
 
-export interface ProductInventory {
-  id: string
-  product_id: number
-  size: string
-  color: string
-  stock_quantity: number
-  low_stock_threshold: number
-  reserved_quantity: number
-  sold_quantity: number
-  created_at?: string
-  updated_at?: string
-}
-
-export interface ProductReview {
+export interface Review {
   id: string
   product_id: number
   user_id: string
-  order_id?: string
   rating: number
   title?: string
   comment?: string
+  body?: string // Alias for comment used in services
   verified_purchase: boolean
   helpful_count: number
   not_helpful_count: number
@@ -158,6 +192,8 @@ export interface ProductReview {
   }
   images?: ReviewImage[]
 }
+
+export type ProductReview = Review
 
 export interface ReviewImage {
   id: string
@@ -182,6 +218,15 @@ export interface Coupon {
   created_at?: string
 }
 
+export interface CouponUsage {
+  id: string
+  coupon_id: string
+  user_id: string
+  order_id: string
+  discount_amount: number
+  created_at?: string
+}
+
 export interface LoyaltyPoints {
   id: string
   user_id: string
@@ -190,6 +235,16 @@ export interface LoyaltyPoints {
   tier: 'bronze' | 'silver' | 'gold' | 'platinum'
   created_at?: string
   updated_at?: string
+}
+
+export interface LoyaltyTransaction {
+  id: string
+  user_id: string
+  order_id?: string
+  points: number
+  transaction_type: 'earned' | 'redeemed' | 'expired' | 'adjusted'
+  description?: string
+  created_at?: string
 }
 
 export interface ReturnRequest {
@@ -203,8 +258,14 @@ export interface ReturnRequest {
   admin_notes?: string
   created_at?: string
   updated_at?: string
-  order?: Order
+  order?: Partial<Order>
   items?: ReturnItem[]
+  orders?: Partial<Order>
+  return_items?: (ReturnItem & { 
+    order_items?: OrderItem & { 
+      products?: Pick<Product, 'name' | 'front_image'> 
+    } 
+  })[]
 }
 
 export interface ReturnItem {
@@ -214,15 +275,20 @@ export interface ReturnItem {
   quantity: number
   exchange_size?: string
   created_at?: string
+  order_items?: OrderItem & { 
+    products?: Pick<Product, 'name' | 'front_image'> 
+  }
 }
 
 export interface NewsletterSubscriber {
   id: string
   email: string
+  first_name?: string
   user_id?: string
   subscribed: boolean
   subscription_source?: string
   created_at?: string
+  subscribed_at?: string
   unsubscribed_at?: string
 }
 

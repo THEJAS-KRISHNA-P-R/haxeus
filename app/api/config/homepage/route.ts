@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { redis, cached } from "@/lib/redis";
+import { NextRequest, NextResponse } from "next/server";
+import { cached } from "@/lib/redis";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
@@ -20,7 +20,7 @@ async function getHomepageConfig() {
   return { ...DEFAULT_HOMEPAGE_CONFIG, ...data.value };
 }
 
-export async function GET() {
+export async function GET(_req: NextRequest) {
   try {
     const config = await cached(
       "config:homepage",

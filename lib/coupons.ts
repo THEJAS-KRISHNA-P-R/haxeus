@@ -3,6 +3,8 @@ import "server-only"
 import { Coupon } from './supabase'
 import { getSupabaseAdmin } from "./supabase-admin"
 
+import { CURRENCY_SYMBOL } from "./currency"
+
 /**
  * Coupons & Discounts System
  * - Percentage and fixed discounts
@@ -54,7 +56,7 @@ export async function validateCoupon(
   if (coupon.min_purchase_amount && cartTotal < coupon.min_purchase_amount) {
     return {
       valid: false,
-      error: `Minimum purchase of ₹${coupon.min_purchase_amount} required`
+      error: `Minimum purchase of ${CURRENCY_SYMBOL}${coupon.min_purchase_amount} required`
     }
   }
 
@@ -65,7 +67,7 @@ export async function validateCoupon(
     .eq('coupon_id', coupon.id)
     .eq('user_id', userId)
 
-  if (previousUsage && previousUsage.length > 0) {
+  if (previousUsage && (previousUsage as any[]).length > 0) {
     return { valid: false, error: 'You have already used this coupon' }
   }
 
@@ -121,7 +123,7 @@ export async function getActiveCoupons(): Promise<Coupon[]> {
     return []
   }
 
-  return data || []
+  return (data as unknown as Coupon[]) || []
 }
 
 export async function createCoupon(coupon: {
@@ -167,7 +169,7 @@ export async function createCoupon(coupon: {
     return { success: false, error: 'Failed to create coupon' }
   }
 
-  return { success: true, couponId: data.id }
+  return { success: true, couponId: (data as any).id }
 }
 
 export async function deactivateCoupon(couponId: string): Promise<boolean> {
@@ -197,7 +199,8 @@ export async function getCouponUsageStats(couponId: string) {
     return null
   }
 
-  const totalDiscount = usages.reduce((sum, u) => sum + u.discount_amount, 0)
+  const usageData = usages as any[]
+  const totalDiscount = usageData.reduce((sum, u) => sum + u.discount_amount, 0)
 
   return {
     code: coupon.code,

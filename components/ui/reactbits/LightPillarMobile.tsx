@@ -7,12 +7,10 @@ interface LightPillarProps {
     bottomColor?: string;
     intensity?: number;
     rotationSpeed?: number;
-    interactive?: boolean;
     className?: string;
     glowAmount?: number;
     pillarWidth?: number;
     pillarHeight?: number;
-    noiseIntensity?: number;
     mixBlendMode?: React.CSSProperties['mixBlendMode'];
     pillarRotation?: number;
     quality?: 'low' | 'medium' | 'high';
@@ -23,12 +21,10 @@ const LightPillarMobile: React.FC<LightPillarProps> = ({
     bottomColor = '#000000',
     intensity = 1.0,
     rotationSpeed = 0.1,
-    interactive = false,
     className = '',
     glowAmount = 0.004,
     pillarWidth = 9.0,
     pillarHeight = 0.6,
-    noiseIntensity = 0.0,
     mixBlendMode = 'screen',
     pillarRotation = 55,
     quality = 'high'

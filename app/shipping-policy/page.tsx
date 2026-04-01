@@ -4,6 +4,7 @@ import { useTheme } from "@/components/ThemeProvider"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { useStoreSettings } from "@/hooks/useStoreSettings"
+import { CURRENCY_SYMBOL } from "@/lib/currency"
 
 function buildSections(settings: { free_shipping_above: number; shipping_rate: number }) {
   const fmt = (n: number) => n.toLocaleString("en-IN")
@@ -25,7 +26,7 @@ function buildSections(settings: { free_shipping_above: number; shipping_rate: n
     {
         title: "Shipping Charges",
         content: [
-            { subtitle: "Standard Shipping", text: `A flat shipping fee of ₹${fmt(settings.shipping_rate)} is charged on all orders below ₹${fmt(settings.free_shipping_above)}. Orders above ₹${fmt(settings.free_shipping_above)} qualify for free standard shipping across India.` },
+            { subtitle: "Standard Shipping", text: `A flat shipping fee of ${CURRENCY_SYMBOL}${fmt(settings.shipping_rate)} is charged on all orders below ${CURRENCY_SYMBOL}${fmt(settings.free_shipping_above)}. Orders above ${CURRENCY_SYMBOL}${fmt(settings.free_shipping_above)} qualify for free standard shipping across India.` },
             { subtitle: "No Hidden Fees", text: "The shipping charge displayed at checkout is final. There are no additional customs, handling, or packaging fees. What you see is what you pay." },
         ],
     },

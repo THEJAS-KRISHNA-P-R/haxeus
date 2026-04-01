@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
 import { CheckCircle, Package, ArrowRight } from "lucide-react"
+import { gaCommerceEvents } from "@/lib/ga-events"
 
 export default function OrderSuccessPage() {
     const { theme } = useTheme()
@@ -34,12 +35,27 @@ export default function OrderSuccessPage() {
 
             const { data } = await supabase
                 .from("orders")
-                .select("id, total_amount, status, created_at, order_items(quantity, price, product:products(name))")
+                .select("id, total_amount, status, created_at, order_items(product_id, quantity, price, product:products(name, category))")
                 .eq("id", orderId)
                 .eq("user_id", user.id) // Explicit ownership — don't rely on RLS alone
                 .single()
 
-            setOrder(data)
+            if (data) {
+                setOrder(data)
+                
+                // GA4 Tracking
+                gaCommerceEvents.purchase(
+                    data.id,
+                    data.total_amount,
+                    data.order_items.map((item: any) => ({
+                        id: item.product_id,
+                        name: item.product?.name || "Product",
+                        price: item.price,
+                        quantity: item.quantity,
+                        category: item.product?.category || "Streetwear"
+                    }))
+                )
+            }
             setLoading(false)
         }
 

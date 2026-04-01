@@ -58,7 +58,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   props: { params: Promise<{ id: string }> }
 ) {
   const { id } = await props.params

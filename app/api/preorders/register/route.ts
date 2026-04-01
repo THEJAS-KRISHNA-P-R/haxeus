@@ -34,12 +34,12 @@ export async function POST(request: Request) {
     }
 
     // 2. Check for duplicate registration
-    const { data: existingReg, error: existingRegError } = await supabase
-        .from("preorder_registrations")
-        .select("id")
-        .eq("product_id", product_id)
-        .eq("email", email)
-        .maybeSingle();
+    const { data: existingReg } = await supabase
+      .from("preorder_registrations")
+      .select("id")
+      .eq("product_id", product_id)
+      .eq("email", email)
+      .maybeSingle();
 
     if (existingReg) {
         return NextResponse.json({ error: "already_registered" }, { status: 409 });

@@ -10,13 +10,25 @@ const PRECACHE_ASSETS = [
   '/offline',
   '/manifest.json',
   '/favi/favicon-96x96.png',
-  '/favi/apple-touch-icon.png'
+  '/favi/apple-touch-icon.png',
+  '/favi/web-app-manifest-192x192.png',
+  '/favi/web-app-manifest-512x512.png'
 ]
 
-// 1. Install — Precache core UI
+// 1. Install — Precache core UI with individualized error handling
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      // Use map to attempt adding each separately, so one 404 doesn't break everything
+      return Promise.allSettled(
+        PRECACHE_ASSETS.map((url) => 
+          fetch(url).then((response) => {
+            if (!response.ok) throw new Error(`Offline asset ${url} failed: ${response.status}`)
+            return cache.put(url, response)
+          })
+        )
+      )
+    })
   )
   self.skipWaiting()
 })
@@ -68,33 +80,46 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // C. Page/API Strategy (Network First)
+  // C. Page/API Strategy (Network First with fallback)
   event.respondWith(
     fetch(request)
       .then((response) => {
+        // Cache success navigation requests
         if (response.ok && request.mode === 'navigate') {
           const copy = response.clone()
           caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
         }
         return response
       })
-      .catch(() => {
-        return caches.match(request).then((cached) => {
-          if (cached) return cached
-          if (request.mode === 'navigate') return caches.match('/offline')
-          return new Response('Offline', { status: 503 })
-        })
+      .catch(async () => {
+        const cached = await caches.match(request)
+        if (cached) return cached
+
+        if (request.mode === 'navigate') {
+          const offlinePage = await caches.match('/offline')
+          return offlinePage || new Response('HAXEUS: Currently Offline', { 
+            status: 503, 
+            headers: { 'Content-Type': 'text/html' } 
+          })
+        }
+
+        return new Response('Offline', { status: 503 })
       })
   )
 })
 
-// Cache trimming helper
+// Cache trimming helper — non-recursive loop for stability
 async function trimCache(cacheName, maxItems) {
-  const cache = await caches.open(cacheName)
-  const keys = await cache.keys()
-  if (keys.length > maxItems) {
-    await cache.delete(keys[0])
-    trimCache(cacheName, maxItems)
+  try {
+    const cache = await caches.open(cacheName)
+    const keys = await cache.keys()
+    if (keys.length > maxItems) {
+      for (let i = 0; i < keys.length - maxItems; i++) {
+        await cache.delete(keys[i])
+      }
+    }
+  } catch (err) {
+    console.error('Cache trim failed:', err)
   }
 }
 

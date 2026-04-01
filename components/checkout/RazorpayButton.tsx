@@ -2,12 +2,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-declare global {
-    interface Window {
-        Razorpay: any;
-    }
-}
-
 interface Props {
     amount: number; // in INR
     orderId: string; // your internal order ID

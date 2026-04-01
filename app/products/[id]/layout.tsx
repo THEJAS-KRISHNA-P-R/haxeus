@@ -66,10 +66,9 @@ async function getProductSeoRecord(id: string): Promise<ProductSeoRecord | null>
 async function getRatingSummary(productId: number) {
   const supabase = createSupabaseServerClient()
   const { data, error } = await supabase
-    .from("product_reviews")
+    .from("reviews")
     .select("rating")
     .eq("product_id", productId)
-    .eq("is_approved", true)
 
   if (error || !data || data.length === 0) {
     return null
@@ -177,7 +176,7 @@ export default async function ProductLayout({
         )}
         <p>
           Premium oversized streetwear from HAXEUS. Made with 240gsm heavyweight cotton. Ships across India within 48 hours.
-          10-day replacement policy on defective items. Free shipping available on qualifying orders.
+          10-day replacement coverage for eligible damaged or incorrect items. Free shipping available on qualifying orders.
         </p>
       </div>
       <BreadcrumbJsonLd

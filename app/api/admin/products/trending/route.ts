@@ -25,20 +25,29 @@ async function getTrendingProducts(supabaseAdmin: any) {
     return [];
   }
     
-  const productSales = data.reduce((acc, item) => {
+  interface SalesItem {
+    product_id: string;
+    name: string;
+    price: number;
+    front_image: string;
+    units_sold: number;
+  }
+
+  const productSales = data.reduce((acc: Record<string, SalesItem>, item: any) => {
     if (!item.products || !item.product_id) return acc;
+    const product = item.products as any;
     acc[item.product_id] = acc[item.product_id] || {
       product_id: item.product_id,
-      name: (item.products as any)?.name,
-      price: (item.products as any)?.price,
-      front_image: (item.products as any)?.front_image,
+      name: product.name,
+      price: product.price,
+      front_image: product.front_image,
       units_sold: 0,
     };
-    acc[item.product_id].units_sold += item.quantity;
+    acc[item.product_id].units_sold += item.quantity || 0;
     return acc;
-  }, {} as any);
+  }, {});
 
-  const sortedProducts = Object.values(productSales).sort((a: any, b: any) => b.units_sold - a.units_sold);
+  const sortedProducts = (Object.values(productSales) as SalesItem[]).sort((a, b) => b.units_sold - a.units_sold);
 
   return sortedProducts.slice(0, 6);
 }

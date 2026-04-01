@@ -6,6 +6,8 @@
  * - Back in stock notifications
  */
 
+import { CURRENCY_SYMBOL } from "../currency"
+
 export interface EmailTemplate {
   subject: string
   html: string
@@ -66,7 +68,7 @@ export function abandonedCartEmail1(data: {
                   <td style="padding:16px;">
                     <h3 style="margin:0 0 8px;color:#1a1a1a;font-size:16px;font-weight:600;">${item.name}</h3>
                     <p style="margin:0;color:#666;font-size:14px;">Size: ${item.size} • Qty: ${item.quantity}</p>
-                    <p style="margin:8px 0 0;color:#667eea;font-size:18px;font-weight:700;">₹${item.price.toLocaleString()}</p>
+                    <p style="margin:8px 0 0;color:#667eea;font-size:18px;font-weight:700;">${CURRENCY_SYMBOL}${item.price.toLocaleString()}</p>
                   </td>
                 </tr>
               </table>
@@ -79,7 +81,7 @@ export function abandonedCartEmail1(data: {
                     <table width="100%">
                       <tr>
                         <td style="color:#666;font-size:16px;">Cart Total:</td>
-                        <td align="right" style="color:#1a1a1a;font-size:20px;font-weight:700;">₹${data.cartTotal.toLocaleString()}</td>
+                        <td align="right" style="color:#1a1a1a;font-size:20px;font-weight:700;">${CURRENCY_SYMBOL}${data.cartTotal.toLocaleString()}</td>
                       </tr>
                     </table>
                   </td>
@@ -98,7 +100,7 @@ export function abandonedCartEmail1(data: {
               </table>
               
               <p style="margin:24px 0 0;color:#999;font-size:14px;text-align:center;">
-                🚚 Free shipping on orders above ₹999 | 💯 100% Authentic
+                🚚 Free shipping on orders above ${CURRENCY_SYMBOL}999 | 💯 100% Authentic
               </p>
             </td>
           </tr>
@@ -120,7 +122,7 @@ export function abandonedCartEmail1(data: {
 </body>
 </html>
     `,
-    text: `Hey ${data.customerName}!\n\nYou left some items in your cart:\n\n${data.cartItems.map(item => `${item.name} - Size ${item.size} - ₹${item.price}`).join('\n')}\n\nTotal: ₹${data.cartTotal}\n\nComplete your order: ${data.checkoutUrl}`
+    text: `Hey ${data.customerName}!\n\nYou left some items in your cart:\n\n${data.cartItems.map(item => `${item.name} - Size ${item.size} - ${CURRENCY_SYMBOL}${item.price}`).join('\n')}\n\nTotal: ${CURRENCY_SYMBOL}${data.cartTotal}\n\nComplete your order: ${data.checkoutUrl}`
   }
 }
 
@@ -168,7 +170,7 @@ export function abandonedCartEmail2(data: {
               </table>
               
               <p style="margin:0 0 32px;color:#666;font-size:16px;">
-                Save ₹${Math.round(data.cartTotal * 0.1)} on your order of ₹${data.cartTotal.toLocaleString()}
+                Save ${CURRENCY_SYMBOL}${Math.round(data.cartTotal * 0.1)} on your order of ${CURRENCY_SYMBOL}${data.cartTotal.toLocaleString()}
               </p>
               
               <!-- CTA -->
@@ -189,7 +191,7 @@ export function abandonedCartEmail2(data: {
 </body>
 </html>
     `,
-    text: `Hey ${data.customerName}!\n\nSpecial offer: 10% OFF your cart!\n\nUse code: ${data.discountCode}\nSave ₹${Math.round(data.cartTotal * 0.1)}\n\nCheckout now: ${data.checkoutUrl}\n\nOffer expires in 24 hours!`
+    text: `Hey ${data.customerName}!\n\nSpecial offer: 10% OFF your cart!\n\nUse code: ${data.discountCode}\nSave ${CURRENCY_SYMBOL}${Math.round(data.cartTotal * 0.1)}\n\nCheckout now: ${data.checkoutUrl}\n\nOffer expires in 24 hours!`
   }
 }
 
@@ -231,10 +233,10 @@ export function priceDropEmail(data: {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
                 <tr>
                   <td align="center">
-                    <p style="margin:0 0 8px;color:#999;font-size:18px;text-decoration:line-through;">₹${data.oldPrice.toLocaleString()}</p>
-                    <p style="margin:0 0 8px;color:#667eea;font-size:36px;font-weight:700;">₹${data.newPrice.toLocaleString()}</p>
+                    <p style="margin:0 0 8px;color:#999;font-size:18px;text-decoration:line-through;">${CURRENCY_SYMBOL}${data.oldPrice.toLocaleString()}</p>
+                    <p style="margin:0 0 8px;color:#667eea;font-size:36px;font-weight:700;">${CURRENCY_SYMBOL}${data.newPrice.toLocaleString()}</p>
                     <div style="display:inline-block;padding:8px 16px;background:#ff6b6b;color:#ffffff;border-radius:20px;font-size:14px;font-weight:600;">
-                      Save ₹${data.savings.toLocaleString()} (${savingsPercent}% OFF)
+                      Save ${CURRENCY_SYMBOL}${data.savings.toLocaleString()} (${savingsPercent}% OFF)
                     </div>
                   </td>
                 </tr>
@@ -255,7 +257,7 @@ export function priceDropEmail(data: {
 </body>
 </html>
     `,
-    text: `Price Drop Alert!\n\n${data.productName}\nWas: ₹${data.oldPrice}\nNow: ₹${data.newPrice}\n\nSave ₹${data.savings} (${savingsPercent}% OFF)\n\nShop now: ${data.productUrl}`
+    text: `Price Drop Alert!\n\n${data.productName}\nWas: ${CURRENCY_SYMBOL}${data.oldPrice}\nNow: ${CURRENCY_SYMBOL}${data.newPrice}\n\nSave ${CURRENCY_SYMBOL}${data.savings} (${savingsPercent}% OFF)\n\nShop now: ${data.productUrl}`
   }
 }
 
@@ -369,7 +371,7 @@ export function newsletterTemplate(data: {
                     <a href="${product.url}" style="text-decoration:none;display:block;">
                       <img src="${product.image}" alt="${product.name}" style="width:100%;height:auto;border-radius:8px;margin-bottom:12px;">
                       <p style="margin:0 0 8px;color:#1a1a1a;font-size:14px;font-weight:600;">${product.name}</p>
-                      <p style="margin:0;color:#667eea;font-size:16px;font-weight:700;">₹${product.price.toLocaleString()}</p>
+                      <p style="margin:0;color:#667eea;font-size:16px;font-weight:700;">${CURRENCY_SYMBOL}${product.price.toLocaleString()}</p>
                     </a>
                   </td>
                   `).join('')}

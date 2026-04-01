@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Too many messages sent. Please try again later." }, { status: 429 })
         }
 
-        const { name, email, subject, message } = await req.json()
+        const { name, email, message, order_number } = await req.json()
 
         if (!name || !email || !message) {
             return NextResponse.json({ error: "Name, email, and message are required." }, { status: 400 })
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
         const cleanName = sanitizeText(name)
         const cleanEmail = sanitizeEmail(email)
-        const cleanSubject = subject ? sanitizeText(subject) : ""
+        const cleanOrderNumber = order_number ? sanitizeText(order_number) : ""
         const cleanMessage = sanitizeText(message)
 
         if (!cleanEmail) {
@@ -40,12 +40,12 @@ export async function POST(req: NextRequest) {
             { cookies: { getAll: () => [] } }
         )
 
-        const { error } = await supabase.from("contact_messages").insert({
+        const { error } = await supabase.from("contact_submissions").insert({
             name: cleanName,
             email: cleanEmail,
-            subject: cleanSubject,
+            order_number: cleanOrderNumber,
             message: cleanMessage,
-            status: "unread",
+            status: "new",
         })
 
         if (error) {

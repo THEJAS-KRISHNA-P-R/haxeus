@@ -1,11 +1,10 @@
 "use client"
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 export default function AuthPageClient() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<"signin" | "signup">("signin")
   const [email, setEmail] = useState("")
@@ -45,8 +44,7 @@ export default function AuthPageClient() {
       return
     }
 
-    router.push(redirectTo)
-    router.refresh()
+    window.location.href = redirectTo
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -131,6 +129,7 @@ export default function AuthPageClient() {
           {(["signin", "signup"] as const).map(t => (
             <button
               key={t}
+              type="button"
               onClick={() => { setTab(t); setError(null); setSuccess(null) }}
               style={{
                 padding: "0.5rem",
@@ -183,7 +182,7 @@ export default function AuthPageClient() {
         )}
 
         {/* Form */}
-        <form onSubmit={tab === "signin" ? handleSignIn : handleSignUp}>
+        <form id="auth-form" onSubmit={tab === "signin" ? handleSignIn : handleSignUp}>
           <div className="space-y-4">
 
             {/* Name — sign up only */}

@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { useCart, type CartItem } from "@/contexts/CartContext"
+import { useCart } from "@/contexts/CartContext"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/components/ThemeProvider"
 import { ArrowLeft, MapPin, Check } from "lucide-react"
@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { useStoreSettings } from "@/hooks/useStoreSettings"
 import { FreeShippingBar } from "@/components/ui/FreeShippingBar"
+import { formatPrice, CURRENCY_SYMBOL } from "@/lib/currency"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -543,7 +544,7 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         <p className={cn("text-sm font-bold flex-shrink-0", primary)}>
-                          ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                          {formatPrice(item.product.price * item.quantity)}
                         </p>
                       </div>
                     ))}
@@ -590,18 +591,18 @@ export default function CheckoutPage() {
               <div className="space-y-2.5 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className={muted}>Subtotal ({items.length} items)</span>
-                  <span className={cn("font-medium", primary)}>₹{subtotal.toLocaleString("en-IN")}</span>
+                  <span className={cn("font-medium", primary)}>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className={muted}>Shipping</span>
                   <span className={cn("font-medium", shipping === 0 ? "text-emerald-400" : primary)}>
-                    {shipping === 0 ? "FREE" : `₹${shipping}`}
+                    {shipping === 0 ? "FREE" : `${CURRENCY_SYMBOL}${shipping}`}
                   </span>
                 </div>
                 <div className={cn("h-px", isDark ? "bg-white/[0.07]" : "bg-black/[0.07]")} />
                 <div className="flex justify-between">
                   <span className={cn("font-bold", primary)}>Total</span>
-                  <span className="font-bold text-lg text-[#e93a3a]">₹{total.toLocaleString("en-IN")}</span>
+                  <span className="font-bold text-lg text-[#e93a3a]">{formatPrice(total)}</span>
                 </div>
               </div>
 

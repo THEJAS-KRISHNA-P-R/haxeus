@@ -1,12 +1,11 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { motion } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
 import { ProductCardCompact } from "@/components/ui/ProductCardCompact"
 import { useRelatedProducts } from "@/hooks/useProductQueries"
-import type { Product } from "@/lib/supabase"
+import { Product } from "@/types/supabase"
 
 interface RelatedProductsProps {
   productId: number
@@ -32,13 +31,6 @@ export function RelatedProducts({ productId, category, initialData = [] }: Relat
     const amount = scrollRef.current.clientWidth * 0.75
     scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" })
   }
-
-  // Debug logs to trace why sections might be missing
-  useEffect(() => {
-    if (mounted) {
-      console.log(`[RelatedProducts] Section mounted. Loaded products: ${products.length}, Loading state: ${loading}, Initial data present: ${!!initialData?.length}`)
-    }
-  }, [mounted, products.length, loading, initialData])
 
   if (mounted && !loading && !initialData?.length && products.length === 0) {
     return null
@@ -109,8 +101,8 @@ export function RelatedProducts({ productId, category, initialData = [] }: Relat
             className="flex gap-6 sm:gap-5 overflow-x-auto pb-3 scroll-smooth hide-scrollbar px-[10px]"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {products.map((product, index) => (
-              <ProductCardCompact key={product.id} product={product} index={index} />
+            {products.map((product) => (
+              <ProductCardCompact key={product.id} product={product} />
             ))}
           </div>
         )}

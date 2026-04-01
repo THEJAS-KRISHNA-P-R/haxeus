@@ -4,7 +4,7 @@
  * Usage: import { gaEvent, gaCommerceEvents } from '@/lib/ga-events'
  */
 
-type EventParams = Record<string, any>
+type EventParams = Record<string, unknown>
 
 /**
  * Core GA4 event tracking function
@@ -12,8 +12,8 @@ type EventParams = Record<string, any>
  * @param eventParams - Optional event parameters
  */
 export const gaEvent = (eventName: string, eventParams?: EventParams) => {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', eventName, eventParams)
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', eventName, { ...eventParams })
   }
 }
 
@@ -279,7 +279,7 @@ export const gaCommerceEvents = {
   /**
    * Track product review submission
    */
-  reviewSubmit: (productId: string, rating: number, reviewText?: string) => {
+  reviewSubmit: (productId: string, rating: number, _reviewText?: string) => {
     gaEvent('post_purchase', {
       items: [
         {
@@ -351,9 +351,9 @@ export const trackCustomEvent = (eventName: string, params?: EventParams) => {
 /**
  * Set user properties
  */
-export const setUserProperties = (properties: Record<string, any>) => {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('set', properties)
+export const setUserProperties = (properties: Record<string, unknown>) => {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('set', 'set', properties)
   }
 }
 
@@ -361,8 +361,8 @@ export const setUserProperties = (properties: Record<string, any>) => {
  * Track user ID (if available)
    */
 export const setUserId = (userId: string) => {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('config', {
+  if (typeof window !== 'undefined' && window.gtag && process.env.NEXT_PUBLIC_GA4_ID) {
+    window.gtag('config', process.env.NEXT_PUBLIC_GA4_ID, {
       'user_id': userId,
     })
   }

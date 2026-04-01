@@ -3,25 +3,25 @@ import type { Metadata } from "next"
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 
 export const metadata: Metadata = {
-  title: "Returns & Refunds | HAXEUS",
+  title: "Replacements Policy | HAXEUS",
   description:
-    "HAXEUS returns and refunds policy. Learn how to initiate a return, eligibility criteria, refund timelines, and how we handle exchanges.",
+    "HAXEUS replacement policy. Learn how to request a replacement, what qualifies, and the expected inspection and dispatch timeline.",
   alternates: {
     canonical: `${SITE_URL}/returns-refunds`,
   },
   openGraph: {
-    title: "Returns & Refunds | HAXEUS",
+    title: "Replacements Policy | HAXEUS",
     description:
-      "Learn how to initiate a return at HAXEUS, eligibility criteria, refund timelines, and how we handle exchanges.",
+      "Learn how to request a replacement at HAXEUS, what qualifies, and the expected inspection timeline.",
     url: `${SITE_URL}/returns-refunds`,
     siteName: "HAXEUS",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Returns & Refunds | HAXEUS",
+    title: "Replacements Policy | HAXEUS",
     description:
-      "Learn how to initiate a return at HAXEUS, eligibility criteria, and refund timelines.",
+      "Learn how to request a replacement at HAXEUS, what qualifies, and the expected inspection timeline.",
   },
 }
 

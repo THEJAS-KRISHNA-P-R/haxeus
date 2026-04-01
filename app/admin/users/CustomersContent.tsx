@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { User, Mail, Calendar, X } from "lucide-react";
+import { User } from "lucide-react";
+import { UserProfile } from "@/types/supabase";
 import {
     AdminCard,
     AdminPageHeader,
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 export default function CustomersContent() {
     const searchParams = useSearchParams();
-    const [customers, setCustomers] = useState<any[]>([])
+    const [customers, setCustomers] = useState<UserProfile[]>([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState(searchParams.get("email") || "")
 

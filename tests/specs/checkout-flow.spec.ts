@@ -60,7 +60,7 @@ test.describe('Checkout Flow', () => {
     await page.screenshot({ path: 'playwright-output/checkout-06-form-filled.png', fullPage: true });
 
     // Step 9: Verify pay button visible — DO NOT click (live API)
-    const payBtn = page.locator('button').filter({ hasText: /pay\s*₹/i }).first();
+    const payBtn = page.locator('button').filter({ hasText: /pay\s*[\u20B9₹]/i }).first();
     const razorpayBtn = page.locator('[data-testid="razorpay-button"], button').filter({ hasText: /pay/i }).first();
     const btnVisible = (await payBtn.count() > 0) || (await razorpayBtn.count() > 0);
 

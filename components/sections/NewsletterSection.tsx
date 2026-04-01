@@ -17,7 +17,6 @@ export function NewsletterSection({ config, isDark = true }: NewsletterSectionPr
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "duplicate" | "error">("idle")
 
-  const heading = config.heading ?? DEFAULT_HOMEPAGE_CONFIG.newsletter.heading
   const subtext = config.subtext ?? DEFAULT_HOMEPAGE_CONFIG.newsletter.subtext
   const ctaText = config.cta_text ?? DEFAULT_HOMEPAGE_CONFIG.newsletter.cta_text
 

@@ -4,7 +4,7 @@ import { getPostBySlug, getAllSlugs } from "@/lib/journal"
 import { ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 
-const SITE_NAME = "HAXEUS"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://haxeus.in"
 
 export async function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }))
@@ -17,14 +17,37 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const post = getPostBySlug(slug)
-  if (!post) return {}
+  if (!post) return { title: "Article Not Found" }
+
+  const fullTitle = `${post.title} | HAXEUS Journal`
+  const description = post.excerpt
+  const canonical = `${SITE_URL}/journal/${slug}`
+
   return {
     title: post.title,
-    description: post.excerpt,
+    description,
     keywords: post.keywords,
+    alternates: { canonical },
     openGraph: {
-      title: `${post.title} | ${SITE_NAME} Journal`,
-      description: post.excerpt,
+      type: "article",
+      url: canonical,
+      title: fullTitle,
+      description,
+      siteName: "HAXEUS",
+      images: [
+        {
+          url: `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&type=journal`,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        }
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: fullTitle,
+      description,
+      images: [`${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&type=journal`],
     },
   }
 }

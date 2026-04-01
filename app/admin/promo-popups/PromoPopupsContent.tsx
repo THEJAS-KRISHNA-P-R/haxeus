@@ -13,7 +13,6 @@ import {
     Settings, 
     Layout, 
     Eye,
-    Maximize,
     ChevronRight,
     GripVertical
 } from "lucide-react"
@@ -21,7 +20,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
     AdminCard,
     AdminPageHeader,
-    AdminTableRow,
     AdminButton,
     AdminInput,
 } from "@/components/admin/AdminUI"

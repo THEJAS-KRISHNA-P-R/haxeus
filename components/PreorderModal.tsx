@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "@/components/ThemeProvider"
 import { X, CheckCircle, AlertTriangle, Loader } from "lucide-react"
-import type { Product } from "@/lib/supabase"
+import { Product } from "@/types/supabase"
 import { supabase } from "@/lib/supabase"
 
 interface PreorderModalProps {

@@ -1,309 +1,222 @@
 "use client";
-import dynamic from 'next/dynamic';
-import ShinyText from '@/components/ui/ShinyText';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import {
-  Palette, Shirt, Truck, Recycle, Heart, Users, Sparkles, ArrowDown,
-  Calendar, Rocket
+import { 
+  Shirt, 
+  Layers, 
+  Zap, 
+  ChevronRight 
 } from 'lucide-react';
-import GlassSurface from '@/components/GlassSurface';
-
-const SparklesCore = dynamic(
-  () => import('@/components/ui/sparkles').then(m => m.SparklesCore),
-  { ssr: false }
-);
-
-const values = [
-  {
-    icon: Shirt,
-    title: '240gsm Heavyweight',
-    desc: 'Our tees and hoodies are made from premium 240gsm cotton for that perfect drape and durability.',},
-  {
-    icon: Truck,
-    title: 'Ships in 48h',
-    desc: 'Order today, we ship within 48 hours. Pan-India delivery in 7-10      days.',
-  },  
-  {
-    icon: Heart,
-    title: 'Community Driven',
-    desc: 'Built by the people who wear it. Your style shapes our next drop.',
-  },
-];
-
-const timeline = [
-  { 
-    year: '2025', 
-    event: 'The idea is born — art meets streetwear.',
-    icon: Calendar,
-    color: '#e93a3a'
-  },
-  { 
-    year: '2026', 
-    event: 'First collection drops. HAXEUS goes live. The movement begins.',
-    icon: Rocket,
-    color: '#c03c9d'
-  },
-];
+import Image from 'next/image';
 
 const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
 };
+
 const fadeUp = {
-  hidden: { y: 30 },
-  visible: { y: 0, transition: { duration: 0.6 } },
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" as const } 
+  },
 };
+
+const differences = [
+  {
+    icon: Shirt,
+    title: "Premium Fabrication",
+    desc: "We exclusively use 240gsm-280gsm heavyweight cotton for a luxury drape that lasts years, not months."
+  },
+  {
+    icon: Layers,
+    title: "Artistic Depth",
+    desc: "Every design is born from a physical canvas. We transform fine art into wearable rebellion."
+  },
+  {
+    icon: Zap,
+    title: "No Middlemen",
+    desc: "We control the full cycle—from sourcing and dyeing to printing. Rare quality at an honest price."
+  }
+];
+
+const team = [
+  {
+    name: "Founder 1",
+    role: "Creative Direction",
+    image: "/placeholder.svg"
+  },
+  {
+    name: "Founder 2",
+    role: "Production & Ops",
+    image: "/placeholder.svg"
+  }
+];
 
 export default function AboutPageClient() {
   return (
-    <main className="bg-theme text-theme transition-colors duration-300">
+    <main className="bg-theme min-h-screen pt-20">
+      {/* ───── 1. HERO ───── */}
+      <section className="relative h-[80vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="z-10"
+        >
+          <span className="text-[var(--accent)] font-bold tracking-[0.4em] uppercase text-xs mb-6 block">
+            EST. 2026
+          </span>
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-none italic">
+            HAXEUS <span className="text-theme-2">IDENTITY.</span>
+          </h1>
+          <p className="max-w-xl mx-auto text-lg md:text-xl text-theme-2 font-medium leading-relaxed">
+            HAXEUS is a rebellion against mass-produced mediocrity, crafting premium streetwear that serves as a canvas for your personal identity.
+          </p>
+        </motion.div>
 
-      {/* ───── HERO ───── */}
-      <section
-        className="relative w-full flex flex-col items-center justify-center overflow-hidden pt-16 md:pt-20"
-        style={{ minHeight: '90dvh' }}
-      >
-        {/* Sparkles background */}
-        <div className="absolute inset-0 w-full h-full bg-theme">
-          <SparklesCore
-            id="haxeus-about-hero"
-            background="transparent"
-            minSize={0.4}
-            maxSize={1.2}
-            particleDensity={60}
-            className="w-full h-full"
-            particleColor="#e93a3a"
-            speed={1}
-          />
-        </div>
-
-        {/* Radial mask for soft edges */}
-        <div className="absolute inset-0 w-full h-full [mask-image:radial-gradient(700px_500px_at_center,transparent_20%,black)]" />
-
-        {/* Content */}
-        <div className="relative z-10 text-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
-          >
-            <p className="text-sm uppercase tracking-[0.3em] text-[var(--accent)] font-semibold mb-4">
-              Our Story
-            </p>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-[10rem] font-black tracking-tight select-none px-4 pb-2">
-              <ShinyText
-                text="HAXEUS"
-                color="var(--text)"
-                shineColor="#b38f8f"
-                speed={3}
-                spread={100}
-                delay={0.5}
-              />
-            </h1>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.8 }}>
-            <p className="mt-4 text-lg text-theme-2 tracking-widest uppercase">
-              Art · Identity · Culture
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.8 }}
-            className="mt-8 flex flex-col items-center gap-2 text-theme-2"
-          >
-            <span className="text-xs tracking-wider uppercase">Scroll</span>
-            <ArrowDown className="w-4 h-4" />
-          </motion.div>
-        </div>
+        {/* Decorative Blur */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--accent)]/10 blur-[120px] rounded-full -z-0" />
       </section>
 
-      {/* ───── BRAND STORY ───── */}
-      <section className="py-24 px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
+      {/* ───── 2. ORIGIN STORY ───── */}
+      <section className="py-32 px-6 lg:px-8 border-t border-theme">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={stagger}
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeUp}
             className="space-y-6"
           >
-            <motion.h2
-              variants={fadeUp}
-              className="text-4xl md:text-5xl font-black leading-tight"
-            >
-              Born from a <span className="text-[var(--accent)]">rebellion</span> against boring merch.
-            </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              className="text-lg text-theme-2 leading-relaxed"
-            >
-              HAXEUS started with a simple belief: your clothes should say something about you.
-              Not a logo someone else chose. Not a trend everyone follows. Something real.
-            </motion.p>
-            <motion.p
-              variants={fadeUp}
-              className="text-lg text-theme-2 leading-relaxed"
-            >
-              We make our drops ourselves — no middlemen, no mass production. Just bold designs and quality you
-              you&apos;ll never find in a mall. Every tee is a canvas.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ───── TIMELINE (JOURNEY) ───── */}
-      <section className="py-32 px-6 lg:px-8 relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[var(--accent)]/5 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#c03c9d]/5 blur-[120px] rounded-full pointer-events-none" />
-
-        <div className="max-w-5xl mx-auto relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <h2 className="text-4xl md:text-6xl font-black mb-6">
-              The <span className="text-[var(--accent)]">Journey</span>
-            </h2>
-            <p className="text-theme-2 max-w-xl mx-auto text-lg">
-              From a late-night sketch to a living, breathing community.
+            <h2 className="text-3xl md:text-5xl font-black italic">The <span className="text-[var(--accent)]">Origin</span> Story</h2>
+            <p className="text-theme-2 leading-relaxed text-lg italic">
+              [ORIGIN STORY COPY GOES HERE - 200-300 WORDS]
+            </p>
+            <p className="text-theme-2 leading-relaxed text-lg italic">
+              Placeholder content: HAXEUS began in a small studio in India, driven by the frustration of seeing the same generic designs in every mall. We wanted to build something that felt like art, something that didn't compromise on fabric weight or print quality. Our first 240gsm sample changed everything.
             </p>
           </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {timeline.map((t, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
-              >
-                <GlassSurface
-                  width="100%"
-                  height="auto"
-                  borderRadius={32}
-                  borderWidth={0.08}
-                  brightness={100}
-                  opacity={0.1}
-                  blur={12}
-                  backgroundOpacity={0.03}
-                  className="p-1"
-                >
-                  <div className="p-8 md:p-10 flex flex-col gap-6 h-full">
-                    <div 
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-2"
-                      style={{ backgroundColor: `${t.color}20` }}
-                    >
-                      <t.icon className="w-7 h-7" style={{ color: t.color }} />
-                    </div>
-                    <div>
-                      <span className="text-xs font-black uppercase tracking-[0.3em] mb-3 block" style={{ color: t.color }}>
-                        {t.year}
-                      </span>
-                      <h3 className="text-2xl md:text-3xl font-bold leading-tight">
-                        {t.event}
-                      </h3>
-                    </div>
-                    <div className="mt-auto pt-6 border-t border-white/5">
-                      <div className="flex items-center gap-2 text-theme-2 text-sm font-medium">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-                        Milestone Reached
-                      </div>
-                    </div>
-                  </div>
-                </GlassSurface>
-              </motion.div>
-            ))}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="aspect-[4/5] bg-theme-2/10 rounded-3xl border border-theme overflow-hidden flex items-center justify-center relative group"
+          >
+            <Image 
+               src="/placeholder.svg" 
+               alt="Origin" 
+               fill 
+               className="object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700" 
+            />
+            <span className="z-10 text-xs font-bold tracking-widest uppercase opacity-40">Brand Archive 001</span>
+          </motion.div>
         </div>
       </section>
 
-      {/* ───── VALUES GRID ───── */}
-      <section className="py-24 px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-black mb-4 text-center"
-          >
-            What We Stand For
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center text-theme-2 mb-14 max-w-xl mx-auto"
-          >
-            Every decision we make is driven by these principles.
-          </motion.p>
+      {/* ───── 3. WHAT MAKES US DIFFERENT ───── */}
+      <section className="py-32 px-6 lg:px-8 bg-black/5 dark:bg-white/5 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-black mb-6">Built <span className="text-[var(--accent)]">Differently</span></h2>
+            <p className="text-theme-2 max-w-xl mx-auto text-lg italic">No compromise. No corners cut. Just the best version of what you wear every day.</p>
+          </div>
 
-          <motion.div
+          <motion.div 
             variants={stagger}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
-            {values.map((v) => (
-              <motion.div
-                key={v.title}
+            {differences.map((diff, index) => (
+              <motion.div 
+                key={index}
                 variants={fadeUp}
-                className="group rounded-2xl border border-theme p-8 hover:border-[var(--accent)] hover:shadow-lg hover:shadow-[var(--accent)]/5 transition-all duration-300"
+                className="p-10 rounded-3xl border border-theme bg-theme hover:border-[var(--accent)] transition-all duration-500 group"
               >
-                <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center mb-5 group-hover:bg-[var(--accent)]/20 transition-colors">
-                  <v.icon className="w-6 h-6 text-[var(--accent)]" />
+                <div className="w-14 h-14 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                  <diff.icon className="w-7 h-7 text-[var(--accent)]" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">{v.title}</h3>
-                <p className="text-theme-2 leading-relaxed text-sm">{v.desc}</p>
+                <h3 className="text-2xl font-bold mb-4 italic uppercase">{diff.title}</h3>
+                <p className="text-theme-2 leading-relaxed italic">{diff.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* ───── CTA ───── */}
-      <section className="py-28 px-6 lg:px-8 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-2xl mx-auto space-y-8"
-        >
-          <h2 className="text-4xl md:text-6xl font-black leading-tight">
-            Ready to <span className="text-[var(--accent)]">wear art</span>?
-          </h2>
-          <p className="text-lg text-theme-2">
-            Every drop is limited. Once it&apos;s gone, it&apos;s gone.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/products">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-8 py-4 bg-[var(--accent)] text-white font-bold rounded-full hover:opacity-90 transition-opacity"
-              >
-                Shop Now
-              </motion.button>
-            </Link>
-            <Link href="/contact">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-8 py-4 border border-theme font-bold rounded-full hover:border-[var(--accent)] transition-colors"
-              >
-                Get in Touch
-              </motion.button>
-            </Link>
+      {/* ───── 4. THE TEAM ───── */}
+      <section className="py-32 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+            <div className="space-y-4">
+              <h2 className="text-4xl md:text-6xl font-black italic">The <span className="text-[var(--accent)]">Studio.</span></h2>
+              <p className="text-theme-2 text-xl italic max-w-md">Our team is small, obsessed, and based out of our Mumbai studio. We don&apos;t just design—we create.</p>
+            </div>
+            <div className="bg-[var(--accent)] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em]">
+              Coming Soon
+            </div>
           </div>
-        </motion.div>
+
+          <motion.div 
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10"
+          >
+            {team.map((member, i) => (
+              <motion.div key={i} variants={fadeUp} className="group cursor-wait">
+                <div className="aspect-[16/9] bg-theme-2/10 rounded-3xl overflow-hidden border border-theme mb-6 relative">
+                   <div className="absolute inset-0 flex items-center justify-center text-[var(--accent)]/40 font-black text-4xl italic opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
+                     HAXEUS STUDIO
+                   </div>
+                   <Image 
+                     src={member.image} 
+                     alt={member.name} 
+                     fill 
+                     className="object-cover grayscale group-hover:opacity-20 transition-all duration-700" 
+                   />
+                </div>
+                <h4 className="text-2xl font-bold italic uppercase mb-1">{member.name}</h4>
+                <p className="text-[var(--accent)] text-xs font-black uppercase tracking-widest">{member.role}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
+      {/* ───── 5. CTA ───── */}
+      <section className="py-24 px-6 lg:px-8 border-t border-theme">
+        <div className="max-w-7xl mx-auto rounded-[4rem] bg-black text-white px-8 py-24 md:py-40 text-center overflow-hidden relative group">
+          <motion.div
+             initial={{ opacity: 0, y: 40 }}
+             whileInView={{ opacity: 1, y: 0 }}
+             viewport={{ once: true }}
+             className="relative z-10 space-y-12"
+          >
+            <h2 className="text-5xl md:text-[8rem] font-black tracking-tighter italic leading-none">
+              OWN YOUR <br />REBELLION.
+            </h2>
+            <Link href="/products" className="inline-flex items-center gap-4 bg-[var(--accent)] text-white px-12 py-6 rounded-full font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all duration-700 group/btn shadow-2xl shadow-[var(--accent)]/20">
+              Shop the current collection
+              <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+            </Link>
+          </motion.div>
+
+          {/* Background Branding */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[25rem] font-black opacity-[0.03] select-none italic pointer-events-none whitespace-nowrap group-hover:scale-110 transition-transform duration-[20s] ease-linear">
+            HAXEUS HAXEUS HAXEUS
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

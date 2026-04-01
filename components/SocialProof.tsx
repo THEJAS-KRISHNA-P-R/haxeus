@@ -1,37 +1,22 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import { Star } from "lucide-react"
-import { useProductReviews } from "@/hooks/useProductQueries"
 import { useTheme } from "@/components/ThemeProvider"
 import { cn } from "@/lib/utils"
-import { ProductReview } from "@/lib/supabase"
-
-interface ReviewSummary {
-  count: number
-  average: number
-}
+import { Product } from "@/types/supabase"
+import type { ProductReviewSummary } from "@/types/reviews"
 
 interface SocialProofProps {
-  product: any
+  product: Product
+  reviewSummary: ProductReviewSummary | null
 }
 
-export function SocialProof({ product }: SocialProofProps) {
+export function SocialProof({ product, reviewSummary }: SocialProofProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const isDark = !mounted ? true : theme === "dark"
-
-  const { data: reviewsData = [] as ProductReview[] } = useProductReviews(product.id.toString(), {
-    enabled: !!product.id && !product.is_preorder
-  })
-
-  const reviews = useMemo(() => {
-    const rd = reviewsData as ProductReview[]
-    if (rd.length === 0) return null
-    const avg = rd.reduce((sum, r) => sum + r.rating, 0) / rd.length
-    return { count: rd.length, average: Math.round(avg * 10) / 10 }
-  }, [reviewsData])
 
   if (!mounted) return null
 
@@ -61,7 +46,7 @@ export function SocialProof({ product }: SocialProofProps) {
   }
 
   // ── Normal product reviews ───────────────────────────────────────────────────
-  if (!product.is_preorder && reviews && reviews.count > 0) {
+  if (!product.is_preorder && reviewSummary && reviewSummary.totalReviews > 0) {
     return (
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-0.5">
@@ -70,7 +55,7 @@ export function SocialProof({ product }: SocialProofProps) {
               key={star}
               size={14}
               className={
-                star <= Math.round(reviews.average)
+                star <= Math.round(reviewSummary.averageRating)
                   ? "text-[#e7bf04] fill-[#e7bf04]"
                   : isDark ? "text-white/20 fill-transparent" : "text-black/20 fill-transparent"
               }
@@ -78,8 +63,8 @@ export function SocialProof({ product }: SocialProofProps) {
           ))}
         </div>
         <span className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>
-          <span className="font-bold">{reviews.average}</span>{" "}
-          ({reviews.count} {reviews.count === 1 ? "review" : "reviews"})
+          <span className="font-bold">{reviewSummary.averageRating}</span>{" "}
+          ({reviewSummary.totalReviews} {reviewSummary.totalReviews === 1 ? "review" : "reviews"})
         </span>
       </div>
     )

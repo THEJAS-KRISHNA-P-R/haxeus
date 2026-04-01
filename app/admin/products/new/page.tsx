@@ -114,10 +114,9 @@ export default function NewProductPage() {
           is_primary: img.is_primary,
         }))
 
-        const { data: imgResult, error: imagesError } = await supabase
+        const { error: imagesError } = await supabase
           .from("product_images")
           .insert(imagesWithProductId)
-          .select()
 
         if (imagesError) {
           console.error("Images insert error:", imagesError)
@@ -136,10 +135,9 @@ export default function NewProductPage() {
           sold_quantity: 0,
         }))
 
-        const { data: invResult, error: inventoryError } = await supabase
+        const { error: inventoryError } = await supabase
           .from("product_inventory")
           .insert(inventoryWithProductId)
-          .select()
 
         if (inventoryError) {
           console.error("Inventory insert error:", inventoryError)

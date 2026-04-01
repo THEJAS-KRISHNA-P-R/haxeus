@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase, type Product } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { Product } from "@/types/supabase";
 import { Plus, Search, Edit, Trash2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,12 +18,9 @@ import {
 import {
     AdminCard,
     AdminPageHeader,
-    AdminTableHeader,
-    AdminTableRow,
     AdminSearchInput,
     AdminButton
 } from "@/components/admin/AdminUI";
-import { cn } from "@/lib/utils";
 
 export default function ProductsManagementContent() {
     const [products, setProducts] = useState<Product[]>([])
@@ -62,7 +60,7 @@ export default function ProductsManagementContent() {
                 images: p.images || []
             }))
 
-            setProducts(productsWithImages as any)
+            setProducts(productsWithImages as Product[])
         } catch (error) {
             console.error("Error loading products:", error)
         } finally {

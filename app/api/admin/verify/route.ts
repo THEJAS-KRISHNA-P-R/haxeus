@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminRequest } from "@/lib/admin-auth";
-import { requireAdmin, getAdminEmail } from "@/lib/admin";
+import { getAdminEmail } from "@/lib/admin";
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
-export async function GET() {
+export async function GET(_req: NextRequest) {
     try {
         const auth = await verifyAdminRequest();
         if (!auth.authorized) {

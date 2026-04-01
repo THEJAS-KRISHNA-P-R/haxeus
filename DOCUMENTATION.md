@@ -190,6 +190,11 @@ SELECT * FROM user_roles WHERE role = 'admin';
 - `product_views` - View tracking
 - `analytics_events` - General events
 
+**External Analytics:**
+- Google Analytics 4 (GA4) - Global e-commerce tracking
+- Vercel Analytics - Performance & traffic
+- Vercel Speed Insights - Core Web Vitals
+
 **Advanced Features:**
 - `return_requests` - Returns & exchanges
 - `return_items` - Items being returned
@@ -406,7 +411,8 @@ Required for all deployments:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-NEXT_PUBLIC_SITE_URL=https://haxeuz.in (Required for absolute links in emails/auth)
+NEXT_PUBLIC_SITE_URL=https://haxeus.in (Required for absolute links in emails/auth)
+NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX (Google Analytics 4 Measurement ID)
 RESEND_API_KEY=re_your_key
 CRON_SECRET=your-random-token
 ```
@@ -727,10 +733,11 @@ haxeus-v26/
 │   ├── use-mobile.tsx           # Mobile detection
 │   └── use-toast.ts             # Toast notifications
 │
-├── lib/                          # Utilities
-│   ├── supabase.ts              # Supabase client
-│   ├── utils.ts                 # Helper functions
-│   ├── admin.ts                 # Admin functions
+├── lib/                    # Utilities & configs
+│   ├── supabase.ts        # Supabase client setup
+│   ├── ga-events.ts       # GA4 Custom Event Utility
+│   ├── utils.ts           # Helper functions
+│   ├── admin.ts           # Admin functions
 │   ├── email.ts                 # Email helpers
 │   └── ...
 │

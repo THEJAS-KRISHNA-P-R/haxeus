@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { supabase, type Order, type OrderItem } from "@/lib/supabase"
 import { sendShippingUpdateEmail } from "@/lib/email"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Package } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -31,7 +31,6 @@ interface OrderWithDetails extends Order {
 
 export default function OrderDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const orderId = params.id as string
 
   const [order, setOrder] = useState<OrderWithDetails | null>(null)
@@ -76,17 +75,36 @@ export default function OrderDetailPage() {
   async function updateOrderStatus(newStatus: string) {
     setUpdating(true)
     try {
+      const isDelivered = newStatus === "delivered"
+      const confirmDelivered = isDelivered
+        ? window.confirm("Mark this order as delivered only after India Post / post-office confirmation. Continue?")
+        : true
+
+      if (!confirmDelivered) {
+        return
+      }
+
       const { error } = await supabase
         .from("orders")
         .update({
           status: newStatus,
+          delivered_at: isDelivered ? new Date().toISOString() : null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", orderId)
 
       if (error) throw error
 
-      setOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
+      setOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: newStatus as any,
+              delivered_at: isDelivered ? new Date().toISOString() : undefined,
+              updated_at: new Date().toISOString(),
+            }
+          : null
+      )
 
       // Send shipping update email if status is shipped or delivered
       if (order && (newStatus === "shipped" || newStatus === "delivered")) {
@@ -96,8 +114,8 @@ export default function OrderDetailPage() {
           await sendShippingUpdateEmail({
             orderId: order.id,
             customerEmail: userData.user.email,
-            customerName: order.shipping_address?.fullName || "Customer",
-            status: newStatus,
+            customerName: order.shipping_name || "Customer",
+            status: newStatus as any,
           })
         }
       }
@@ -144,6 +162,8 @@ export default function OrderDetailPage() {
       </div>
     )
   }
+
+  const address = order.shipping_address as any
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -246,13 +266,13 @@ export default function OrderDetailPage() {
                 </SelectContent>
               </Select>
               <p className="text-sm text-gray-500">
-                Update the order status to keep the customer informed
+                Mark as delivered only after India Post or post-office delivery confirmation. This unlocks verified reviews.
               </p>
             </CardContent>
           </Card>
 
           {/* Shipping Address */}
-          {order.shipping_address && (
+          {address && (
             <Card>
               <CardHeader>
                 <CardTitle>Shipping Address</CardTitle>
@@ -260,13 +280,14 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="space-y-1 text-sm">
                   <p className="font-medium">
-                    {order.shipping_address.fullName}
+                    {order.shipping_name}
                   </p>
-                  <p>{order.shipping_address.address}</p>
+                  <p>{address.line1}</p>
+                  {address.line2 && <p>{address.line2}</p>}
                   <p>
-                    {order.shipping_address.city},{" "}
-                    {order.shipping_address.state}{" "}
-                    {order.shipping_address.pincode}
+                    {address.city},{" "}
+                    {address.state}{" "}
+                    {address.pincode}
                   </p>
                   <p className="text-gray-500">
                     Phone: {order.shipping_address.phone}
@@ -303,6 +324,18 @@ export default function OrderDetailPage() {
                   <span className="text-gray-600">Last Updated</span>
                   <span>
                     {new Date(order.updated_at).toLocaleDateString("en-IN")}
+                  </span>
+                </div>
+              )}
+              {order.delivered_at && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Delivered At</span>
+                  <span>
+                    {new Date(order.delivered_at).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </span>
                 </div>
               )}

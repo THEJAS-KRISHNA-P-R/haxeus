@@ -1,15 +1,16 @@
-import { supabase, LoyaltyPoints } from './supabase'
+import { supabase, LoyaltyPoints, LoyaltyTransaction, UserProfile } from './supabase'
+import { CURRENCY_SYMBOL } from "./currency"
 
 /**
  * Loyalty Program System
- * - Points for purchases (1 point per ₹10)
+ * - Points for purchases (1 point per ${CURRENCY_SYMBOL}10)
  * - Tier system (Bronze, Silver, Gold, Platinum)
  * - Redeem points for discounts
  * - Exclusive perks per tier
  */
 
-const POINTS_PER_RUPEE = 0.1 // 1 point per ₹10
-const RUPEE_PER_POINT = 0.5 // 1 point = ₹0.50
+const POINTS_PER_RUPEE = 0.1 // 1 point per ${CURRENCY_SYMBOL}10
+const RUPEE_PER_POINT = 0.5 // 1 point = ${CURRENCY_SYMBOL}0.50
 
 const TIER_THRESHOLDS = {
   bronze: 0,
@@ -163,7 +164,7 @@ export async function redeemPoints(
       points: -pointsToRedeem,
       transaction_type: 'redeemed',
       order_id: orderId,
-      description: `Redeemed ${pointsToRedeem} points for ₹${discountAmount} discount`
+      description: `Redeemed ${pointsToRedeem} points for ${CURRENCY_SYMBOL}${discountAmount} discount`
     })
 
   return { success: true, discountAmount }
@@ -172,7 +173,7 @@ export async function redeemPoints(
 export async function getLoyaltyTransactions(
   userId: string,
   limit: number = 20
-): Promise<any[]> {
+): Promise<LoyaltyTransaction[]> {
   const { data, error } = await supabase
     .from('loyalty_transactions')
     .select('*')
@@ -185,7 +186,7 @@ export async function getLoyaltyTransactions(
     return []
   }
 
-  return data || []
+  return (data as unknown as LoyaltyTransaction[]) || []
 }
 
 export function getTierBenefits(tier: keyof typeof TIER_BENEFITS) {
@@ -207,12 +208,14 @@ export function getPointsNeededForNextTier(currentTier: string, lifetimePoints: 
   return 0 // Already at max tier
 }
 
-export async function getLoyaltyLeaderboard(limit: number = 10): Promise<any[]> {
+export async function getLoyaltyLeaderboard(limit: number = 10): Promise<(LoyaltyPoints & { profiles?: UserProfile })[]> {
   const { data, error } = await supabase
     .from('loyalty_points')
     .select(`
       *,
-      auth.users (
+      profiles (
+        id,
+        full_name,
         email
       )
     `)
@@ -224,5 +227,5 @@ export async function getLoyaltyLeaderboard(limit: number = 10): Promise<any[]> 
     return []
   }
 
-  return data || []
+  return (data as unknown as (LoyaltyPoints & { profiles?: UserProfile })[]) || []
 }

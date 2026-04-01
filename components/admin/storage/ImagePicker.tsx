@@ -6,7 +6,6 @@ import {
   Search, 
   HardDrive,
   ChevronRight,
-  File as FileIcon,
   X,
   Check
 } from "lucide-react"

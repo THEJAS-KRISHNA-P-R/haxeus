@@ -1,7 +1,9 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { createServerClient } from "@supabase/ssr"
+import { SupabaseClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 import { redis } from "@/lib/redis"
 import crypto from "crypto"
+import { cache } from "react"
 
 // TTL for the admin role cache in seconds.
 const ADMIN_CACHE_TTL = 300  // 5 minutes
@@ -24,7 +26,7 @@ export interface AdminAuthResult {
 /**
  * Core authentication logic that works in both Middleware and API/Server Components.
  */
-export async function verifyUserAdmin(supabase: any, userId: string): Promise<boolean> {
+export async function verifyUserAdmin(supabase: SupabaseClient, userId: string): Promise<boolean> {
   const secret = process.env.ADMIN_CACHE_SECRET;
   const hasRedis = !!process.env.REDIS_URL && !!secret;
 
@@ -34,8 +36,8 @@ export async function verifyUserAdmin(supabase: any, userId: string): Promise<bo
       const cached = await redis.get(cacheKey)
       if (cached === "1") return true
       if (cached === "0") return false
-    } catch (err) {
-      console.error("[admin-auth] Redis error:", err)
+    } catch (err: unknown) {
+      console.error("[admin-auth] Redis error:", err instanceof Error ? err.message : "Unknown error")
     }
   }
 
@@ -50,12 +52,13 @@ export async function verifyUserAdmin(supabase: any, userId: string): Promise<bo
   const isAdmin = !roleError && roleData !== null
 
   // Update cache if possible
-  if (hasRedis && isAdmin !== null) {
+  if (hasRedis) {
     try {
       const cacheKey = makeCacheKey(userId)
-      await (redis as any).set(cacheKey, isAdmin ? "1" : "0", "EX", ADMIN_CACHE_TTL)
-    } catch (err) {
-      console.error("[admin-auth] Redis write error:", err)
+      // ioredis uses positional arguments for EX
+      await (redis as { set(k: string, v: string, m: string, t: number): Promise<unknown> }).set(cacheKey, isAdmin ? "1" : "0", "EX", ADMIN_CACHE_TTL)
+    } catch (err: unknown) {
+      console.error("[admin-auth] Redis write error:", err instanceof Error ? err.message : "Unknown error")
     }
   }
 
@@ -63,10 +66,9 @@ export async function verifyUserAdmin(supabase: any, userId: string): Promise<bo
 }
 
 /**
- * High-level verification for API Routes and Server Components.
- * Uses next/headers for cookies.
+ * Internal verification logic for API Routes and Server Components.
  */
-export async function verifyAdminRequest(): Promise<AdminAuthResult> {
+async function verifyAdminRequestInternal(): Promise<AdminAuthResult> {
   const cookieStore = await cookies()
 
   const supabaseAuth = createServerClient(
@@ -91,13 +93,19 @@ export async function verifyAdminRequest(): Promise<AdminAuthResult> {
 }
 
 /**
+ * High-level verification for API Routes and Server Components.
+ * Wrapped in React cache() to deduplicate hits across a single request lifecycle.
+ */
+export const verifyAdminRequest = cache(verifyAdminRequestInternal)
+
+/**
  * Immediately evicts the admin role cache for a specific user.
  */
 export async function evictAdminCache(userId: string): Promise<void> {
   try {
     const cacheKey = makeCacheKey(userId)
     await redis.del(cacheKey)
-  } catch (err) {
-    console.error(`[admin-auth] Failed to evict cache for user ${userId}`, err)
+  } catch (err: unknown) {
+    console.error(`[admin-auth] Failed to evict cache for user ${userId}`, err instanceof Error ? err.message : "Unknown error")
   }
 }

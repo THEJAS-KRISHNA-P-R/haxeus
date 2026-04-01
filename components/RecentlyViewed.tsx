@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { motion } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
 import { useProductHistory } from "@/lib/stores/product-history"
@@ -17,7 +16,7 @@ export function RecentlyViewed({ currentProductId }: RecentlyViewedProps) {
   useEffect(() => setMounted(true), [])
   const isDark = !mounted ? true : theme === "dark"
 
-  const { recentlyViewed, clearHistory } = useProductHistory()
+  const { recentlyViewed } = useProductHistory()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Exclude current product
@@ -97,9 +96,9 @@ export function RecentlyViewed({ currentProductId }: RecentlyViewedProps) {
           className="flex gap-5 sm:gap-4 overflow-x-auto pb-3 scroll-smooth hide-scrollbar px-[10px]"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {items.map((product, index) => (
-            <ProductCardCompact key={product.id} product={product} index={index} />
-          ))}
+            {items.map((product) => (
+              <ProductCardCompact key={product.id} product={product} />
+            ))}
         </div>
       </div>
     </section>

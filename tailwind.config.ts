@@ -11,10 +11,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        display: ["var(--font-bebas)", "Impact", "sans-serif"],
+        display: ["var(--font-clash)", "Impact", "sans-serif"],
         heading: ["var(--font-clash)", "sans-serif"],
-        body: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
-        sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
+        body: ["system-ui", "-apple-system", "BlinkMacSystemFont", "\"Segoe UI\"", "sans-serif"],
+        sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", "\"Segoe UI\"", "sans-serif"],
       },
       colors: {
         hx: {

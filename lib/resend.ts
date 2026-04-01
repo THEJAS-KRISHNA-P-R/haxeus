@@ -17,7 +17,7 @@ export async function sendEmail({
     from = `HAXEUS <${process.env.FROM_EMAIL ?? 'orders@haxeus.in'}>`,
     replyTo,
 }: {
-    to: string
+    to: string | string[]
     subject: string
     html: string
     from?: string
@@ -43,8 +43,9 @@ export async function sendEmail({
         })
         if (error) throw error
         return { success: true, data }
-    } catch (err) {
-        console.error('Email send failed:', err)
-        return { success: false, error: err }
+    } catch (err: unknown) {
+        const error = err instanceof Error ? err.message : String(err)
+        console.error('Email send failed:', error)
+        return { success: false, error }
     }
 }

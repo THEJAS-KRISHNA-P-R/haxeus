@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Eye, Save, View } from "lucide-react"
+import { Save, View } from "lucide-react"
 import { useHomepageConfig } from "@/hooks/useHomepageConfig"
 import { deepMerge } from "@/lib/deep-merge"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"

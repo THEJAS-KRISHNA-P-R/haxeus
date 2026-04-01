@@ -2,8 +2,11 @@
 
 import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { supabase, type Order, type OrderItem, type UserAddress } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase"
+import { Order, OrderItem, UserAddress } from "@/types/supabase"
+import { User as SupabaseUser } from "@supabase/supabase-js"
 import { removeFromWishlist } from "@/lib/wishlist"
+import { formatPrice } from "@/lib/currency"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -34,11 +37,11 @@ interface OrderWithItems extends Order {
 function ProfileContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [orders, setOrders] = useState<OrderWithItems[]>([])
   const [addresses, setAddresses] = useState<UserAddress[]>([])
-  const [wishlist, setWishlist] = useState<any[]>([])
+  const [wishlist, setWishlist] = useState<{ id: string, products: { id: number, name: string, price: number, front_image: string } }[]>([])
   const [activeTab, setActiveTab] = useState("orders")
   const [hasLoaded, setHasLoaded] = useState(false)
 
@@ -85,7 +88,7 @@ function ProfileContent() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
 
-      setOrders((ordersData as any) || [])
+      setOrders((ordersData as unknown as OrderWithItems[]) || [])
 
       // Load addresses
       const { data: addressesData } = await supabase
@@ -112,7 +115,7 @@ function ProfileContent() {
         )
         .eq("user_id", user.id)
 
-      setWishlist((wishlistData as any)?.filter((item: any) => item?.product) || [])
+      setWishlist((wishlistData as unknown as { id: string, products: { id: number, name: string, price: number, front_image: string } }[] | null)?.filter((item) => item?.products) || [])
     } catch (error) {
       console.error("Error loading user data:", error)
     } finally {
@@ -250,7 +253,7 @@ function ProfileContent() {
                              </p>
                           </Link>
                           <p className="font-semibold text-theme">
-                            ₹{Number(item.price).toLocaleString("en-IN")}
+                            {formatPrice(item.price)}
                           </p>
                         </div>
                       ))}
@@ -258,7 +261,7 @@ function ProfileContent() {
                     <div className="flex items-center justify-between pt-4 border-t border-theme">
                       <p className="font-semibold text-theme">Total</p>
                       <p className="font-bold text-lg text-theme">
-                        ₹{Number(order.total_amount).toLocaleString("en-IN")}
+                        {formatPrice(order.total_amount)}
                       </p>
                     </div>
                   </CardContent>
@@ -353,11 +356,11 @@ function ProfileContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {wishlist.map((item, index) => (
                   <Card key={item.id} className="overflow-hidden bg-card border-theme">
-                    <Link href={`/products/${item.product.id}`}>
+                    <Link href={`/products/${item.products.id}`}>
                       <div className="relative h-64 bg-background/5">
                         <Image
-                          src={item.product.front_image || "/placeholder.svg"}
-                          alt={item.product.name}
+                          src={item.products.front_image || "/placeholder.svg"}
+                          alt={item.products.name}
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
@@ -367,11 +370,11 @@ function ProfileContent() {
                     </Link>
                     <CardContent className="p-4">
                       <h3 className="font-semibold mb-2 text-theme">
-                        {item.product.name}
+                        {item.products.name}
                       </h3>
                       <div className="flex items-center justify-between">
                         <p className="font-bold text-lg text-theme">
-                          ₹{Number(item.product.price).toLocaleString("en-IN")}
+                          {formatPrice(item.products.price)}
                         </p>
                         <Button
                           variant="ghost"
@@ -379,7 +382,7 @@ function ProfileContent() {
                           className="hover:bg-theme"
                           onClick={async () => {
                             // Remove from wishlist
-                            const success = await removeFromWishlist(item.product.id)
+                            const success = await removeFromWishlist(item.products.id)
                             if (success) {
                               // Refresh wishlist
                               loadUserData()

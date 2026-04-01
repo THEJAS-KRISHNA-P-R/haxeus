@@ -29,15 +29,15 @@ test.describe("Admin route protection", () => {
 
     test("auth page loads correctly", async ({ page }) => {
         await page.goto("/auth")
-        await expect(page.locator('input[type="email"]')).toBeVisible()
-        await expect(page.locator('input[type="password"]')).toBeVisible()
+        await expect(page.locator('#auth-form input[type="email"]')).toBeVisible()
+        await expect(page.locator('#auth-form input[type="password"]')).toBeVisible()
     })
 
     test("wrong password shows error", async ({ page }) => {
         await page.goto("/auth")
-        await page.fill('input[type="email"]', "testadmin@hax.in")
-        await page.fill('input[type="password"]', "wrongpassword")
-        const btn = page.locator('button[type="submit"]').first()
+        await page.fill('#auth-form input[type="email"]', "testadmin@hax.in")
+        await page.fill('#auth-form input[type="password"]', "wrongpassword")
+        const btn = page.locator('#auth-form button[type="submit"]').first()
         await btn.click()
         // Should NOT redirect to admin
         await page.waitForTimeout(3000)

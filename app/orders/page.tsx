@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
 import { Package, Truck, CheckCircle, XCircle, Clock, ArrowRight } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { formatPrice } from "@/lib/currency"
 
 interface Order {
   id: string
@@ -21,7 +22,6 @@ interface Order {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -34,7 +34,6 @@ export default function OrdersPage() {
       router.push("/auth")
       return
     }
-    setUser(user)
     fetchOrders(user.id)
   }
 
@@ -176,7 +175,7 @@ export default function OrdersPage() {
                       <div className="text-right">
                         <p className="text-sm text-white/50">Total</p>
                         <p className="text-2xl font-bold text-white">
-                          ₹{(order.total_amount ?? 0).toLocaleString("en-IN")}
+                          {formatPrice(order.total_amount ?? 0)}
                         </p>
                       </div>
                       <Link href={`/orders/${order.id}`}>

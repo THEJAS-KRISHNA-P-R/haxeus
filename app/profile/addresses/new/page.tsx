@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,12 +10,9 @@ import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/Toggle"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { useTheme } from "@/components/ThemeProvider"
 
 export default function NewAddressPage() {
   const router = useRouter()
-  const { theme } = useTheme()
-  const [mounted, setMounted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
     full_name: "",
@@ -28,7 +25,6 @@ export default function NewAddressPage() {
     is_default: false,
   })
 
-  useEffect(() => setMounted(true), [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

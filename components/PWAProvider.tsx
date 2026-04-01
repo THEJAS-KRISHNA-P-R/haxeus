@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { registerServiceWorker } from '@/lib/pwa'
+import { InstallPrompt } from './InstallPrompt'
 
 /**
  * PWA Provider Component
@@ -9,10 +10,9 @@ import { registerServiceWorker } from '@/lib/pwa'
  */
 export function PWAProvider() {
   useEffect(() => {
-    
     // Register service worker
     registerServiceWorker()
   }, [])
 
-  return null // This component doesn't render anything
+  return <InstallPrompt />
 }

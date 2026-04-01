@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
-import { Plus, Pencil, Trash2, X, Check, Loader2, Tag } from "lucide-react"
+import { Plus, Pencil, Trash2, X, Check, Loader2 } from "lucide-react"
 import {
     AdminCard,
     AdminPageHeader,

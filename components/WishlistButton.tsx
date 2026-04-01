@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Heart } from "lucide-react"
 import { Button } from "./ui/button"
 import { addToWishlist, removeFromWishlist, isInWishlist } from "@/lib/wishlist"
-import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/contexts/CartContext"
 
@@ -26,7 +25,7 @@ export function WishlistButton({
   const router = useRouter()
   const { user } = useCart()
   const [inWishlist, setInWishlist] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {

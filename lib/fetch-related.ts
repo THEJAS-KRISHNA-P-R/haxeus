@@ -1,7 +1,8 @@
 import { cache } from "react"
 import { createClient } from "@/lib/supabase-server"
+import { Product } from "@/types/supabase"
 
-export const fetchRelatedProducts = cache(async (productId: number, category: string) => {
+export const fetchRelatedProducts = cache(async (productId: number, category: string): Promise<Product[]> => {
   try {
     const supabase = await createClient()
     const { data, error } = await supabase

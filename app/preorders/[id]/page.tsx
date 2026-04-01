@@ -5,13 +5,13 @@ import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/components/ThemeProvider"
 import { Shield, Truck, RotateCcw, Zap } from "lucide-react"
 import { useStoreSettings } from "@/hooks/useStoreSettings"
+import { formatPrice } from "@/lib/currency"
 
 interface PreorderItem {
   id: string
@@ -295,9 +295,9 @@ export default function PreorderDetailPage() {
             <div>
               <h1 className="text-3xl lg:text-4xl font-bold text-theme mb-3">{preorderItem.name}</h1>
               <div className="flex items-center gap-4 mb-4">
-                <span className="text-3xl font-bold text-[var(--accent)]">₹{preorderItem.price.toLocaleString("en-IN")}</span>
+                <span className="text-3xl font-bold text-[var(--accent)]">{formatPrice(preorderItem.price)}</span>
                 {preorderItem.original_price && (
-                  <span className={`text-lg line-through ${isDark ? 'text-white/50' : 'text-black/55'}`}>₹{preorderItem.original_price.toLocaleString("en-IN")}</span>
+                  <span className={`text-lg line-through ${isDark ? 'text-white/50' : 'text-black/55'}`}>{formatPrice(preorderItem.original_price)}</span>
                 )}
               </div>
               {preorderItem.expected_date && (
@@ -364,7 +364,7 @@ export default function PreorderDetailPage() {
               </span>
               <span className="flex items-center gap-1.5">
                 <Truck className="w-3.5 h-3.5 text-theme-2" />
-                Free shipping over ₹{settings.free_shipping_above.toLocaleString("en-IN")}
+                Free shipping over {formatPrice(settings.free_shipping_above)}
               </span>
               <span className="flex items-center gap-1.5">
                 <RotateCcw className="w-3.5 h-3.5 text-theme-2" />
@@ -476,7 +476,7 @@ export default function PreorderDetailPage() {
             <div className="flex items-center gap-3 max-w-7xl mx-auto">
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-theme truncate">{preorderItem.name}</p>
-                <p className="text-[var(--accent)] font-bold">₹{preorderItem.price.toLocaleString("en-IN")}</p>
+                <p className="text-[var(--accent)] font-bold">{formatPrice(preorderItem.price)}</p>
               </div>
               <Button
                 onClick={handlePreorder}

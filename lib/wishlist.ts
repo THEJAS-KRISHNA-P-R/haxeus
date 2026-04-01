@@ -1,4 +1,5 @@
 import { supabase } from "./supabase"
+import { WishlistItem, Product } from "@/types/supabase"
 
 /**
  * Add product to wishlist
@@ -15,7 +16,7 @@ export async function addToWishlist(productId: number): Promise<boolean> {
     }
 
 
-    const { data, error } = await supabase.from("wishlist").insert([
+    const { error } = await supabase.from("wishlist").insert([
       {
         user_id: user.id,
         product_id: productId,
@@ -49,7 +50,7 @@ export async function removeFromWishlist(productId: number): Promise<boolean> {
     }
 
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("wishlist")
       .delete()
       .eq("user_id", user.id)
@@ -106,7 +107,7 @@ export async function isInWishlist(productId: number): Promise<boolean> {
 /**
  * Get user's wishlist
  */
-export async function getWishlist() {
+export async function getWishlist(): Promise<(WishlistItem & { products?: Pick<Product, 'id' | 'name' | 'price' | 'front_image' | 'available_sizes'> })[]> {
   try {
     const {
       data: { user },
@@ -134,7 +135,7 @@ export async function getWishlist() {
 
     if (error) throw error
 
-    return data || []
+    return (data as unknown as (WishlistItem & { products: Pick<Product, 'id' | 'name' | 'price' | 'front_image' | 'available_sizes'> })[]) || []
   } catch (error) {
     console.error("Error getting wishlist:", error)
     return []

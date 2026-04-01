@@ -4,13 +4,13 @@ import { motion } from "framer-motion"
 import { scrollReveal } from "@/lib/animations"
 import { ProductCard } from "@/components/ui/ProductCard"
 import type { PreorderSectionConfig } from "@/types/homepage"
-import type { Product } from "@/lib/supabase"
+import { Product } from "@/types/supabase"
 
 interface PreorderSectionProps {
   config: PreorderSectionConfig
   products: Product[]
   isDark?: boolean
-  onPreorderClick: (product: any) => void
+  onPreorderClick: (product: Product) => void
 }
 
 const accentColors = ["#e7bf04", "#c03c9d", "#07e4e1"]
@@ -19,7 +19,7 @@ export function PreorderSection({
   config, 
   products, 
   isDark = true,
-  onPreorderClick 
+  onPreorderClick
 }: PreorderSectionProps) {
   if (products.length === 0) return null
 
@@ -46,7 +46,7 @@ export function PreorderSection({
           {products.map((product, index) => (
             <ProductCard
               key={product.id}
-              product={product as any}
+              product={product}
               index={index}
               accentColor={accentColors[index % 3]}
               variant="preorder"

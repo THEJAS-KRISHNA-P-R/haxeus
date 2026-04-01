@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, type Product } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase"
+import { Product } from "@/types/supabase"
 import { Button } from "@/components/ui/button"
 import { Edit, Package, Users, CheckCircle2 } from "lucide-react"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
@@ -57,14 +58,12 @@ export default function PreordersAdminPage() {
     const { theme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const [items, setItems] = useState<Product[]>([])
-    const [loading, setLoading] = useState(true)
     const isDark = !mounted ? true : theme === "dark"
 
     useEffect(() => setMounted(true), [])
 
     async function fetchPreorders() {
-        setLoading(true)
-        const { data, error } = await supabase.from("products").select(`
+        const { data } = await supabase.from("products").select(`
             id, name, price, front_image,
             is_preorder, preorder_status,
             expected_date, max_preorders, preorder_count
@@ -73,7 +72,6 @@ export default function PreordersAdminPage() {
         if (data) {
             setItems(data as Product[]);
         }
-        setLoading(false)
     }
 
     useEffect(() => {

@@ -9,6 +9,7 @@ import { useTheme } from "@/components/ThemeProvider"
 import { cn } from "@/lib/utils"
 import { ArrowLeft, Check, CheckCircle, Clock, Package, Truck, XCircle } from "lucide-react"
 import { format } from "date-fns"
+import { formatPrice, CURRENCY_SYMBOL } from "@/lib/currency"
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 
@@ -233,7 +234,7 @@ export default function OrderDetailsPage() {
                         )}
                       </div>
                       <p className={cn("text-sm font-bold flex-shrink-0", primary)}>
-                        ₹{(price * item.quantity).toLocaleString("en-IN")}
+                        {formatPrice(price * item.quantity)}
                       </p>
                     </div>
                   )
@@ -266,23 +267,23 @@ export default function OrderDetailsPage() {
               <div className="space-y-2.5 text-sm">
                 <div className="flex justify-between">
                   <span className={muted}>Subtotal</span>
-                  <span className={primary}>₹{subtotal.toLocaleString("en-IN")}</span>
+                  <span className={primary}>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className={muted}>Shipping</span>
                   <span className={shippingAmt === 0 ? "text-emerald-400" : primary}>
-                    {shippingAmt === 0 ? "FREE" : `₹${shippingAmt}`}
+                    {shippingAmt === 0 ? "FREE" : `${CURRENCY_SYMBOL}${shippingAmt}`}
                   </span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between">
                     <span className={muted}>Discount</span>
-                    <span className="text-emerald-400">−₹{discount.toLocaleString("en-IN")}</span>
+                    <span className="text-emerald-400">\u2212{formatPrice(discount)}</span>
                   </div>
                 )}
                 <div className={cn("border-t pt-2.5 flex justify-between font-bold", isDark ? "border-white/[0.07]" : "border-black/[0.07]")}>
                   <span className={primary}>Total</span>
-                  <span className="text-[#e93a3a]">₹{(order.total_amount ?? 0).toLocaleString("en-IN")}</span>
+                  <span className="text-[#e93a3a]">{formatPrice(order.total_amount ?? 0)}</span>
                 </div>
               </div>
             </div>

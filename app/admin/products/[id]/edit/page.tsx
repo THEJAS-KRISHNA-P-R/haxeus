@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useTheme } from "@/components/ThemeProvider"
-import { supabase, type Product, type ProductImage, type ProductInventory } from "@/lib/supabase"
+import { supabase, type ProductImage, type ProductInventory } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -125,7 +125,7 @@ export default function EditProductPage() {
 
       // Load reviews
       const { data: revs } = await supabase
-        .from("product_reviews")
+        .from("reviews")
         .select("*")
         .eq("product_id", productId)
         .order("created_at", { ascending: false })
@@ -223,7 +223,7 @@ export default function EditProductPage() {
       } else {
         // Update existing product
 
-        const { data: updateResult, error: productError } = await supabase
+        const { error: productError } = await supabase
           .from("products")
           .update({
             name: formData.name,
@@ -271,7 +271,7 @@ export default function EditProductPage() {
             is_primary: img.is_primary,
           }))
 
-          const { data: imageInsertResult, error: imagesError } = await supabase
+          const { error: imagesError } = await supabase
             .from("product_images")
             .insert(imagesWithProductId)
             .select()
@@ -304,7 +304,7 @@ export default function EditProductPage() {
             sold_quantity: 0,
           }))
 
-          const { data: invInsertResult, error: inventoryError } = await supabase
+          const { error: inventoryError } = await supabase
             .from("product_inventory")
             .insert(inventoryWithProductId)
             .select()
@@ -379,40 +379,13 @@ export default function EditProductPage() {
   }
 
   async function handleAddReview() {
-    if (!newReview.reviewer_name || !newReview.body) {
-      alert("Please fill in name and review body")
-      return
-    }
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      const { data, error } = await supabase
-        .from("product_reviews")
-        .insert([{
-          product_id: Number(productId),
-          reviewer_name: newReview.reviewer_name,
-          rating: newReview.rating,
-          body: newReview.body,
-          verified_purchase: newReview.verified_purchase,
-          user_id: user?.id
-        }])
-        .select()
-        .single()
-
-      if (error) throw error
-      setReviews([data, ...reviews])
-      setShowAddReview(false)
-      setNewReview({ reviewer_name: "", rating: 5, body: "", verified_purchase: true })
-    } catch (err: any) {
-      alert(`Failed to add review: ${err.message}`)
-    }
+    alert("Manual review seeding has been disabled. Reviews are now created only by delivered customers.")
   }
 
   async function handleDeleteReview(id: string) {
     if (!window.confirm("Delete this review?")) return
     try {
-      const { error } = await supabase.from("product_reviews").delete().eq("id", id)
+      const { error } = await supabase.from("reviews").delete().eq("id", id)
       if (error) throw error
       setReviews(reviews.filter(r => r.id !== id))
     } catch (err: any) {
@@ -736,7 +709,7 @@ export default function EditProductPage() {
             <div className="space-y-4">
               {reviews.length === 0 ? (
                 <div className="py-8 text-center border-2 border-dashed border-white/[0.05] rounded-xl">
-                  <p className="text-sm opacity-30 italic">No reviews yet. Use the button above to seed some.</p>
+                  <p className="text-sm opacity-30 italic">No reviews yet. Reviews appear here after delivered customers submit them.</p>
                 </div>
               ) : (
                 reviews.map((r) => (
@@ -744,7 +717,7 @@ export default function EditProductPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold">{r.reviewer_name}</p>
+                          <p className="text-sm font-bold">{r.title || (r.verified_purchase ? "Delivered buyer" : "Customer review")}</p>
                           {r.verified_purchase && (
                             <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[8px] font-bold uppercase tracking-wider">
                               Verified

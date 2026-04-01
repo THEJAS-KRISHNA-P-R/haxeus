@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { X, Plus, AlertCircle, Package } from "lucide-react"
 import { ProductInventory } from "@/lib/supabase"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 
 interface SizeInventoryManagerProps {
     inventory: ProductInventory[]

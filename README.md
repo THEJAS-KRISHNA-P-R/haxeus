@@ -66,8 +66,9 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ### Backend & Caching
 - **Database**: Supabase (PostgreSQL 15)
-- **Caching**: **Upstash Redis** (Admin role cache + Rate limiting)
+- **Caching**: **Redis Enterprise Cloud** (Admin role cache + Rate limiting)
 - **Security**: Row Level Security (RLS) + Redis signature verification
+- **Analytics**: Google Analytics 4 (GA4) + Vercel Analytics
 
 ---
 
@@ -83,11 +84,11 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 # Email & Site Configuration
 RESEND_API_KEY=re_your_api_key
 NEXT_PUBLIC_SITE_URL=https://haxeus.in
+NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
 CRON_SECRET=your-random-cron-secret
 
-# Caching (Optional - App will use No-Op Stub if missing)
+# Caching
 REDIS_URL=rediss://default:password@your-redis-host:port
-ADMIN_CACHE_SECRET=your-random-secret-key
 ```
 
 Get these from your Supabase project dashboard at [supabase.com](https://supabase.com)
@@ -161,7 +162,8 @@ For detailed documentation, troubleshooting, and setup guides, see:
 ---
 
 **Built with ❤️ by the HAXEUS Team**  
-Powered by Next.js 15, Supabase, and Framer Motion
+Powered by Next.js 15, Supabase, and Framer Motion.  
+Version: **v26 (Production Ready)**
 - **Authentication**: Supabase Auth (email/password, OAuth)
 - **Storage**: Supabase Storage for product images
 - **Real-time**: Supabase Realtime subscriptions

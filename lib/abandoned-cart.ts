@@ -1,4 +1,6 @@
-import { supabase } from './supabase'
+import { supabase, AbandonedCart, UserProfile } from './supabase'
+import { SupabaseClient } from '@supabase/supabase-js'
+import { sendEmail } from './resend'
 
 /**
  * Abandoned Cart Recovery System
@@ -50,7 +52,7 @@ export async function markCartAsRecovered(userId: string) {
     .eq('recovered', false)
 }
 
-export async function getAbandonedCartsForEmail(): Promise<any[]> {
+export async function getAbandonedCartsForEmail(): Promise<(AbandonedCart & { email?: string })[]> {
   // Get carts abandoned > 1 hour ago, not recovered, < 3 emails sent
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
 
@@ -58,7 +60,7 @@ export async function getAbandonedCartsForEmail(): Promise<any[]> {
     .from('abandoned_carts')
     .select(`
       *,
-      auth.users (
+      profiles (
         email
       )
     `)
@@ -71,7 +73,14 @@ export async function getAbandonedCartsForEmail(): Promise<any[]> {
     return []
   }
 
-  return data || []
+  type AbandonedCartWithProfile = AbandonedCart & {
+    profiles: { email: string } | null
+  }
+
+  return (data as unknown as AbandonedCartWithProfile[]).map(item => ({
+    ...item,
+    email: item.profiles?.email
+  }))
 }
 
 export async function incrementEmailSentCount(abandonedCartId: string) {
@@ -177,7 +186,7 @@ export async function getAbandonedCartStats() {
  * Process abandoned carts and send recovery emails
  * Should be called from cron job every hour
  */
-export async function processAbandonedCarts(supabaseClient: any) {
+export async function processAbandonedCarts(supabaseClient: SupabaseClient) {
   const results = {
     stage1Sent: 0,
     stage2Sent: 0,
@@ -212,14 +221,23 @@ export async function processAbandonedCarts(supabaseClient: any) {
       return results
     }
 
-    if (!abandonedCarts || abandonedCarts.length === 0) {
+    if (!abandonedCarts || (abandonedCarts as unknown[]).length === 0) {
       return results
     }
 
+    type AbandonedCartWithFullProfile = AbandonedCart & {
+      profiles: Pick<UserProfile, 'id' | 'email' | 'full_name'> | null
+    }
+
+    const carts = abandonedCarts as unknown as AbandonedCartWithFullProfile[]
+
     // Process each cart
-    for (const cart of abandonedCarts) {
+    for (const cart of carts) {
       try {
-        const cartUpdatedAt = new Date(cart.updated_at)
+        const updatedAt = cart.updated_at
+        if (!updatedAt) continue
+
+        const cartUpdatedAt = new Date(updatedAt)
         const lastEmailSent = cart.last_email_sent_at ? new Date(cart.last_email_sent_at) : null
         const emailsSent = cart.email_sent_count || 0
 
@@ -344,27 +362,14 @@ async function sendAbandonedCartEmail(
         return false
     }
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: `HAXEUS <${process.env.FROM_EMAIL ?? 'orders@haxeus.in'}>`,
-        to: [email],
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-      }),
+    const response = await sendEmail({
+      from: `HAXEUS <${process.env.FROM_EMAIL ?? 'orders@haxeus.in'}>`,
+      to: email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
     })
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error(`Failed to send email to ${email}:`, error)
-      return false
-    }
-
-    return true
+    return response.success
   } catch (error) {
     console.error(`Error sending abandoned cart email to ${email}:`, error)
     return false

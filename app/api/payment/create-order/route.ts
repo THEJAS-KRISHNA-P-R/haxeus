@@ -175,14 +175,12 @@ export async function POST(req: NextRequest) {
 
     // ── Coupon validation ──────────────────────────────────────────────────────
     let discountAmount = 0
-    let validatedCouponId: string | null = null
     if (couponCode) {
       const validation = await validateCoupon(couponCode, subtotal, user.id)
       if (!validation.valid) {
         return NextResponse.json({ error: validation.error }, { status: 400 })
       }
       discountAmount = validation.discountAmount ?? 0
-      validatedCouponId = validation.coupon?.id ?? null
     }
 
     const totalINR = subtotal - discountAmount + shippingFeeINR

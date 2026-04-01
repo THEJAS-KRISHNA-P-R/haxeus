@@ -1,10 +1,10 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { scrollReveal } from "@/lib/animations"
 import { ProductCard } from "@/components/ui/ProductCard"
 import type { FeaturedProductsConfig } from "@/types/homepage"
-import type { Product } from "@/lib/supabase"
+import { Product } from "@/types/supabase"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,7 @@ export function FeaturedProductsSection({
   loading = false,
   isDark = true 
 }: FeaturedProductsSectionProps) {
+  const prefersReducedMotion = useReducedMotion()
   const heading = config.heading ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading
   const headingAccent = config.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.heading_accent
   const subtext = config.subtext ?? DEFAULT_HOMEPAGE_CONFIG.featured_products.subtext
@@ -33,10 +34,11 @@ export function FeaturedProductsSection({
     <section className="relative min-h-screen flex items-center z-10 border-t border-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
         <motion.div
-          initial="hidden"
+          initial={prefersReducedMotion ? false : "hidden"}
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={scrollReveal}
+          layout="position"
           className="text-center mb-16"
         >
           <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>
@@ -62,13 +64,15 @@ export function FeaturedProductsSection({
           </div>
         ) : products.length === 0 ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            transition={prefersReducedMotion ? { duration: 0 } : undefined}
+            layout="position"
             className="text-center py-16"
           >
             <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              animate={prefersReducedMotion ? { scale: 1 } : { scale: [1, 1.1, 1] }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 2, repeat: Infinity }}
               className="text-6xl mb-6"
             />
             <h3 className="text-3xl font-bold text-theme mb-4">Coming Soon!</h3>
@@ -76,7 +80,7 @@ export function FeaturedProductsSection({
               We&apos;re working on bringing you amazing products. Stay tuned!
             </p>
             <Link href="/contact">
-              <motion.div whileHover={hoverScale} whileTap={tapScale}>
+              <motion.div whileHover={prefersReducedMotion ? undefined : hoverScale} whileTap={prefersReducedMotion ? undefined : tapScale}>
                 <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-8 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[var(--accent)]/20">
                   Get Notified
                 </Button>
@@ -88,7 +92,7 @@ export function FeaturedProductsSection({
             {products.map((product, index) => (
               <ProductCard
                 key={product.id}
-                product={product as any}
+                product={product}
                 index={index}
                 accentColor={accentColors[index % 3]}
                 variant="default"

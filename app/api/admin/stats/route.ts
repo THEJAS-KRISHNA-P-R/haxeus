@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
 import { verifyAdminRequest } from "@/lib/admin-auth"
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const auth = await verifyAdminRequest()
     if (!auth.authorized) {

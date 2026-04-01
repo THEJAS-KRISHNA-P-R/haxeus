@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { checkStockAvailability } from '@/lib/inventory'
+import { Product } from '@/types/supabase'
+import { User } from '@supabase/supabase-js'
 
 export interface CartItem {
   id: string
@@ -12,12 +14,7 @@ export interface CartItem {
   quantity: number
   is_preorder: boolean
   preorder_expected_date: string | null
-  product: {
-    id: number
-    name: string
-    price: number
-    front_image: string
-  }
+  product: Pick<Product, 'id' | 'name' | 'price' | 'front_image'>
 }
 
 export interface AddToCartInput {
@@ -37,9 +34,9 @@ interface CartContextType {
   clearCart: () => Promise<void>
   totalItems: number
   totalPrice: number
-  isLoading: boolean
-  user: any
   userId: string | null
+  user: User | null
+  isLoading: boolean
   wishlist: number[]
   toggleWishlist: (productId: number) => Promise<void>
   isWishlisted: (productId: number) => boolean
@@ -50,13 +47,13 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [hasFetchedUser, setHasFetchedUser] = useState(false)
   const [wishlist, setWishlist] = useState<number[]>([])
 
   useEffect(() => {
-    let subscription: any = null
+    let subscription: { unsubscribe: () => void } | null = null
 
     const getUser = async () => {
       if (hasFetchedUser) return

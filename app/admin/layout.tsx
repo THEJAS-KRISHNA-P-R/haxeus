@@ -66,8 +66,6 @@ function AdminSearch() {
       }))
 
     // 2. Status-based Order Search
-    const statuses = ["paid", "pending", "shipped", "delivered", "cancelled"]
-    const matchedStatus = statuses.find(s => s.startsWith(safeTerm))
 
     const res = await fetch(`/api/admin/search?q=${encodeURIComponent(term)}`)
     if (!res.ok) { setLoading(false); return }

@@ -1,3 +1,6 @@
+import createMDX from '@next/mdx'
+import bundleAnalyzer from '@next/bundle-analyzer'
+
 /** @type {import('next').NextConfig} */
 
 const securityHeaders = [
@@ -5,11 +8,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data: https://*.supabase.co https://vercel.com",
-      "font-src 'self'",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://www.googletagmanager.com https://va.vercel-scripts.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' blob: data: https://*.supabase.co https://vercel.com https://www.googletagmanager.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live https://www.google-analytics.com https://va.vercel-scripts.com",
       "frame-ancestors 'none'",
     ].join("; "),
   },
@@ -20,9 +23,14 @@ const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
 ]
 
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+})
+
 const nextConfig = {
   output: "standalone",
   productionBrowserSourceMaps: false,
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -83,9 +91,25 @@ const nextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      {
+        source: "/service-worker.js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" }
+        ]
+      },
+      {
+        source: "/manifest.json",
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }]
+      }
     ]
   },
   turbopack: {},
 }
 
-export default nextConfig
+const withMDX = createMDX({
+  // Add markdown plugins here if needed
+})
+
+// Merge MDX config with Next.js config
+export default withMDX(withBundleAnalyzer(nextConfig))

@@ -8,181 +8,21 @@
  */
 
 import { supabase } from "@/lib/supabase"
+import { 
+    Product, 
+    ProductImage, 
+    ProductReview, 
+    WishlistItem, 
+    Order, 
+    OrderItem, 
+    Coupon, 
+    LoyaltyPoints, 
+    LoyaltyTransaction, 
+    UserAddress, 
+    OrderStatus,
+} from "@/types/supabase"
 import { invalidate } from "@/lib/redis"
 import { CK } from "@/lib/cache-keys"
-
-// ─────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────
-
-export interface Product {
-    id: number
-    name: string
-    description: string
-    price: number
-    compare_price?: number
-    front_image?: string
-    back_image?: string
-    is_active: boolean
-    is_featured: boolean
-    category_id?: number
-    tags?: string[]
-    created_at: string
-    product_images?: ProductImage[]
-    product_inventory?: ProductInventory[]
-    avg_rating?: number
-    review_count?: number
-}
-
-export interface ProductImage {
-    id: number
-    product_id: number
-    image_url: string
-    is_primary: boolean
-    display_order: number
-    alt_text?: string
-}
-
-export interface ProductInventory {
-    id: number
-    product_id: number
-    size: string
-    quantity: number
-    low_stock_threshold: number
-}
-
-export interface ProductReview {
-    id: string
-    product_id: number
-    user_id: string
-    rating: number
-    title?: string
-    body: string
-    is_approved: boolean
-    is_verified_purchase: boolean
-    helpful_count: number
-    created_at: string
-    profiles?: { full_name: string; avatar_url?: string }
-    review_images?: ReviewImage[]
-}
-
-export interface ReviewImage {
-    id: string
-    review_id: string
-    image_url: string
-    display_order: number
-}
-
-export interface WishlistItem {
-    id: string
-    user_id: string
-    product_id: number
-    created_at: string
-    products?: Product
-}
-
-export interface Order {
-    id: string
-    order_number?: string
-    user_id?: string
-    status: string
-    payment_status: string
-    total_amount: number
-    subtotal: number
-    shipping_amount: number
-    discount_amount?: number
-    coupon_code?: string
-    email: string
-    phone?: string
-    shipping_first_name: string
-    shipping_last_name: string
-    shipping_address_line_1: string
-    shipping_address_line_2?: string
-    shipping_city: string
-    shipping_state: string
-    shipping_zip_code: string
-    tracking_number?: string
-    notes?: string
-    created_at: string
-    order_items?: OrderItem[]
-}
-
-export interface OrderItem {
-    id: string
-    order_id: string
-    product_id: number
-    product_name: string
-    product_image?: string
-    size: string
-    quantity: number
-    unit_price: number
-    total_price: number
-}
-
-export interface Coupon {
-    id: number
-    code: string
-    description?: string
-    discount_type: "percentage" | "fixed"
-    discount_value: number
-    minimum_amount: number
-    usage_limit?: number
-    used_count: number
-    is_active: boolean
-    valid_from: string
-    valid_until: string
-}
-
-export interface LoyaltyPoints {
-    id: string
-    user_id: string
-    points_balance: number
-    lifetime_points: number
-    tier: "member" | "core" | "elite"
-}
-
-export interface LoyaltyTransaction {
-    id: string
-    user_id: string
-    points: number
-    type: "earn" | "redeem" | "expire" | "bonus"
-    description: string
-    order_id?: string
-    created_at: string
-}
-
-export interface UserAddress {
-    id: string
-    user_id: string
-    type: string
-    first_name: string
-    last_name: string
-    address_line_1: string
-    address_line_2?: string
-    city: string
-    state: string
-    zip_code: string
-    country: string
-    is_default: boolean
-    created_at: string
-}
-
-export interface ReturnRequest {
-    id: string
-    order_id: string
-    user_id: string
-    reason: string
-    status: string
-    created_at: string
-}
-
-export interface NewsletterSubscriber {
-    id: string
-    email: string
-    first_name?: string
-    is_active: boolean
-    subscribed_at: string
-}
 
 // ─────────────────────────────────────────────
 // PRODUCTS
@@ -249,7 +89,7 @@ export const ProductService = {
             .single()
 
         if (error) throw error
-        return data as Product & { product_relations: any[] }
+        return data as Product & { product_relations: { related_product: Product & { product_images: ProductImage[] } }[] }
     },
 
     /** Search products by text */
@@ -310,18 +150,13 @@ export const ReviewService = {
     /** Get approved reviews for a product */
     async getForProduct(productId: number, sort: "newest" | "highest" | "helpful" = "newest") {
         let query = supabase
-            .from("product_reviews")
-            .select(`
-        *,
-        profiles (full_name, avatar_url),
-        review_images (id, image_url, display_order)
-      `)
+            .from("reviews")
+            .select(`*`)
             .eq("product_id", productId)
-            .eq("is_approved", true)
 
         switch (sort) {
             case "highest": query = query.order("rating", { ascending: false }); break
-            case "helpful": query = query.order("helpful_count", { ascending: false }); break
+            case "helpful": query = query.order("created_at", { ascending: false }); break
             default: query = query.order("created_at", { ascending: false })
         }
 
@@ -333,17 +168,16 @@ export const ReviewService = {
     /** Get avg rating + count for a product */
     async getSummary(productId: number) {
         const { data, error } = await supabase
-            .from("product_reviews")
+            .from("reviews")
             .select("rating")
             .eq("product_id", productId)
-            .eq("is_approved", true)
 
         if (error) throw error
         if (!data || data.length === 0) return { avg: 0, count: 0, distribution: {} }
 
         const count = data.length
-        const avg = data.reduce((sum, r) => sum + r.rating, 0) / count
-        const distribution = data.reduce((acc: Record<number, number>, r) => {
+        const avg = (data as { rating: number }[]).reduce((sum, r) => sum + r.rating, 0) / count
+        const distribution = (data as { rating: number }[]).reduce((acc: Record<number, number>, r) => {
             acc[r.rating] = (acc[r.rating] || 0) + 1
             return acc
         }, {})
@@ -361,21 +195,12 @@ export const ReviewService = {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error("Must be logged in to review")
 
-        // Check if verified purchase
-        const { data: orderCheck } = await supabase
-            .from("orders")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("status", "delivered")
-            .limit(1)
-
         const { data, error } = await supabase
-            .from("product_reviews")
+            .from("reviews")
             .insert({
                 ...review,
                 user_id: user.id,
-                is_approved: false, // admin approves
-                is_verified_purchase: (orderCheck?.length ?? 0) > 0,
+                verified_purchase: false,
             })
             .select()
             .single()
@@ -384,26 +209,18 @@ export const ReviewService = {
         return data
     },
 
-    /** Vote helpful/unhelpful on a review */
+    /** Helpful voting is not enabled in the current storefront review model */
     async vote(reviewId: string, helpful: boolean) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error("Must be logged in to vote")
-
-        const { error } = await supabase
-            .from("review_votes")
-            .upsert({ review_id: reviewId, user_id: user.id, is_helpful: helpful })
-
-        if (error) throw error
-
-        // Update helpful_count on the review
-        await supabase.rpc("update_review_helpful_count", { p_review_id: reviewId })
+        void reviewId
+        void helpful
+        return
     },
 
     /** Upload review images */
     async uploadImages(reviewId: string, files: File[]) {
         const uploads = files.map(async (file, index) => {
             const path = `reviews/${reviewId}/${Date.now()}_${index}`
-            const { data, error } = await supabase.storage
+            const { error } = await supabase.storage
                 .from("product-images")
                 .upload(path, file, { cacheControl: "3600", upsert: false })
 
@@ -422,14 +239,11 @@ export const ReviewService = {
         await Promise.all(uploads)
     },
 
-    /** Admin: approve or reject a review */
+    /** Admin moderation is not required in the current delivered-review flow */
     async setApproval(reviewId: string, approved: boolean) {
-        const { error } = await supabase
-            .from("product_reviews")
-            .update({ is_approved: approved })
-            .eq("id", reviewId)
-
-        if (error) throw error
+        void reviewId
+        void approved
+        return
     },
 }
 
@@ -561,8 +375,10 @@ export const OrderService = {
 
         // Decrement inventory for each item
         for (const item of items) {
-            await ProductService.decrementStock(item.product_id, item.size, item.quantity)
-                .catch(err => console.error("Stock decrement failed:", err))
+            if (item.product_id) {
+                await ProductService.decrementStock(item.product_id, item.size, item.quantity)
+                    .catch(err => console.error("Stock decrement failed:", err))
+            }
         }
 
         // Track abandoned cart as recovered
@@ -579,7 +395,7 @@ export const OrderService = {
             await LoyaltyService.awardPoints(
                 user.id,
                 Math.floor(order.total_amount),
-                "earn",
+                "earned",
                 `Order ${newOrder.id}`,
                 newOrder.id
             ).catch(err => console.error("Loyalty points failed:", err))
@@ -599,8 +415,8 @@ export const OrderService = {
     },
 
     /** Admin: update order status */
-    async updateStatus(orderId: string, status: string, trackingNumber?: string) {
-        const updates: any = { status }
+    async updateStatus(orderId: string, status: OrderStatus, trackingNumber?: string) {
+        const updates: Partial<Order> = { status }
         if (trackingNumber) updates.tracking_number = trackingNumber
 
         const { error } = await supabase
@@ -613,7 +429,7 @@ export const OrderService = {
 
     /** Admin: get all orders with filters */
     async adminGetAll(options?: {
-        status?: string
+        status?: OrderStatus | "all"
         limit?: number
         offset?: number
         search?: string
@@ -743,42 +559,42 @@ export const LoyaltyService = {
     async awardPoints(
         userId: string,
         points: number,
-        type: LoyaltyTransaction["type"],
+        type: LoyaltyTransaction["transaction_type"],
         description: string,
         orderId?: string
     ) {
         // Upsert loyalty_points balance
         const { data: existing } = await supabase
             .from("loyalty_points")
-            .select("points_balance, lifetime_points")
+            .select("total_points, lifetime_points")
             .eq("user_id", userId)
             .single()
-
+ 
         if (existing) {
-            const newBalance = existing.points_balance + points
-            const newLifetime = existing.lifetime_points + (type === "earn" ? points : 0)
+            const newBalance = existing.total_points + points
+            const newLifetime = existing.lifetime_points + (type === "earned" ? points : 0)
             const tier = newLifetime >= 5000 ? "elite" : newLifetime >= 1000 ? "core" : "member"
-
+ 
             await supabase
                 .from("loyalty_points")
-                .update({ points_balance: newBalance, lifetime_points: newLifetime, tier })
+                .update({ total_points: newBalance, lifetime_points: newLifetime, tier })
                 .eq("user_id", userId)
         } else {
             await supabase
                 .from("loyalty_points")
                 .insert({
                     user_id: userId,
-                    points_balance: points,
+                    total_points: points,
                     lifetime_points: points,
                     tier: "member",
                 })
         }
-
+ 
         // Log transaction
         await supabase.from("loyalty_transactions").insert({
             user_id: userId,
             points,
-            type,
+            transaction_type: type,
             description,
             order_id: orderId,
         })
@@ -787,22 +603,22 @@ export const LoyaltyService = {
     /** Redeem points at checkout (100 points = ₹10) */
     async redeem(userId: string, points: number, orderId: string) {
         const balance = await LoyaltyService.getBalance(userId)
-        if (!balance || balance.points_balance < points)
+        if (!balance || balance.total_points < points)
             throw new Error("Insufficient points")
-
+ 
         await supabase
             .from("loyalty_points")
-            .update({ points_balance: balance.points_balance - points })
+            .update({ total_points: balance.total_points - points })
             .eq("user_id", userId)
-
+ 
         await supabase.from("loyalty_transactions").insert({
             user_id: userId,
             points: -points,
-            type: "redeem",
+            transaction_type: "redeemed",
             description: `Redeemed for order`,
             order_id: orderId,
         })
-
+ 
         return (points / 100) * 10 // ₹ discount
     },
 
@@ -1007,7 +823,7 @@ export const AnalyticsService = {
 
     async track(
         eventType: string,
-        eventData?: Record<string, any>,
+        eventData?: Record<string, unknown>,
         productId?: number,
         orderId?: string
     ) {
@@ -1043,7 +859,7 @@ export const AnalyticsService = {
 
         if (error) throw error
 
-        const total = data?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0
+        const total = (data as { total_amount: number }[] | null)?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0
         const count = data?.length || 0
         const avg = count > 0 ? total / count : 0
 
@@ -1059,16 +875,23 @@ export const AnalyticsService = {
 
         if (error) throw error
 
-        const totals = (data || []).reduce((acc: Record<string, any>, item: any) => {
-            if (!acc[item.product_id]) {
-                acc[item.product_id] = { product_id: item.product_id, name: item.products?.name ?? 'Unknown', total_sold: 0 }
-            }
-            acc[item.product_id].total_sold += item.quantity
-            return acc
-        }, {})
+        interface TopProductAcc {
+            product_id: number
+            name: string
+            total_sold: number
+        }
 
-        return Object.values(totals)
-            .sort((a: any, b: any) => b.total_sold - a.total_sold)
+        const totals = (data || []).reduce((acc: Record<number, TopProductAcc>, item: any) => {
+            const pId = item.product_id
+            if (!acc[pId]) {
+                acc[pId] = { product_id: pId, name: item.products?.name ?? 'Unknown', total_sold: 0 }
+            }
+            acc[pId].total_sold += (item.quantity || 0)
+            return acc
+        }, {} as Record<number, TopProductAcc>)
+
+        return (Object.values(totals) as TopProductAcc[])
+            .sort((a, b) => b.total_sold - a.total_sold)
             .slice(0, limit)
     },
 

@@ -1,4 +1,4 @@
-import { supabase, Product, ProductRelation } from './supabase'
+import { supabase, Product } from './supabase'
 
 /**
  * Product Recommendations Engine
@@ -29,7 +29,14 @@ export async function getRelatedProducts(
     return []
   }
 
-  return data.map((item: any) => item.products).filter(Boolean)
+  type RelatedProductQueryResult = {
+    related_product_id: number
+    products: Product | null
+  }
+
+  return (data as unknown as RelatedProductQueryResult[])
+    .map((item) => item.products)
+    .filter((p): p is Product => !!p)
 }
 
 export async function getFrequentlyBoughtTogether(
@@ -118,20 +125,26 @@ export async function getPersonalizedRecommendations(
   }
 
   // Remove duplicates and products already viewed
-  const uniqueProducts = new Map<number, Product>()
-  
-  data.forEach((item: any) => {
+  const uniqueProductsRecord: Record<number, Product> = {}
+
+  type PersonalizedQueryResult = {
+    related_product_id: number
+    score: number
+    products: Product | null
+  }
+
+  ;(data as unknown as PersonalizedQueryResult[]).forEach((item) => {
     const product = item.products
     if (
       product &&
       !viewedProductIds.includes(product.id) &&
-      !uniqueProducts.has(product.id)
+      !uniqueProductsRecord[product.id]
     ) {
-      uniqueProducts.set(product.id, product)
+      uniqueProductsRecord[product.id] = product
     }
   })
 
-  const recommendations = Array.from(uniqueProducts.values()).slice(0, limit)
+  const recommendations = Object.values(uniqueProductsRecord).slice(0, limit)
 
   // Fill remaining slots with trending products
   if (recommendations.length < limit) {
@@ -208,7 +221,7 @@ export async function getNewArrivals(limit: number = 8): Promise<Product[]> {
 }
 
 export async function getBestSellers(limit: number = 8): Promise<Product[]> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('top_selling_products')
     .select(`
       id,
@@ -218,12 +231,16 @@ export async function getBestSellers(limit: number = 8): Promise<Product[]> {
     `)
     .limit(limit)
 
-  if (error || !data) {
-    console.error('Error fetching best sellers:', error)
-    return []
+  type BestSellerQueryResult = {
+    id: number
+    name: string
+    total_sold: number
+    products: Product | null
   }
 
-  return data.map((item: any) => item.products).filter(Boolean)
+  return (data as unknown as BestSellerQueryResult[])
+    .map((item) => item.products)
+    .filter((p): p is Product => !!p)
 }
 
 // Admin function to generate product relations

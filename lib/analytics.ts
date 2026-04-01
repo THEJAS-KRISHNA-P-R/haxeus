@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, Product } from './supabase'
 
 /**
  * Analytics & Tracking System
@@ -28,7 +28,7 @@ export async function trackEvent(
     sessionId?: string
     productId?: number
     orderId?: string
-    eventData?: Record<string, any>
+    eventData?: Record<string, unknown>
   }
 ) {
   await supabase
@@ -156,12 +156,19 @@ export async function getTopSellingProducts(limit: number = 10, startDate?: Date
 
   // Aggregate by product
   const productStats: Record<number, {
-    product: any
+    product: Pick<Product, 'id' | 'name' | 'front_image'>
     totalQuantity: number
     totalRevenue: number
   }> = {}
 
-  data.forEach((item: any) => {
+  type TopSellingQueryResult = {
+    product_id: number
+    quantity: number
+    price: number
+    products: Pick<Product, 'id' | 'name' | 'front_image'> | null
+  }
+
+  ;(data as unknown as TopSellingQueryResult[]).forEach((item) => {
     if (!item.product_id || !item.products) return
 
     if (!productStats[item.product_id]) {
@@ -241,8 +248,8 @@ export async function getProductPerformance(productId: number, days: number = 30
 
   const totalViews = views?.length || 0
   const totalCartAdds = cartAdds?.length || 0
-  const totalPurchases = purchases?.reduce((sum, p) => sum + p.quantity, 0) || 0
-  const totalRevenue = purchases?.reduce((sum, p) => sum + (p.quantity * p.price), 0) || 0
+  const totalPurchases = (purchases as { quantity: number; price: number }[] | null)?.reduce((sum, p) => sum + p.quantity, 0) || 0
+  const totalRevenue = (purchases as { quantity: number; price: number }[] | null)?.reduce((sum, p) => sum + (p.quantity * p.price), 0) || 0
 
   const viewToCartRate = totalViews > 0 ? (totalCartAdds / totalViews) * 100 : 0
   const cartToPurchaseRate = totalCartAdds > 0 ? (totalPurchases / totalCartAdds) * 100 : 0
@@ -270,9 +277,9 @@ export function initGoogleAnalytics(measurementId: string) {
   document.head.appendChild(script)
 
   // Initialize
-  ;(window as any).dataLayer = (window as any).dataLayer || []
-  function gtag(...args: any[]) {
-    ;(window as any).dataLayer.push(args)
+  window.dataLayer = window.dataLayer || []
+  const gtag = (...args: unknown[]) => {
+    window.dataLayer.push(args)
   }
   gtag('js', new Date())
   gtag('config', measurementId)
@@ -281,28 +288,31 @@ export function initGoogleAnalytics(measurementId: string) {
 export function initFacebookPixel(pixelId: string) {
   if (typeof window === 'undefined') return
 
-  ;(window as any).fbq = function(...args: any[]) {
-    ;((window as any).fbq.q = (window as any).fbq.q || []).push(args)
+  const fbq = function(...args: unknown[]) {
+    const q = window.fbq.q || []
+    q.push(args)
+    window.fbq.q = q
   }
-  ;(window as any).fbq.loaded = true
+  window.fbq = fbq as unknown as typeof window.fbq
+  window.fbq.loaded = true
 
   const script = document.createElement('script')
   script.async = true
   script.src = 'https://connect.facebook.net/en_US/fbevents.js'
   document.head.appendChild(script)
 
-  ;(window as any).fbq('init', pixelId)
-  ;(window as any).fbq('track', 'PageView')
+  window.fbq('init', pixelId)
+  window.fbq('track', 'PageView')
 }
 
-export function trackGAEvent(eventName: string, params: Record<string, any>) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    ;(window as any).gtag('event', eventName, params)
+export function trackGAEvent(eventName: string, params: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'event', { event_name: eventName, ...params })
   }
 }
 
-export function trackFBEvent(eventName: string, params: Record<string, any>) {
-  if (typeof window !== 'undefined' && (window as any).fbq) {
-    ;(window as any).fbq('track', eventName, params)
+export function trackFBEvent(eventName: string, params: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', eventName, params)
   }
 }

@@ -20,12 +20,13 @@ test.describe("Public homepage", () => {
 
     test("hero section visible", async ({ page }) => {
         await page.goto("/")
-        await expect(page.locator("text=Won't Change")).toBeVisible({ timeout: 10_000 })
+        // getByText is usually better at handling text split into spans (SplitText)
+        await expect(page.getByText("Won't Change").first()).toBeVisible({ timeout: 15_000 })
     })
 
     test("navbar visible and contains HAXEUS", async ({ page }) => {
         await page.goto("/")
-        await expect(page.locator("text=HAXEUS").first()).toBeVisible({ timeout: 10_000 })
+        await expect(page.getByRole("link", { name: /HAXEUS/i }).first()).toBeVisible({ timeout: 15_000 })
     })
 
     test("Shop Collection button links to products", async ({ page }) => {

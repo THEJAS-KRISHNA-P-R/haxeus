@@ -1,4 +1,4 @@
-import { supabase, ReturnRequest, ReturnItem } from './supabase'
+import { supabase, ReturnRequest, ReturnItem, Order, Product } from './supabase'
 
 /**
  * Returns & Exchanges Management
@@ -94,7 +94,7 @@ export async function createReturnRequest(request: {
 }
 
 export async function getUserReturnRequests(userId: string): Promise<ReturnRequest[]> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('return_requests')
     .select(`
       *,
@@ -117,12 +117,16 @@ export async function getUserReturnRequests(userId: string): Promise<ReturnReque
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
-  if (error) {
-    console.error('Error fetching return requests:', error)
-    return []
+  type ReturnRequestWithDetails = ReturnRequest & {
+    orders: Pick<Order, 'id' | 'total_amount' | 'created_at'> | null
+    return_items: (ReturnItem & {
+      order_items: (Record<string, unknown> & {
+        products: Pick<Product, 'name' | 'front_image'> | null
+      }) | null
+    })[]
   }
 
-  return (data as any) || []
+  return (data as unknown as ReturnRequestWithDetails[]) || []
 }
 
 export async function getAllReturnRequests(
@@ -154,14 +158,18 @@ export async function getAllReturnRequests(
     query = query.eq('status', status)
   }
 
-  const { data, error } = await query
+  const { data } = await query
 
-  if (error) {
-    console.error('Error fetching return requests:', error)
-    return []
+  type ReturnRequestWithDetails = ReturnRequest & {
+    orders: Pick<Order, 'id' | 'total_amount' | 'created_at'> | null
+    return_items: (ReturnItem & {
+      order_items: (Record<string, unknown> & {
+        products: Pick<Product, 'name' | 'front_image'> | null
+      }) | null
+    })[]
   }
 
-  return (data as any) || []
+  return (data as unknown as ReturnRequestWithDetails[]) || []
 }
 
 export async function updateReturnStatus(
@@ -255,7 +263,7 @@ export async function getReturnStats() {
   return stats
 }
 
-export function canReturnOrder(order: any): { canReturn: boolean; reason?: string } {
+export function canReturnOrder(order: Partial<Order>): { canReturn: boolean; reason?: string } {
   if (order.status !== 'delivered') {
     return { canReturn: false, reason: 'Order must be delivered to request return' }
   }

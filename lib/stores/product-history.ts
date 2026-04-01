@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
-import type { Product } from "@/lib/supabase"
+import { Product } from "@/types/supabase"
 
 const MAX_RECENT = 10
 

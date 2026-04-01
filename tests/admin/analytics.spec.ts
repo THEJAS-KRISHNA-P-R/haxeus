@@ -4,14 +4,14 @@ test.describe("Analytics page", () => {
 
     test.beforeEach(async ({ page }) => {
         await page.goto("/admin/analytics")
-        await expect(page.locator("h1:has-text('Analytics')")).toBeVisible({ timeout: 15_000 })
+        await expect(page.getByRole('heading', { name: 'Analytics' })).toBeVisible({ timeout: 15_000 })
     })
 
     test("loads stat cards", async ({ page }) => {
-        await expect(page.locator("text=TOTAL ORDERS")).toBeVisible()
-        await expect(page.locator("text=TOTAL REVENUE")).toBeVisible()
-        await expect(page.locator("text=CUSTOMERS")).toBeVisible()
-        await expect(page.locator("text=AVG ORDER VALUE")).toBeVisible()
+        await expect(page.locator("text=Total Orders")).toBeVisible()
+        await expect(page.locator("text=Revenue")).toBeVisible()
+        await expect(page.locator("text=Customers")).toBeVisible()
+        await expect(page.locator("text=Avg Ticket")).toBeVisible()
     })
 
     test("has no fake placeholder data", async ({ page }) => {

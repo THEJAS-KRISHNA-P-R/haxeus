@@ -1,6 +1,6 @@
-import { Resend } from "resend"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from "@/lib/resend"
+import type { OrderStatus } from "@/lib/supabase"
+import { formatPrice, CURRENCY_SYMBOL } from "@/lib/currency"
 
 const FROM_ORDERS  = `HAXEUS <${process.env.FROM_EMAIL ?? "orders@haxeus.in"}>`
 const FROM_UPDATES = `HAXEUS Updates <${process.env.UPDATES_EMAIL ?? "updates@haxeus.in"}>`
@@ -119,7 +119,7 @@ export async function sendOrderConfirmation(params: OrderConfirmationParams) {
       </td>
       <td style="padding:14px 0;border-bottom:1px solid #1a1a1a;text-align:right;vertical-align:top;">
         <p style="color:#ffffff;font-weight:600;margin:0;font-size:14px;">
-          ₹${(item.price * item.quantity).toLocaleString("en-IN")}
+          ${formatPrice(item.price * item.quantity)}
         </p>
       </td>
     </tr>
@@ -153,18 +153,18 @@ export async function sendOrderConfirmation(params: OrderConfirmationParams) {
       <table style="width:100%;border-collapse:collapse;">
         <tr>
           <td style="color:#666;font-size:13px;padding:4px 0;">Subtotal</td>
-          <td style="color:#fff;font-size:13px;text-align:right;padding:4px 0;">₹${params.subtotal.toLocaleString("en-IN")}</td>
+          <td style="color:#fff;font-size:13px;text-align:right;padding:4px 0;">${formatPrice(params.subtotal)}</td>
         </tr>
         <tr>
           <td style="color:#666;font-size:13px;padding:4px 0;">Shipping</td>
           <td style="font-size:13px;text-align:right;padding:4px 0;color:${params.shipping === 0 ? "#4ade80" : "#fff"};">
-            ${params.shipping === 0 ? "FREE" : `₹${params.shipping}`}
+            ${params.shipping === 0 ? "FREE" : `${CURRENCY_SYMBOL}${params.shipping}`}
           </td>
         </tr>
         <tr>
           <td style="color:#fff;font-size:15px;font-weight:700;padding:12px 0 4px;border-top:1px solid #1a1a1a;">Total</td>
           <td style="color:#e93a3a;font-size:18px;font-weight:700;text-align:right;padding:12px 0 4px;border-top:1px solid #1a1a1a;">
-            ₹${params.total.toLocaleString("en-IN")}
+            ${formatPrice(params.total)}
           </td>
         </tr>
       </table>
@@ -189,10 +189,17 @@ export async function sendOrderConfirmation(params: OrderConfirmationParams) {
       </a>
     </div>
 
+    <p style="color:#666;font-size:13px;line-height:1.7;text-align:center;margin:20px 0 0;">
+      Need a return or size exchange? Read the full policy here:
+      <a href="${APP_URL}/returns-refunds" style="color:#e93a3a;text-decoration:underline;margin-left:4px;">
+        Returns & Refunds
+      </a>
+    </p>
+
     ${emailFooter(params.customer_email)}
   `
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_ORDERS,
     to: params.customer_email,
     replyTo: REPLY_TO,
@@ -275,7 +282,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams) {
     ${emailFooter(params.email)}
   `
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_UPDATES,
     to: params.email,
     replyTo: REPLY_TO,
@@ -330,7 +337,7 @@ export async function sendDropAlert(params: DropAlertParams) {
     <!-- Price row -->
     <div style="margin-bottom:28px;">
       <span style="color:#e93a3a;font-size:26px;font-weight:700;">
-        ₹${params.price.toLocaleString("en-IN")}
+        ${formatPrice(params.price)}
       </span>
       ${params.is_preorder && params.expected_date ? `
         <span style="background:#e7bf04;color:#000;padding:4px 14px;border-radius:100px;font-size:11px;font-weight:700;margin-left:12px;">
@@ -367,7 +374,7 @@ export async function sendDropAlert(params: DropAlertParams) {
 
     await Promise.all(
       batch.map(email =>
-        resend.emails.send({
+        sendEmail({
           from: FROM_UPDATES,
           to: email,
           replyTo: REPLY_TO,
@@ -466,7 +473,7 @@ export async function sendContactAutoReply(email: string, name: string) {
     ${emailFooter()}
   `
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_ORDERS,
     to: email,
     replyTo: REPLY_TO,
@@ -484,16 +491,16 @@ export async function sendShippingUpdateEmail({
   orderId: string
   customerEmail: string
   customerName: string
-  status: string
+  status: OrderStatus
 }) {
-  const statusLabel: Record<string, { emoji: string; message: string }> = {
+  const statusLabel: Partial<Record<OrderStatus, { emoji: string; message: string }>> = {
     confirmed: { emoji: "✅", message: "Your order has been confirmed and is being prepared." },
     shipped: { emoji: "📦", message: "Your order is on its way. Tracking info will follow shortly." },
     delivered: { emoji: "🎉", message: "Your order has been delivered. We hope you love it." },
     cancelled: { emoji: "❌", message: "Your order has been cancelled. If this was unexpected, please contact us." },
   }
 
-  const s = statusLabel[status.toLowerCase()] ?? { emoji: "📋", message: `Your order status has been updated to ${status}.` }
+  const s = statusLabel[status] ?? { emoji: "📋", message: `Your order status has been updated to ${status}.` }
 
   const content = `
     <h2 style="color:#ffffff;font-size:20px;font-weight:700;margin:0 0 8px;">
@@ -512,7 +519,7 @@ export async function sendShippingUpdateEmail({
     ${emailFooter()}
   `
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_ORDERS,
     to: customerEmail,
     replyTo: REPLY_TO,

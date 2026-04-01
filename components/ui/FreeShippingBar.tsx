@@ -6,6 +6,7 @@ import { Truck, CheckCircle } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
 import { useStoreSettings } from "@/hooks/useStoreSettings"
 import { cn } from "@/lib/utils"
+import { formatPrice, CURRENCY_SYMBOL } from "@/lib/currency"
 
 interface FreeShippingBarProps {
   subtotal: number
@@ -48,7 +49,7 @@ export function FreeShippingBar({ subtotal, className }: FreeShippingBarProps) {
             <>
               Add{" "}
               <span className="font-bold text-[#e93a3a]">
-                ₹{remaining.toLocaleString("en-IN")}
+                {formatPrice(remaining)}
               </span>{" "}
               more for{" "}
               <span className="font-bold">free shipping</span>
@@ -78,9 +79,9 @@ export function FreeShippingBar({ subtotal, className }: FreeShippingBarProps) {
       {/* Threshold labels */}
       {!achieved && (
         <div className="flex justify-between mt-1.5">
-          <span className={cn("text-xs", isDark ? "text-white/30" : "text-black/30")}>₹0</span>
+          <span className={cn("text-xs", isDark ? "text-white/30" : "text-black/30")}>{CURRENCY_SYMBOL}0</span>
           <span className={cn("text-xs", isDark ? "text-white/30" : "text-black/30")}>
-            ₹{threshold.toLocaleString("en-IN")} free shipping
+            {formatPrice(threshold)} free shipping
           </span>
         </div>
       )}

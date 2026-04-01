@@ -6,14 +6,23 @@ import dynamic from "next/dynamic"
 import { usePromoPopups } from "@/hooks/usePromoPopups"
 import { PreorderModal } from "@/components/PreorderModal"
 import { HeroSection } from "@/components/sections/HeroSection"
-import { FeaturedProductsSection } from "@/components/sections/FeaturedProductsSection"
-import { PreorderSection } from "@/components/sections/PreorderSection"
-import { NewsletterSection } from "@/components/sections/NewsletterSection"
-import { AboutSection } from "@/components/sections/AboutSection"
 import type { HomepageConfig } from "@/types/homepage"
-import type { Product } from "@/lib/supabase"
+import { Product } from "@/types/supabase"
+import type { ActiveDrop } from "@/types/drops"
 
 const PromoPopupRenderer = dynamic(() => import("@/components/PromoPopupRenderer").then(mod => mod.PromoPopupRenderer), { ssr: false })
+const DynamicPreorderSection = dynamic(() => import("@/components/sections/PreorderSection").then((mod) => mod.PreorderSection), {
+  loading: () => <div className="min-h-[480px]" />,
+})
+const DynamicNewsletterSection = dynamic(() => import("@/components/sections/NewsletterSection").then((mod) => mod.NewsletterSection), {
+  loading: () => <div className="min-h-[360px]" />,
+})
+const DynamicFeaturedProductsSection = dynamic(() => import("@/components/sections/FeaturedProductsSection").then((mod) => mod.FeaturedProductsSection), {
+  loading: () => <div className="min-h-[800px]" />,
+})
+const DynamicAboutSection = dynamic(() => import("@/components/sections/AboutSection").then((mod) => mod.AboutSection), {
+  loading: () => <div className="min-h-[600px]" />,
+})
 const DynamicTestimonials = dynamic(() => import("@/components/Testimonials"), {
   loading: () => <div className="h-96 animate-pulse bg-[var(--bg-elevated)] rounded-2xl" />,
 })
@@ -22,12 +31,14 @@ interface HomePageClientProps {
   config: HomepageConfig
   featuredProducts: Product[]
   preorderItems: Product[]
+  activeDrop: ActiveDrop | null
 }
 
 export function HomePageClient({ 
   config, 
   featuredProducts, 
-  preorderItems 
+  preorderItems,
+  activeDrop,
 }: HomePageClientProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -64,28 +75,28 @@ export function HomePageClient({
 
         {/* Hero Section */}
         {isSectionVisible("hero", config.hero.visible) && (
-          <HeroSection config={config.hero} />
+          <HeroSection config={config.hero} activeDrop={activeDrop} />
         )}
 
         {/* Preorder Section */}
         {isSectionVisible("preorder", config.preorder.visible) && preorderItems.length > 0 && (
-          <PreorderSection 
+          <DynamicPreorderSection
             config={config.preorder} 
             products={preorderItems} 
             isDark={isDark}
-            onPreorderClick={(p) => setPreorderModalItem(p)}
+            onPreorderClick={(p: Product) => setPreorderModalItem(p)}
           />
         )}
 
         {/* Newsletter Section */}
         {isSectionVisible("newsletter", config.newsletter.visible) && (
-          <NewsletterSection config={config.newsletter} isDark={isDark} />
+          <DynamicNewsletterSection config={config.newsletter} isDark={isDark} />
         )}
 
         {/* Featured Products Section */}
         {isSectionVisible("featured_products", config.featured_products.visible) && (
           <div style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
-            <FeaturedProductsSection 
+            <DynamicFeaturedProductsSection
               config={config.featured_products} 
               products={featuredProducts} 
               isDark={isDark}
@@ -103,7 +114,7 @@ export function HomePageClient({
         {/* About Section */}
         {isSectionVisible("about", config.about.visible) && (
           <div style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
-            <AboutSection config={config.about} isDark={isDark} />
+            <DynamicAboutSection config={config.about} isDark={isDark} />
           </div>
         )}
       </div>
@@ -117,7 +128,7 @@ export function HomePageClient({
         />
       )}
 
-      {mounted && (
+      {mounted && promoPopup && (
         <PromoPopupRenderer
           popup={promoPopup}
           isVisible={isPromoVisible}

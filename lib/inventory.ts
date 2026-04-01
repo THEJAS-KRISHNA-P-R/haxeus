@@ -1,4 +1,4 @@
-import { supabase, ProductInventory } from './supabase'
+import { supabase, ProductInventory, Product } from './supabase'
 
 /**
  * Inventory Management System
@@ -79,17 +79,12 @@ export async function releaseReservedStock(
   return !error
 }
 
-export async function getLowStockProducts(): Promise<any[]> {
-  const { data, error } = await supabase
+export async function getLowStockProducts(): Promise<ProductInventory[]> {
+  const { data } = await supabase
     .from('low_stock_products')
     .select('*')
 
-  if (error) {
-    console.error('Error fetching low stock products:', error)
-    return []
-  }
-
-  return data || []
+  return (data as unknown as ProductInventory[]) || []
 }
 
 export async function decrementInventory(
@@ -147,8 +142,10 @@ export async function bulkUpdateInventory(
   }
 }
 
-export async function getInventorySummary() {
-  const { data, error } = await supabase
+export type InventorySummaryItem = ProductInventory & { products?: Pick<Product, 'id' | 'name' | 'category'> }
+
+export async function getInventorySummary(): Promise<InventorySummaryItem[]> {
+  const { data } = await supabase
     .from('product_inventory')
     .select(`
       *,
@@ -159,16 +156,11 @@ export async function getInventorySummary() {
       )
     `)
 
-  if (error) {
-    console.error('Error fetching inventory summary:', error)
-    return []
-  }
-
-  return data || []
+  return (data as unknown as InventorySummaryItem[]) || []
 }
 
 // Export inventory report as CSV
-export function exportInventoryToCSV(inventory: any[]): string {
+export function exportInventoryToCSV(inventory: InventorySummaryItem[]): string {
   const headers = ['Product', 'Size', 'Stock', 'Reserved', 'Sold', 'Status']
   const rows = inventory.map(item => [
     item.products?.name || 'Unknown',

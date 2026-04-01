@@ -19,12 +19,6 @@ interface RazorpayCheckoutProps {
     onError?: (error: string) => void
 }
 
-declare global {
-    interface Window {
-        Razorpay: any
-    }
-}
-
 const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
         if (window.Razorpay) return resolve(true)

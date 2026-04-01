@@ -19,7 +19,7 @@ export function useHomepageConfig(): UseHomepageConfigReturn {
   const [error, setError] = useState<string | null>(null)
   const supabase = supabaseClient
 
-  const fetchConfig = useCallback(async (signal?: AbortSignal) => {
+  const fetchConfig = useCallback(async (_signal?: AbortSignal) => {
     setLoading(true)
     try {
       const { data, error: fetchError } = await supabase

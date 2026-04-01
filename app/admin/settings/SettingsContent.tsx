@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
-import { Save, Loader2, Check, Globe, Shield, Bell, Truck, Store } from "lucide-react"
+import { Save, Check, Shield, Bell, Truck, Store, LucideIcon } from "lucide-react"
 import {
     AdminCard,
     AdminPageHeader,
@@ -50,7 +50,7 @@ export default function SettingsContent() {
                         try { v = JSON.parse(v) } catch { }
                     }
                     if (row.key in merged) {
-                        (merged as any)[row.key] = v
+                        Object.assign(merged, { [row.key]: v });
                     }
                 })
                 setSettings(merged)
@@ -79,7 +79,7 @@ export default function SettingsContent() {
         setTimeout(() => setSaved(false), 2500)
     }
 
-    const set = (k: keyof SettingsState, v: any) =>
+    const set = (k: keyof SettingsState, v: string | number | boolean) =>
         setSettings(s => ({ ...s, [k]: v }))
 
     const Toggle = ({ k, label }: { k: "cod_enabled" | "maintenance_mode", label: string }) => (
@@ -221,7 +221,7 @@ export default function SettingsContent() {
     )
 }
 
-function SectionTitle({ icon: Icon, title }: { icon: any; title: string }) {
+function SectionTitle({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
     return (
         <div className="flex items-center gap-2 px-1">
             <div style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)" }} className="p-1.5 rounded-lg border border-[var(--border)]">

@@ -3,7 +3,7 @@ import { invalidate } from "@/lib/redis";
 import { verifyAdminRequest } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-export async function GET(request: Request) {
+export async function GET() {
     const auth = await verifyAdminRequest();
     if (!auth.authorized) {
         return NextResponse.json({ error: auth.error }, { status: auth.status });

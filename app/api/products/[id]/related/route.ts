@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase-server"
 import { NextResponse } from "next/server"
 
 export async function GET(
-  request: Request,
+  _request: Request,
   props: { params: Promise<{ id: string }> }
 ) {
   const { id } = await props.params

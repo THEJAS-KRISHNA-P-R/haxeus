@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import type { Product, ProductInventory, ProductReview } from "@/lib/supabase"
+import type { Product, ProductInventory, ProductReview, QueryOptions } from "@/types/supabase"
 
 // Query Keys - centralized for easy invalidation
 export const productKeys = {
@@ -20,7 +20,7 @@ export const productKeys = {
 /**
  * Fetch a single product by ID
  */
-export function useProduct(id: string, options: any = {}) {
+export function useProduct(id: string, options: QueryOptions = {}) {
   return useQuery<Product, Error>({
     queryKey: productKeys.detail(id),
     queryFn: async () => {
@@ -53,7 +53,7 @@ export function useProduct(id: string, options: any = {}) {
 /**
  * Fetch inventory for a specific product
  */
-export function useProductInventory(productId: string, options: any = {}) {
+export function useProductInventory(productId: string, options: QueryOptions = {}) {
   return useQuery<ProductInventory[], Error>({
     queryKey: productKeys.inventory(productId),
     queryFn: async () => {
@@ -76,7 +76,7 @@ export function useProductInventory(productId: string, options: any = {}) {
 /**
  * Fetch reviews for a specific product
  */
-export function useProductReviews(productId: string, options: any = {}) {
+export function useProductReviews(productId: string, options: QueryOptions = {}) {
   return useQuery<ProductReview[], Error>({
     queryKey: productKeys.reviews(productId),
     queryFn: async () => {
@@ -84,7 +84,7 @@ export function useProductReviews(productId: string, options: any = {}) {
         throw new Error("Invalid product ID")
       }
       const { data, error } = await supabase
-        .from("product_reviews")
+        .from("reviews")
         .select("*")
         .eq("product_id", productId)
       
@@ -99,11 +99,23 @@ export function useProductReviews(productId: string, options: any = {}) {
 /**
  * Fetch products list with optional search/filter
  */
-export function useProducts(search?: string, options: any = {}) {
+export function useProducts(search?: string, options: QueryOptions = {}) {
   return useQuery<Product[], Error>({
     queryKey: productKeys.list(search || ""),
     queryFn: async () => {
-      let query = supabase.from("products").select("*")
+      let query = supabase
+        .from("products")
+        .select(`
+          *,
+          product_images (
+            id,
+            product_id,
+            image_url,
+            is_primary,
+            display_order,
+            created_at
+          )
+        `)
       
       if (search) {
         query = query.ilike("name", `%${search}%`)
@@ -120,7 +132,7 @@ export function useProducts(search?: string, options: any = {}) {
 /**
  * Fetch related products (same category, excluding current)
  */
-export function useRelatedProducts(productId: string, category: string, options: any = {}) {
+export function useRelatedProducts(productId: string, category: string, options: QueryOptions = {}) {
   return useQuery<Product[], Error>({
     queryKey: productKeys.related(productId, category),
     queryFn: async () => {
@@ -129,7 +141,17 @@ export function useRelatedProducts(productId: string, category: string, options:
       }
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          product_images (
+            id,
+            product_id,
+            image_url,
+            is_primary,
+            display_order,
+            created_at
+          )
+        `)
         .eq("category", category)
         .neq("id", productId)
         .limit(10)
@@ -145,7 +167,7 @@ export function useRelatedProducts(productId: string, category: string, options:
 /**
  * Fetch active preorders
  */
-export function usePreorderProducts(options: any = {}) {
+export function usePreorderProducts(options: QueryOptions = {}) {
   return useQuery<Product[], Error>({
     queryKey: productKeys.preorders(),
     queryFn: async () => {

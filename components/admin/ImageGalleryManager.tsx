@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { X, GripVertical, Star, Plus, Image as ImageIcon, Upload, Loader2, Clipboard } from "lucide-react"
 import Image from "next/image"
 import { supabase, ProductImage } from "@/lib/supabase"
@@ -77,7 +76,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
             const filePath = `products/${fileName}`
 
             // Upload to Supabase Storage
-            const { data, error } = await supabase.storage
+            const { error } = await supabase.storage
                 .from('product-images')
                 .upload(filePath, processedFile, {
                     cacheControl: '3600',

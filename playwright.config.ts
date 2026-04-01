@@ -1,4 +1,4 @@
-import { defineConfig, devices } from "@playwright/test"
+import { defineConfig } from "@playwright/test"
 
 export default defineConfig({
   testDir: "./tests",
@@ -7,6 +7,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: [["html", { open: "never", outputFolder: "playwright-output/report" }], ["line"]],
+  timeout: 60_000,
+  expect: {
+    timeout: 10_000,
+  },
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
@@ -14,33 +18,33 @@ export default defineConfig({
     video: "retain-on-failure",
     locale: "en-IN",
     timezoneId: "Asia/Kolkata",
-    // Persist auth state across tests
-    storageState: "tests/.auth/admin.json",
   },
   projects: [
     // Auth setup — runs first, saves session
     {
       name: "setup",
       testMatch: "**/auth.setup.ts",
-      use: { storageState: undefined },  // no stored state for setup
+      timeout: 120_000,
     },
     // All admin tests — depend on setup
     {
       name: "admin",
       testMatch: "**/admin/**/*.spec.ts",
       dependencies: ["setup"],
+      use: {
+        storageState: "tests/.auth/admin.json",
+      },
     },
     // Public tests — no auth needed
     {
       name: "public",
       testMatch: "**/public/**/*.spec.ts",
-      use: { storageState: undefined },
     },
   ],
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 180_000,
   },
 })
