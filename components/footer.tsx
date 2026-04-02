@@ -16,7 +16,7 @@ export function Footer() {
             </p>
           </div>
           <a
-            href="https://www.instagram.com/haxeuz.in/"
+            href="https://www.instagram.com/haxeus.in/"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-[-2px] flex h-10 w-10 items-center justify-center rounded-full border border-[#f00078]/20 bg-[#f00078]/10 text-[#f00078] shadow-[0_0_15px_rgba(240,0,120,0.1)] transition-all duration-300 hover:scale-110 hover:bg-[#f00078]/20 active:scale-95"

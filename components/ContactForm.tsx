@@ -1,13 +1,13 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Send, 
-  CheckCircle2, 
-  Instagram, 
-  MessageCircle, 
-  ArrowRight,
-  Hash
+import {
+    Send,
+    CheckCircle2,
+    Instagram,
+    MessageCircle,
+    ArrowRight,
+    Hash
 } from "lucide-react";
 import { isValidEmail } from "@/lib/validation";
 
@@ -68,9 +68,9 @@ export default function ContactForm() {
 
                 <div className="space-y-8">
                     {/* WhatsApp CTA */}
-                    <a 
-                        href="https://wa.me/919999999999" 
-                        target="_blank" 
+                    <a
+                        href="https://wa.me/919999999999"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-between p-8 rounded-3xl border border-theme bg-emerald-500/5 hover:bg-emerald-500/10 transition-all duration-500 hover:border-emerald-500/30"
                     >
@@ -87,9 +87,9 @@ export default function ContactForm() {
                     </a>
 
                     {/* Instagram CTA */}
-                    <a 
-                        href="https://instagram.com/haxeuz.in" 
-                        target="_blank" 
+                    <a
+                        href="https://instagram.com/haxeus.in"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-between p-8 rounded-3xl border border-theme bg-[#f00078]/5 hover:bg-[#f00078]/10 transition-all duration-500 hover:border-[#f00078]/30"
                     >
@@ -122,7 +122,7 @@ export default function ContactForm() {
             <div className="relative">
                 <AnimatePresence mode="wait">
                     {status === "success" ? (
-                        <motion.div 
+                        <motion.div
                             key="success"
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -135,7 +135,7 @@ export default function ContactForm() {
                             <p className="text-theme-2 text-xl italic mb-10 max-w-sm mx-auto">
                                 Message received. Our team is already on it—expect a response within 24 hours.
                             </p>
-                            <button 
+                            <button
                                 onClick={() => setStatus("idle")}
                                 className="px-10 py-4 border border-theme rounded-full text-xs font-black uppercase tracking-widest hover:border-[var(--accent)] transition-colors text-theme"
                             >
@@ -143,7 +143,7 @@ export default function ContactForm() {
                             </button>
                         </motion.div>
                     ) : (
-                        <motion.form 
+                        <motion.form
                             key="form"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -154,9 +154,9 @@ export default function ContactForm() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-theme-2 ml-4">Full Name</label>
-                                    <input 
+                                    <input
                                         required
-                                        type="text" 
+                                        type="text"
                                         className="w-full bg-theme-2/5 border border-theme focus:border-[var(--accent)]/60 rounded-3xl px-6 py-4 outline-none transition-colors italic font-medium text-theme"
                                         placeholder="Aaryan Sharma"
                                         value={formData.name}
@@ -165,9 +165,9 @@ export default function ContactForm() {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-theme-2 ml-4">Email Address</label>
-                                    <input 
+                                    <input
                                         required
-                                        type="email" 
+                                        type="email"
                                         className="w-full bg-theme-2/5 border border-theme focus:border-[var(--accent)]/60 rounded-3xl px-6 py-4 outline-none transition-colors italic font-medium text-theme"
                                         placeholder="aaryan@example.com"
                                         value={formData.email}
@@ -180,8 +180,8 @@ export default function ContactForm() {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-theme-2 ml-4">Order Number (Optional)</label>
                                 <div className="relative">
                                     <Hash className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-2 opacity-40" />
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         className="w-full bg-theme-2/5 border border-theme focus:border-[var(--accent)]/60 rounded-3xl pl-14 pr-6 py-4 outline-none transition-colors italic font-medium uppercase placeholder:normal-case text-theme"
                                         placeholder="HXS-12345"
                                         value={formData.order_number}
@@ -192,7 +192,7 @@ export default function ContactForm() {
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-theme-2 ml-4">Your Message</label>
-                                <textarea 
+                                <textarea
                                     required
                                     rows={6}
                                     className="w-full bg-theme-2/5 border border-theme focus:border-[var(--accent)]/60 rounded-[2rem] px-6 py-6 outline-none transition-colors italic font-medium resize-none text-theme"
@@ -202,7 +202,7 @@ export default function ContactForm() {
                                 />
                             </div>
 
-                            <button 
+                            <button
                                 disabled={status === "loading"}
                                 type="submit"
                                 className="w-full bg-theme-2 text-theme flex items-center justify-center gap-4 py-6 rounded-full font-black uppercase tracking-[0.2em] hover:bg-[var(--accent)] hover:text-white transition-all duration-500 disabled:opacity-50 group"

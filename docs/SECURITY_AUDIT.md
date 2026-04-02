@@ -4,7 +4,7 @@ Last updated: March 13, 2026
 
 ## Scope
 
-This document records a manual code review of the HaxeuZ v26 Next.js ecommerce application.
+This document records a manual code review of the Haxeus v26 Next.js ecommerce application.
 It focuses on application-layer security, authentication and authorization flows, payment handling,
 storage permissions, input validation, data exposure, and security-related configuration.
 
