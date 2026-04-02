@@ -14,11 +14,11 @@ export function sanitizeText(input: string): string {
   if (!input) return ""
   return input
     .replace(/\0/g, "")                     // strip null bytes
-    .replace(/<[^>]*>/g, "")                // strip HTML tags
+    .replace(/<[^>]*>?/gm, "")               // strip HTML tags (improved)
     .replace(/javascript\s*:/gi, "")        // strip javascript: protocol
     .replace(/vbscript\s*:/gi, "")          // strip vbscript: protocol
-    .replace(/data\s*:[^,]*;base64/gi, "")  // strip data: base64 URIs
-    .replace(/on\w+\s*=/gi, "")             // strip event handlers
+    .replace(/data\s*:[^,]{0,1000};base64/gi, "") // strip data: base64 URIs (fixed length)
+    .replace(/on[a-z]{1,20}\s*=/gi, "")      // strip event handlers (constrained)
     .replace(/expression\s*\(/gi, "")       // strip CSS expressions
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "") // strip control chars
     .trim()

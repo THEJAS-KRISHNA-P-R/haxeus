@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     if (!product_id || isNaN(product_id) || product_id <= 0) {
         return new NextResponse("Invalid input", { status: 400 });
     }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return new NextResponse("Invalid input", { status: 400 });
+    if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+        return new NextResponse("Invalid email format", { status: 400 });
     }
 
     // 1. Fetch item and check status — use maybeSingle() to avoid throws on missing row
