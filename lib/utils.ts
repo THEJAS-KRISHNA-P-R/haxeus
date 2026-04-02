@@ -12,15 +12,27 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function sanitizeText(input: string): string {
   if (!input) return ""
-  return input
-    .replace(/\0/g, "")                     // strip null bytes
-    .replace(/<[^>]*>?/gm, "")               // strip HTML tags (improved)
-    .replace(/javascript\s*:/gi, "")        // strip javascript: protocol
-    .replace(/vbscript\s*:/gi, "")          // strip vbscript: protocol
-    .replace(/data\s*:[^,]{0,1000};base64/gi, "") // strip data: base64 URIs (fixed length)
-    .replace(/on[a-z]{1,20}\s*=/gi, "")      // strip event handlers (constrained)
-    .replace(/expression\s*\(/gi, "")       // strip CSS expressions
+  
+  let sanitized = input
+    .replace(/\0/g, "")                         // strip null bytes
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "") // strip control chars
+  
+  // Recursive HTML stripping to solve "Incomplete multi-character sanitization"
+  // Limits to 10 passes to prevent any potential infinite loops while handling deeply nested tags
+  let prev;
+  let passes = 0;
+  do {
+    prev = sanitized;
+    sanitized = sanitized.replace(/<[^>]+>/g, ""); 
+    passes++;
+  } while (sanitized !== prev && passes < 10);
+
+  return sanitized
+    .replace(/javascript\s*:/gi, "")            // strip javascript: protocol
+    .replace(/vbscript\s*:/gi, "")              // strip vbscript: protocol
+    .replace(/data\s*:[^,]{0,256};base64/gi, "") // strip data: base64 (constrained)
+    .replace(/on[a-z]{1,20}\s*=/gi, "")          // strip event handlers
+    .replace(/expression\s*\(/gi, "")           // strip CSS expressions
     .trim()
     .slice(0, 2000)
 }
