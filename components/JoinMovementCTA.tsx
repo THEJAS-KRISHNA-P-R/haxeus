@@ -27,7 +27,7 @@ export function JoinMovementCTA() {
         >
           <div className="space-y-4">
             <h2 className="font-display text-5xl font-black uppercase tracking-[-0.04em] text-white md:text-8xl">
-              The &nbsp;Movement <br className="hidden md:block" /> is &nbsp;Here
+              The &nbsp;Movement <br className="hidden md:block" /> &nbsp;is &nbsp;Here
             </h2>
             <p className="mx-auto max-w-xl text-lg font-medium text-white/70 md:text-xl">
               Premium artistic streetwear, designed for the obsessive. Join us at the edge of culture.

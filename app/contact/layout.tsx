@@ -30,7 +30,7 @@ const faqs = [
   {
     question: "Do you offer returns?",
     answer:
-      "We don't offer returns. We provide a 10-day replacement policy from the date of delivery for items that are defective or damaged. Items must be unworn, unwashed, with original tags attached. Email haxeus.in@gmail.com with your order ID and photos to initiate.",
+      "We don't offer returns. We provide a 10-day replacement policy from the date of delivery for items that are defective or damaged. Items must be unworn, unwashed, with original tags attached. Email support@haxeus.in with your order ID and photos to initiate.",
   },
   {
     question: "How long does shipping take?",

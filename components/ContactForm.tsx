@@ -109,11 +109,11 @@ export default function ContactForm() {
                 <div className="pt-8 grid grid-cols-2 gap-8 text-xs font-black uppercase tracking-widest text-theme-2">
                     <div className="space-y-2">
                         <p className="opacity-40">Email</p>
-                        <p className="text-[var(--accent)] font-bold">haxeus.in@gmail.com</p>
+                        <p className="text-[var(--accent)] font-bold lowercase">support@haxeus.in</p>
                     </div>
                     <div className="space-y-2">
                         <p className="opacity-40">Studio</p>
-                        <p className="text-theme font-bold">Mumbai, India</p>
+                        <p className="text-theme font-bold">Kerala, India</p>
                     </div>
                 </div>
             </div>

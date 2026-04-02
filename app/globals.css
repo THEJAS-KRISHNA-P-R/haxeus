@@ -40,7 +40,7 @@
 
   /* BRAND BACKGROUND TOKENS - SINGLE SOURCE OF TRUTH */
   --brand-bg-dark: #100a0b;
-  --brand-bg-light: #ffeff1;
+  --brand-bg-light: #ffe3e6;
 
   /* Default = dark theme */
   --bg: var(--brand-bg-dark);

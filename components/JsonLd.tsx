@@ -25,7 +25,7 @@ export function OrganizationJsonLd() {
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
-      email: "haxeus.in@gmail.com",
+      email: "support@haxeus.in",
       availableLanguage: ["English", "Malayalam"],
     },
     sameAs: ["https://instagram.com/haxeus", "https://twitter.com/haxeus"],
@@ -128,12 +128,12 @@ export function ProductJsonLd({
     },
     ...(aggregateRating && reviewCount
       ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: aggregateRating.toFixed(1),
-            reviewCount,
-          },
-        }
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: aggregateRating.toFixed(1),
+          reviewCount,
+        },
+      }
       : {}),
   }
 

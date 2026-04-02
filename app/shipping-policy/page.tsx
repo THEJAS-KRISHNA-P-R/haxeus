@@ -7,56 +7,56 @@ import { useStoreSettings } from "@/hooks/useStoreSettings"
 import { CURRENCY_SYMBOL } from "@/lib/currency"
 
 function buildSections(settings: { free_shipping_above: number; shipping_rate: number }) {
-  const fmt = (n: number) => n.toLocaleString("en-IN")
-  return [
-    {
-        title: "Order Processing",
-        content: [
-            { subtitle: "Processing Time", text: "All orders are processed within 2–3 business days (excluding weekends and public holidays) after payment confirmation. You will receive a confirmation email once your order has been placed and another when it has been dispatched." },
-            { subtitle: "Order Confirmation", text: "Once your order is placed and payment is verified, you will receive a confirmation email with your order details. Please ensure your shipping address and contact information are accurate — HAXEUS is not responsible for delays due to incorrect addresses." },
-        ],
-    },
-    {
-        title: "Shipping Coverage & Delivery",
-        content: [
-            { subtitle: "Domestic Shipping Only", text: "HAXEUS currently ships to all serviceable pin codes within India. We do not offer international shipping at this time. If you are located outside India, please check back — we plan to expand shipping in the future." },
-            { subtitle: "Delivery Timeframes", text: "Standard delivery takes 7–14 business days from the date of dispatch, depending on your location. Metro cities typically receive orders within 7–10 days, while remote areas may take up to 14 business days." },
-        ],
-    },
-    {
-        title: "Shipping Charges",
-        content: [
-            { subtitle: "Standard Shipping", text: `A flat shipping fee of ${CURRENCY_SYMBOL}${fmt(settings.shipping_rate)} is charged on all orders below ${CURRENCY_SYMBOL}${fmt(settings.free_shipping_above)}. Orders above ${CURRENCY_SYMBOL}${fmt(settings.free_shipping_above)} qualify for free standard shipping across India.` },
-            { subtitle: "No Hidden Fees", text: "The shipping charge displayed at checkout is final. There are no additional customs, handling, or packaging fees. What you see is what you pay." },
-        ],
-    },
-    {
-        title: "Order Tracking",
-        content: [
-            { subtitle: "Tracking Number", text: "Once your order is dispatched, you will receive a tracking number via email. You can use this number on our courier partner's website to track your shipment in real time." },
-            { subtitle: "Tracking Updates", text: "Please allow 24–48 hours after receiving the dispatch email for tracking information to become active. If your tracking number does not show updates after 48 hours, please contact us at haxeus.in@gmail.com." },
-        ],
-    },
-    {
-        title: "Delays & Issues",
-        content: [
-            { subtitle: "Courier Delays", text: "HAXEUS is not responsible for delays caused by the courier service, natural disasters, strikes, or other events beyond our control. We will, however, do our best to follow up with the courier on your behalf if a delay occurs." },
-            { subtitle: "Lost or Damaged Shipments", text: "If your package is lost in transit or arrives damaged, please contact us at haxeus.in@gmail.com within 48 hours of the expected delivery date. Include your order ID and, for damaged items, clear photographs of the package and product. We will coordinate with the courier to resolve the issue or send a replacement." },
-        ],
-    },
-    {
-        title: "Undeliverable Packages",
-        content: [
-            { subtitle: "", text: "If a package is returned to us due to an incorrect address, refused delivery, or failed delivery attempts, we will contact you to arrange reshipment. Additional shipping charges may apply for reshipment." },
-        ],
-    },
-    {
-        title: "Contact",
-        content: [
-            { subtitle: "", text: "For any shipping-related queries, contact us at haxeus.in@gmail.com or through our Contact page. We aim to respond within 2 business days." },
-        ],
-    },
-  ]
+    const fmt = (n: number) => n.toLocaleString("en-IN")
+    return [
+        {
+            title: "Order Processing",
+            content: [
+                { subtitle: "Processing Time", text: "All orders are processed within 2–3 business days (excluding weekends and public holidays) after payment confirmation. You will receive a confirmation email once your order has been placed and another when it has been dispatched." },
+                { subtitle: "Order Confirmation", text: "Once your order is placed and payment is verified, you will receive a confirmation email with your order details. Please ensure your shipping address and contact information are accurate — HAXEUS is not responsible for delays due to incorrect addresses." },
+            ],
+        },
+        {
+            title: "Shipping Coverage & Delivery",
+            content: [
+                { subtitle: "Domestic Shipping Only", text: "HAXEUS currently ships to all serviceable pin codes within India. We do not offer international shipping at this time. If you are located outside India, please check back — we plan to expand shipping in the future." },
+                { subtitle: "Delivery Timeframes", text: "Standard delivery takes 7–14 business days from the date of dispatch, depending on your location. Metro cities typically receive orders within 7–10 days, while remote areas may take up to 14 business days." },
+            ],
+        },
+        {
+            title: "Shipping Charges",
+            content: [
+                { subtitle: "Standard Shipping", text: `A flat shipping fee of ${CURRENCY_SYMBOL}${fmt(settings.shipping_rate)} is charged on all orders below ${CURRENCY_SYMBOL}${fmt(settings.free_shipping_above)}. Orders above ${CURRENCY_SYMBOL}${fmt(settings.free_shipping_above)} qualify for free standard shipping across India.` },
+                { subtitle: "No Hidden Fees", text: "The shipping charge displayed at checkout is final. There are no additional customs, handling, or packaging fees. What you see is what you pay." },
+            ],
+        },
+        {
+            title: "Order Tracking",
+            content: [
+                { subtitle: "Tracking Number", text: "Once your order is dispatched, you will receive a tracking number via email. You can use this number on our courier partner's website to track your shipment in real time." },
+                { subtitle: "Tracking Updates", text: "Please allow 24–48 hours after receiving the dispatch email for tracking information to become active. If your tracking number does not show updates after 48 hours, please contact us at support@haxeus.in." },
+            ],
+        },
+        {
+            title: "Delays & Issues",
+            content: [
+                { subtitle: "Courier Delays", text: "HAXEUS is not responsible for delays caused by the courier service, natural disasters, strikes, or other events beyond our control. We will, however, do our best to follow up with the courier on your behalf if a delay occurs." },
+                { subtitle: "Lost or Damaged Shipments", text: "If your package is lost in transit or arrives damaged, please contact us at support@haxeus.in within 48 hours of the expected delivery date. Include your order ID and, for damaged items, clear photographs of the package and product. We will coordinate with the courier to resolve the issue or send a replacement." },
+            ],
+        },
+        {
+            title: "Undeliverable Packages",
+            content: [
+                { subtitle: "", text: "If a package is returned to us due to an incorrect address, refused delivery, or failed delivery attempts, we will contact you to arrange reshipment. Additional shipping charges may apply for reshipment." },
+            ],
+        },
+        {
+            title: "Contact",
+            content: [
+                { subtitle: "", text: "For any shipping-related queries, contact us at support@haxeus.in or through our Contact page. We aim to respond within 2 business days." },
+            ],
+        },
+    ]
 }
 
 export default function ShippingPolicyPage() {

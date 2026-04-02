@@ -86,7 +86,7 @@ export const JOURNAL_POSTS: JournalPost[] = [
     excerpt: "Discover how streetwear has taken root in India — from metro cities to emerging brands. Learn what makes Indian streetwear unique and where to find the best pieces.",
     publishedAt: "2025-03-01",
     readTime: "5 min",
-    keywords: ["streetwear India", "Indian streetwear","hax","haxe","haxeus", "urban fashion India","tshirt","t","tee","t-shirt","premium","art","haxeus"],
+    keywords: ["streetwear India", "Indian streetwear", "hax", "haxe", "haxeus", "urban fashion India", "tshirt", "t", "tee", "t-shirt", "premium", "art", "haxeus"],
   },
   {
     slug: "oversized-fit-guide",

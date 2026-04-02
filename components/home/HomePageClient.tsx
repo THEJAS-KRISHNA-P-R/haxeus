@@ -28,6 +28,7 @@ const DynamicTestimonials = dynamic(() => import("@/components/Testimonials"), {
 })
 
 import { JoinMovementCTA } from "@/components/JoinMovementCTA"
+import { TrustSignals } from "@/components/TrustSignals"
 
 interface HomePageClientProps {
   config: HomepageConfig
@@ -79,6 +80,8 @@ export function HomePageClient({
         {isSectionVisible("hero", config.hero.visible) && (
           <HeroSection config={config.hero} activeDrop={activeDrop} />
         )}
+
+        <TrustSignals />
 
         {/* Preorder Section */}
         {isSectionVisible("preorder", config.preorder.visible) && preorderItems.length > 0 && (

@@ -82,7 +82,7 @@ const sections = [
       },
       {
         subtitle: "Correction & Deletion",
-        text: "You may update your account information at any time from your profile page. To delete your account and associated data, contact us at haxeus.in@gmail.com.",
+        text: "You may update your account information at any time from your profile page. To delete your account and associated data, contact us at support@haxeus.in.",
       },
       {
         subtitle: "Opt-Out",
@@ -111,7 +111,7 @@ const sections = [
       },
       {
         subtitle: "",
-        text: "To exercise any of these rights, email haxeus.in@gmail.com with the subject line 'DPDP Rights Request'. We will respond within 14 business days.",
+        text: "To exercise any of these rights, email support@haxeus.in with the subject line 'DPDP Rights Request'. We will respond within 14 business days.",
       },
     ],
   },
@@ -138,7 +138,7 @@ const sections = [
     content: [
       {
         subtitle: "",
-        text: "For any privacy-related questions or requests, contact us at haxeus.in@gmail.com or through our Contact page. We aim to respond within 2 business days.",
+        text: "For any privacy-related questions or requests, contact us at support@haxeus.in or through our Contact page. We aim to respond within 2 business days.",
       },
     ],
   },

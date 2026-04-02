@@ -6,17 +6,18 @@ import { useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { ShimmerButton } from "@/components/ui/ShimmerButton"
 import { ShinyButton } from "@/components/ui/shiny-button"
-import { 
-  staggerContainer, 
-  staggerFast, 
-  scaleIn 
+import {
+  staggerContainer,
+  staggerFast,
+  scaleIn
 } from "@/lib/animations"
 import SplitText from "@/components/ui/SplitText"
 import ShinyText from "@/components/ui/ShinyText"
 import type { HeroConfig } from "@/types/homepage"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
 import type { ActiveDrop } from "@/types/drops"
-import { DropCountdown } from "@/components/DropCountdown"
+import { useTheme } from "@/components/ThemeProvider"
+import { DropCountdown } from "../DropCountdown"
 
 interface HeroSectionProps {
   config: HeroConfig
@@ -25,9 +26,14 @@ interface HeroSectionProps {
 
 export function HeroSection({ config, activeDrop }: HeroSectionProps) {
   const prefersReducedMotion = useReducedMotion()
+  const { theme } = useTheme()
   const [heroLine1Done, setHeroLine1Done] = useState(false)
   const [heroLine2Done, setHeroLine2Done] = useState(false)
   const [heroLine3Done, setHeroLine3Done] = useState(false)
+
+  const isDark = theme === "dark" || !theme
+  const shinyColor = isDark ? "#ffffff" : "#211013"
+  const shinySubtleColor = isDark ? "rgba(255,255,255,0.8)" : "rgba(33, 16, 19, 0.8)"
 
   const line1 = config.line1 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line1
   const line2 = config.line2 ?? DEFAULT_HOMEPAGE_CONFIG.hero.line2
@@ -52,20 +58,20 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                   style={{ fontKerning: 'none', fontVariantLigatures: 'none' }}
                 >
                   {/* Line 1 */}
-                  <span className="relative block drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]">
-                    <span className="block text-white pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">{line1}</span>
+                  <span className="relative grid items-start overflow-visible drop-shadow-[0_1px_8px_rgba(255,255,255,0.08)]">
+                    <span className="block text-theme pointer-events-none select-none invisible col-start-1 row-start-1" aria-hidden="true">{line1}</span>
                     <motion.span
-                      className="absolute inset-0 block"
+                      className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine1Done || prefersReducedMotion ? 0 : 1 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
                       {prefersReducedMotion ? (
-                        <span className="block text-white">{line1}</span>
+                        <span className="block text-theme">{line1}</span>
                       ) : (
                         <SplitText
                           text={line1}
                           tag="span"
-                          className="block text-white"
+                          className="block text-theme"
                           splitType="chars"
                           delay={65}
                           duration={2.4}
@@ -79,7 +85,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                       )}
                     </motion.span>
                     <motion.span
-                      className="absolute inset-0 block"
+                      className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine1Done && !prefersReducedMotion ? 1 : 0 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
@@ -89,7 +95,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                         display="block"
                         baseVisible={false}
                         disabled={!heroLine1Done}
-                        color="#ffffff"
+                        color={shinyColor}
                         shineColor="#ffc0c0"
                         speed={6}
                         spread={60}
@@ -99,20 +105,20 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                   </span>
 
                   {/* Line 2 */}
-                  <span className="relative block drop-shadow-[0_4px_18px_rgba(233,58,58,0.4)]">
-                    <span className="block text-[var(--accent)] pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">{line2}</span>
+                  <span className="relative grid items-start overflow-visible drop-shadow-[0_4px_18px_rgba(233,58,58,0.4)]">
+                    <span className="block text-accent pointer-events-none select-none invisible col-start-1 row-start-1" aria-hidden="true">{line2}</span>
                     <motion.span
-                      className="absolute inset-0 block"
+                      className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine2Done || prefersReducedMotion ? 0 : 1 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
                       {prefersReducedMotion ? (
-                        <span className="block text-[var(--accent)]">{line2}</span>
+                        <span className="block text-[#ef3939]">{line2}</span>
                       ) : (
                         <SplitText
                           text={line2}
                           tag="span"
-                          className="block text-[var(--accent)]"
+                          className="block text-[#ef3939]"
                           splitType="chars"
                           delay={65}
                           duration={2.4}
@@ -126,7 +132,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                       )}
                     </motion.span>
                     <motion.span
-                      className="absolute inset-0 block"
+                      className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine2Done && !prefersReducedMotion ? 1 : 0 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
@@ -136,7 +142,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                         display="block"
                         baseVisible={false}
                         disabled={!heroLine2Done}
-                        color="#e93e3a"
+                        color="#ef3939"
                         shineColor="#f86666"
                         speed={6}
                         spread={60}
@@ -146,20 +152,20 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                   </span>
 
                   {/* Line 3 */}
-                  <span className="relative block drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]">
-                    <span className="block text-white/80 pointer-events-none select-none" style={{ opacity: 0 }} aria-hidden="true">{line3}</span>
+                  <span className="relative grid items-start overflow-visible drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]">
+                    <span className="block text-theme-2 pointer-events-none select-none invisible col-start-1 row-start-1" aria-hidden="true">{line3}</span>
                     <motion.span
-                      className="absolute inset-0 block"
+                      className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine3Done || prefersReducedMotion ? 0 : 1 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
                       {prefersReducedMotion ? (
-                        <span className="block text-white/80">{line3}</span>
+                        <span className="block text-theme-2">{line3}</span>
                       ) : (
                         <SplitText
                           text={line3}
                           tag="span"
-                          className="block text-white/80"
+                          className="block text-theme-2"
                           splitType="chars"
                           delay={65}
                           duration={2.4}
@@ -173,7 +179,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                       )}
                     </motion.span>
                     <motion.span
-                      className="absolute inset-0 block"
+                      className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine3Done && !prefersReducedMotion ? 1 : 0 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
@@ -183,7 +189,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                         display="block"
                         baseVisible={false}
                         disabled={!heroLine3Done}
-                        color="rgba(255,255,255,0.8)"
+                        color={shinySubtleColor}
                         shineColor="#ffbcbc"
                         speed={6}
                         spread={60}
@@ -200,7 +206,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                 transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.8, duration: 0.5 }}
                 layout="position"
               >
-                <p className="text-lg mt-4 leading-relaxed max-w-lg text-white/80">
+                <p className="text-lg mt-4 leading-relaxed max-w-lg text-theme-2">
                   {config.subtext ?? DEFAULT_HOMEPAGE_CONFIG.hero.subtext}
                 </p>
               </motion.div>
@@ -218,11 +224,11 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
               </Link>
               <Link href={config.cta_secondary?.href ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_secondary.href}>
                 <ShimmerButton
-                  background="rgba(0, 0, 0, 1)"
+                  background="rgba(255, 255, 255, 1)"
                   borderRadius="100px"
-                  shimmerColor="#ffffffff"
+                  shimmerColor="#000000ff"
                   shimmerDuration="2.5s"
-                  className="h-[52px] px-7 border-white/[0.08] text-red-600/90 font-bold text-sm tracking-widest uppercase hover:text-white"
+                  className="h-[52px] px-7 border-theme-hover text-accent font-bold text-sm tracking-widest uppercase hover:opacity-80"
                 >
                   {config.cta_secondary?.text ?? DEFAULT_HOMEPAGE_CONFIG.hero.cta_secondary.text}
                 </ShimmerButton>
@@ -249,7 +255,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                   className="cursor-default"
                 >
                   <div className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                  <div className="text-xs sm:text-sm mt-1 text-white/70">{stat.label}</div>
+                  <div className="text-xs sm:text-sm mt-1 text-theme-3">{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>

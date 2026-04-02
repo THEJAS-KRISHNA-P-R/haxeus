@@ -116,7 +116,7 @@ export default function AboutPageClient() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-white/40 font-medium tracking-[0.5em] text-[10px] md:text-xs uppercase -mt-2 md:-mt-4"
+            className="text-theme-2/40 font-medium tracking-[0.5em] text-[10px] md:text-xs uppercase -mt-2 md:-mt-4"
           >
             Art &middot; Identity &middot; Culture
           </motion.p>
@@ -214,7 +214,7 @@ export default function AboutPageClient() {
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="space-y-4">
               <h2 className="text-4xl md:text-6xl font-black italic">The <span className="text-[var(--accent)]">Studio.</span></h2>
-              <p className="text-theme-2 text-xl italic max-w-md">Our team is small, obsessed, and based out of our Mumbai studio. We don&apos;t just design—we create.</p>
+              <p className="text-theme-2 text-xl italic max-w-md">Our team is small, obsessed, and based out of our Kerala studio. We don&apos;t just design—we create.</p>
             </div>
             <div className="bg-[var(--accent)] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em]">
               Coming Soon

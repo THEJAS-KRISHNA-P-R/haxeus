@@ -5,7 +5,7 @@ import { isValidEmail } from "@/lib/validation"
 
 export function Footer() {
   return (
-    <footer style={{ background: "var(--bg-card)", borderTop: "1px solid var(--border)" }} className="relative overflow-hidden">
+    <footer style={{ background: "var(--bg-card)" }} className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-10" />
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 sm:py-10">
         <div className="mb-6 flex items-start justify-between gap-4 py-2">
@@ -18,14 +18,14 @@ export function Footer() {
             href="https://www.instagram.com/haxeus.in/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-[-2px] flex h-10 w-10 items-center justify-center rounded-full border border-[#f00078]/20 bg-[#f00078]/10 text-[#f00078] shadow-[0_0_15px_rgba(240,0,120,0.1)] transition-all duration-300 hover:scale-110 hover:bg-[#f00078]/20 active:scale-95"
+            className="mt-[-2px] flex h-10 w-10 items-center justify-center rounded-full bg-[#f00078]/10 text-[#f00078] shadow-[0_0_15px_rgba(240,0,120,0.1)] transition-all duration-300 hover:scale-110 hover:bg-[#f00078]/20 active:scale-95"
             aria-label="Instagram"
           >
             <FaInstagram className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
 
-        <div className="space-y-8 border-t border-white/5 pt-8">
+        <div className="space-y-8 pt-8">
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
             <div className="space-y-4">
               <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-yellow)]/60 sm:text-xs">Join the movement</h4>
@@ -59,7 +59,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div style={{ borderColor: "var(--border)" }} className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-6 sm:flex-row sm:pt-8">
+        <div style={{ borderColor: "var(--border)" }} className="mt-8 flex flex-col items-center justify-between gap-4 pt-6 sm:flex-row sm:pt-8">
           <p style={{ color: "var(--text-2)" }} className="text-xs opacity-60">© 2026 HAXEUS. All rights reserved.</p>
           <div className="text-[10px] uppercase tracking-[0.2em] opacity-40">
             <span style={{ color: "var(--text-2)" }}>Made with obsession in India</span>
@@ -133,7 +133,7 @@ function FooterNewsletter() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
-          className="w-full rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2.5 text-xs text-[var(--text)] outline-none transition-all placeholder:text-[var(--text-3)]/30 focus:border-[var(--accent)]/60 shadow-inner"
+          className="w-full rounded-full bg-[var(--bg-elevated)] px-4 py-2.5 text-xs text-[var(--text)] outline-none transition-all placeholder:text-[var(--text-3)]/30 focus:bg-[var(--bg-elevated)]/80 shadow-inner"
         />
         <button
           type="submit"

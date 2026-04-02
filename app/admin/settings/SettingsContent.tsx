@@ -23,18 +23,18 @@ interface SettingsState {
     email_popup_enabled: boolean
     email_popup_title: string
     email_popup_subtitle: string
-    email_popup_coupon_id: string 
+    email_popup_coupon_id: string
 }
 
 const defaults: SettingsState = {
     store_name: "HAXEUS",
-    store_email: "haxeus.in@gmail.com",
+    store_email: "support@haxeus.in",
     currency: "INR",
     shipping_rate: 150,
     free_shipping_above: 1000,
     cod_enabled: false,
     maintenance_mode: false,
-    notification_email: "haxeus.in@gmail.com",
+    notification_email: "support@haxeus.in",
     email_popup_enabled: true,
     email_popup_title: "Get 10% off your first order",
     email_popup_subtitle: "Join the list for early drop access and your welcome code.",
@@ -72,7 +72,7 @@ export default function SettingsContent() {
                 .from("coupons")
                 .select("id, code")
                 .eq("is_active", true)
-            
+
             if (couponsData) {
                 setCoupons(couponsData)
             }

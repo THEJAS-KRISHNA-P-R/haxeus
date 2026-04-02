@@ -66,7 +66,7 @@ const sections = [
     content: [
       {
         subtitle: "Support",
-        text: "For any questions regarding these terms, please contact us at haxeus.in@gmail.com. We typically respond within 48 hours.",
+        text: "For any questions regarding these terms, please contact us at support@haxeus.in. We typically respond within 48 hours.",
       },
     ],
   },

@@ -1045,13 +1045,13 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.store_settings (key, value) VALUES
   ('store_name', '"HAXEUS"'),
-  ('store_email', '"haxeus.in@gmail.com"'),
+  ('store_email', '"support@haxeus.in"'),
   ('currency', '"INR"'),
   ('shipping_rate', '150'),
   ('free_shipping_above', '2000'),
   ('cod_enabled', 'false'),
-  ('support_email', '"haxeus.in@gmail.com"'),
-  ('support_url', '"mailto:haxeus.in@gmail.com"')
+  ('support_email', '"support@haxeus.in"'),
+  ('support_url', '"mailto:support@haxeus.in"')
 ON CONFLICT (key) DO NOTHING;
 
 
