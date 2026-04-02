@@ -17,7 +17,7 @@ export function EmailCapturePopup() {
   const [isAlreadySubscribed, setIsAlreadySubscribed] = useState(false)
   const [discountCode, setDiscountCode] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Dynamic Settings state
   const [config, setConfig] = useState({
     title: "Get 10% off your first order",
@@ -29,7 +29,7 @@ export function EmailCapturePopup() {
     async function initPopup() {
       try {
         console.log("EmailCapture: Initializing...")
-        
+
         // 1. Check local storage first (fast path)
         if (window.localStorage.getItem(STORAGE_KEY)) {
           console.log("EmailCapture: Suppressed (Previously dismissed/subscribed)")
@@ -49,7 +49,7 @@ export function EmailCapturePopup() {
           .in("key", ["email_popup_enabled", "email_popup_title", "email_popup_subtitle", "email_popup_coupon_id"])
 
         if (fetchError) {
-           console.error("EmailCapture: Settings fetch error:", fetchError)
+          console.error("EmailCapture: Settings fetch error:", fetchError)
         }
 
         // Map settings with defaults if missing
@@ -70,8 +70,8 @@ export function EmailCapturePopup() {
         console.log("EmailCapture: Config loaded", settingsMap)
 
         if (settingsMap.email_popup_enabled === false) {
-           console.log("EmailCapture: Disabled in admin dashboard")
-           return
+          console.log("EmailCapture: Disabled in admin dashboard")
+          return
         }
 
         // 4. Integrity Check: Verify linked coupon is still active (only if an ID is provided)
@@ -81,7 +81,7 @@ export function EmailCapturePopup() {
             .select("is_active")
             .eq("id", settingsMap.email_popup_coupon_id)
             .maybeSingle()
-          
+
           if (!coupon || !coupon.is_active) {
             console.log("EmailCapture: Suppression triggered (Linked coupon is inactive or missing)")
             return
@@ -111,7 +111,7 @@ export function EmailCapturePopup() {
   function dismissPopup() {
     try {
       window.localStorage.setItem(STORAGE_KEY, "1")
-    } catch {}
+    } catch { }
     setIsVisible(false)
   }
 
@@ -162,10 +162,10 @@ export function EmailCapturePopup() {
 
       setDiscountCode(result.discountCode || "WELCOME10")
       setIsAlreadySubscribed(!!result.alreadySubscribed)
-      
+
       try {
         window.localStorage.setItem(STORAGE_KEY, "1")
-      } catch {}
+      } catch { }
     } catch (err) {
       setError("Something went wrong.")
       console.error("Verification/Subscription error:", err)
@@ -211,8 +211,8 @@ export function EmailCapturePopup() {
               {discountCode && isAlreadySubscribed ? "You're already on the list!" : config.title}
             </h3>
             <p className="mt-2 text-sm leading-6" style={{ color: "var(--color-foreground-muted)" }}>
-              {isAlreadySubscribed 
-                ? "You're already part of the HAXEUS mission. Stay tuned for our next drop!" 
+              {isAlreadySubscribed
+                ? "You're already part of the HAXEUS mission. Stay tuned for our next drop!"
                 : config.subtitle}
             </p>
 
@@ -224,13 +224,13 @@ export function EmailCapturePopup() {
               </div>
             ) : (discountCode && isAlreadySubscribed) ? (
               <div className="mt-6 flex flex-col gap-3">
-                 <button 
+                <button
                   onClick={dismissPopup}
                   className="w-full rounded-full py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                   style={{ background: "var(--color-accent)" }}
-                 >
-                   Continue Shopping
-                 </button>
+                >
+                  Continue Shopping
+                </button>
               </div>
             ) : (
               <form className="mt-5 space-y-3" onSubmit={handleSubmit}>
@@ -240,7 +240,7 @@ export function EmailCapturePopup() {
                   autoComplete="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  placeholder="email@example.com"
+                  placeholder="yourname@gmail.com"
                   className="w-full rounded-2xl border px-4 py-3 text-sm outline-none"
                   style={{ borderColor: "var(--color-border)", background: "var(--color-surface-muted)", color: "var(--color-foreground)" }}
                   required

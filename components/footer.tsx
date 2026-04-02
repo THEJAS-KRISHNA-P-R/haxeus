@@ -130,7 +130,7 @@ function FooterNewsletter() {
       <div className="group relative max-w-[280px]">
         <input
           type="email"
-          placeholder="email@example.com"
+          placeholder="yourname@gmail.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
