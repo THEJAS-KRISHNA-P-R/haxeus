@@ -62,17 +62,16 @@ export default function CheckoutPage() {
   const { toast } = useToast()
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
-
   useEffect(() => {
     setMounted(true)
 
-    // Load Razorpay script on checkout page only
-    const script = document.createElement("script")
-    script.src = "https://checkout.razorpay.com/v1/checkout.js"
-    script.async = true
-    document.body.appendChild(script)
-    return () => {
-      if (document.body.contains(script)) document.body.removeChild(script)
+    // Ensure Razorpay script is loaded only once
+    if (typeof (window as any).Razorpay === "undefined" && !document.getElementById("razorpay-checkout-js")) {
+      const script = document.createElement("script")
+      script.id = "razorpay-checkout-js"
+      script.src = "https://checkout.razorpay.com/v1/checkout.js"
+      script.async = true
+      document.head.appendChild(script)
     }
   }, [])
 
@@ -240,8 +239,10 @@ export default function CheckoutPage() {
   }
 
   function openRazorpay(razorpayOrderId: string, amount: number, internalOrderId: string) {
+    const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+
     const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key: razorpayKey,
       amount,
       currency: "INR",
       name: "HAXEUS",
@@ -258,14 +259,30 @@ export default function CheckoutPage() {
       },
       theme: { color: "#e93a3a" },
       modal: {
+        confirm_close: true,
         ondismiss: () => {
           setStep("review")
-          setError("Payment cancelled. Your cart is still saved.")
+          setError("Payment window closed. Your cart is saved.")
         },
       },
     }
-    const rzp = new (window as any).Razorpay(options)
-    rzp.open()
+
+
+
+    if (typeof (window as any).Razorpay === "undefined") {
+      setError("Payment gateway not loaded yet. Please wait a moment and try again.")
+      setStep("review")
+      return
+    }
+
+    try {
+      const rzp = new (window as any).Razorpay(options)
+      rzp.open()
+    } catch (err) {
+      console.error("[RAZORPAY ERROR]", err)
+      setError("Failed to initialize payment gateway. Please check your internet connection or disable adblockers.")
+      setStep("review")
+    }
   }
 
   async function verifyPayment(response: RazorpayResponse, internalOrderId: string) {
@@ -608,7 +625,6 @@ export default function CheckoutPage() {
 
               {/* Trust */}
               <div className={cn("rounded-xl p-3 flex items-center gap-2 text-xs", isDark ? "bg-white/[0.03]" : "bg-black/[0.02]")}>
-                <span>🔒</span>
                 <span className={muted}>Secured by Razorpay. Cards · UPI · NetBanking · Wallets.</span>
               </div>
             </div>

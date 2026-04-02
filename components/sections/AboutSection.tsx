@@ -68,12 +68,12 @@ export function AboutSection({ config, isDark = true }: AboutSectionProps) {
               </h2>
             </motion.div>
             <motion.div variants={fadeInRight}>
-              <p className="mb-6 leading-relaxed text-lg text-white/80">
+              <p className={`mb-6 leading-relaxed text-lg ${isDark ? "text-white/90" : "text-black/90"}`}>
                 {body1}
               </p>
             </motion.div>
             <motion.div variants={fadeInRight}>
-              <p className="mb-8 leading-relaxed text-lg text-white/80">
+              <p className={`mb-8 leading-relaxed text-lg ${isDark ? "text-white/90" : "text-black/90"}`}>
                 {body2}
               </p>
             </motion.div>
@@ -92,7 +92,7 @@ export function AboutSection({ config, isDark = true }: AboutSectionProps) {
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
                   />
-                  <span className="font-semibold text-white/80">{feature.label}</span>
+                  <span className={`font-semibold ${isDark ? "text-white/80" : "text-black/80"}`}>{feature.label}</span>
                 </motion.div>
               ))}
             </motion.div>

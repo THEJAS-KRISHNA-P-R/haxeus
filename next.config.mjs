@@ -8,11 +8,12 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://www.googletagmanager.com https://va.vercel-scripts.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://www.googletagmanager.com https://va.vercel-scripts.com https://*.razorpay.com blob:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' blob: data: https://*.supabase.co https://vercel.com https://www.googletagmanager.com",
+      "img-src 'self' blob: data: https://*.supabase.co https://vercel.com https://www.googletagmanager.com https://*.razorpay.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live https://www.google-analytics.com https://va.vercel-scripts.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live https://www.google-analytics.com https://va.vercel-scripts.com https://*.razorpay.com blob:",
+      "frame-src 'self' https://*.razorpay.com",
       "frame-ancestors 'none'",
     ].join("; "),
   },
@@ -28,6 +29,14 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const nextConfig = {
+  // async headers() {
+  //   return [
+  //     {
+  //       source: "/(.*)",
+  //       headers: securityHeaders,
+  //     },
+  //   ]
+  // },
   output: "standalone",
   allowedDevOrigins: ["192.168.1.5"],
   productionBrowserSourceMaps: false,

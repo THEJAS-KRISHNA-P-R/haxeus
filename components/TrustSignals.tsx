@@ -1,64 +1,105 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Truck, ShieldCheck, RefreshCcw, CreditCard, Award, Heart } from 'lucide-react'
-
-const USPs = [
-  { icon: Truck, label: 'FREE SHIPPING ABOVE ₹1499', color: 'text-[var(--accent)]' },
-  { icon: ShieldCheck, label: '100% SECURE CHECKOUT', color: 'text-[var(--accent-aqua)]' },
-  { icon: RefreshCcw, label: '10-DAY REPLACEMENT', color: 'text-[#e7bf04]' },
-  { icon: Award, label: 'PREMIUM 240GSM COTTON', color: 'text-[#c03c9d]' },
-  { icon: CreditCard, label: 'COD AVAILABLE ACROSS INDIA', color: 'text-white' },
-  { icon: Heart, label: 'SUPPORT ARTISTIC STREETWEAR', color: 'text-[var(--accent)]' },
-]
+import { useTheme } from '@/components/ThemeProvider'
 
 export function TrustSignals() {
   const prefersReducedMotion = useReducedMotion()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark' || !theme
+  const [shippingThreshold, setShippingThreshold] = useState<number>(1499)
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(data => {
+        if (data.free_shipping_above) setShippingThreshold(data.free_shipping_above)
+      })
+      .catch(console.error)
+  }, [])
+
+  const items = [
+    { text: `FREE SHIPPING ABOVE ₹${shippingThreshold}`, style: 'bold' },
+    { text: '100% SECURE CHECKOUT', style: 'italic' },
+    { text: '10-DAY REPLACEMENT', style: 'bold' },
+    { text: 'PREMIUM 240 GSM COTTON', style: 'italic' },
+    { text: 'SUPPORT ARTISTIC STREETWEAR', style: 'italic' },
+  ]
+
+  const track = [...items, ...items, ...items]
 
   return (
-    <div className="w-full py-12 bg-card overflow-hidden">
-      <div className="container mx-auto px-4 mb-4">
-         {/* Grid for desktop */}
-         <div className="hidden lg:grid grid-cols-3 gap-8">
-            {USPs.slice(0, 3).map((usp, i) => (
-              <div key={i} className="flex items-center justify-center gap-5 group">
-                <div className="p-3.5 rounded-2xl bg-theme-2/5 border border-theme-hover group-hover:bg-theme-2/10 transition-all duration-500 hover:scale-105">
-                  <usp.icon className={`w-6 h-6 ${usp.color}`} />
-                </div>
-                <span className="text-[11px] font-black tracking-[0.25em] uppercase italic text-theme group-hover:text-accent transition-colors duration-500">
-                  {usp.label}
-                </span>
-              </div>
-            ))}
-         </div>
-      </div>
-
-      {/* Marquee for mobile/tablet and extra USPs */}
-      <div className="relative flex overflow-hidden pt-4 mask-fade-edges">
+    /*
+     * overflow-hidden on the SECTION clips horizontal bleed.
+     * Extra vertical padding (py-10) gives the rotated band room
+     * to breathe so the angled corners never get cut off.
+     */
+    <section
+      className="w-full overflow-hidden"
+      style={{ paddingBlock: '2.5rem' }}
+      aria-label="Trust signals"
+    >
+      {/* Band is wider than viewport and rotated; translate centres it */}
+      <div
+        style={{
+          width: '130vw',
+          marginLeft: '-15vw',
+          transform: 'rotate(-2.5deg)',
+          background: isDark
+            ? 'linear-gradient(90deg, #c0182a 0%, #e93a3a 50%, #c0182a 100%)'
+            : 'linear-gradient(90deg, #d42030 0%, #e93a3a 50%, #d42030 100%)',
+          boxShadow: isDark
+            ? '0 6px 32px rgba(233,58,58,0.45), 0 1px 0 rgba(255,255,255,0.08) inset'
+            : '0 6px 32px rgba(233,58,58,0.3)',
+          padding: '14px 0',
+        }}
+      >
         <motion.div
-          animate={prefersReducedMotion ? { x: 0 } : { x: ["0%", "-50%"] }}
+          animate={prefersReducedMotion ? { x: 0 } : { x: ['0%', '-33.33%'] }}
           transition={prefersReducedMotion ? { duration: 0 } : {
             x: {
               repeat: Infinity,
               repeatType: 'loop',
-              duration: 35,
+              duration: 30,
               ease: 'linear',
             },
           }}
-          className="flex whitespace-nowrap gap-16 items-center w-max"
+          className="flex whitespace-nowrap items-center w-max"
         >
-          {/* Double the array for seamless looping */}
-          {[...USPs, ...USPs].map((usp, i) => (
-            <div key={i} className="flex items-center gap-6">
-              <usp.icon className={`w-5 h-5 ${usp.color}`} />
-              <span className="text-[10px] font-extrabold tracking-[0.3em] uppercase italic text-theme-2">
-                {usp.label}
+          {track.map((item, i) => (
+            <span key={i} className="flex items-center">
+              <span
+                style={{
+                  fontFamily: "var(--font-barlow), Impact, sans-serif",
+                  fontWeight: item.style === 'bold' ? 800 : 700,
+                  fontStyle: item.style === 'italic' ? 'italic' : 'normal',
+                  fontSize: '13px',
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: '#ffffff',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.35)',
+                  padding: '0 1.5rem',
+                  lineHeight: 1,
+                }}
+              >
+                {item.text}
               </span>
-              <span className="w-2 h-2 rounded-full bg-accent/20 border border-accent/30" />
-            </div>
+              <span
+                style={{
+                  color: 'rgba(255,255,255,0.55)',
+                  fontSize: '1.1rem',
+                  lineHeight: 1,
+                  userSelect: 'none',
+                }}
+                aria-hidden="true"
+              >
+                •
+              </span>
+            </span>
           ))}
         </motion.div>
       </div>
-    </div>
+    </section>
   )
 }

@@ -15,16 +15,16 @@ import {
     AdminButton
 } from "@/components/admin/AdminUI";
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
-    paid:       { label: "Paid",       color: "text-emerald-500", dot: "bg-emerald-500" },
-    confirmed:  { label: "Confirmed",  color: "text-emerald-500", dot: "bg-emerald-500" },
-    pending:    { label: "Pending",    color: "text-orange-500",  dot: "bg-orange-500"  },
-    preorder:   { label: "Pre-Order",  color: "text-yellow-400",  dot: "bg-yellow-400"  },
-    processing: { label: "Processing", color: "text-blue-400",    dot: "bg-blue-400"    },
-    shipped:    { label: "Shipped",    color: "text-blue-500",    dot: "bg-blue-500"    },
-    delivered:  { label: "Delivered",  color: "text-emerald-500", dot: "bg-emerald-500" },
-    cancelled:  { label: "Cancelled",  color: "text-rose-500",    dot: "bg-rose-500"    },
-    refunded:   { label: "Refunded",   color: "text-orange-400",  dot: "bg-orange-400"  },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+    paid:       { label: "Paid",       color: "var(--color-success, #16a34a)" },
+    confirmed:  { label: "Confirmed",  color: "var(--color-success, #16a34a)" },
+    pending:    { label: "Pending",    color: "var(--accent-yellow, #f59e0b)" },
+    preorder:   { label: "Pre-Order",  color: "var(--accent-yellow, #facc15)" },
+    processing: { label: "Processing", color: "var(--accent-cyan, #3b82f6)"   },
+    shipped:    { label: "Shipped",    color: "var(--accent-cyan, #3b82f6)"   },
+    delivered:  { label: "Delivered",  color: "var(--color-success, #16a34a)" },
+    cancelled:  { label: "Cancelled",  color: "var(--color-accent, #f43f5e)"  },
+    refunded:   { label: "Refunded",   color: "var(--accent-yellow, #fb923c)" },
 };
 
 export default function OrdersContent() {
@@ -231,13 +231,14 @@ export default function OrdersContent() {
                                                         ₹{Number(order.total_amount).toLocaleString("en-IN")}
                                                     </div>
                                                     <div>
-                                                        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border", s.color)}
+                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border"
                                                             style={{
-                                                                background: `color-mix(in srgb, ${s.color.includes('rose') ? '#f43f5e' : s.color.includes('emerald') ? '#10b981' : s.color.includes('orange') ? '#f59e0b' : s.color.includes('yellow') ? '#facc15' : '#3b82f6'} 10%, transparent)`,
-                                                                borderColor: `color-mix(in srgb, ${s.color.includes('rose') ? '#f43f5e' : s.color.includes('emerald') ? '#10b981' : s.color.includes('orange') ? '#f59e0b' : s.color.includes('yellow') ? '#facc15' : '#3b82f6'} 20%, transparent)`
+                                                                color: s.color,
+                                                                background: `color-mix(in srgb, ${s.color} 10%, transparent)`,
+                                                                borderColor: `color-mix(in srgb, ${s.color} 20%, transparent)`
                                                             }}
                                                         >
-                                                            <div className={cn("w-1 h-1 rounded-full", s.dot)} />
+                                                            <div className="w-1 h-1 rounded-full" style={{ background: s.color }} />
                                                             {s.label}
                                                         </span>
                                                     </div>

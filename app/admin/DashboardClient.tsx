@@ -170,11 +170,11 @@ export default function DashboardClient() {
                                         <td className="px-6 py-4 text-xs font-black">₹{o.total_amount}</td>
                                         <td className="px-6 py-4 text-xs">
                                             {o.payment_status === "paid" ? (
-                                                <span className="flex items-center gap-1.5 text-emerald-500 font-bold uppercase tracking-wider text-[9px]">
+                                                <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[9px]" style={{ color: "var(--color-success, #16a34a)" }}>
                                                     <CheckCircle size={10} /> PAID
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-1.5 text-amber-500 font-bold uppercase tracking-wider text-[9px]">
+                                                <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[9px]" style={{ color: "var(--accent-yellow, #f59e0b)" }}>
                                                     <Clock size={10} /> PENDING
                                                 </span>
                                             )}

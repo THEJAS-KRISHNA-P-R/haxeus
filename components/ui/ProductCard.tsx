@@ -214,7 +214,7 @@ export function ProductCard({
                 {description && (
                   <p
                     className={`mb-1.5 line-clamp-2 text-[10px] leading-tight sm:mb-3 sm:line-clamp-3 sm:text-[12px] sm:leading-relaxed ${
-                      isDark ? "text-white/40" : "text-black/40"
+                      isDark ? "text-white/40" : "text-black/60"
                     }`}
                   >
                     {description}
@@ -230,7 +230,7 @@ export function ProductCard({
                       className={`mt-1 w-fit rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest sm:text-[9px] ${
                         isDark
                           ? "border-white/[0.08] bg-white/[0.06] text-white/40"
-                          : "border-black/[0.08] bg-black/[0.05] text-black/40"
+                          : "border-black/[0.08] bg-black/[0.1] text-black/60"
                       }`}
                     >
                       Out
@@ -260,7 +260,7 @@ export function ProductCard({
                       className={`flex w-full items-center justify-center rounded-full border-none py-1.5 text-[10px] font-semibold transition-all sm:py-2.5 sm:text-xs ${
                         isDark
                           ? "border-white/[0.08] bg-white/[0.06] text-white/40"
-                          : "border-black/[0.08] bg-black/[0.05] text-black/40"
+                          : "border-black/[0.08] bg-black/[0.1] text-black/60"
                       }`}
                     >
                       View

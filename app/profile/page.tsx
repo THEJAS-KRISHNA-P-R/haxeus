@@ -128,6 +128,25 @@ function ProfileContent() {
     router.push("/")
   }
 
+  async function handleDeleteAddress(addressId: string) {
+    if (!confirm("Are you sure you want to delete this address?")) return
+    
+    try {
+      const { error } = await supabase
+        .from("user_addresses")
+        .delete()
+        .eq("id", addressId)
+      
+      if (error) throw error
+      
+      // Update local state
+      setAddresses(addresses.filter(a => a.id !== addressId))
+    } catch (err) {
+      console.error("Error deleting address:", err)
+      alert("Failed to delete address")
+    }
+  }
+
   function getStatusColor(status: string) {
     switch (status) {
       case "pending": return "bg-[#e7bf04]/10 text-[#e7bf04] border border-[#e7bf04]/20"
@@ -312,10 +331,17 @@ function ProfileContent() {
                           )}
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" className="hover:bg-theme text-theme-2 hover:text-theme">
-                            <Edit size={16} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="hover:bg-theme">
+                          <Link href={`/profile/addresses/${address.id}`}>
+                            <Button variant="ghost" size="icon" className="hover:bg-theme text-theme-2 hover:text-theme">
+                              <Edit size={16} />
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover:bg-theme"
+                            onClick={() => handleDeleteAddress(address.id)}
+                          >
                             <Trash2 size={16} className="text-[var(--accent)]" />
                           </Button>
                         </div>

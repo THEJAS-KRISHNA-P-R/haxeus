@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { hoverScale, tapScale } from "@/lib/animations"
 import { isValidEmail } from "@/lib/validation"
 import type { NewsletterConfig } from "@/types/homepage"
@@ -79,14 +80,17 @@ export function NewsletterSection({ config, isDark = true }: NewsletterSectionPr
           transition={{ duration: 0.6, delay: 0.2 }}
           className="relative max-w-xl mx-auto mb-16"
         >
-          <div className="flex flex-col sm:flex-row gap-3 p-2 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-md shadow-2xl focus-within:border-[var(--accent)]/50 transition-all">
+          <div className={cn(
+            "flex flex-col sm:flex-row gap-3 p-2 rounded-full transition-all border backdrop-blur-md shadow-2xl focus-within:border-[var(--accent)]/50",
+            isDark ? "bg-white/[0.03] border-white/10" : "bg-black/[0.05] border-black/10"
+          )}>
             <input
               type="email"
               placeholder="Your email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              className={`flex-1 px-6 py-4 bg-transparent outline-none text-lg min-w-0 ${isDark ? "text-white placeholder:text-white/20" : "text-black placeholder:text-black/20"}`}
+              className={`flex-1 px-6 py-4 bg-transparent outline-none text-lg min-w-0 ${isDark ? "text-white placeholder:text-white/30" : "text-black placeholder:text-black/40"}`}
             />
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button

@@ -215,7 +215,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     '--glass-frost': backgroundOpacity,
     '--glass-saturation': saturation,
     '--glass-blur': `${blur}px`,
-    '--glass-bg': 'rgba(10, 10, 10, 0.45)',
+    '--glass-bg': 'rgba(230, 230, 230, 0.12)',
     '--glass-border': 'rgba(255, 255, 255, 0.08)',
     '--glass-highlight': 'rgba(255, 255, 255, 0.12)',
     '--filter-id': `url(#${filterId})`

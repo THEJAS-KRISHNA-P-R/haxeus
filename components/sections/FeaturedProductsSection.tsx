@@ -44,7 +44,7 @@ export function FeaturedProductsSection({
           <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>
             {heading} <span style={{ color: "var(--accent)" }}>{headingAccent}</span>
           </h2>
-          <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-white/80">
+          <p className={`text-base sm:text-lg md:text-xl max-w-2xl mx-auto ${isDark ? "text-white/80" : "text-black/80"}`}>
             {subtext}
           </p>
         </motion.div>
@@ -76,7 +76,7 @@ export function FeaturedProductsSection({
               className="text-6xl mb-6"
             />
             <h3 className="text-3xl font-bold text-theme mb-4">Coming Soon!</h3>
-            <p className="text-lg text-white/70 max-w-md mx-auto mb-8">
+            <p className={`text-lg max-w-md mx-auto mb-8 ${isDark ? "text-white/70" : "text-black/70"}`}>
               We&apos;re working on bringing you amazing products. Stay tuned!
             </p>
             <Link href="/contact">

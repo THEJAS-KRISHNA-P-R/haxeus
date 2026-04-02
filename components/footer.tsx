@@ -6,56 +6,53 @@ import { isValidEmail } from "@/lib/validation"
 export function Footer() {
   return (
     <footer style={{ background: "var(--bg-card)" }} className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-10" />
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 sm:py-10">
-        <div className="mb-6 flex items-start justify-between gap-4 py-2">
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <Link href="/" className="font-display text-4xl font-black uppercase tracking-[-0.04em]" style={{ color: '#ef3939' }}>
-              HAXEUS
-            </Link>
-          </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-12 sm:py-20 space-y-16">
+        {/* Top Tier: Brand & Social */}
+        <div className="flex items-start justify-between gap-4">
+          <Link href="/" className="font-display text-4xl font-black uppercase tracking-[-0.04em]" style={{ color: '#ef3939' }}>
+            HAXEUS
+          </Link>
           <a
             href="https://www.instagram.com/haxeus.in/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-[-2px] flex h-10 w-10 items-center justify-center rounded-full bg-[#f00078]/10 text-[#f00078] shadow-[0_0_15px_rgba(240,0,120,0.1)] transition-all duration-300 hover:scale-110 hover:bg-[#f00078]/20 active:scale-95"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f00078]/10 text-[#f00078] shadow-[0_0_15px_rgba(240,0,120,0.1)] transition-all duration-300 hover:scale-110 hover:bg-[#f00078]/20 active:scale-95"
             aria-label="Instagram"
           >
             <FaInstagram className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
 
-        <div className="space-y-8 pt-8">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-            <div className="space-y-4">
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-yellow)]/60 sm:text-xs">Join the movement</h4>
-              <p style={{ color: "var(--text-3)" }} className="max-w-xs text-[11px] leading-tight opacity-60">
-                Get early drop access and exclusive member-only releases.
-              </p>
-              <FooterNewsletter />
-            </div>
+        {/* Middle Tier: Newsletter & Links */}
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:gap-20">
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-yellow)]/60 sm:text-xs">Join the movement</h4>
+            <p style={{ color: "var(--text-3)" }} className="max-w-xs text-[11px] leading-tight opacity-70">
+              Get early drop access and exclusive member-only releases.
+            </p>
+            <FooterNewsletter />
+          </div>
 
-            <div className="grid grid-cols-3 gap-6 sm:gap-10">
-              {[
-                { title: "Shop", links: [{ label: "New Arrivals", href: "/products" }, { label: "Limited Drops", href: "/drops" }, { label: "All Items", href: "/products" }] },
-                { title: "Help", links: [{ label: "Contact Us", href: "/contact" }, { label: "Size Guide", href: "/size-guide" }] },
-                { title: "Brand", links: [{ label: "About HAXEUS", href: "/about" }, { label: "The Journal", href: "/journal" }] },
-                { title: "Legal", links: [{ label: "Replacements", href: "/returns-refunds" }, { label: "Privacy", href: "/privacy-policy" }, { label: "Terms", href: "/terms-conditions" }] },
-              ].map((column) => (
-                <div key={column.title}>
-                  <h4 className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-yellow)]/60 sm:text-xs">{column.title}</h4>
-                  <ul className="space-y-2">
-                    {column.links.map((link) => (
-                      <li key={link.label}>
-                        <Link href={link.href} style={{ color: "var(--text-2)" }} className="text-sm transition-colors duration-300 hover:text-[var(--accent)]">
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 md:gap-10">
+            {[
+              { title: "Shop", links: [{ label: "New Arrivals", href: "/products" }, { label: "Limited Drops", href: "/drops" }, { label: "All Items", href: "/products" }] },
+              { title: "Help", links: [{ label: "Contact Us", href: "/contact" }, { label: "Size Guide", href: "/size-guide" }] },
+              { title: "Brand", links: [{ label: "About HAXEUS", href: "/about" }, { label: "The Journal", href: "/journal" }] },
+              { title: "Legal", links: [{ label: "Replacements", href: "/returns-refunds" }, { label: "Privacy", href: "/privacy-policy" }, { label: "Terms", href: "/terms-conditions" }] },
+            ].map((column) => (
+              <div key={column.title} className="space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-yellow)]/60 sm:text-xs">{column.title}</h4>
+                <ul className="space-y-3">
+                  {column.links.map((link) => (
+                    <li key={link.label}>
+                      <Link href={link.href} style={{ color: "var(--text-2)" }} className="text-xs transition-colors duration-300 hover:text-[var(--accent)] sm:text-sm">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 

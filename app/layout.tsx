@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
+import { Barlow_Condensed } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
@@ -18,6 +19,14 @@ import { CartProvider } from "@/contexts/CartContext"
 const clashDisplay = localFont({
   src: "../public/fonts/ClashDisplay-Variable.woff2",
   variable: "--font-clash",
+  display: "swap",
+})
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-barlow",
   display: "swap",
 })
 
@@ -141,8 +150,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             />
           </>
         )}
+
       </head>
-      <body className={`${clashDisplay.variable} font-sans`}>
+      <body className={`${clashDisplay.variable} ${barlowCondensed.variable} font-sans`}>
         <OrganizationJsonLd />
         <WebsiteJsonLd />
         <ThemeProvider>

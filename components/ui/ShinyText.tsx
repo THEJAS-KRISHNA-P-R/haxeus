@@ -91,7 +91,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [direction])
 
-  const backgroundPosition = useTransform(progress, p => `${150 - p * 2}% center`)
+  const backgroundPosition = useTransform(progress, p => `${200 - p * 3}% center`)
 
   const handleMouseEnter = useCallback(() => {
     if (pauseOnHover) setIsPaused(true)
@@ -103,7 +103,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
 
   const gradientStyle: React.CSSProperties = {
     backgroundImage: `linear-gradient(${spread}deg, ${color} 0%, ${color} 35%, ${shineColor} 50%, ${color} 65%, ${color} 100%)`,
-    backgroundSize: '250% 100%',
+    backgroundSize: '300% 100%',
     backgroundRepeat: 'repeat',
     top: 0,
     bottom: '-25%',

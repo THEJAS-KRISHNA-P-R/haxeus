@@ -4,7 +4,14 @@
 export function AdminCard({ children, className = "", style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
     return (
         <div
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "1rem", ...style }}
+            style={{ 
+                background: "var(--bg-card)", 
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid var(--border)", 
+                borderRadius: "1rem", 
+                ...style 
+            }}
             className={className}
         >
             {children}
@@ -47,7 +54,14 @@ export function AdminTableRow({ children, cols, className = "", style }: { child
 export function AdminStatCard({ label, value, sub, className = "", style }: { label: string; value: string | number; sub?: string; className?: string; style?: React.CSSProperties }) {
     return (
         <div
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "1.25rem", ...style }}
+            style={{ 
+                background: "var(--bg-card)", 
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid var(--border)", 
+                borderRadius: "1.25rem", 
+                ...style 
+            }}
             className={`p-6 shadow-sm hover:shadow-md transition-shadow ${className}`}
         >
             <p style={{ color: "var(--text-3)" }} className="text-[10px] uppercase tracking-widest font-bold mb-1">{label}</p>

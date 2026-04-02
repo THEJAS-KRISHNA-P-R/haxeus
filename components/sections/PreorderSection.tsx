@@ -37,7 +37,7 @@ export function PreorderSection({
           <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-black"}`}>
             {config.heading}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-white/80">
+          <p className={`text-base sm:text-lg md:text-xl max-w-2xl mx-auto ${isDark ? "text-white/80" : "text-black/80"}`}>
             {config.subtext}
           </p>
         </motion.div>

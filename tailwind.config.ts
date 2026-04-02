@@ -13,6 +13,7 @@ const config: Config = {
       fontFamily: {
         display: ["var(--font-clash)", "Impact", "sans-serif"],
         heading: ["var(--font-clash)", "sans-serif"],
+        hero: ["var(--font-barlow)", "Impact", "sans-serif"],
         body: ["system-ui", "-apple-system", "BlinkMacSystemFont", "\"Segoe UI\"", "sans-serif"],
         sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", "\"Segoe UI\"", "sans-serif"],
       },

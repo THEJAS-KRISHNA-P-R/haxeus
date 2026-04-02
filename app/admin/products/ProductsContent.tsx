@@ -180,7 +180,7 @@ export default function ProductsManagementContent() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-2)]">
+                                            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--text-2)]" style={{ background: "color-mix(in srgb, var(--text) 5%, transparent)" }}>
                                                 {product.category || "Uncategorized"}
                                             </span>
                                         </td>
@@ -189,13 +189,13 @@ export default function ProductsManagementContent() {
                                         </td>
                                         <td className="px-6 py-4">
                                             {product.is_active ? (
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-1.5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: "var(--color-success, #16a34a)" }}>
+                                                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--color-success, #16a34a)" }} />
                                                     Live
                                                 </span>
                                             ) : (
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-rose-500 flex items-center gap-1.5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                                <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: "var(--color-accent, #e93a3a)" }}>
+                                                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-accent, #e93a3a)" }} />
                                                     Inactive
                                                 </span>
                                             )}
@@ -203,13 +203,14 @@ export default function ProductsManagementContent() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link href={`/admin/products/${product.id}/edit`}>
-                                                    <button className="p-2.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-3)] hover:text-[var(--text)] hover:border-[var(--text-3)] border border-transparent transition-all">
+                                                    <button className="p-2.5 rounded-xl text-[var(--text-3)] hover:text-[var(--text)] hover:border-[var(--text-3)] border border-transparent transition-all" style={{ background: "color-mix(in srgb, var(--text) 5%, transparent)" }}>
                                                         <Edit size={14} />
                                                     </button>
                                                 </Link>
                                                 <button
                                                     onClick={() => setDeleteProductId(product.id)}
-                                                    className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+                                                    className="p-2.5 rounded-xl transition-all"
+                                                    style={{ background: "color-mix(in srgb, var(--color-accent, #e93a3a) 10%, transparent)", color: "var(--color-accent, #e93a3a)" }}
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>

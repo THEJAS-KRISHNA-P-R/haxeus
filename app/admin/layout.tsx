@@ -258,7 +258,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* -- SIDEBAR -- */}
       <aside
         style={{
-          background: "var(--bg-card)",
+          background: "var(--bg)",
           borderRight: "1px solid var(--border)",
           position: "fixed",
           top: 0,
@@ -359,7 +359,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* -- ADMIN TOPBAR -- */}
       <header
         style={{
-          background: "var(--bg-card)",
+          background: "var(--bg)",
           borderBottom: "1px solid var(--border)",
           position: "fixed",
           top: 0,

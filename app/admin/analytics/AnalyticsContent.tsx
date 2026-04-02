@@ -19,7 +19,7 @@ interface Stats {
     topProducts: { name: string; total_sold: number; revenue: number }[]
     revenueByDay: { date: string; revenue: number; orders: number }[]
     ordersByStatus: { status: string; count: number }[]
-    recentOrders: { id: string; order_number: string; shipping_email: string; total_amount: number; status: string; created_at: string }[]
+    recentOrders: { id: string; order_number: string; shipping_email: string; total_amount: number; status: string; payment_status: string; created_at: string }[]
 }
 
 export default function AnalyticsContent() {
@@ -40,18 +40,18 @@ export default function AnalyticsContent() {
             orderItemsRes,
             recentRes,
         ] = await Promise.all([
-            supabase.from("orders").select("id, total_amount, status, created_at, shipping_email").gte("created_at", sinceISO).order("created_at", { ascending: true }),
-            supabase.from("orders").select("status"),
+            supabase.from("orders").select("id, total_amount, status, payment_status, created_at, shipping_email").gte("created_at", sinceISO).order("created_at", { ascending: true }),
+            supabase.from("orders").select("status, payment_status"),
             supabase.from("user_roles").select("user_id", { count: "exact", head: true }),
             supabase.from("order_items").select("quantity, price, order_id, product_id, products(name)").gte("created_at", sinceISO),
-            supabase.from("orders").select("id, order_number, shipping_email, total_amount, status, created_at").order("created_at", { ascending: false }).limit(5),
+            supabase.from("orders").select("id, order_number, shipping_email, total_amount, status, payment_status, created_at").order("created_at", { ascending: false }).limit(5),
         ])
 
         const orders = ordersRes.data || []
         const allOrders = allOrdersRes.data || []
         const orderItems = orderItemsRes.data || []
 
-        const paidOrders = orders.filter(o => ["paid", "shipped", "delivered"].includes(o.status))
+        const paidOrders = orders.filter(o => o.payment_status === "paid")
         const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
         const totalOrders = orders.length
         const avgOrderValue = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0
@@ -61,6 +61,8 @@ export default function AnalyticsContent() {
             return acc
         }, {})
         const ordersByStatus = Object.entries(statusCounts).map(([status, count]) => ({ status, count }))
+
+        const pendingOrders = allOrders.filter(o => o.payment_status === "pending").length
 
         const dayMap: Record<string, { revenue: number; orders: number }> = {}
         for (let i = days - 1; i >= 0; i--) {
@@ -73,7 +75,7 @@ export default function AnalyticsContent() {
             const key = o.created_at.slice(0, 10)
             if (dayMap[key]) {
                 dayMap[key].orders++
-                if (["paid", "shipped", "delivered"].includes(o.status)) {
+                if (o.payment_status === "paid") {
                     dayMap[key].revenue += o.total_amount || 0
                 }
             }
@@ -91,7 +93,7 @@ export default function AnalyticsContent() {
 
         setStats({
             totalOrders, totalRevenue, totalCustomers: customersRes.count || 0,
-            avgOrderValue, pendingOrders: statusCounts["pending"] || 0,
+            avgOrderValue, pendingOrders,
             deliveredOrders: statusCounts["delivered"] || 0,
             topProducts, revenueByDay, ordersByStatus, recentOrders: (recentRes.data || []).map(o => ({
                 ...o,
@@ -259,7 +261,14 @@ export default function AnalyticsContent() {
                                 </div>
                                 <div className="text-right">
                                     <p style={{ color: "var(--text)" }} className="text-xs font-bold leading-tight">{fmt(o.total_amount)}</p>
-                                    <span style={{ color: o.status === "delivered" ? "#22c55e" : "#f59e0b" }} className="text-[8px] font-black uppercase tracking-[0.15em]">{o.status}</span>
+                                    <div className="flex flex-col items-end gap-1 mt-1">
+                                        {o.payment_status === "paid" ? (
+                                            <span style={{ color: "var(--color-success, #16a34a)" }} className="text-[8px] font-black uppercase tracking-[0.15em]">PAID</span>
+                                        ) : (
+                                            <span style={{ color: "var(--accent-yellow, #f59e0b)" }} className="text-[8px] font-black uppercase tracking-[0.15em]">UNPAID</span>
+                                        )}
+                                        <span style={{ color: o.status === "delivered" ? "var(--color-success, #16a34a)" : "var(--text-3)" }} className="text-[8px] font-black uppercase tracking-[0.15em]">{o.status}</span>
+                                    </div>
                                 </div>
                             </div>
                         ))}
