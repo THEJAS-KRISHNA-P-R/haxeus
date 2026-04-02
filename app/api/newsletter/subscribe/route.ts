@@ -32,6 +32,30 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid email address format." }, { status: 400 })
         }
 
+        // 1. Deliverability Verification (API)
+        try {
+            const verifierUrl = `https://rapid-email-verifier.fly.dev/api/validate?email=${encodeURIComponent(cleanEmail)}`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+            const vRes = await fetch(verifierUrl, {
+                signal: controller.signal,
+                headers: { 'Accept': 'application/json' }
+            });
+            clearTimeout(timeoutId);
+
+            if (vRes.ok) {
+                const vResult = await vRes.json();
+                const isAcceptable = vResult.status === "VALID" && vResult.validations?.mx_records;
+                
+                if (!isAcceptable) {
+                    return NextResponse.json({ error: "This email inbox does not exist or cannot receive mail." }, { status: 400 });
+                }
+            }
+        } catch (vErr) {
+            console.warn("[newsletter_subscribe] Verification service unavailable. Falling back to local.", vErr);
+        }
+
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!,

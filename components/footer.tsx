@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { FaInstagram } from "react-icons/fa"
+import { isValidEmail } from "@/lib/validation"
 
 export function Footer() {
   return (
@@ -77,15 +78,38 @@ function FooterNewsletter() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
-    if (!email) return
+    const trimmedEmail = email.trim().toLowerCase()
+    if (!trimmedEmail) return
+
+    // 1. Local Strict Validation
+    if (!isValidEmail(trimmedEmail)) {
+      setStatus("invalid")
+      return
+    }
 
     setStatus("loading")
 
     try {
+      // 2. Real-time Deliverability Check
+      const vRes = await fetch("/api/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail })
+      })
+
+      if (vRes.ok) {
+        const { isValid } = await vRes.json()
+        if (!isValid) {
+          setStatus("invalid")
+          return
+        }
+      }
+
+      // 3. Final Subscription
       const response = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify({ email: trimmedEmail }),
       })
 
       if (response.ok) {
@@ -122,7 +146,8 @@ function FooterNewsletter() {
       </div>
 
       {status === "success" && <p className="ml-2 text-[10px] font-bold uppercase tracking-widest italic text-emerald-500">Subscribed!</p>}
-      {status === "duplicate" && <p className="ml-2 text-[10px] font-bold uppercase tracking-widest italic text-yellow-500">Already in!</p>}
+      {status === "duplicate" && <p className="ml-2 text-[10px] font-bold uppercase tracking-widest italic text-yellow-500">Already with us!</p>}
+      {status === "invalid" && <p className="ml-2 text-[10px] font-bold uppercase tracking-widest italic text-red-500">Invalid inbox. Use real email.</p>}
       {status === "error" && <p className="ml-2 text-[10px] font-bold uppercase tracking-widest italic text-red-500">Error. Try again.</p>}
     </form>
   )

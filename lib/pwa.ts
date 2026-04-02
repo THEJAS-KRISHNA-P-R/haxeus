@@ -258,7 +258,18 @@ export function usePWA() {
   useEffect(() => {
     setIsInstalled(isPWAInstalled())
 
-    const handler = () => setCanInstall(true)
+    // 1. If the prompt has already fired and been captured globally, enable installation immediately
+    if (typeof window !== 'undefined' && window.deferredPrompt) {
+      setCanInstall(true)
+    }
+
+    // 2. Listen for future events (if any)
+    const handler = (e: Event) => {
+      e.preventDefault()
+      if (typeof window !== 'undefined') window.deferredPrompt = e as BeforeInstallPromptEvent
+      setCanInstall(true)
+    }
+
     window.addEventListener('beforeinstallprompt', handler)
 
     return () => window.removeEventListener('beforeinstallprompt', handler)

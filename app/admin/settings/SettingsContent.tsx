@@ -19,6 +19,11 @@ interface SettingsState {
     cod_enabled: boolean
     maintenance_mode: boolean
     notification_email: string
+    // Email Capture Settings
+    email_popup_enabled: boolean
+    email_popup_title: string
+    email_popup_subtitle: string
+    email_popup_coupon_id: string 
 }
 
 const defaults: SettingsState = {
@@ -30,21 +35,27 @@ const defaults: SettingsState = {
     cod_enabled: false,
     maintenance_mode: false,
     notification_email: "haxeus.in@gmail.com",
+    email_popup_enabled: true,
+    email_popup_title: "Get 10% off your first order",
+    email_popup_subtitle: "Join the list for early drop access and your welcome code.",
+    email_popup_coupon_id: "",
 }
 
 export default function SettingsContent() {
     const [settings, setSettings] = useState<SettingsState>(defaults)
+    const [coupons, setCoupons] = useState<{ id: string; code: string }[]>([])
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        const fetchSettings = async () => {
-            const { data } = await supabase.from("store_settings").select("key, value")
-            if (data) {
+        const fetchData = async () => {
+            // 1. Fetch Settings
+            const { data: settingsData } = await supabase.from("store_settings").select("key, value")
+            if (settingsData) {
                 const merged = { ...defaults }
-                data.forEach(row => {
+                settingsData.forEach(row => {
                     let v = row.value
                     if (typeof v === "string") {
                         try { v = JSON.parse(v) } catch { }
@@ -55,9 +66,20 @@ export default function SettingsContent() {
                 })
                 setSettings(merged)
             }
+
+            // 2. Fetch Active Coupons
+            const { data: couponsData } = await supabase
+                .from("coupons")
+                .select("id, code")
+                .eq("is_active", true)
+            
+            if (couponsData) {
+                setCoupons(couponsData)
+            }
+
             setLoading(false)
         }
-        fetchSettings()
+        fetchData()
     }, [])
 
     const save = async () => {
@@ -65,7 +87,7 @@ export default function SettingsContent() {
         setError(null)
         const rows = Object.entries(settings).map(([key, value]) => ({
             key,
-            value: typeof value === "string" ? `"${value}"` : JSON.stringify(value),
+            value, // Let Supabase client handle jsonb serialization
             updated_at: new Date().toISOString(),
         }))
 
@@ -204,6 +226,66 @@ export default function SettingsContent() {
                             />
                         </div>
                         <Toggle k="cod_enabled" label="Enable Cash on Delivery" />
+                    </AdminCard>
+
+                    <SectionTitle icon={Bell} title="Marketing & Promos" />
+                    <AdminCard className="p-6 space-y-5">
+                        <div className="flex items-center justify-between p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border)]">
+                            <div>
+                                <p style={{ color: "var(--text)" }} className="text-sm font-bold">Email Signup Popup</p>
+                                <p style={{ color: "var(--text-3)" }} className="text-[10px] font-medium mt-0.5">Show a discount popup to new visitors.</p>
+                            </div>
+                            <button
+                                onClick={() => set("email_popup_enabled", !settings.email_popup_enabled)}
+                                className={cn(
+                                    "relative w-12 h-6 rounded-full transition-colors border border-[var(--border)]",
+                                    settings.email_popup_enabled ? "bg-[var(--accent)]" : "bg-[var(--bg-elevated)]"
+                                )}
+                            >
+                                <div className={cn(
+                                    "absolute top-1 w-3.5 h-3.5 bg-white rounded-full transition-all",
+                                    settings.email_popup_enabled ? "left-7" : "left-1"
+                                )} />
+                            </button>
+                        </div>
+
+                        {settings.email_popup_enabled && (
+                            <>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Popup Title</label>
+                                    <AdminInput
+                                        value={settings.email_popup_title}
+                                        onChange={e => set("email_popup_title", e.target.value)}
+                                        placeholder="Get 10% off..."
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Popup Subtitle</label>
+                                    <AdminInput
+                                        value={settings.email_popup_subtitle}
+                                        onChange={e => set("email_popup_subtitle", e.target.value)}
+                                        placeholder="Join the list..."
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Select Linked Coupon</label>
+                                    <select
+                                        style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: "1rem", padding: "0.875rem 1.25rem", fontSize: "0.875rem", outline: "none", width: "100%", cursor: "pointer" }}
+                                        className="focus:border-[var(--accent)] transition-all font-medium"
+                                        value={settings.email_popup_coupon_id}
+                                        onChange={e => set("email_popup_coupon_id", e.target.value)}
+                                    >
+                                        <option value="">Select an active coupon...</option>
+                                        {coupons.map(c => (
+                                            <option key={c.id} value={c.id}>{c.code}</option>
+                                        ))}
+                                    </select>
+                                    {coupons.length === 0 && (
+                                        <p className="text-[10px] text-rose-500 font-bold px-1 mt-1">No active coupons found! Create one first.</p>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </AdminCard>
 
                     <SectionTitle icon={Shield} title="System Security" />

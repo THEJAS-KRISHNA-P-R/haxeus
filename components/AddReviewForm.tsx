@@ -64,8 +64,8 @@ export function AddReviewForm({ productId, isAuthenticated, onReviewCreated }: A
         <p className="mt-1 text-sm" style={{ color: "var(--color-foreground-muted)" }}>
           Help other shoppers choose the right fit and feel.
         </p>
-        <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em]" style={{ color: "var(--color-accent-warm)" }}>
-          Reviews unlock only after your order is delivered.
+        <p className="mt-4 text-xs font-small tracking-[0.01em]" style={{ color: "var(--color-accent-warm)" }}>
+          You can write a review once your order is delivered.
         </p>
       </div>
 

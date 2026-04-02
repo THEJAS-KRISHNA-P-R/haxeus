@@ -10,8 +10,10 @@ export function InstallPrompt() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    // Only show if the prompt is available and not already installed
-    if (canInstall && !isInstalled) {
+    // Only show if the prompt is available, not already installed, and on a mobile device
+    const isMobile = window.innerWidth < 1024
+    
+    if (canInstall && !isInstalled && isMobile) {
       // Delay to ensure user is engaged
       const timer = setTimeout(() => setShow(true), 3000)
       return () => clearTimeout(timer)

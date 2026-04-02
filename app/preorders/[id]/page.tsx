@@ -57,6 +57,7 @@ export default function PreorderDetailPage() {
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [submitting, setSubmitting] = useState(false)
+  const [verifying, setVerifying] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [stickyBarVisible, setStickyBarVisible] = useState(false)
   const buySectionRef = useRef<HTMLDivElement>(null)
@@ -127,9 +128,8 @@ export default function PreorderDetailPage() {
       return
     }
 
-    setSubmitting(true)
     try {
-      // Get the logged-in user's session
+      // 1. Get the logged-in user's session
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session?.user?.email) {
@@ -138,15 +138,59 @@ export default function PreorderDetailPage() {
           description: "You must be logged in to pre-order.",
           variant: "destructive",
         })
-        setSubmitting(false)
         return
       }
 
+      const email = session.user.email
+
+      // 2. Already Pre-ordered check
+      setVerifying(true)
+      const { data: existing } = await supabase
+        .from("preorder_registrations")
+        .select("id")
+        .eq("preorder_item_id", preorderItem!.id)
+        .eq("email", email)
+        .maybeSingle()
+
+      if (existing) {
+        toast({
+          title: "Already Reserved",
+          description: "You have already pre-ordered this item. We will contact you soon!",
+          variant: "default",
+        })
+        setVerifying(false)
+        return
+      }
+
+      // 3. Optional: Real-time deliverability check
+      const verifyRes = await fetch("/api/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      })
+
+      if (verifyRes.ok) {
+        const { isValid } = await verifyRes.json()
+        if (!isValid) {
+          toast({
+            title: "Verification Error",
+            description: "Your account email appears to be undeliverable. Please update your profile.",
+            variant: "destructive",
+          })
+          setVerifying(false)
+          return
+        }
+      }
+
+      setVerifying(false)
+      setSubmitting(true)
+
+      // 4. Save preorder registration
       const { error } = await supabase.from("preorder_registrations").insert({
         preorder_item_id: preorderItem!.id,
         size: selectedSize,
-        email: session.user.email,
-        name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
+        email: email,
+        name: session.user.user_metadata?.full_name || email.split('@')[0],
       })
 
       if (error) {
@@ -156,8 +200,11 @@ export default function PreorderDetailPage() {
           description: error.message || "Could not place pre-order.",
           variant: "destructive",
         })
-        setSubmitting(false)
       } else {
+        toast({
+          title: "Pre-order Successful!",
+          description: "Your reservation has been confirmed.",
+        })
         router.push("/checkout")
       }
     } catch (error: any) {
@@ -167,6 +214,8 @@ export default function PreorderDetailPage() {
         description: error.message || "Could not place pre-order.",
         variant: "destructive",
       })
+    } finally {
+      setVerifying(false)
       setSubmitting(false)
     }
   }
@@ -376,12 +425,12 @@ export default function PreorderDetailPage() {
             <div ref={buySectionRef}>
               <Button
                 onClick={handlePreorder}
-                disabled={submitting}
+                disabled={verifying || submitting}
                 className="w-full bg-[var(--accent)] hover:opacity-90 text-white h-12 text-base font-bold shadow-lg shadow-[var(--accent)]/20 transition-all disabled:opacity-50"
                 size="lg"
               >
                 <Zap className="w-5 h-5 mr-2" />
-                {submitting ? "Processing..." : "Pre-Order Now"}
+                {verifying ? "Verifying..." : submitting ? "Processing..." : "Pre-Order Now"}
               </Button>
             </div>
 

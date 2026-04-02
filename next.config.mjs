@@ -29,6 +29,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig = {
   output: "standalone",
+  allowedDevOrigins: ["192.168.1.5"],
   productionBrowserSourceMaps: false,
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   images: {

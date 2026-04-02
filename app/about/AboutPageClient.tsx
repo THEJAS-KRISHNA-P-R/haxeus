@@ -212,7 +212,7 @@ export default function AboutPageClient() {
           </motion.div>
 
           {/* Background Branding */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[25rem] font-black opacity-[0.03] select-none italic pointer-events-none whitespace-nowrap group-hover:scale-110 transition-transform duration-[20s] ease-linear">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[25rem] font-black opacity-[0.03] select-none italic pointer-events-none whitespace-nowrap group-hover:scale-110 transition-transform [transition-duration:20s] ease-linear">
             HAXEUS HAXEUS HAXEUS
           </div>
         </div>

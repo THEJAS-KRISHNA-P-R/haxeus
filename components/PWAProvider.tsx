@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { registerServiceWorker } from '@/lib/pwa'
+import { registerServiceWorker, setupAddToHomeScreen } from '@/lib/pwa'
 import { InstallPrompt } from './InstallPrompt'
 
 /**
@@ -12,6 +12,8 @@ export function PWAProvider() {
   useEffect(() => {
     // Register service worker
     registerServiceWorker()
+    // Setup PWA installation listeners
+    setupAddToHomeScreen()
   }, [])
 
   return <InstallPrompt />

@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { useTheme } from "@/components/ThemeProvider"
 import dynamic from "next/dynamic"
+import { useRouter } from "next/navigation"
 import { usePromoPopups } from "@/hooks/usePromoPopups"
-import { PreorderModal } from "@/components/PreorderModal"
 import { HeroSection } from "@/components/sections/HeroSection"
 import type { HomepageConfig } from "@/types/homepage"
 import { Product } from "@/types/supabase"
@@ -40,9 +40,9 @@ export function HomePageClient({
   preorderItems,
   activeDrop,
 }: HomePageClientProps) {
+  const router = useRouter()
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [preorderModalItem, setPreorderModalItem] = useState<Product | null>(null)
   
   // Popup Systems
   const { activePopup: promoPopup, isVisible: isPromoVisible, close: handlePromoClose } = usePromoPopups()
@@ -84,7 +84,7 @@ export function HomePageClient({
             config={config.preorder} 
             products={preorderItems} 
             isDark={isDark}
-            onPreorderClick={(p: Product) => setPreorderModalItem(p)}
+            onPreorderClick={(p: Product) => router.push(`/products/${p.id}`)}
           />
         )}
 
@@ -119,17 +119,11 @@ export function HomePageClient({
         )}
       </div>
 
-      {/* Modals & Popups */}
-      {preorderModalItem && (
-        <PreorderModal
-          item={preorderModalItem as any}
-          isOpen={!!preorderModalItem}
-          onClose={() => setPreorderModalItem(null)}
-        />
-      )}
+
 
       {mounted && promoPopup && (
         <PromoPopupRenderer
+          //@ts-ignore - promoPopup is checked by the conditional above
           popup={promoPopup}
           isVisible={isPromoVisible}
           onClose={handlePromoClose}
