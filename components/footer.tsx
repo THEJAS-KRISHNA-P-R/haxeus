@@ -9,11 +9,10 @@ export function Footer() {
       <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-10" />
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-6 sm:py-10">
         <div className="mb-6 flex items-start justify-between gap-4 py-2">
-          <div className="space-y-0.5">
-            <span className="block font-display text-2xl uppercase tracking-widest text-[var(--accent)]">HAXEUS</span>
-            <p style={{ color: "var(--text-2)" }} className="text-xs font-medium italic leading-none opacity-80 sm:text-sm">
-              Art you can wear. Limited drops by HAXEUS.
-            </p>
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <Link href="/" className="font-display text-4xl font-black uppercase tracking-[-0.04em]" style={{ color: '#ef3939' }}>
+              HAXEUS
+            </Link>
           </div>
           <a
             href="https://www.instagram.com/haxeus.in/"

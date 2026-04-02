@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import ContactForm from "@/components/ContactForm";
+import { JoinMovementCTA } from "@/components/JoinMovementCTA";
 
 export const metadata: Metadata = {
   title: 'Contact | HAXEUS Support',
@@ -8,9 +9,12 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="bg-theme min-h-screen pt-32 pb-20 px-6 lg:px-8">
-      <ContactForm />
-    </main>
+    <>
+      <main className="bg-theme min-h-screen pt-32 pb-20 px-6 lg:px-8">
+        <ContactForm />
+      </main>
+      <JoinMovementCTA />
+    </>
   );
 }
 

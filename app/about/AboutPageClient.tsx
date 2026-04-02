@@ -11,6 +11,7 @@ import {
 import Image from 'next/image';
 import { SparklesCore } from "@/components/ui/sparkles";
 import { ShinyText } from "@/components/ui";
+import { JoinMovementCTA } from "@/components/JoinMovementCTA";
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -272,6 +273,8 @@ export default function AboutPageClient() {
           </div>
         </div>
       </section>
+
+      <JoinMovementCTA />
     </main>
   );
 }

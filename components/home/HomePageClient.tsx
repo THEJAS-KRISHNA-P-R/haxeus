@@ -27,6 +27,8 @@ const DynamicTestimonials = dynamic(() => import("@/components/Testimonials"), {
   loading: () => <div className="h-96 animate-pulse bg-[var(--bg-elevated)] rounded-2xl" />,
 })
 
+import { JoinMovementCTA } from "@/components/JoinMovementCTA"
+
 interface HomePageClientProps {
   config: HomepageConfig
   featuredProducts: Product[]
@@ -117,6 +119,8 @@ export function HomePageClient({
             <DynamicAboutSection config={config.about} isDark={isDark} />
           </div>
         )}
+
+        <JoinMovementCTA />
       </div>
 
 

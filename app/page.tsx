@@ -163,7 +163,6 @@ export default async function HomePage() {
         preorderItems={preorderItems}
         activeDrop={activeDrop}
       />
-      <TrustSignals />
     </div>
   )
 }
