@@ -103,13 +103,12 @@ const ShinyText: React.FC<ShinyTextProps> = ({
 
   const gradientStyle: React.CSSProperties = {
     backgroundImage: `linear-gradient(${spread}deg, ${color} 0%, ${color} 35%, ${shineColor} 50%, ${color} 65%, ${color} 100%)`,
-    backgroundSize: '200% auto',
+    backgroundSize: '250% 100%',
+    backgroundRepeat: 'repeat',
     inset: 0,
     pointerEvents: 'none',
     position: 'absolute',
-    lineHeight: 'inherit',
     letterSpacing: 'inherit',
-    font: 'inherit',
     whiteSpace: 'inherit',
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
@@ -122,8 +121,6 @@ const ShinyText: React.FC<ShinyTextProps> = ({
       style={{
         color: baseVisible ? color : 'transparent',
         display,
-        font: 'inherit',
-        letterSpacing: 'inherit',
         lineHeight: 'inherit',
         position: 'relative',
         whiteSpace: 'inherit',

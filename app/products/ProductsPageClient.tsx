@@ -276,8 +276,9 @@ function ProductsContent() {
 
 export default function ProductsPageClient() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#080808]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[var(--bg)]" />}>
       <ProductsContent />
     </Suspense>
   )
 }
+

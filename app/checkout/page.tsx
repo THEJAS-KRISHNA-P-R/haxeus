@@ -297,7 +297,7 @@ export default function CheckoutPage() {
   // Empty cart guard
   if (mounted && items.length === 0 && step !== "payment") {
     return (
-      <div className={cn("min-h-screen pt-[88px] flex items-center justify-center", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
+      <div className={cn("min-h-screen pt-[88px] flex items-center justify-center", "bg-[var(--bg)]")}>
         <div className="text-center">
           <p className={cn("text-lg font-semibold mb-4", primary)}>Your cart is empty</p>
           <Link href="/products">
@@ -313,7 +313,7 @@ export default function CheckoutPage() {
   if (!mounted) return null
 
   return (
-    <main className={cn("min-h-screen pt-[88px] pb-16 px-4 md:px-8 transition-colors duration-300", isDark ? "bg-[#0a0a0a] text-white" : "bg-[#f5f4f0] text-black")}>
+    <main className={cn("min-h-screen pt-[88px] pb-16 px-4 md:px-8 transition-colors duration-300", isDark ? "bg-[var(--bg)] text-white" : "bg-[var(--bg)] text-black")}>
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
@@ -619,3 +619,4 @@ export default function CheckoutPage() {
     </main>
   )
 }
+

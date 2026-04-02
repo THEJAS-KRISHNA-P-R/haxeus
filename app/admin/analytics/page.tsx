@@ -5,3 +5,4 @@ export default async function AnalyticsPage() {
     await verifyAdmin()
     return <AnalyticsContent />
 }
+

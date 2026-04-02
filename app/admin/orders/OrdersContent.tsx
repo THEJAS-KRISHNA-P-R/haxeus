@@ -140,7 +140,7 @@ export default function OrdersContent() {
                     />
                     <div
                         style={{
-                            background: "rgba(0,0,0,0.025)",
+                            background: "var(--bg-elevated)",
                             border: "1px solid var(--border)",
                         }}
                         className="flex gap-1 p-1 rounded-full w-fit"
@@ -314,3 +314,4 @@ export default function OrdersContent() {
         </div>
     );
 }
+

@@ -23,7 +23,7 @@ export default function Error({
   }, [error])
 
   return (
-    <div className={cn("min-h-screen flex items-center justify-center p-4 transition-colors duration-300", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
+    <div className={cn("min-h-screen flex items-center justify-center p-4 transition-colors duration-300", "bg-[var(--bg)]")}>
       <Card className={cn("max-w-md w-full border-none shadow-2xl", isDark ? "bg-[#111] text-white" : "bg-white text-black")}>
         <CardContent className="p-8 text-center space-y-6">
           <div className="flex justify-center">
@@ -71,3 +71,4 @@ export default function Error({
     </div>
   )
 }
+

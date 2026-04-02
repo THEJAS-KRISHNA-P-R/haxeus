@@ -86,14 +86,14 @@ export default function AuthPageClient() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 pt-20 pb-10"
-      style={{ background: "var(--bg, #f5f4f0)" }}
+      style={{ background: "var(--bg)" }}
     >
       <div
         style={{
-          background: "var(--bg-card, #ffffff)",
-          border: "1px solid var(--border, #e8e8e8)",
+          background: "var(--bg-card)",
+          border: "1px solid var(--border)",
           borderRadius: "1.25rem",
-          boxShadow: "0 4px 32px rgba(0,0,0,0.08)",
+          boxShadow: "var(--shadow)",
           width: "100%",
           maxWidth: "440px",
           padding: "2.5rem",
@@ -137,9 +137,9 @@ export default function AuthPageClient() {
                 fontSize: "0.875rem",
                 fontWeight: 600,
                 transition: "all 0.15s",
-                background: tab === t ? "var(--bg-card, #ffffff)" : "transparent",
-                color: tab === t ? "var(--text, #0a0a0a)" : "var(--text-3, rgba(0,0,0,0.4))",
-                boxShadow: tab === t ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                background: tab === t ? "var(--bg-card)" : "transparent",
+                color: tab === t ? "var(--text)" : "var(--text-3)",
+                boxShadow: tab === t ? "var(--shadow)" : "none",
                 border: "none",
                 cursor: "pointer",
               }}
@@ -389,3 +389,4 @@ export default function AuthPageClient() {
     </div>
   )
 }
+

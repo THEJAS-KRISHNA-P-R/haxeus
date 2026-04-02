@@ -5,3 +5,4 @@ export default async function ReviewsPage() {
     await verifyAdmin()
     return <ReviewsContent />
 }
+

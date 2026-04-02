@@ -64,7 +64,7 @@ export default function OrderSuccessPage() {
 
     if (loading) {
         return (
-            <main className={cn("min-h-screen pt-[88px] flex items-center justify-center", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
+            <main className={cn("min-h-screen pt-[88px] flex items-center justify-center", "bg-[var(--bg)]")}>
                 <div className="w-8 h-8 rounded-full border-2 border-[#e93a3a] border-t-transparent animate-spin" />
             </main>
         )
@@ -72,7 +72,7 @@ export default function OrderSuccessPage() {
 
     if (!order) {
         return (
-            <main className={cn("min-h-screen pt-[88px] flex items-center justify-center", isDark ? "bg-[#0a0a0a] text-white" : "bg-[#f5f4f0] text-black")}>
+            <main className={cn("min-h-screen pt-[88px] flex items-center justify-center", isDark ? "bg-[var(--bg)] text-white" : "bg-[var(--bg)] text-black")}>
                 <div className="text-center">
                     <p className={cn("text-sm mb-4", isDark ? "text-white/50" : "text-black/55")}>Order not found.</p>
                     <Link href="/products" className="text-[#e93a3a] text-sm font-medium hover:underline">
@@ -86,7 +86,7 @@ export default function OrderSuccessPage() {
     return (
         <main className={cn(
             "min-h-screen pt-[88px] pb-20 px-4 md:px-8 transition-colors duration-300",
-            isDark ? "bg-[#0a0a0a] text-white" : "bg-[#f5f4f0] text-black"
+            isDark ? "bg-[var(--bg)] text-white" : "bg-[var(--bg)] text-black"
         )}>
             <div className="max-w-lg mx-auto pt-8 text-center">
 
@@ -165,3 +165,4 @@ export default function OrderSuccessPage() {
         </main>
     )
 }
+

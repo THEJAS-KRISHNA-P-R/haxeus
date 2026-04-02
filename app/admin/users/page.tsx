@@ -5,3 +5,4 @@ export default async function CustomersPage() {
   await verifyAdmin()
   return <CustomersContent />
 }
+

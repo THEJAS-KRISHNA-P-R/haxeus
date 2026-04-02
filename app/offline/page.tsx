@@ -2,7 +2,7 @@
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#080808] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-4">
       <div className="text-center max-w-md">
         <div className="mb-8">
           <div className="w-24 h-24 mx-auto mb-6 bg-[#e93a3a]/10 border border-[#e93a3a]/20 rounded-full flex items-center justify-center">
@@ -57,3 +57,4 @@ export default function OfflinePage() {
     </div>
   )
 }
+

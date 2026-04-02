@@ -8,7 +8,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ConditionalFooter } from "@/components/ConditionalFooter"
 import { ConditionalNavbar } from "@/components/ConditionalNavbar"
 import { ClientOverlays } from "@/components/ClientOverlays"
-import { LightPillarBackground } from "@/components/LightPillarBackground"
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/JsonLd"
 import { PWAProvider } from "@/components/PWAProvider"
 import { QueryProvider } from "@/components/QueryProvider"
@@ -150,7 +149,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <CartProvider>
               <PWAProvider />
-              <LightPillarBackground />
               <ConditionalNavbar />
               <main className="relative min-h-screen" style={{ zIndex: 1 }}>
                 {children}
@@ -167,3 +165,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   )
 }
+

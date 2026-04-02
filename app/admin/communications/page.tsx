@@ -5,3 +5,4 @@ export default async function AdminCommunicationsPage() {
     await verifyAdmin()
     return <CommunicationsContent />
 }
+

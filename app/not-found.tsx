@@ -5,7 +5,7 @@ import { Home, ShoppingBag } from "lucide-react"
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center p-4">
       <Card className="max-w-2xl w-full">
         <CardContent className="p-12 text-center space-y-8">
           <div className="space-y-4">
@@ -61,3 +61,4 @@ export default function NotFound() {
     </div>
   )
 }
+

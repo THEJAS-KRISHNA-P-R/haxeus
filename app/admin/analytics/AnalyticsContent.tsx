@@ -183,7 +183,7 @@ export default function AnalyticsContent() {
                                         style={{
                                             height: `${(d.revenue / maxRev) * 100}%`,
                                             minHeight: d.revenue > 0 ? "4px" : "1px",
-                                            background: d.revenue > 0 ? "var(--accent)" : "rgba(255,255,255,0.05)",
+                                            background: d.revenue > 0 ? "var(--accent)" : "var(--bg-elevated)",
                                             borderRadius: "4px 4px 1px 1px",
                                             width: "100%",
                                             transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
@@ -212,7 +212,7 @@ export default function AnalyticsContent() {
                                         <span style={{ color: "var(--text-2)" }} className="text-[10px] uppercase font-bold tracking-wider">{s.status}</span>
                                         <span style={{ color: "var(--text)" }} className="text-[10px] font-bold">{s.count} <span className="opacity-40 font-medium">({pct}%)</span></span>
                                     </div>
-                                    <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "10px", height: "4px", overflow: "hidden" }}>
+                                    <div style={{ background: "var(--bg-elevated)", borderRadius: "10px", height: "4px", overflow: "hidden" }}>
                                         <div style={{ width: `${pct}%`, height: "100%", background: colors[s.status] || "var(--accent)", transition: "width 0.8s ease-out" }} />
                                     </div>
                                 </div>
@@ -280,3 +280,4 @@ function SectionTitle({ icon: Icon, title }: { icon: any; title: string }) {
         </div>
     )
 }
+

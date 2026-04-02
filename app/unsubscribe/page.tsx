@@ -44,7 +44,7 @@ function UnsubscribeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center p-6 selection:bg-[#e93a3a]/30">
+    <div className="min-h-screen bg-[var(--bg)] text-white flex items-center justify-center p-6 selection:bg-[#e93a3a]/30">
       {/* Background Glow */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#e93a3a]/5 blur-[120px] rounded-full" />
@@ -62,7 +62,7 @@ function UnsubscribeContent() {
           </Link>
         </div>
 
-        <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-[32px] p-8 md:p-10 shadow-2xl shadow-black">
+        <div className="bg-[var(--bg)] border border-white/[0.05] rounded-[32px] p-8 md:p-10 shadow-2xl shadow-black">
           {status === "success" ? (
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
@@ -146,8 +146,9 @@ function UnsubscribeContent() {
 
 export default function UnsubscribePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#050505] flex items-center justify-center"><Loader2 className="text-[#e93a3a] animate-spin" size={40} /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[var(--bg)] flex items-center justify-center"><Loader2 className="text-[#e93a3a] animate-spin" size={40} /></div>}>
       <UnsubscribeContent />
     </Suspense>
   )
 }
+

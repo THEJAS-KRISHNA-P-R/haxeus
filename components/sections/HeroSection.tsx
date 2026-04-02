@@ -48,7 +48,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
             <div>
               <div className="relative py-10 overflow-visible">
                 <h1
-                  className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-semibold leading-[1.15] tracking-tight"
+                  className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-semibold leading-tight tracking-tight"
                   style={{ fontKerning: 'none', fontVariantLigatures: 'none' }}
                 >
                   {/* Line 1 */}

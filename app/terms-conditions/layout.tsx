@@ -26,3 +26,4 @@ export const metadata: Metadata = {
 export default function TermsConditionsLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
+

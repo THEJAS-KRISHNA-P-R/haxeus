@@ -133,7 +133,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className={cn("min-h-screen pt-[72px] md:pt-[104px] flex items-center justify-center px-3", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
+      <div className={cn("min-h-screen pt-[72px] md:pt-[104px] flex items-center justify-center px-3", "bg-[var(--bg)]")}>
         <div className="text-center">
           <p className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>Your cart is empty</p>
           <p className={cn("text-sm mb-6", isDark ? "text-white/50" : "text-black/50")}>Add some items and come back.</p>
@@ -148,7 +148,7 @@ export default function CartPage() {
   }
 
   return (
-    <main className={cn("min-h-screen pt-[72px] md:pt-[104px] pb-16 px-3 md:px-8 transition-colors duration-300", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
+    <main className={cn("min-h-screen pt-[72px] md:pt-[104px] pb-16 px-3 md:px-8 transition-colors duration-300", "bg-[var(--bg)]")}>
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
@@ -384,3 +384,4 @@ export default function CartPage() {
     </main>
   )
 }
+

@@ -101,7 +101,7 @@ export default function OrderDetailsPage() {
 
   if (!mounted || loading) {
     return (
-      <div className={cn("min-h-screen flex items-center justify-center pt-20", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
+      <div className={cn("min-h-screen flex items-center justify-center pt-20", "bg-[var(--bg)]")}>
         <div className={cn("w-10 h-10 rounded-full border-2 border-t-[#e93a3a] animate-spin", isDark ? "border-white/10" : "border-black/10")} />
       </div>
     )
@@ -135,7 +135,7 @@ export default function OrderDetailsPage() {
   const currentIdx = timeline.indexOf(status)
 
   return (
-    <main className={cn("min-h-screen pt-[88px] pb-16 px-4 md:px-8 transition-colors", isDark ? "bg-[#0a0a0a]" : "bg-[#f5f4f0]")}>
+    <main className={cn("min-h-screen pt-[88px] pb-16 px-4 md:px-8 transition-colors", "bg-[var(--bg)]")}>
       <div className="max-w-5xl mx-auto">
 
         {/* Payment confirmed banner */}

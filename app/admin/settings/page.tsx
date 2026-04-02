@@ -5,3 +5,4 @@ export default async function SettingsPage() {
   await verifyAdmin()
   return <SettingsContent />
 }
+

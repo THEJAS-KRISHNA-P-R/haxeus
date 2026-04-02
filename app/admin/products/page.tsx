@@ -5,3 +5,4 @@ export default async function ProductsManagementPage() {
   await verifyAdmin()
   return <ProductsContent />
 }
+

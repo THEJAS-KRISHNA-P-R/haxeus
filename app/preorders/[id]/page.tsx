@@ -234,7 +234,7 @@ export default function PreorderDetailPage() {
 
   if (!preorderItem) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#080808]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-theme mb-4">Preorder not found</h1>
           <Button onClick={() => router.push("/")} className="bg-[var(--accent)] hover:opacity-90 text-white">

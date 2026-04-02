@@ -5,3 +5,4 @@ export default async function NotificationsPage() {
     await verifyAdmin()
     return <NotificationsContent />
 }
+

@@ -38,13 +38,17 @@
   --font-dm-sans: system-ui;
   scroll-behavior: smooth;
 
+  /* BRAND BACKGROUND TOKENS - SINGLE SOURCE OF TRUTH */
+  --brand-bg-dark: #100a0b;
+  --brand-bg-light: #ffeff1;
+
   /* Default = dark theme */
-  --bg: #060606;
-  --bg-card: #0f0f0f;
-  --bg-card-2: #111111;
-  --bg-elevated: #161616;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.12);
+  --bg: var(--brand-bg-dark);
+  --bg-card: color-mix(in srgb, var(--bg) 95%, white);
+  --bg-card-2: color-mix(in srgb, var(--bg) 90%, white);
+  --bg-elevated: color-mix(in srgb, var(--bg) 85%, white);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
   --text: #f5f5f5;
   --text-2: #a1a1aa;
   --text-3: rgba(255, 255, 255, 0.3);
@@ -53,13 +57,13 @@
   --accent-yellow: #e7bf04;
   --accent-pink: #c03c9d;
   --accent-cyan: #07e4e1;
-  --glass-bg: rgba(10, 10, 10, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(33, 16, 19, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   --invert-icon: 0;
 
   /* Shadcn variables - map to theme vars */
-  --background: 0 0% 3.1%;
+  --background: 345 35.7% 6.7%;
   --foreground: 0 0% 96%;
   --primary: 0 72% 57%;
 
@@ -81,28 +85,28 @@
 }
 
 [data-theme="light"] {
-  --bg: #f5f4f0;
+  --bg: var(--brand-bg-light);
   --bg-card: #ffffff;
   --bg-card-2: #fafaf9;
-  --bg-elevated: #efefec;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.16);
-  --text: #0a0a0a;
+  --bg-elevated: color-mix(in srgb, var(--bg) 95%, black);
+  --border: rgba(33, 16, 19, 0.12);
+  --border-hover: rgba(33, 16, 19, 0.2);
+  --text: #211013;
   --text-2: #52525b;
-  --text-3: rgba(0, 0, 0, 0.35);
+  --text-3: rgba(33, 16, 19, 0.4);
   --accent: #d42b2b;
   --accent-hover: #b82020;
   --accent-yellow: #c49b00;
   --accent-pink: #a0308a;
   --accent-cyan: #059e9b;
-  --glass-bg: rgba(245, 244, 240, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  --glass-bg: rgba(255, 186, 200, 0.85);
+  --glass-border: rgba(33, 16, 19, 0.15);
+  --shadow: 0 4px 24px rgba(33, 16, 19, 0.1);
   --invert-icon: 1;
 
   /* Shadcn light overrides */
-  --background: 48 20% 95.3%;
-  --foreground: 0 0% 3.9%;
+  --background: 348 100% 86.3%;
+  --foreground: 345 35.7% 6.7%;
 
   --color-background: var(--bg);
   --color-surface: var(--bg-card);
@@ -136,6 +140,17 @@ canvas *,
   animation: none !important;
   will-change: auto !important;
 }
+
+/* Landing Page Theme Override — Restores Light Pillar and Dark Aesthetics */
+.theme-landing {
+  --bg: #060606 !important;
+  --bg-card: #0c0c0c !important;
+  --bg-elevated: #1a1a1a !important;
+  --brand-bg-light: #060606 !important;
+  --brand-bg-dark: #060606 !important;
+  background-color: #060606 !important;
+}
+
 
 body {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
@@ -250,9 +265,11 @@ input[type="checkbox"]:checked {
   .pt-safe {
     padding-top: max(0.75rem, env(safe-area-inset-top));
   }
+
   .pb-safe {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
+
   .px-safe {
     padding-left: max(0.75rem, env(safe-area-inset-left));
     padding-right: max(0.75rem, env(safe-area-inset-right));
@@ -368,8 +385,13 @@ section {
 
 /* ── Hero Text Exact Sync Shine ── */
 @keyframes hero-shine-pan {
-  0% { background-position: 200% center; }
-  100% { background-position: -50% center; }
+  0% {
+    background-position: 200% center;
+  }
+
+  100% {
+    background-position: -50% center;
+  }
 }
 
 .hero-shine-line1 {
@@ -391,7 +413,7 @@ section {
 }
 
 .hero-shine-line3 {
-  background-image: linear-gradient(60deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.8) 35%, #ffbcbc 50%, rgba(255,255,255,0.8) 65%, rgba(255,255,255,0.8) 100%);
+  background-image: linear-gradient(60deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.8) 35%, #ffbcbc 50%, rgba(255, 255, 255, 0.8) 65%, rgba(255, 255, 255, 0.8) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -411,9 +433,9 @@ section {
   --tw-prose-hr: var(--border);
 }
 
-.prose-brand h1, 
-.prose-brand h2, 
-.prose-brand h3, 
+.prose-brand h1,
+.prose-brand h2,
+.prose-brand h3,
 .prose-brand h4 {
   font-family: var(--font-clash);
   font-style: italic;

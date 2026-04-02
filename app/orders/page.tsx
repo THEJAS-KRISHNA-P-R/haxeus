@@ -110,7 +110,7 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg)] pt-20 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#e93a3a] mx-auto"></div>
           <p className="mt-4 text-white/50">Loading your orders...</p>
@@ -120,7 +120,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-20 pb-12">
+    <div className="min-h-screen bg-[var(--bg)] pt-20 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Order History</h1>
@@ -195,3 +195,4 @@ export default function OrdersPage() {
     </div>
   )
 }
+

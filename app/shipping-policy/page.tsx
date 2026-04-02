@@ -71,7 +71,7 @@ export default function ShippingPolicyPage() {
         <main
             className={cn(
                 "min-h-screen pt-[88px] pb-20 px-4 md:px-8 transition-colors duration-300",
-                isDark ? "bg-[#0a0a0a] text-white" : "bg-[#f5f4f0] text-black"
+                isDark ? "bg-[var(--bg)] text-white" : "bg-[var(--bg)] text-black"
             )}
         >
             <div className="max-w-3xl mx-auto">
@@ -139,3 +139,4 @@ export default function ShippingPolicyPage() {
         </main>
     )
 }
+

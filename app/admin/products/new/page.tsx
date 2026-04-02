@@ -162,7 +162,7 @@ export default function NewProductPage() {
   if (!mounted) return null
 
   return (
-    <div className={cn("min-h-screen -mx-8 -mt-24 pt-24 px-8 pb-12", isDark ? 'bg-[#0a0a0a] text-white' : 'bg-[#f5f4f0] text-black')}>
+    <div className={cn("min-h-screen -mx-8 -mt-24 pt-24 px-8 pb-12", isDark ? 'bg-[var(--bg)] text-white' : 'bg-[var(--bg)] text-black')}>
       <div className="max-w-5xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -382,3 +382,4 @@ export default function NewProductPage() {
     </div>
   )
 }
+

@@ -5,3 +5,4 @@ export default async function CouponsPage() {
     await verifyAdmin()
     return <CouponsContent />
 }
+

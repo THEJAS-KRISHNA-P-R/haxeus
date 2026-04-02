@@ -112,7 +112,7 @@ export default function PreordersAdminPage() {
     }
 
     return (
-        <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0a] text-white' : 'bg-[#f5f4f0] text-black'}`}>
+        <div className={`min-h-screen ${isDark ? 'bg-[var(--bg)] text-white' : 'bg-[var(--bg)] text-black'}`}>
             <div className="flex justify-between items-center mb-8">
                 <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>Pre-Orders</h1>
                 <Link href="/admin/products/new?preorder=true">
@@ -199,3 +199,4 @@ export default function PreordersAdminPage() {
         </div>
     )
 }
+

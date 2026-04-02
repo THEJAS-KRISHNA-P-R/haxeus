@@ -54,3 +54,4 @@ export default async function DropsPage() {
     </main>
   );
 }
+

@@ -117,7 +117,7 @@ export default function CommunicationsContent() {
             {/* Tabs */}
             <div
                 style={{
-                    background: "rgba(0,0,0,0.025)",
+                    background: "var(--bg-elevated)",
                     border: "1px solid var(--border)",
                 }}
                 className="flex gap-1 p-1 rounded-full w-fit mb-6"
@@ -199,7 +199,7 @@ export default function CommunicationsContent() {
                                                     animate={{ opacity: 1, x: 0 }}
                                                     transition={{ delay: i * 0.02 }}
                                                     onClick={() => setExpandedMessage(expandedMessage === msg.id ? null : msg.id)}
-                                                    className="cursor-pointer hover:bg-white/[0.02] transition-colors"
+                                                    className="cursor-pointer hover:bg-[var(--bg-elevated)] transition-colors"
                                                 >
                                                     <AdminTableRow cols="grid-cols-[2fr_1.5fr_1.5fr_1fr]" className="items-center py-4 bg-transparent border-0 pointer-events-none">
                                                         <div className="flex items-center gap-3">
@@ -362,3 +362,4 @@ export default function CommunicationsContent() {
         </div>
     );
 }
+

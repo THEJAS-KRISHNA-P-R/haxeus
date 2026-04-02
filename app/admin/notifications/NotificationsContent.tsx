@@ -118,3 +118,4 @@ function formatTime(iso: string) {
     if (hours < 24) return `${hours}h ago`
     return `${days}d ago`
 }
+
