@@ -47,6 +47,7 @@
     "_disabled",
     "tests",
     "playwright-report",
-    "test-results"
+    "test-results",
+    "supabase"
   ]
 }

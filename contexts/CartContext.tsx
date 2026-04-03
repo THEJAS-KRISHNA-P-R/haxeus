@@ -92,9 +92,48 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [hasFetchedUser])
 
   useEffect(() => {
-    loadCart()
-    loadWishlist()
+    const handleCartSync = async () => {
+      if (userId) {
+        await syncCartWithServer()
+      }
+      await loadCart()
+      await loadWishlist()
+    }
+    
+    handleCartSync()
   }, [userId])
+
+  const syncCartWithServer = async () => {
+    const localCart = localStorage.getItem('haxeus-cart')
+    if (!localCart || !userId) return
+
+    try {
+      const guestItems: CartItem[] = JSON.parse(localCart)
+      if (guestItems.length === 0) return
+
+      // Batch sync: Check existing and upsert
+      // We iterate and wrap each in a try/catch to ensure one failure doesn't block the rest
+      for (const item of guestItems) {
+        try {
+          await addItem({
+            productId: item.product_id,
+            size: item.size,
+            color: item.color,
+            quantity: item.quantity,
+            is_preorder: item.is_preorder,
+            preorder_expected_date: item.preorder_expected_date
+          })
+        } catch (itemErr) {
+          console.error(`[CartContext] Failed to sync item ${item.product_id}:`, itemErr)
+        }
+      }
+
+      // Clear local storage after attempt
+      localStorage.removeItem('haxeus-cart')
+    } catch (err) {
+      console.error('[CartContext] Critical sync error:', err)
+    }
+  }
 
   const loadWishlist = async () => {
     if (!userId) return

@@ -4,10 +4,12 @@ import Link from "next/link"
 import { useEffect, useState, useRef, useCallback } from "react"
 import {
   LayoutDashboard, ShoppingBag, Package, Users,
-  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X, Mail, ShoppingCart, HardDrive, Globe
+  Tag, Star, BarChart3, Settings, Bell, LogOut, Search, X, Mail, ShoppingCart, HardDrive, Globe, Menu
 } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { supabase } from "@/lib/supabase"
+import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Overview" },
@@ -200,6 +202,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
   const [adminEmail, setAdminEmail] = useState<string>("Admin")
   const [unreadMsgCount, setUnreadMsgCount] = useState(0)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Server-side auth guard using API route with service role
   useEffect(() => {
@@ -237,6 +240,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkAdmin()
   }, [router])
 
+  // Close sidebar on navigation (mobile)
+  useEffect(() => {
+    setIsSidebarOpen(false)
+  }, [pathname])
+
   if (isAuthorized === null) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
       <div className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
@@ -252,159 +260,204 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/auth")
   }
 
-  return (
-    <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
+  const sidebarContent = (
+    <>
+      {/* Brand */}
+      <div
+        style={{ borderBottom: "1px solid var(--border)" }}
+        className="px-6 py-8 shrink-0 flex items-center justify-between"
+      >
+        <div>
+          <span style={{ color: "var(--accent)" }} className="text-xl font-black tracking-widest uppercase">
+            HAXEUS
+          </span>
+          <p style={{ color: "var(--text-3)" }} className="text-xs mt-1 font-medium">Admin Dashboard</p>
+        </div>
+        <button className="lg:hidden p-2 text-[var(--text-3)]" onClick={() => setIsSidebarOpen(false)}>
+          <X size={20} />
+        </button>
+      </div>
 
-      {/* -- SIDEBAR -- */}
+      {/* Nav links */}
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+        {navItems.map(item => (
+          <Link
+            key={item.href}
+            href={item.href}
+            style={{
+              color: isActive(item.href) ? "var(--text)" : "var(--text-3)",
+              background: isActive(item.href) ? "rgba(var(--text-rgb), 0.05)" : "transparent",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.875rem",
+              padding: "0.875rem 1rem",
+              borderRadius: "1rem",
+              fontSize: "0.8125rem",
+              fontWeight: 800,
+              textDecoration: "none",
+              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+              border: isActive(item.href) ? "1px solid var(--border)" : "1px solid transparent",
+            }}
+            className="hover:translate-x-1"
+          >
+            <item.icon size={18} className={cn("shrink-0", isActive(item.href) ? "text-[var(--accent)]" : "opacity-40")} />
+            <span className="font-large">{item.label}</span>
+            {item.href === "/admin/communications" && unreadMsgCount > 0 && (
+              <span className="ml-auto bg-[var(--accent)] text-white text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-lg shadow-[var(--accent)]/30">
+                {unreadMsgCount}
+              </span>
+            )}
+          </Link>
+        ))}
+      </nav>
+
+      {/* Admin user */}
+      <div
+        style={{ borderTop: "1px solid var(--border)" }}
+        className="px-6 py-6 shrink-0 bg-[var(--bg-elevated)]/30"
+      >
+        <div className="flex items-center gap-4 mb-5">
+          <div
+            style={{ background: "var(--accent)" }}
+            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-xs font-black shrink-0 shadow-xl shadow-[var(--accent)]/20 border border-white/10"
+          >
+            {adminEmail.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p style={{ color: "var(--text)" }} className="text-xs font-black uppercase tracking-tight truncate">{adminEmail.split('@')[0]}</p>
+            <p style={{ color: "var(--text-3)" }} className="text-[9px] font-black uppercase tracking-widest truncate">System Operator</p>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          style={{ color: "var(--text-3)" }}
+          className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.2em] hover:text-[var(--accent)] transition-all w-full"
+        >
+          <LogOut size={14} />
+          Terminate session
+        </button>
+      </div>
+    </>
+  )
+
+  return (
+    <div id="admin-root" style={{ background: "var(--bg)", minHeight: "100vh" }} className="flex">
+      <style jsx global>{`
+        #admin-root {
+          --text: #ffffff !important;
+          --text-2: #f4f4f5 !important;
+          --text-3: rgba(255, 255, 255, 0.9) !important;
+          --text-rgb: 255, 255, 255 !important;
+        }
+
+        [data-theme="light"] #admin-root {
+          --text: #000000 !important;
+          --text-2: #18181b !important;
+          --text-3: rgba(0, 0, 0, 0.8) !important;
+          --text-rgb: 0, 0, 0 !important;
+        }
+
+        #admin-root p, 
+        #admin-root span, 
+        #admin-root div,
+        #admin-root footer,
+        #admin-root aside nav a {
+          transition: color 0.1s ease !important;
+        }
+      `}</style>
+
+      {/* -- DESKTOP SIDEBAR -- */}
       <aside
         style={{
           background: "var(--bg)",
           borderRight: "1px solid var(--border)",
+          width: "280px",
           position: "fixed",
-          top: 0,
           left: 0,
-          width: "256px",
-          height: "100vh",
-          zIndex: 100,
-          display: "flex",
-          flexDirection: "column",
-          overflowY: "auto",
-          overflowX: "hidden",
+          top: 0,
+          bottom: 0,
         }}
+        className="hidden lg:flex flex-col z-[131]"
       >
-        {/* Brand */}
-        <div
-          style={{ borderBottom: "1px solid var(--border)" }}
-          className="px-6 py-8 shrink-0"
-        >
-          <span style={{ color: "var(--accent)" }} className="text-xl font-bold tracking-widest">
-            HAXEUS
-          </span>
-          <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase tracking-wider mt-1">Admin Dashboard</p>
-        </div>
-
-        {/* Nav links */}
-        <nav className="flex-1 px-4 py-6 space-y-1">
-          {navItems.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                color: isActive(item.href) ? "var(--accent)" : "var(--text-2)",
-                background: isActive(item.href) ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.875rem",
-                padding: "0.75rem 1rem",
-                borderRadius: "0.75rem",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                textDecoration: "none",
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
-              onMouseEnter={e => {
-                if (!isActive(item.href)) {
-                  (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
-                  (e.currentTarget as HTMLElement).style.color = "var(--text)";
-                }
-              }}
-              onMouseLeave={e => {
-                if (!isActive(item.href)) {
-                  (e.currentTarget as HTMLElement).style.background = "transparent";
-                  (e.currentTarget as HTMLElement).style.color = "var(--text-2)";
-                }
-              }}
-            >
-              <div className="flex items-center gap-0.875rem flex-1">
-                <item.icon size={18} className="shrink-0" />
-                <span className="ml-[0.875rem]">{item.label}</span>
-              </div>
-              {item.href === "/admin/communications" && unreadMsgCount > 0 && (
-                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
-                  {unreadMsgCount}
-                </span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Admin user */}
-        <div
-          style={{ borderTop: "1px solid var(--border)" }}
-          className="px-6 py-6 shrink-0"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div
-              style={{ background: "var(--accent)" }}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-lg shadow-red-500/20"
-            >
-              A
-            </div>
-            <div className="min-w-0">
-              <p style={{ color: "var(--text)" }} className="text-sm font-bold truncate">Admin</p>
-              <p style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase truncate opacity-60">{adminEmail}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            style={{ color: "var(--text-3)" }}
-            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest hover:text-[var(--accent)] transition-colors w-full"
-          >
-            <LogOut size={14} />
-            Logout Session
-          </button>
-        </div>
+        {sidebarContent}
       </aside>
 
-      {/* -- ADMIN TOPBAR -- */}
-      <header
-        style={{
-          background: "var(--bg)",
-          borderBottom: "1px solid var(--border)",
-          position: "fixed",
-          top: 0,
-          left: "256px",
-          right: 0,
-          height: "64px",
-          zIndex: 100,
-          display: "flex",
-          alignItems: "center",
-          padding: "0 2rem",
-          gap: "1.5rem",
-        }}
-      >
-        {/* Global Search */}
-        <AdminSearch />
+      {/* -- MOBILE DRAWER -- */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[140] lg:hidden"
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              style={{ background: "var(--bg)", width: "280px" }}
+              className="fixed top-0 left-0 bottom-0 z-[150] lg:hidden flex flex-col shadow-2xl border-right border-[var(--border)]"
+            >
+              {sidebarContent}
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
-        <div className="ml-auto flex items-center gap-2">
-          <ThemeToggle />
-          <button
-            onClick={() => router.push("/admin/notifications")}
-            style={{ color: "var(--text-2)" }}
-            className="relative p-2.5 rounded-xl hover:bg-[var(--bg-elevated)] hover:text-[var(--text)] transition-all"
-          >
-            <Bell size={20} />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[var(--bg-card)]" />
-          </button>
-        </div>
-      </header>
-
-      {/* -- MAIN CONTENT -- */}
-      <main
-        style={{ background: "var(--bg)" }}
-        className="ml-64 pt-24 min-h-screen px-8 max-w-[1600px] mx-auto"
-      >
-        {children}
-
-        {/* Admin footer */}
-        <footer
-          style={{ borderTop: "1px solid var(--border)", color: "var(--text-3)" }}
-          className="mt-12 px-8 py-4 text-xs text-center"
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-[280px]">
+        {/* -- ADMIN TOPBAR -- */}
+        <header
+          style={{
+            background: "rgba(var(--bg-rgb), 0.8)",
+            backdropFilter: "blur(20px)",
+            borderBottom: "1px solid var(--border)",
+            height: "80px",
+          }}
+          className="sticky top-0 z-[130] flex items-center px-6 md:px-10 gap-6"
         >
-          HAXEUS Admin © {new Date().getFullYear()}
-        </footer>
-      </main>
+          <button
+            className="lg:hidden p-2.5 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border)] text-[var(--text)] active:scale-90 transition-transform"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <Menu size={20} />
+          </button>
 
+          {/* Global Search */}
+          <div className="hidden md:block flex-1 max-w-md">
+            <AdminSearch />
+          </div>
+
+          <div className="ml-auto flex items-center gap-3">
+            <ThemeToggle />
+            <button
+              onClick={() => router.push("/admin/notifications")}
+              style={{ color: "var(--text-3)" }}
+              className="relative p-3 rounded-2xl bg-[var(--bg-elevated)]/50 border border-[var(--border)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text)] transition-all group"
+            >
+              <Bell size={20} className="group-hover:rotate-12 transition-transform" />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[var(--accent)] rounded-full border-2 border-[var(--bg)] shadow-[0_0_8px_var(--accent)]" />
+            </button>
+          </div>
+        </header>
+
+        {/* -- MAIN CONTENT -- */}
+        <main
+          className="flex-1 p-6 md:p-10 max-w-[1600px] w-full mx-auto"
+        >
+          {children}
+
+          {/* Admin footer */}
+          <footer
+            style={{ borderTop: "1px solid var(--border)", color: "var(--text-3)" }}
+            className="mt-20 py-8 text-[9px] font-black uppercase tracking-[0.3em] text-center"
+          >
+            HAXEUS OPERATING SYSTEM v2.01 // © {new Date().getFullYear()} DEEPCORE INDUSTRIES
+          </footer>
+        </main>
+      </div>
     </div>
   )
 }

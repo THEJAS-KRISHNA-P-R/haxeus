@@ -12,9 +12,9 @@ export async function POST(req: NextRequest) {
         // Relax rate limits in development for testing
         const isDev = process.env.NODE_ENV === "development"
         const limit = isDev ? 100 : 3
-        const { limited } = await rateLimit(`contact_form:ip:${ip}`, limit, 3600) // 3 req per hour (100 in dev)
-
-        if (limited) {
+        // IP rate limit — 3 attempts per hour
+        const ipLimited = await rateLimit(ip, "contact_form", limit, 3600)
+        if (ipLimited) {
             console.warn(`[contact_form] Rate limit exceeded for IP: ${ip}`)
             return NextResponse.json({ error: "Too many messages sent. Please try again later." }, { status: 429 })
         }

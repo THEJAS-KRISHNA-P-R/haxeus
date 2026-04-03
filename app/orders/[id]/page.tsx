@@ -1,31 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter, useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import { useTheme } from "@/components/ThemeProvider"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Check, CheckCircle, Clock, Package, Truck, XCircle } from "lucide-react"
+import { ArrowLeft, CheckCircle, Clock, MapPin, ShieldCheck, ChevronRight } from "lucide-react"
 import { format } from "date-fns"
-import { formatPrice, CURRENCY_SYMBOL } from "@/lib/currency"
-
-// ─── Status config ─────────────────────────────────────────────────────────────
-
-const STATUS_CONFIG: Record<string, { label: string; bgCls: string; textCls: string; icon: any }> = {
-  pending:    { label: "Pending",    bgCls: "bg-yellow-500/10", textCls: "text-yellow-400",  icon: Clock },
-  confirmed:  { label: "Confirmed",  bgCls: "bg-emerald-500/10",textCls: "text-emerald-400", icon: CheckCircle },
-  preorder:   { label: "Pre-Order",  bgCls: "bg-[#e7bf04]/10",  textCls: "text-[#e7bf04]",  icon: Clock },
-  processing: { label: "Processing", bgCls: "bg-blue-500/10",   textCls: "text-blue-400",   icon: Package },
-  shipped:    { label: "Shipped",    bgCls: "bg-purple-500/10", textCls: "text-purple-400",  icon: Truck },
-  delivered:  { label: "Delivered",  bgCls: "bg-emerald-500/10",textCls: "text-emerald-400", icon: CheckCircle },
-  cancelled:  { label: "Cancelled",  bgCls: "bg-red-500/10",    textCls: "text-red-400",    icon: XCircle },
-  refunded:   { label: "Refunded",   bgCls: "bg-orange-500/10", textCls: "text-orange-400", icon: XCircle },
-}
-
-const TIMELINE: string[] = ["pending", "confirmed", "processing", "shipped", "delivered"]
-const PREORDER_TIMELINE: string[] = ["pending", "preorder", "processing", "shipped", "delivered"]
+import { formatPrice } from "@/lib/currency"
+import { PaymentStatusBadge } from "@/components/PaymentStatusBadge"
 
 export default function OrderDetailsPage() {
   const { theme } = useTheme()
@@ -34,6 +19,8 @@ export default function OrderDetailsPage() {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [confirmedBanner, setConfirmedBanner] = useState(false)
+  const [verificationBanner, setVerificationBanner] = useState(false)
+  
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
@@ -41,12 +28,13 @@ export default function OrderDetailsPage() {
 
   useEffect(() => {
     setMounted(true)
-    if (searchParams?.get("confirmed") === "true") {
+    const status = searchParams?.get("payment")
+    if (status === "success") {
       setConfirmedBanner(true)
-      const timer = setTimeout(() => setConfirmedBanner(false), 5000)
-      return () => clearTimeout(timer)
+    } else if (status === "verification_failed") {
+      setVerificationBanner(true)
     }
-  }, [])
+  }, [searchParams])
 
   useEffect(() => { checkAuth() }, [orderId])
 
@@ -62,19 +50,10 @@ export default function OrderDetailsPage() {
     try {
       const { data: orderData } = await supabase
         .from("orders")
-        .select(`
-          id, order_number, status, payment_status,
-          shipping_name, shipping_phone,
-          shipping_address_1, shipping_address_2,
-          shipping_city, shipping_state, shipping_pincode, shipping_country,
-          shipping_address,
-          total_amount, subtotal_amount, shipping_amount, discount_amount,
-          payment_method, tracking_number, coupon_code,
-          is_preorder, created_at, updated_at
-        `)
+        .select("*")
         .eq("id", id)
         .eq("user_id", userId)
-        .maybeSingle()
+        .single()
 
       if (!orderData) { router.push("/orders"); return }
       setOrder(orderData)
@@ -92,241 +71,214 @@ export default function OrderDetailsPage() {
     }
   }
 
-  const card = cn(
-    "rounded-2xl border p-5 transition-colors",
-    isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-white border-black/[0.07] shadow-sm"
+  const cardCls = cn(
+    "rounded-2xl border p-6 transition-colors duration-300 backdrop-blur-md",
+    isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-white border-black/[0.08] shadow-sm"
   )
-  const muted = isDark ? "text-white/50" : "text-black/50"
-  const primary = isDark ? "text-white" : "text-black"
+  const mutedText = isDark ? "text-white/40" : "text-black/40"
+  const primaryText = isDark ? "text-white" : "text-black"
 
   if (!mounted || loading) {
     return (
-      <div className={cn("min-h-screen flex items-center justify-center pt-20", "bg-[var(--bg)]")}>
-        <div className={cn("w-10 h-10 rounded-full border-2 border-t-[#e93a3a] animate-spin", isDark ? "border-white/10" : "border-black/10")} />
+      <div className="min-h-screen pt-[88px] flex items-center justify-center bg-[var(--bg)]">
+        <div className="w-10 h-10 rounded-full border-2 border-t-[#e93a3a] animate-spin border-white/10" />
       </div>
     )
   }
 
   if (!order) return null
 
-  const status = order.status ?? "pending"
-  const sc = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending
-  const StatusIcon = sc.icon
-  const isPreorder = order.is_preorder
-
-  // Shipping address — prefer flat columns, fall back to JSON blob
-  const addr = {
-    name: order.shipping_name || order.shipping_address?.full_name || "",
-    phone: order.shipping_phone || order.shipping_address?.phone || "",
-    address_1: order.shipping_address_1 || order.shipping_address?.address_line1 || "",
-    address_2: order.shipping_address_2 || order.shipping_address?.address_line2 || "",
-    city: order.shipping_city || order.shipping_address?.city || "",
-    state: order.shipping_state || order.shipping_address?.state || "",
-    pincode: order.shipping_pincode || order.shipping_address?.pincode || "",
-    country: order.shipping_country || order.shipping_address?.country || "India",
-  }
-
-  const subtotal = order.subtotal_amount ?? items.reduce((s: number, i: any) => s + ((i.unit_price ?? i.price) * i.quantity), 0)
-  const shippingAmt = order.shipping_amount ?? 0
-  const discount = order.discount_amount ?? 0
-
-  // Timeline
-  const timeline = isPreorder ? PREORDER_TIMELINE : TIMELINE
-  const currentIdx = timeline.indexOf(status)
-
   return (
-    <main className={cn("min-h-screen pt-[88px] pb-16 px-4 md:px-8 transition-colors", "bg-[var(--bg)]")}>
+    <main className="min-h-screen pt-[88px] pb-16 px-4 md:px-8 bg-[var(--bg)]">
       <div className="max-w-5xl mx-auto">
 
-        {/* Payment confirmed banner */}
+        {/* ─── Payment Success Banner ────────────────────────────────────────── */}
         {confirmedBanner && (
-          <div className="mt-6 mb-4 flex items-center gap-3 px-5 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="mt-6 mb-6 p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-start gap-4">
+            <div className="p-3 rounded-full bg-emerald-500/20">
+              <CheckCircle className="w-6 h-6" />
+            </div>
             <div>
-              <p className="font-bold text-sm">Payment successful!</p>
-              <p className="text-xs opacity-80">Your {isPreorder ? "pre-order" : "order"} is confirmed. A confirmation email has been sent.</p>
+              <p className="font-black text-lg tracking-tight mb-0.5">Order Confirmed!</p>
+              <p className="text-sm font-medium opacity-80 leading-relaxed">
+                Your payment was successful and your order is being processed. 
+                A confirmation email has been sent to {order.shipping_email || 'your inbox'}.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ─── Verification Failed Banner ────────────────────────────────────── */}
+        {verificationBanner && (
+          <div className="mt-6 mb-6 p-6 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-start gap-4">
+            <div className="p-3 rounded-full bg-amber-500/20">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-black text-lg tracking-tight mb-0.5">Verification in Progress</p>
+              <p className="text-sm font-medium opacity-80 leading-relaxed">
+                Your payment was received but validation is taking a moment. 
+                Your order status will update to "Confirmed" automatically within 2-5 minutes.
+              </p>
             </div>
           </div>
         )}
 
         {/* Header */}
-        <div className="flex items-center gap-3 mt-6 mb-6">
-          <Link href="/orders">
-            <button className={cn("p-2 rounded-full transition-all", isDark ? "text-white/45 hover:text-white hover:bg-white/[0.07]" : "text-black/45 hover:text-black hover:bg-black/[0.05]")}>
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+        <div className="flex items-center gap-4 mb-8 pt-6">
+          <Link href="/orders" className={cn("p-2 rounded-full", isDark ? "hover:bg-white/10" : "hover:bg-black/5")}>
+            <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex-1">
-            <p className={cn("text-xs tracking-widest uppercase font-medium mb-0.5", isDark ? "text-white/30" : "text-black/35")}>Order</p>
-            <h1 className={cn("text-xl font-bold tracking-tight", primary)}>
-              {order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}
-            </h1>
+            <p className={cn("text-[10px] tracking-widest uppercase font-bold", mutedText)}>Order Summary</p>
+            <h1 className="text-2xl font-black tracking-tight">{order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}</h1>
           </div>
-          <span className={cn("px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center gap-1.5", sc.bgCls, sc.textCls)}>
-            <StatusIcon className="w-3.5 h-3.5" />
-            {sc.label}
-          </span>
+          <PaymentStatusBadge status={order.status} className="h-9 px-4" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
-
-          {/* Left column */}
-          <div className="space-y-4">
-
-            {/* Status timeline */}
-            <div className={card}>
-              <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-4", isDark ? "text-white/35" : "text-black/40")}>Order Progress</p>
-              <div className="flex items-center gap-1">
-                {timeline.map((s, i) => {
-                  const done = currentIdx > i
-                  const active = currentIdx === i
-                  const sc2 = STATUS_CONFIG[s]
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
+          
+          <div className="space-y-6">
+            {/* Timeline */}
+            <div className={cardCls}>
+              <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-8", mutedText)}>Order Journey</p>
+              <div className="flex items-center justify-between gap-2 px-2">
+                {['pending', 'confirmed', 'shipped', 'delivered'].map((s, i) => {
+                  const states = ['pending', 'confirmed', 'payment_failed', 'shipped', 'delivered']
+                  const currentIdx = states.indexOf(order.status)
+                  const thisIdx = states.indexOf(s)
+                  const isDone = currentIdx >= thisIdx
+                  const isDisabled = order.status === 'payment_failed' && s !== 'pending'
+                  
                   return (
-                    <div key={s} className="flex items-center gap-1 flex-1">
-                      <div className="flex flex-col items-center flex-shrink-0">
+                    <React.Fragment key={s}>
+                      <div className="flex flex-col items-center gap-2 group">
                         <div className={cn(
-                          "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
-                          done ? "bg-emerald-500 text-white" : active ? "bg-[#e93a3a] text-white" : isDark ? "bg-white/[0.08] text-white/25" : "bg-black/[0.07] text-black/25"
+                          "w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                          isDisabled ? "opacity-20 translate-y-3" :
+                          isDone ? "bg-emerald-500 text-white scale-110 shadow-lg shadow-emerald-500/20" : 
+                          isDark ? "bg-white/5 text-white/20" : "bg-black/5 text-black/20"
                         )}>
-                          {done ? <Check className="w-3.5 h-3.5" strokeWidth={3} /> : i + 1}
+                          {isDone ? <CheckCircle className="w-5 h-5" /> : (i + 1)}
                         </div>
-                        <p className={cn("text-[9px] mt-1 font-bold uppercase tracking-wider text-center w-12", active ? (isDark ? "text-white/80" : "text-black/80") : muted)}>
-                          {sc2?.label ?? s}
+                        <p className={cn("text-[9px] font-black uppercase tracking-widest", isDone ? primaryText : mutedText)}>
+                          {s === 'pending' && order.status === 'payment_failed' ? 'Failed' : s}
                         </p>
                       </div>
-                      {i < timeline.length - 1 && (
-                        <div className={cn("h-px flex-1 -mt-4", done ? "bg-emerald-500/40" : isDark ? "bg-white/[0.07]" : "bg-black/[0.07]")} />
+                      {i < 3 && (
+                        <div className={cn("h-[2px] flex-1 mb-6 transition-all", isDisabled ? "bg-white/5" : isDone ? "bg-emerald-500/30" : isDark ? "bg-white/5" : "bg-black/5")} />
                       )}
-                    </div>
+                    </React.Fragment>
                   )
                 })}
               </div>
             </div>
 
-            {/* Order items */}
-            <div className={card}>
-              <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-4", isDark ? "text-white/35" : "text-black/40")}>Items</p>
-              <div className="space-y-4">
-                {items.map((item: any) => {
-                  const price = item.unit_price ?? item.price
-                  return (
-                    <div key={item.id} className="flex gap-3">
-                      <div className={cn("relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0", isDark ? "bg-white/[0.05]" : "bg-black/[0.05]")}>
-                        <Image
-                          src={item.product?.front_image || "/placeholder.svg"}
-                          alt={item.product?.name || "Product"}
-                          fill sizes="56px"
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn("text-sm font-semibold truncate", primary)}>{item.product?.name || item.product_name}</p>
-                        <p className={cn("text-xs mt-0.5", muted)}>
-                          {item.size}{item.color ? ` · ${item.color}` : ""} · Qty {item.quantity}
-                        </p>
-                        {(item.is_preorder ?? false) && (
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-[#e7bf04]/20 text-[#e7bf04]">PRE-ORDER</span>
-                            {(item.preorder_expected_date || item.product?.expected_date) && (
-                              <span className={cn("text-[10px]", muted)}>Ships {item.preorder_expected_date ?? item.product?.expected_date}</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <p className={cn("text-sm font-bold flex-shrink-0", primary)}>
-                        {formatPrice(price * item.quantity)}
-                      </p>
+            {/* Items */}
+            <div className={cardCls}>
+              <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-6", mutedText)}>Items in Order</p>
+              <div className="space-y-6">
+                {items.map((item: any) => (
+                  <div key={item.id} className="flex gap-4 p-2 rounded-2xl transition-colors hover:bg-white/[0.02]">
+                    <div className="w-20 h-20 rounded-2xl bg-black/5 relative overflow-hidden group">
+                      <Image src={item.product?.front_image || "/placeholder.svg"} alt="Item" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
-                  )
-                })}
+                    <div className="flex-1 min-w-0 pt-1">
+                      <p className="font-black text-base tracking-tight truncate">{item.product?.name}</p>
+                      <p className={cn("text-xs font-bold mt-1", mutedText)}>{item.size} · Qty {item.quantity}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs font-black text-[#e93a3a]">{formatPrice(item.unit_price || item.price)}</span>
+                      </div>
+                    </div>
+                    <div className="pt-1 text-right">
+                      <p className="font-black text-sm">{formatPrice((item.unit_price || item.price) * item.quantity)}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Shipping address */}
-            {addr.address_1 && (
-              <div className={card}>
-                <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-3", isDark ? "text-white/35" : "text-black/40")}>Shipping Address</p>
-                {addr.name && <p className={cn("font-bold text-sm", primary)}>{addr.name}</p>}
-                <p className={cn("text-sm mt-1 leading-relaxed", muted)}>
-                  {addr.address_1}
-                  {addr.address_2 ? `, ${addr.address_2}` : ""}
-                  <br />
-                  {addr.city}, {addr.state} — {addr.pincode}
-                  {addr.country !== "India" ? `, ${addr.country}` : ""}
-                </p>
-                {addr.phone && <p className={cn("text-sm mt-1", muted)}>+91 {addr.phone}</p>}
+            {/* Shipping Address */}
+            <div className={cardCls}>
+               <div className="flex items-center gap-2 mb-4 text-[#e93a3a]">
+                <MapPin className="w-4 h-4" />
+                <p className="text-xs font-bold tracking-[0.2em] uppercase">Delivery To</p>
               </div>
-            )}
+              <p className="font-black text-base">{order.shipping_address?.full_name || order.shipping_name}</p>
+              <p className={cn("text-sm mt-1.5 leading-relaxed font-medium", mutedText)}>
+                {order.shipping_address?.address_line1 || order.shipping_address_1}
+                {(order.shipping_address?.address_line2 || order.shipping_address_2) ? `, ${order.shipping_address?.address_line2 || order.shipping_address_2}` : ""}
+                <br />
+                {order.shipping_address?.city || order.shipping_city}, {order.shipping_address?.state || order.shipping_state} — {order.shipping_address?.pincode || order.shipping_pincode}
+              </p>
+              <p className={cn("text-sm mt-2 font-bold", primaryText)}>+91 {order.shipping_address?.phone || order.shipping_phone}</p>
+            </div>
           </div>
 
-          {/* Right — summary */}
-          <div className="space-y-4">
-            {/* Order summary */}
-            <div className={card}>
-              <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-4", isDark ? "text-white/35" : "text-black/40")}>Summary</p>
-              <div className="space-y-2.5 text-sm">
+          {/* Totals */}
+          <aside className="space-y-6">
+            <div className={cardCls}>
+              <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-6", mutedText)}>Financials</p>
+              <div className="space-y-3.5 text-sm">
                 <div className="flex justify-between">
-                  <span className={muted}>Subtotal</span>
-                  <span className={primary}>{formatPrice(subtotal)}</span>
+                  <span className={mutedText}>Subtotal</span>
+                  <span className="font-bold">{formatPrice(order.subtotal_amount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={muted}>Shipping</span>
-                  <span className={shippingAmt === 0 ? "text-emerald-400" : primary}>
-                    {shippingAmt === 0 ? "FREE" : `${CURRENCY_SYMBOL}${shippingAmt}`}
+                  <span className={mutedText}>Shipping</span>
+                  <span className={cn("font-bold", order.shipping_amount === 0 ? "text-emerald-400" : "")}>
+                    {order.shipping_amount === 0 ? "FREE" : formatPrice(order.shipping_amount)}
                   </span>
                 </div>
-                {discount > 0 && (
-                  <div className="flex justify-between">
-                    <span className={muted}>Discount</span>
-                    <span className="text-emerald-400">\u2212{formatPrice(discount)}</span>
+                {order.discount_amount > 0 && (
+                  <div className="flex justify-between text-emerald-400 font-bold">
+                    <span>Discount</span>
+                    <span>-{formatPrice(order.discount_amount)}</span>
                   </div>
                 )}
-                <div className={cn("border-t pt-2.5 flex justify-between font-bold", isDark ? "border-white/[0.07]" : "border-black/[0.07]")}>
-                  <span className={primary}>Total</span>
-                  <span className="text-[#e93a3a]">{formatPrice(order.total_amount ?? 0)}</span>
+                <div className="flex justify-between pt-4 border-t border-white/10">
+                  <span className="font-black text-lg">Total Paid</span>
+                  <span className="font-black text-xl text-[#e93a3a]">{formatPrice(order.total_amount)}</span>
+                </div>
+              </div>
+
+              {/* Payment Meta */}
+              <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className={cn("uppercase tracking-widest font-black", mutedText)}>Payment Method</span>
+                  <span className="font-black">{order.payment_method?.toUpperCase()}</span>
+                </div>
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className={cn("uppercase tracking-widest font-black", mutedText)}>Order Date</span>
+                  <span className="font-black">{order.created_at ? format(new Date(order.created_at), 'MMM dd, yyyy') : '—'}</span>
                 </div>
               </div>
             </div>
 
-            {/* Meta */}
-            <div className={card}>
-              <p className={cn("text-xs font-bold tracking-[0.2em] uppercase mb-3", isDark ? "text-white/35" : "text-black/40")}>Details</p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className={muted}>Placed</span>
-                  <span className={primary}>{order.created_at ? format(new Date(order.created_at), "d MMM yyyy") : "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className={muted}>Payment</span>
-                  <span className={cn("font-medium", order.payment_status === "paid" ? "text-emerald-400" : "text-yellow-400")}>
-                    {(order.payment_status ?? "pending").charAt(0).toUpperCase() + (order.payment_status ?? "pending").slice(1)}
-                  </span>
-                </div>
-                {order.tracking_number && (
-                  <div className="flex justify-between gap-2">
-                    <span className={muted}>Tracking</span>
-                    <span className={cn("font-mono text-xs", primary)}>{order.tracking_number}</span>
-                  </div>
-                )}
-                {order.coupon_code && (
-                  <div className="flex justify-between">
-                    <span className={muted}>Coupon</span>
-                    <span className={cn("font-mono text-xs font-bold", primary)}>{order.coupon_code}</span>
-                  </div>
-                )}
+            {/* Assistance */}
+            <div className={cn("p-6 rounded-3xl border border-[#e93a3a]/10 bg-[#e93a3a]/5")}>
+              <div className="flex items-center gap-2 mb-3 text-[#e93a3a]">
+                <ShieldCheck className="w-4 h-4" />
+                <p className="text-[10px] font-black tracking-widest uppercase">Secured Order</p>
               </div>
+              <p className="text-[10px] font-bold leading-relaxed opacity-60">
+                You're covered by HAXEUS buyer protection. Need help with this order? 
+                Reach out to us on WhatsApp or Instagram with your Order ID.
+              </p>
+              <Link href="/support" className="mt-4 flex items-center justify-between text-[10px] font-black uppercase tracking-widest group">
+                Customer Support <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
-
-            {/* Actions */}
+            
             <Link href="/products">
-              <button className={cn("w-full py-3.5 rounded-full text-sm font-bold tracking-wide transition-colors", "bg-[#e93a3a] hover:bg-[#ff4a4a] text-white shadow-lg shadow-[#e93a3a]/20")}>
+              <button className="w-full py-4 rounded-full bg-white/5 border border-white/10 text-xs font-black tracking-widest uppercase hover:bg-white/10 transition-colors">
                 Continue Shopping
               </button>
             </Link>
-          </div>
-
+          </aside>
         </div>
       </div>
     </main>
   )
 }
+

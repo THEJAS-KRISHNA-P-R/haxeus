@@ -19,7 +19,9 @@ import {
     AdminCard,
     AdminPageHeader,
     AdminSearchInput,
-    AdminButton
+    AdminButton,
+    AdminTableHeader,
+    AdminTableRow
 } from "@/components/admin/AdminUI";
 
 export default function ProductsManagementContent() {
@@ -130,97 +132,100 @@ export default function ProductsManagementContent() {
 
             {/* Products Table */}
             <AdminCard className="overflow-hidden border-[var(--border)] shadow-2xl">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-[var(--border)] bg-[var(--bg-elevated)]/30 text-[var(--text-3)]">
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Product</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Category</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Price</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Status</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[var(--border)]">
+                <div className="p-2 overflow-x-auto">
+                    <div className="min-w-[800px]">
+                        <AdminTableHeader cols="grid-cols-[2.5fr_1.2fr_1fr_1fr_1.2fr] border-none !bg-transparent">
+                            <div className="pl-4">Product Engine Item</div>
+                            <div>Classification</div>
+                            <div>Price Terminal</div>
+                            <div>Runtime Status</div>
+                            <div className="pr-4 text-right">System Actions</div>
+                        </AdminTableHeader>
+
+                        <div className="divide-y divide-[var(--border)]/50">
                             {loading ? (
                                 [...Array(5)].map((_, i) => (
-                                    <tr key={i} className="animate-pulse">
-                                        <td colSpan={5} className="px-6 py-8">
-                                            <div className="h-4 bg-[var(--bg-elevated)] rounded-full w-full opacity-20" />
-                                        </td>
-                                    </tr>
+                                    <div key={i} className="px-6 py-8 flex items-center justify-between gap-4 animate-pulse">
+                                        <div className="h-4 bg-[var(--bg-elevated)]/50 rounded-full w-full opacity-20" />
+                                    </div>
                                 ))
                             ) : filteredProducts.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-20 text-center">
-                                        <div className="flex flex-col items-center gap-3 opacity-20">
-                                            <Search size={48} />
-                                            <p className="text-sm font-bold uppercase tracking-widest">No products found</p>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <div className="py-24 text-center">
+                                    <div className="flex flex-col items-center gap-3 opacity-20">
+                                        <Search size={48} className="text-[var(--text-3)]" />
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Zero assets matched search query</p>
+                                    </div>
+                                </div>
                             ) : (
                                 filteredProducts.map((product) => (
-                                    <tr key={product.id} className="hover:bg-[var(--bg-elevated)]/50 transition-colors group">
-                                        <td className="px-6 py-4">
+                                    <AdminTableRow 
+                                        key={product.id} 
+                                        cols="grid-cols-[2.5fr_1.2fr_1fr_1fr_1.2fr]"
+                                        className="py-4 hover:bg-white/[0.02]"
+                                    >
+                                        <div className="pl-4">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-xl overflow-hidden border border-[var(--border)] bg-black shrink-0 relative">
+                                                <div className="w-12 h-12 rounded-xl overflow-hidden border border-[var(--border)] bg-black shrink-0 relative group-hover/row:border-[var(--accent)] transition-all">
                                                     <Image
                                                         src={product.front_image || "/placeholder.svg"}
                                                         alt={product.name}
                                                         fill
                                                         sizes="48px"
-                                                        className="object-cover transition-transform group-hover:scale-110"
+                                                        className="object-cover transition-transform duration-500 group-hover/row:scale-110"
                                                     />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-black text-[var(--text)] truncate">{product.name}</p>
-                                                    <p className="text-[10px] text-[var(--text-3)] font-medium">ID: #{String(product.id).padStart(4, '0')}</p>
+                                                    <p className="text-[11px] font-black uppercase tracking-tight text-[var(--text)] truncate">{product.name}</p>
+                                                    <p className="text-[9px] text-[var(--text-3)] font-black opacity-40 uppercase tracking-widest mt-0.5">ID: {String(product.id).padStart(4, '0')}</p>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--text-2)]" style={{ background: "color-mix(in srgb, var(--text) 5%, transparent)" }}>
-                                                {product.category || "Uncategorized"}
+                                        </div>
+                                        <div>
+                                            <span 
+                                                className="inline-flex items-center px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.2em] border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-3)] opacity-70"
+                                            >
+                                                {product.category || "UNCATEGORIZED"}
                                             </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm font-black text-[var(--text)]">₹{product.price.toLocaleString("en-IN")}</p>
-                                        </td>
-                                        <td className="px-6 py-4">
+                                        </div>
+                                        <div>
+                                            <p className="text-[12px] font-black text-[var(--text)] tracking-tight">₹{product.price.toLocaleString("en-IN")}</p>
+                                        </div>
+                                        <div>
                                             {product.is_active ? (
-                                                <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: "var(--color-success, #16a34a)" }}>
-                                                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--color-success, #16a34a)" }} />
-                                                    Live
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 text-[8px] font-black uppercase tracking-widest">
+                                                    <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                                                    LIVE
                                                 </span>
                                             ) : (
-                                                <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: "var(--color-accent, #e93a3a)" }}>
-                                                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-accent, #e93a3a)" }} />
-                                                    Inactive
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[8px] font-black uppercase tracking-widest">
+                                                    <span className="w-1 h-1 rounded-full bg-rose-500" />
+                                                    INACTIVE
                                                 </span>
                                             )}
-                                        </td>
-                                        <td className="px-6 py-4">
+                                        </div>
+                                        <div className="pr-4">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link href={`/admin/products/${product.id}/edit`}>
-                                                    <button className="p-2.5 rounded-xl text-[var(--text-3)] hover:text-[var(--text)] hover:border-[var(--text-3)] border border-transparent transition-all" style={{ background: "color-mix(in srgb, var(--text) 5%, transparent)" }}>
+                                                    <button className="p-2 rounded-xl text-[var(--text-3)] hover:text-[var(--text)] hover:border-[var(--text-3)] border border-transparent transition-all bg-[var(--bg-elevated)]/50 hover:bg-[var(--bg-elevated)]">
                                                         <Edit size={14} />
                                                     </button>
                                                 </Link>
                                                 <button
-                                                    onClick={() => setDeleteProductId(product.id)}
-                                                    className="p-2.5 rounded-xl transition-all"
-                                                    style={{ background: "color-mix(in srgb, var(--color-accent, #e93a3a) 10%, transparent)", color: "var(--color-accent, #e93a3a)" }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setDeleteProductId(product.id);
+                                                    }}
+                                                    className="p-2 rounded-xl transition-all bg-[var(--color-accent, #e93a3a)]/10 text-[var(--color-accent, #e93a3a)] hover:bg-[var(--color-accent, #e93a3a)]/20"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </AdminTableRow>
                                 ))
                             )}
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
                 </div>
             </AdminCard>
 

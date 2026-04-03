@@ -7,6 +7,7 @@ export interface ProductReviewRecord {
   title: string | null
   body: string | null
   verified_purchase: boolean
+  image_urls?: string[] | null
   created_at: string
 }
 

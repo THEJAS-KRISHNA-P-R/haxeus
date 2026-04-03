@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
             if (diffSeconds < 10) {
                 await sendWelcomeEmail({
                     email: data.user.email!,
-                    name: data.user.user_metadata?.full_name ||
+                    discountCode: "WELCOME10",
+                    customerName: data.user.user_metadata?.full_name ||
                         data.user.user_metadata?.name ||
                         data.user.email?.split("@")[0]
                 }).catch(console.error)

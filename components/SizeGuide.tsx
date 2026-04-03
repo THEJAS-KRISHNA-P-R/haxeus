@@ -44,7 +44,7 @@ export function SizeGuide() {
           color: "var(--color-foreground)",
         }}
       >
-        <div className="overflow-y-auto p-5 sm:p-7">
+        <div className="overflow-y-auto max-h-[85vh] p-5 sm:p-7 custom-scrollbar">
           <DialogHeader className="space-y-3">
             <DialogTitle className="text-2xl font-bold tracking-tight">Size Guide</DialogTitle>
             <DialogDescription style={{ color: "var(--color-foreground-muted)" }}>

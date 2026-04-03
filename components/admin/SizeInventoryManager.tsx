@@ -1,13 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { AdminCard, AdminButton, AdminInput, AdminBadge } from "@/components/admin/AdminUI"
 import { X, Plus, AlertCircle, Package } from "lucide-react"
 import { ProductInventory } from "@/lib/supabase"
-import { Badge } from "@/components/ui/badge"
 
 interface SizeInventoryManagerProps {
     inventory: ProductInventory[]
@@ -58,130 +54,126 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
     }
 
     const getStockStatus = (item: ProductInventory) => {
-        if (item.stock_quantity === 0) return { label: "Out of Stock", color: "bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300" }
-        if (item.stock_quantity <= item.low_stock_threshold) return { label: "Low Stock", color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-300" }
-        return { label: "In Stock", color: "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300" }
+        if (item.stock_quantity === 0) return { label: "Out of Stock", variant: "danger" as const }
+        if (item.stock_quantity <= item.low_stock_threshold) return { label: "Low Stock", variant: "warning" as const }
+        return { label: "In Stock", variant: "success" as const }
     }
 
     const totalStock = inventory.reduce((sum, inv) => sum + inv.stock_quantity, 0)
 
     return (
-        <Card className="bg-white dark:bg-[#111] border-black/[0.07] dark:border-white/[0.07]">
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-black dark:text-white">Size Inventory</CardTitle>
-                        <p className="text-sm text-black/40 dark:text-white/40 mt-1">
-                            Manage stock for each size variant
-                        </p>
-                    </div>
-                    {inventory.length > 0 && (
-                        <Badge variant="secondary" className="text-lg px-4 py-2 bg-black/5 dark:bg-[#111] text-black/60 dark:text-white/60">
-                            <Package size={16} className="mr-2" />
-                            Total: {totalStock}
-                        </Badge>
-                    )}
+        <AdminCard className="p-6">
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 style={{ color: "var(--text)" }} className="text-xl font-bold">
+                        Size Inventory
+                    </h2>
+                    <p style={{ color: "var(--text-3)" }} className="text-[10px] font-black uppercase tracking-[0.2em] mt-1 opacity-70">
+                        Manage stock for each size variant
+                    </p>
                 </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                {inventory.length > 0 && (
+                    <AdminBadge variant="neutral" className="px-3 py-1.5 text-[10px]">
+                        <Package size={12} className="mr-1.5" />
+                        Total: {totalStock}
+                    </AdminBadge>
+                )}
+            </div>
+
+            <div className="space-y-6">
                 {/* Add New Size */}
-                <div className="flex gap-2">
+                <div className="flex gap-4">
                     <div className="flex-1">
-                        <Input
+                        <AdminInput
                             value={newSize}
-                            onChange={(e) => setNewSize(e.target.value)}
+                            onChange={(e: any) => setNewSize(e.target.value)}
                             placeholder="Enter size (e.g., S, M, L, XL)"
-                            className="bg-white dark:bg-[#111] border-black/10 dark:border-white/[0.06] text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/30"
-                            onKeyDown={(e) => e.key === 'Enter' && addSize()}
+                            onKeyDown={(e: any) => e.key === 'Enter' && addSize()}
                         />
                     </div>
-                    <Button
+                    <AdminButton
                         type="button"
                         onClick={addSize}
-                        className="gap-2 bg-red-600 hover:bg-red-700"
+                        variant="primary"
+                        icon={Plus}
                     >
-                        <Plus size={16} />
                         Add Size
-                    </Button>
+                    </AdminButton>
                 </div>
 
                 {/* Size Inventory List */}
                 {inventory.length === 0 ? (
-                    <div className="border-2 border-dashed border-black/10 dark:border-white/[0.06] rounded-lg p-12 text-center">
-                        <Package className="mx-auto h-12 w-12 text-black/30 dark:text-white/30 mb-3" />
-                        <p className="text-black/40 dark:text-white/40">No sizes added yet</p>
-                        <p className="text-sm text-black/30 dark:text-white/30 mt-1">
+                    <div 
+                        className="border border-dashed rounded-2xl p-12 text-center"
+                        style={{ borderColor: 'var(--border)' }}
+                    >
+                        <Package size={32} style={{ color: "var(--text-3)" }} className="mx-auto mb-4 opacity-50" />
+                        <p style={{ color: "var(--text)" }} className="text-[11px] font-bold uppercase tracking-widest">No sizes added yet</p>
+                        <p style={{ color: "var(--text-3)" }} className="text-[9px] uppercase tracking-[0.2em] mt-1 opacity-50">
                             Add size variants to track inventory
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {inventory.map((item, index) => {
                             const status = getStockStatus(item)
                             return (
                                 <div
                                     key={item.id}
-                                    className="border border-black/10 dark:border-white/[0.06] rounded-lg p-4 space-y-3"
+                                    className="rounded-2xl p-5 space-y-5"
+                                    style={{
+                                        background: "rgba(var(--bg-rgb), 0.03)",
+                                        border: "1px solid var(--border)"
+                                    }}
                                 >
                                     {/* Size Header */}
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 dark:bg-[#1a1a1a] rounded-lg font-bold text-lg text-black dark:text-white">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center justify-center w-12 h-12 rounded-xl font-bold text-lg" style={{ background: "var(--bg-card)", color: "var(--text)" }}>
                                                 {item.size}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-black dark:text-white">Size {item.size}</p>
-                                                <Badge className={status.color}>
+                                                <p style={{ color: "var(--text)" }} className="text-[12px] font-bold uppercase tracking-widest opacity-90 mb-1.5">Size {item.size}</p>
+                                                <AdminBadge variant={status.variant}>
                                                     {status.label}
-                                                </Badge>
+                                                </AdminBadge>
                                             </div>
                                         </div>
-                                        <Button
+                                        <AdminButton
                                             type="button"
-                                            variant="ghost"
-                                            size="sm"
+                                            variant="danger"
                                             onClick={() => removeSize(index)}
-                                            className="text-red-500 hover:text-red-700 hover:bg-[#e93a3a]/10k:hover:bg-red-950"
+                                            className="px-3"
                                         >
-                                            <X size={16} />
-                                        </Button>
+                                            <X size={14} />
+                                        </AdminButton>
                                     </div>
 
                                     {/* Stock Controls */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`stock-${index}`} className="text-sm text-black/60 dark:text-white/60">
-                                                Stock Quantity *
-                                            </Label>
-                                            <Input
-                                                id={`stock-${index}`}
-                                                type="number"
-                                                min="0"
-                                                value={item.stock_quantity}
-                                                onChange={(e) => updateStock(index, Number(e.target.value))}
-                                                className="bg-white dark:bg-[#111] border-black/10 dark:border-white/[0.06] text-black dark:text-white"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`threshold-${index}`} className="text-sm text-black/60 dark:text-white/60">
-                                                Low Stock Alert
-                                            </Label>
-                                            <Input
-                                                id={`threshold-${index}`}
-                                                type="number"
-                                                min="0"
-                                                value={item.low_stock_threshold}
-                                                onChange={(e) => updateThreshold(index, Number(e.target.value))}
-                                                className="bg-white dark:bg-[#111] border-black/10 dark:border-white/[0.06] text-black dark:text-white"
-                                            />
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <AdminInput
+                                            label="Stock Quantity *"
+                                            id={`stock-${index}`}
+                                            type="number"
+                                            min={0}
+                                            value={item.stock_quantity}
+                                            onChange={(e: any) => updateStock(index, Number(e.target.value))}
+                                        />
+                                        <AdminInput
+                                            label="Low Stock Alert"
+                                            id={`threshold-${index}`}
+                                            type="number"
+                                            min={0}
+                                            value={item.low_stock_threshold}
+                                            onChange={(e: any) => updateThreshold(index, Number(e.target.value))}
+                                        />
                                     </div>
 
                                     {/* Warning for Low/Out of Stock */}
                                     {item.stock_quantity <= item.low_stock_threshold && (
-                                        <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                                            <AlertCircle size={16} className="text-yellow-600 dark:text-yellow-500 mt-0.5" />
-                                            <div className="text-sm text-yellow-800 dark:text-yellow-300">
+                                        <div className="flex items-start gap-3 p-4 bg-yellow-400/5 border border-yellow-400/20 rounded-xl">
+                                            <AlertCircle size={16} className="text-yellow-500 mt-0.5" />
+                                            <div className="text-[11px] font-bold tracking-wide text-yellow-500/90 leading-normal">
                                                 {item.stock_quantity === 0
                                                     ? `Size ${item.size} is out of stock. Customers won't be able to purchase this size.`
                                                     : `Size ${item.size} has low stock (${item.stock_quantity} remaining). Consider restocking.`
@@ -195,14 +187,13 @@ export function SizeInventoryManager({ inventory, onChange }: SizeInventoryManag
                     </div>
                 )}
 
-                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <AlertCircle size={16} className="text-blue-600 dark:text-blue-400 mt-0.5" />
-                    <p className="text-xs text-blue-800 dark:text-blue-300">
-                        <strong>Tip:</strong> Set "Low Stock Alert" to receive warnings when inventory gets low.
-                        The default threshold is 10 units.
+                <div className="flex items-start gap-3 p-4 bg-[var(--accent)]/5 border border-[var(--accent)]/10 rounded-xl">
+                    <AlertCircle size={16} className="text-[var(--accent)] mt-0.5 opacity-80" />
+                    <p className="text-[11px] font-bold tracking-wide text-[var(--accent)]/90 leading-normal">
+                        <strong>Tip:</strong> Set "Low Stock Alert" to receive warnings when inventory gets low. Default is 10 units.
                     </p>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </AdminCard>
     )
 }

@@ -328,13 +328,12 @@ export default function PromoPopupsContent() {
                                 {activeTab === "content" && (
                                     <div className="space-y-5">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Name (Admin Label)</label>
-                                            <AdminInput value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Summer Sale Promo" />
+                                            <AdminInput value={form.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Summer Sale Promo" />
                                         </div>
 
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Image URL</label>
-                                            <AdminInput value={form.image_url} onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))} placeholder="https://..." />
+                                            <AdminInput value={form.image_url} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, image_url: e.target.value }))} placeholder="https://..." />
                                             {form.image_url && (
                                                 <div className="mt-2 aspect-video rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--bg-elevated)]">
                                                     <img src={form.image_url} className="w-full h-full object-cover" />
@@ -344,7 +343,7 @@ export default function PromoPopupsContent() {
 
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Alt Text</label>
-                                            <AdminInput value={form.image_alt} onChange={e => setForm(f => ({ ...f, image_alt: e.target.value }))} />
+                                            <AdminInput value={form.image_alt} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, image_alt: e.target.value }))} />
                                         </div>
 
                                         <div className="space-y-4 pt-4 border-t border-[var(--border)]">
@@ -372,7 +371,7 @@ export default function PromoPopupsContent() {
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                            <AdminInput value={block.text} onChange={e => updateTextBlock(block.id, { text: e.target.value })} className="!bg-[var(--bg-card)] !py-2 !text-xs" />
+                                                            <AdminInput value={block.text} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateTextBlock(block.id, { text: e.target.value })} className="!bg-[var(--bg-card)] !py-2 !text-xs" />
                                                             <div className="grid grid-cols-2 gap-2">
                                                                 <select 
                                                                     value={block.position} 

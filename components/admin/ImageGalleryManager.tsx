@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react"
+import { AdminCard, AdminButton, AdminInput } from "@/components/admin/AdminUI"
 import { X, GripVertical, Star, Plus, Image as ImageIcon, Upload, Loader2, Clipboard } from "lucide-react"
 import Image from "next/image"
 import { supabase, ProductImage } from "@/lib/supabase"
@@ -20,7 +18,6 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
     const [uploading, setUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState("")
     const [isPasteActive, setIsPasteActive] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null)
 
     // Handle clipboard paste for images
     useEffect(() => {
@@ -205,18 +202,20 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
     }
 
     return (
-        <Card className="bg-white dark:bg-[#111] border-black/[0.07] dark:border-white/[0.07]" ref={containerRef}>
-            <CardHeader>
-                <CardTitle className="text-black dark:text-white flex items-center gap-2">
-                    Product Images
-                    {uploading && <Loader2 className="h-4 w-4 animate-spin text-red-500" />}
-                </CardTitle>
-                <p className="text-sm text-black/40 dark:text-white/40">
-                    Add multiple images for your product. <span className="text-red-500 font-medium">Paste images directly (Ctrl+V)</span> or use the upload button.
-                    Images are automatically <span className="font-medium text-green-600 dark:text-green-400">compressed & converted to WebP</span> before uploading.
-                </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <AdminCard className="p-6">
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 style={{ color: "var(--text)" }} className="text-xl font-bold flex items-center gap-2">
+                        Product Images
+                        {uploading && <Loader2 className="h-4 w-4 animate-spin text-[var(--accent)]" />}
+                    </h2>
+                    <p style={{ color: "var(--text-3)" }} className="text-[10px] font-black uppercase tracking-[0.2em] mt-1 opacity-70">
+                        Add multiple images for your product. <span className="text-[var(--accent)]">Paste (Ctrl+V)</span> or upload.
+                    </p>
+                </div>
+            </div>
+            
+            <div className="space-y-6">
                 {/* Upload Progress */}
                 {uploading && uploadProgress && (
                     <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-center gap-3">
@@ -226,30 +225,34 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                 )}
 
                 {/* Paste Zone + File Upload */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Paste/Drop Zone */}
                     <div
                         className={cn(
-                            'border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer',
+                            'border border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center',
                             isPasteActive
-                                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                                : 'border-black/10 dark:border-white/[0.06] hover:border-red-400'
+                                ? 'border-[var(--accent)] bg-[var(--accent)]/5'
+                                : 'hover:border-[var(--accent)] hover:bg-[var(--accent)]/5'
                         )}
+                        style={{ borderColor: !isPasteActive ? 'var(--border)' : undefined }}
                         onFocus={() => setIsPasteActive(true)}
                         onBlur={() => setIsPasteActive(false)}
                         tabIndex={0}
                     >
-                        <Clipboard className="mx-auto h-8 w-8 text-black/30 dark:text-white/30 mb-2" />
-                        <p className="text-sm font-medium text-black/60 dark:text-white/60">
+                        <Clipboard size={24} style={{ color: "var(--text-3)" }} className="mb-3 opacity-50" />
+                        <p style={{ color: "var(--text)" }} className="text-[11px] font-bold uppercase tracking-widest">
                             Paste Image Here
                         </p>
-                        <p className="text-xs text-black/40 dark:text-white/40 mt-1">
+                        <p style={{ color: "var(--text-3)" }} className="text-[9px] uppercase tracking-[0.2em] mt-1 opacity-50">
                             Press Ctrl+V anywhere to paste
                         </p>
                     </div>
 
                     {/* File Upload */}
-                    <label className="border-2 border-dashed border-black/10 dark:border-white/[0.06] rounded-lg p-6 text-center cursor-pointer hover:border-red-400 transition-all">
+                    <label 
+                        className="border border-dashed rounded-2xl p-8 text-center cursor-pointer hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-all flex flex-col items-center justify-center"
+                        style={{ borderColor: 'var(--border)' }}
+                    >
                         <input
                             type="file"
                             accept="image/*"
@@ -257,56 +260,62 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                             onChange={handleFileSelect}
                             className="hidden"
                         />
-                        <Upload className="mx-auto h-8 w-8 text-black/30 dark:text-white/30 mb-2" />
-                        <p className="text-sm font-medium text-black/60 dark:text-white/60">
+                        <Upload size={24} style={{ color: "var(--text-3)" }} className="mb-3 opacity-50" />
+                        <p style={{ color: "var(--text)" }} className="text-[11px] font-bold uppercase tracking-widest">
                             Upload from Device
                         </p>
-                        <p className="text-xs text-black/40 dark:text-white/40 mt-1">
+                        <p style={{ color: "var(--text-3)" }} className="text-[9px] uppercase tracking-[0.2em] mt-1 opacity-50">
                             Click to select files
                         </p>
                     </label>
                 </div>
 
                 {/* URL Input */}
-                <div className="flex gap-2">
+                <div className="flex gap-4">
                     <div className="flex-1">
-                        <Input
+                        <AdminInput
                             value={newImageUrl}
-                            onChange={(e) => setNewImageUrl(e.target.value)}
+                            onChange={(e: any) => setNewImageUrl(e.target.value)}
                             placeholder="Or enter image URL (e.g., /images/product.jpg)"
-                            className="bg-white dark:bg-[#111] border-black/10 dark:border-white/[0.06] text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/30"
-                            onKeyDown={(e) => e.key === 'Enter' && addImage()}
+                            onKeyDown={(e: any) => e.key === 'Enter' && addImage()}
                         />
                     </div>
-                    <Button
+                    <AdminButton
                         type="button"
                         onClick={addImage}
                         disabled={!newImageUrl.trim()}
-                        className="gap-2 bg-red-600 hover:bg-red-700"
+                        variant="primary"
+                        icon={Plus}
                     >
-                        <Plus size={16} />
                         Add
-                    </Button>
+                    </AdminButton>
                 </div>
 
                 {/* Image Gallery */}
                 {images.length === 0 ? (
-                    <div className="border-2 border-dashed border-black/10 dark:border-white/[0.06] rounded-lg p-12 text-center">
-                        <ImageIcon className="mx-auto h-12 w-12 text-black/30 dark:text-white/30 mb-3" />
-                        <p className="text-black/40 dark:text-white/40">No images added yet</p>
-                        <p className="text-sm text-black/30 dark:text-white/30 mt-1">
+                    <div 
+                        className="border border-dashed rounded-2xl p-12 text-center"
+                        style={{ borderColor: 'var(--border)' }}
+                    >
+                        <ImageIcon size={32} style={{ color: "var(--text-3)" }} className="mx-auto mb-4 opacity-50" />
+                        <p style={{ color: "var(--text)" }} className="text-[11px] font-bold uppercase tracking-widest">No images added yet</p>
+                        <p style={{ color: "var(--text-3)" }} className="text-[9px] uppercase tracking-[0.2em] mt-1 opacity-50">
                             Paste an image or upload from your device
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {images.map((image, index) => (
                             <div
                                 key={image.id}
-                                className="relative border border-black/10 dark:border-white/[0.06] rounded-lg p-3 group"
+                                className="relative rounded-2xl p-4 group"
+                                style={{
+                                    background: "rgba(var(--bg-rgb), 0.03)",
+                                    border: "1px solid var(--border)"
+                                }}
                             >
                                 {/* Image Preview */}
-                                <div className="relative h-48 bg-gray-100 dark:bg-[#111] rounded-lg overflow-hidden mb-3">
+                                <div className="relative h-48 rounded-xl overflow-hidden mb-4" style={{ background: "var(--bg-card)" }}>
                                     <Image
                                         src={image.image_url}
                                         alt={`Product image ${index + 1}`}
@@ -315,8 +324,8 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                         className="object-cover"
                                     />
                                     {image.is_primary && (
-                                        <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
-                                            <Star size={12} fill="white" />
+                                        <div className="absolute top-3 left-3 bg-[var(--accent)] text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-[var(--accent)]/30">
+                                            <Star size={10} fill="white" />
                                             Primary
                                         </div>
                                     )}
@@ -325,54 +334,49 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                                 {/* Controls */}
                                 <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-1">
-                                        <Button
+                                        <AdminButton
                                             type="button"
                                             variant="ghost"
-                                            size="sm"
                                             onClick={() => moveImage(index, 'up')}
                                             disabled={index === 0}
-                                            className="h-8 w-8 p-0 hover:bg-black/5 dark:hover:bg-white/5"
+                                            className="px-2 py-2 min-w-0"
                                         >
                                             <GripVertical size={16} />
-                                        </Button>
-                                        <Button
+                                        </AdminButton>
+                                        <AdminButton
                                             type="button"
                                             variant="ghost"
-                                            size="sm"
                                             onClick={() => moveImage(index, 'down')}
                                             disabled={index === images.length - 1}
-                                            className="h-8 w-8 p-0 hover:bg-black/5 dark:hover:bg-white/5"
+                                            className="px-2 py-2 min-w-0"
                                         >
                                             <GripVertical size={16} className="rotate-180" />
-                                        </Button>
+                                        </AdminButton>
                                     </div>
 
                                     <div className="flex items-center gap-2">
                                         {!image.is_primary && (
-                                            <Button
+                                            <AdminButton
                                                 type="button"
                                                 variant="outline"
-                                                size="sm"
                                                 onClick={() => setPrimary(index)}
-                                                className="text-xs border-black/10 dark:border-white/[0.06] hover:bg-black/5 dark:hover:bg-white/5"
                                             >
                                                 Set Primary
-                                            </Button>
+                                            </AdminButton>
                                         )}
-                                        <Button
+                                        <AdminButton
                                             type="button"
-                                            variant="ghost"
-                                            size="sm"
+                                            variant="danger"
                                             onClick={() => removeImage(index)}
-                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-[#e93a3a]/10k:hover:bg-red-950"
+                                            className="px-3"
                                         >
-                                            <X size={16} />
-                                        </Button>
+                                            <X size={14} />
+                                        </AdminButton>
                                     </div>
                                 </div>
 
                                 {/* Image URL */}
-                                <p className="text-xs text-black/40 dark:text-white/40 truncate mt-2">
+                                <p style={{ color: "var(--text-3)" }} className="text-[10px] font-medium truncate mt-4 opacity-50">
                                     {image.image_url}
                                 </p>
                             </div>
@@ -383,7 +387,7 @@ export function ImageGalleryManager({ images, onChange }: ImageGalleryManagerPro
                 <p className="text-xs text-black/40 dark:text-white/40">
                     Tip: Use high-quality images (at least 1200x1200px) for best results
                 </p>
-            </CardContent>
-        </Card>
+            </div>
+        </AdminCard>
     )
 }

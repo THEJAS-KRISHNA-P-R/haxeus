@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import {
     HeroEditor,
+    AboutEditor,
 } from "@/components/admin/homepage/Editors"
 import Link from "next/link"
 import { useTheme } from "@/components/ThemeProvider"
@@ -72,9 +73,12 @@ export default function HomepageEditorPage() {
                 </div>
             </div>
 
-            <div className="flex items-start gap-4 lg:gap-8">
-                <div className={`flex-1 rounded-2xl border p-6 ${isDark ? 'bg-white/[0.02] border-white/[0.07]' : 'bg-black/[0.01] border-black/[0.07]'}`}>
+            <div className="flex items-start gap-4 lg:gap-8 flex-col">
+                <div className={`flex-1 w-full rounded-2xl border p-6 ${isDark ? 'bg-white/[0.02] border-white/[0.07]' : 'bg-black/[0.01] border-black/[0.07]'}`}>
                     <HeroEditor config={editConfig.hero} update={(u) => updateSection('hero', u)} />
+                </div>
+                <div className={`flex-1 w-full rounded-2xl border p-6 ${isDark ? 'bg-white/[0.02] border-white/[0.07]' : 'bg-black/[0.01] border-black/[0.07]'}`}>
+                    <AboutEditor config={editConfig.about} update={(u) => updateSection('about', u)} />
                 </div>
             </div>
         </div>

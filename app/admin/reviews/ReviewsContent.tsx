@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Loader2, ShieldCheck, Star, Trash2 } from "lucide-react"
+import { ShieldCheck, Star, Trash2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import {
   AdminCard,
@@ -66,49 +66,54 @@ export default function ReviewsContent() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Reviews"
-        subtitle={`${reviews.length} delivered-customer reviews in the live storefront feed.`}
+        title="Engine Pulse"
+        subtitle={`${reviews.length} authenticated customer signals captured in the primary feedback loop.`}
       />
 
-      <AdminCard>
-        <div className="px-6 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
-          <p className="mb-3 text-xs uppercase tracking-[0.22em]" style={{ color: "var(--text-3)" }}>
-            Reviews are auto-published only after delivery confirmation.
+      <AdminCard className="overflow-hidden">
+        <div className="px-6 py-6 border-b border-[var(--border)] bg-[var(--bg-elevated)]/20">
+          <p className="mb-4 text-[9px] font-black uppercase tracking-[0.25em] text-[var(--accent-glow)] flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+            Signals auto-published after delivery protocol confirmation.
           </p>
           <AdminSearchInput
-            placeholder="Search reviews by product or content..."
+            placeholder="Query pulses by product or signal content..."
             value={search}
             onChange={setSearch}
             onClear={() => setSearch("")}
-            className="max-w-sm"
+            className="max-w-md"
           />
         </div>
 
-        <div className="overflow-x-auto">
-          <AdminTableHeader cols="grid-cols-[1.35fr_0.7fr_2fr_0.9fr_1fr]" className="px-6 py-4">
-            <span>Product Name</span>
-            <span>Rating</span>
-            <span>Customer Review</span>
-            <span>Purchase</span>
-            <span className="text-right">Manage</span>
+        <div className="p-2">
+          <AdminTableHeader cols="grid-cols-[1.35fr_0.7fr_2fr_0.9fr_1fr] border-none !bg-transparent">
+            <div className="pl-4">Target Asset</div>
+            <div>Magnitude</div>
+            <div>Transmission Content</div>
+            <div>Origin Status</div>
+            <div className="pr-4 text-right">System Management</div>
           </AdminTableHeader>
 
-          <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+          <div className="divide-y divide-[var(--border)]/50">
             {loading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 size={24} className="animate-spin text-[var(--accent)]" />
+              <div className="flex items-center justify-center py-24">
+                <div 
+                    style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }}
+                    className="w-8 h-8 rounded-full border-2 animate-spin" 
+                />
               </div>
             ) : filteredReviews.length === 0 ? (
-              <div className="px-6 py-20 text-center">
+              <div className="px-6 py-32 text-center">
                 <div
-                  className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-3)" }}
+                  className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)]/50"
+                  style={{ color: "var(--text-3)" }}
                 >
                   <Star size={32} className="opacity-20" />
                 </div>
-                <p className="text-lg font-bold" style={{ color: "var(--text)" }}>
-                  {reviews.length === 0 ? "No reviews yet" : "No matching reviews"}
-                </p>
+                <h3 className="text-lg font-black uppercase tracking-tight italic" style={{ color: "var(--text)" }}>
+                  {reviews.length === 0 ? "Zero pulses detected" : "No signals match query"}
+                </h3>
+                <p className="text-[10px] font-black uppercase tracking-widest mt-2 opacity-40">System feedback loop is currently dormant.</p>
               </div>
             ) : (
               filteredReviews.map((review) => (

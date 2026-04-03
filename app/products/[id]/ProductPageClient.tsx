@@ -21,7 +21,7 @@ import { getShimmerDataUrl } from "@/lib/image-placeholder"
 import { SizeGuide } from "@/components/SizeGuide"
 import { TrustBadges } from "@/components/TrustBadges"
 import { ReviewList } from "@/components/ReviewList"
-import { AddReviewForm } from "@/components/AddReviewForm"
+import { supabase } from "@/lib/supabase"
 import type { ProductReviewSummary, ProductReviewViewModel } from "@/types/reviews"
 import { gaCommerceEvents } from "@/lib/ga-events"
 
@@ -52,7 +52,6 @@ export function ProductPageClient({
   relatedProducts = [],
   initialReviews,
   reviewSummary,
-  isAuthenticated,
 }: ProductPageClientProps) {
   const { data: product } = useProduct(initialProduct.id.toString(), {
     initialData: initialProduct,
@@ -70,9 +69,41 @@ export function ProductPageClient({
   const { toast } = useToast()
   const router = useRouter()
   const [reviews, setReviews] = useState<ProductReviewViewModel[]>(initialReviews)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [canReview, setCanReview] = useState(false)
   const prefersReducedMotion = useReducedMotion()
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id ?? null)
+    })
+  }, [])
+
+  useEffect(() => {
+    async function checkReviewEligibility() {
+      if (!userId || !p.id) return
+
+      const { data } = await supabase
+        .from('orders')
+        .select(`
+          status,
+          order_items!inner(product_id)
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'delivered')
+        .eq('order_items.product_id', p.id)
+        .limit(1)
+
+      if (data && data.length > 0) {
+        setCanReview(true)
+      } else {
+        setCanReview(false)
+      }
+    }
+
+    checkReviewEligibility()
+  }, [userId, p.id])
 
   const isDark = !mounted ? true : theme === "dark"
 
@@ -171,7 +202,6 @@ export function ProductPageClient({
 
       toast({ title: "Added to cart!", description: p.name })
       
-      // GA4 Tracking
       gaCommerceEvents.addToCart(
         p.id.toString(),
         p.name,
@@ -214,6 +244,20 @@ export function ProductPageClient({
     } finally {
       setTimeout(() => setAddingToCart(false), 600)
     }
+  }
+
+  const handleReviewCreated = (review: ProductReviewViewModel) => {
+    setReviews((current) => {
+      const exists = current.find((r) => r.id === review.id)
+      if (exists) {
+        return current.map((r) => (r.id === review.id ? review : r))
+      }
+      return [review, ...current]
+    })
+  }
+
+  const handleReviewDeleted = (id: string) => {
+    setReviews((current) => current.filter((r) => r.id !== id))
   }
 
   return (
@@ -456,18 +500,20 @@ export function ProductPageClient({
 
           {p.description && (
             <div className="space-y-4">
-              <p className={cn("text-sm leading-relaxed", isDark ? "text-white/65" : "text-black/65")}>{p.description}</p>
+              <p className="text-sm leading-relaxed text-theme-2">{p.description}</p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mt-14 grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <ReviewList reviews={reviews} />
-        <AddReviewForm
+      <div className="mt-14 border-t-2 border-theme">
+        <ReviewList 
           productId={p.id}
-          isAuthenticated={isAuthenticated}
-          onReviewCreated={(review) => setReviews((current) => [review, ...current])}
+          userId={userId}
+          canReview={canReview}
+          reviews={reviews} 
+          onReviewCreated={handleReviewCreated}
+          onReviewDeleted={handleReviewDeleted}
         />
       </div>
 

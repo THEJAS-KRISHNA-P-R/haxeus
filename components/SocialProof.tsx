@@ -70,6 +70,19 @@ export function SocialProof({ product, reviewSummary }: SocialProofProps) {
     )
   }
 
-  // Nothing to show — render null cleanly (never show 0)
+  // ── No reviews yet — invite first review ───────────────────────────────────
+  if (!product.is_preorder && (!reviewSummary || reviewSummary.totalReviews === 0)) {
+    return (
+      <div className="flex items-center gap-2 py-1">
+        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-theme-2/10 border border-theme-2/25 shadow-sm shadow-theme-2/5">
+          <Star size={12} className="text-theme-2 fill-theme-2 animate-pulse" />
+        </div>
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-theme-2/90">
+           Be the 1st to review this item
+        </span>
+      </div>
+    )
+  }
+
   return null
 }

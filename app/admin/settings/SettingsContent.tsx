@@ -165,7 +165,7 @@ export default function SettingsContent() {
                             <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Store Name</label>
                             <AdminInput
                                 value={settings.store_name}
-                                onChange={e => set("store_name", e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("store_name", e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
@@ -173,7 +173,7 @@ export default function SettingsContent() {
                             <AdminInput
                                 type="email"
                                 value={settings.store_email}
-                                onChange={e => set("store_email", e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("store_email", e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
@@ -198,7 +198,7 @@ export default function SettingsContent() {
                             <AdminInput
                                 type="email"
                                 value={settings.notification_email}
-                                onChange={e => set("notification_email", e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("notification_email", e.target.value)}
                                 placeholder="alerts@haxeus.in"
                             />
                         </div>
@@ -214,7 +214,7 @@ export default function SettingsContent() {
                             <AdminInput
                                 type="number"
                                 value={settings.shipping_rate}
-                                onChange={e => set("shipping_rate", Number(e.target.value))}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("shipping_rate", Number(e.target.value))}
                             />
                         </div>
                         <div className="space-y-2">
@@ -222,7 +222,7 @@ export default function SettingsContent() {
                             <AdminInput
                                 type="number"
                                 value={settings.free_shipping_above}
-                                onChange={e => set("free_shipping_above", Number(e.target.value))}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("free_shipping_above", Number(e.target.value))}
                             />
                         </div>
                         <Toggle k="cod_enabled" label="Enable Cash on Delivery" />
@@ -255,7 +255,7 @@ export default function SettingsContent() {
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Popup Title</label>
                                     <AdminInput
                                         value={settings.email_popup_title}
-                                        onChange={e => set("email_popup_title", e.target.value)}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("email_popup_title", e.target.value)}
                                         placeholder="Get 10% off..."
                                     />
                                 </div>
@@ -263,7 +263,7 @@ export default function SettingsContent() {
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Popup Subtitle</label>
                                     <AdminInput
                                         value={settings.email_popup_subtitle}
-                                        onChange={e => set("email_popup_subtitle", e.target.value)}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("email_popup_subtitle", e.target.value)}
                                         placeholder="Join the list..."
                                     />
                                 </div>

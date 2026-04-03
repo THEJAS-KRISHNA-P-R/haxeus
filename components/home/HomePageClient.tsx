@@ -81,7 +81,9 @@ export function HomePageClient({
           <HeroSection config={config.hero} activeDrop={activeDrop} />
         )}
 
-        <TrustSignals />
+        <div className="hidden lg:block">
+          <TrustSignals />
+        </div>
 
         {/* Preorder Section */}
         {isSectionVisible("preorder", config.preorder.visible) && preorderItems.length > 0 && (
@@ -118,9 +120,7 @@ export function HomePageClient({
 
         {/* About Section */}
         {isSectionVisible("about", config.about.visible) && (
-          <div style={{ contentVisibility: "auto", containIntrinsicSize: "0 800px" }}>
-            <DynamicAboutSection config={config.about} isDark={isDark} />
-          </div>
+          <DynamicAboutSection config={config.about} isDark={isDark} />
         )}
 
         <JoinMovementCTA />

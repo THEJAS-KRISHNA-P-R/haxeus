@@ -101,7 +101,31 @@ export async function invalidate(...keys: string[]): Promise<void> {
   }
 }
 
+/**
+ * Rate limiter utility that uses Redis INCR/EXPIRE.
+ * Key format: rl:{action}:{identifier}
+ */
 export async function rateLimit(
+  identifier: string,
+  action: string,
+  limit: number,
+  windowSeconds: number
+): Promise<boolean> {
+  const key = `rl:${action}:${identifier}`
+  try {
+    const current = await redis.incr(key)
+    if (current === 1) {
+      await redis.expire(key, windowSeconds)
+    }
+    return current > limit // returns true if rate limited
+  } catch (err) {
+    console.error(`[redis-ratelimit] Error for ${key}:`, err)
+    return false // Fallback to open on error
+  }
+}
+
+// ── Deprecated: original rateLimit function (keeping for legacy shim) ────────
+export async function rateLimitLegacy(
   key: string,
   limit: number,
   windowSeconds: number,
@@ -119,7 +143,6 @@ export async function rateLimit(
       reset 
     }
   } catch {
-    // Rate limiter unavailable — fail closed on sensitive endpoints, open otherwise
     return { 
       limited: failClosed, 
       remaining: failClosed ? 0 : limit, 

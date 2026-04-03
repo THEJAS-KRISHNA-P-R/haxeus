@@ -294,7 +294,7 @@ export default function CouponsContent() {
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Coupon Code</label>
                                     <AdminInput
                                         value={form.code}
-                                        onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
                                         placeholder="HAXEUS20"
                                     />
                                 </div>
@@ -304,7 +304,7 @@ export default function CouponsContent() {
                                         style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: "0.75rem", padding: "0.75rem 1rem", fontSize: "0.875rem", outline: "none", width: "100%", cursor: "pointer" }}
                                         className="focus:border-[var(--accent)] transition-all font-medium"
                                         value={form.discount_type}
-                                        onChange={e => setForm(f => ({ ...f, discount_type: e.target.value as "percentage" | "fixed" }))}
+                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm(f => ({ ...f, discount_type: e.target.value as "percentage" | "fixed" }))}
                                     >
                                         <option value="percentage">Percentage (%)</option>
                                         <option value="fixed">Fixed Amount (₹)</option>
@@ -318,7 +318,7 @@ export default function CouponsContent() {
                                     <AdminInput
                                         type="number"
                                         value={form.discount_value}
-                                        onChange={e => setForm(f => ({ ...f, discount_value: Number(e.target.value) }))}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, discount_value: Number(e.target.value) }))}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -326,7 +326,7 @@ export default function CouponsContent() {
                                     <AdminInput
                                         type="number"
                                         value={form.min_purchase_amount}
-                                        onChange={e => setForm(f => ({ ...f, min_purchase_amount: Number(e.target.value) }))}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, min_purchase_amount: Number(e.target.value) }))}
                                     />
                                 </div>
                             </div>
@@ -337,7 +337,7 @@ export default function CouponsContent() {
                                     <AdminInput
                                         type="date"
                                         value={form.valid_from}
-                                        onChange={e => setForm(f => ({ ...f, valid_from: e.target.value }))}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, valid_from: e.target.value }))}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -345,7 +345,7 @@ export default function CouponsContent() {
                                     <AdminInput
                                         type="date"
                                         value={form.valid_until}
-                                        onChange={e => setForm(f => ({ ...f, valid_until: e.target.value }))}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, valid_until: e.target.value }))}
                                     />
                                 </div>
                             </div>
@@ -356,7 +356,7 @@ export default function CouponsContent() {
                                     type="number"
                                     value={form.usage_limit ?? ""}
                                     placeholder="No limit"
-                                    onChange={e => setForm(f => ({ ...f, usage_limit: e.target.value ? Number(e.target.value) : null }))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, usage_limit: e.target.value ? Number(e.target.value) : null }))}
                                 />
                             </div>
 
@@ -364,7 +364,7 @@ export default function CouponsContent() {
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-3)] px-1">Description</label>
                                 <AdminInput
                                     value={form.description}
-                                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, description: e.target.value }))}
                                     placeholder="Summer Sale 2026"
                                 />
                             </div>

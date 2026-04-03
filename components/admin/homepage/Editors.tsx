@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type {
   HeroConfig,
+  AboutConfig,
 } from "@/types/homepage"
+import { AboutImageUpload } from "@/components/admin/AboutImageUpload"
 import { cn } from "@/lib/utils"
 import { X, ImageIcon } from "lucide-react"
 import { ImagePicker } from "@/components/admin/storage/ImagePicker"
@@ -123,5 +125,29 @@ function AdminImageSelect({ value, onSelect, isDark }: { value: string, onSelect
         />
       )}
     </div>
+  )
+}
+
+export function AboutEditor({ config, update }: { config: AboutConfig; update: (updates: Partial<AboutConfig>) => void }) {
+  const isDark = useIsDark()
+
+  return (
+    <EditorCard title="About Section">
+      <FormField label="About Image" subtext="Upload a new image or paste a direct URL.">
+        <div className="flex flex-col gap-4 w-full">
+          <AboutImageUpload
+            currentUrl={config.image_url}
+            onUploaded={(url) => update({ image_url: url })}
+            isDark={isDark}
+          />
+          <Input
+            value={config.image_url}
+            onChange={(e) => update({ image_url: e.target.value })}
+            className={fieldClassName(isDark)}
+            placeholder="https://…"
+          />
+        </div>
+      </FormField>
+    </EditorCard>
   )
 }

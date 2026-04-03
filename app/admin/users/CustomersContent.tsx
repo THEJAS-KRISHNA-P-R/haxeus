@@ -40,97 +40,104 @@ export default function CustomersContent() {
     )
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-12">
             <div className="mb-2">
                 <AdminPageHeader
                     title="Customers"
-                    subtitle={`${customers.length} registered users found in the database.`}
+                    subtitle={`${customers.length} registered customers.`}
                 />
             </div>
 
-            <AdminCard>
+            <AdminCard className="overflow-hidden">
                 {/* Search Bar */}
                 <div
-                    style={{ borderBottom: "1px solid var(--border)" }}
-                    className="px-6 py-4"
+                    className="px-6 py-6 bg-[var(--bg-elevated)]/20 border-b border-[var(--border)]"
                 >
                     <AdminSearchInput
                         placeholder="Search customers by name or email..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                         onClear={() => setSearchQuery("")}
-                        className="max-w-sm"
+                        className="max-w-md"
                     />
                 </div>
-                <AdminTableHeader cols="grid-cols-[2fr_2fr_1fr_1fr] px-6 py-4">
-                    <span>Customer</span>
-                    <span>Email Address</span>
-                    <span>Account Role</span>
-                    <span className="text-right">Joined Date</span>
-                </AdminTableHeader>
 
-                <div className="divide-y" style={{ borderColor: "var(--border)" }}>
-                    {loading ? (
-                        [...Array(6)].map((_, i) => (
-                            <div key={i} className="px-6 py-5 flex items-center justify-between gap-4">
-                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-32 rounded animate-pulse" />
-                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-48 rounded animate-pulse" />
-                                <div style={{ background: "var(--bg-elevated)" }} className="h-6 w-16 rounded-full animate-pulse" />
-                                <div style={{ background: "var(--bg-elevated)" }} className="h-4 w-24 rounded animate-pulse" />
-                            </div>
-                        ))
-                    ) : customers.length === 0 ? (
-                        <div className="text-center py-20 px-6">
-                            <div
-                                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-3)" }}
-                                className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                            >
-                                <User size={32} className="opacity-20" />
-                            </div>
-                            <p style={{ color: "var(--text)" }} className="font-bold text-lg">No customers registered yet</p>
-                            <p style={{ color: "var(--text-3)" }} className="text-sm mt-1 max-w-[280px] mx-auto">Once users sign up or place orders, they will appear here in this management list.</p>
-                        </div>
-                    ) : filteredCustomers.length === 0 ? (
-                        <div className="text-center py-20 px-6">
-                            <p style={{ color: "var(--text-3)" }} className="text-sm font-medium">No results matching "{searchQuery}"</p>
-                        </div>
-                    ) : (
-                        filteredCustomers.map(c => (
-                            <AdminTableRow key={c.id} cols="grid-cols-[2fr_2fr_1fr_1fr]" className="px-6 py-5 items-center">
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--accent)" }}
-                                        className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs"
-                                    >
-                                        {(c.full_name || 'U').charAt(0).toUpperCase()}
+                <div className="p-2">
+                    <AdminTableHeader cols="grid-cols-[2fr_2fr_1fr_1fr] border-none !bg-transparent">
+                        <div className="pl-4">Customer</div>
+                        <div>Email Address</div>
+                        <div>Access Level</div>
+                        <div className="pr-4 text-right">Joined</div>
+                    </AdminTableHeader>
+
+                    <div className="divide-y divide-[var(--border)]/50">
+                        {loading ? (
+                            [...Array(6)].map((_, i) => (
+                                <div key={i} className="px-6 py-6 flex items-center justify-between gap-4 animate-pulse">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-[var(--bg-elevated)]/50" />
+                                        <div className="h-4 w-32 rounded bg-[var(--bg-elevated)]/50" />
                                     </div>
-                                    <span style={{ color: "var(--text)" }} className="font-bold text-sm">{c.full_name || 'Unknown User'}</span>
+                                    <div className="h-4 w-48 rounded bg-[var(--bg-elevated)]/50" />
+                                    <div className="h-6 w-16 rounded-lg bg-[var(--bg-elevated)]/50" />
+                                    <div className="h-4 w-24 rounded bg-[var(--bg-elevated)]/50 ml-auto" />
                                 </div>
-                                <div style={{ color: "var(--text-3)" }} className="text-sm font-medium">{c.email}</div>
-                                <div>
-                                    <span
-                                        className={cn(
-                                            "inline-flex items-center px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border",
-                                            c.role === 'admin' ? "text-[var(--accent)]" : "text-[var(--text-3)]"
-                                        )}
-                                        style={{
-                                            background: c.role === 'admin'
-                                                ? "color-mix(in srgb, var(--accent) 10%, transparent)"
-                                                : "var(--bg-elevated)",
-                                            borderColor: c.role === 'admin'
-                                                ? "color-mix(in srgb, var(--accent) 20%, transparent)"
-                                                : "var(--border)"
-                                        }}
-                                    >
-                                        {c.role || 'customer'}
-                                    </span>
+                            ))
+                        ) : customers.length === 0 ? (
+                            <div className="text-center py-24 px-6">
+                                <div
+                                    style={{ border: "1px solid var(--border)" }}
+                                    className="w-16 h-16 rounded-2xl bg-[var(--bg-elevated)]/50 flex items-center justify-center mx-auto mb-4"
+                                >
+                                    <User size={32} className="text-[var(--text-3)] opacity-20" />
                                 </div>
-                                <div style={{ color: "var(--text-2)" }} className="text-sm font-bold tabular-nums text-right">
-                                    {new Date(c.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                </div>
-                            </AdminTableRow>
-                        ))
-                    )}
+                                <h3 className="text-[var(--text)] font-black uppercase tracking-tight text-lg italic">No Customers Found</h3>
+                                <p className="text-[var(--text-3)] text-[10px] font-black uppercase tracking-widest mt-2 max-w-[280px] mx-auto opacity-40">You do not have any registered customers yet.</p>
+                            </div>
+                        ) : filteredCustomers.length === 0 ? (
+                            <div className="text-center py-24 px-6">
+                                <p className="text-[var(--text-3)] text-[10px] font-black uppercase tracking-[0.2em] opacity-40 italic">No customers match your search for "{searchQuery}"</p>
+                            </div>
+                        ) : (
+                            filteredCustomers.map(c => (
+                                <AdminTableRow
+                                    key={c.id}
+                                    cols="grid-cols-[2fr_2fr_1fr_1fr]"
+                                    className="py-4 hover:bg-white/[0.02]"
+                                >
+                                    <div className="flex items-center gap-4 pl-4">
+                                        <div
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs border border-[var(--border)] transition-all group-hover:border-[var(--accent)]"
+                                            style={{ background: "var(--bg-elevated)", color: "var(--accent)" }}
+                                        >
+                                            {(c.full_name || 'U').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[11px] font-black uppercase tracking-tight truncate">{c.full_name || 'Guest User'}</p>
+                                            <p className="text-[8px] font-black text-[var(--text-3)] opacity-40 uppercase tracking-[0.2em]">Customer</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-[11px] font-bold text-[var(--text-3)] font-mono opacity-80">{c.email}</div>
+                                    <div>
+                                        <span
+                                            className={cn(
+                                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border",
+                                                c.role === 'admin'
+                                                    ? "text-[var(--accent)] bg-[var(--accent)]/10 border-[var(--accent)]/30"
+                                                    : "text-[var(--text-3)] bg-[var(--bg-elevated)] border-[var(--border)]"
+                                            )}
+                                        >
+                                            <span className={cn("w-1 h-1 rounded-full mr-1.5", c.role === 'admin' ? "bg-[var(--accent)] animate-pulse" : "bg-[var(--text-3)] opacity-40")} />
+                                            {c.role || 'customer'}
+                                        </span>
+                                    </div>
+                                    <div className="text-[10px] font-black text-[var(--text-3)] font-mono text-right pr-4 opacity-60">
+                                        {new Date(c.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
+                                    </div>
+                                </AdminTableRow>
+                            ))
+                        )}
+                    </div>
                 </div>
             </AdminCard>
         </div>

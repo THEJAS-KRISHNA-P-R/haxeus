@@ -1,19 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useTheme } from "@/components/ThemeProvider"
 import { supabase, type ProductImage, type ProductInventory } from "@/lib/supabase"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { AdminCard, AdminPageHeader, AdminInput, AdminButton, AdminSelect } from "@/components/admin/AdminUI"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, Save } from "lucide-react"
 import Link from "next/link"
 import { ImageGalleryManager } from "@/components/admin/ImageGalleryManager"
 import { SizeInventoryManager } from "@/components/admin/SizeInventoryManager"
-import { cn } from "@/lib/utils"
 import { Toggle } from "@/components/ui/Toggle"
 import { motion } from "framer-motion"
 
@@ -36,15 +31,6 @@ export default function NewProductPage() {
   const [preorderStatus, setPreorderStatus] = useState<"active" | "sold_out" | "stopped">("active")
   const [expectedDate, setExpectedDate] = useState("")
   const [maxPreorders, setMaxPreorders] = useState<string>("")
-
-  const [mounted, setMounted] = useState(false)
-  const { theme } = useTheme()
-
-  useEffect(() => { setMounted(true) }, [])
-
-  // IMPORTANT: while not mounted, render with dark styles as default
-  // This prevents flash and ensures admin feels dark on first load
-  const isDark = !mounted ? true : theme === 'dark'
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -159,113 +145,98 @@ export default function NewProductPage() {
     setFormData({ ...formData, colors: colorsArray })
   }
 
-  if (!mounted) return null
-
   return (
-    <div className={cn("min-h-screen -mx-8 -mt-24 pt-24 px-8 pb-12", isDark ? 'bg-[var(--bg)] text-white' : 'bg-[var(--bg)] text-black')}>
+    <div className="space-y-6 pb-12">
+      <div className="mb-2">
+        <Link href="/admin/products" className="inline-flex mb-4">
+          <AdminButton variant="ghost" icon={ArrowLeft} className="px-3 py-2 text-xs">
+            Back to Products
+          </AdminButton>
+        </Link>
+        <AdminPageHeader
+          title="Add New Product"
+          subtitle="Create a new product with images and inventory tracking"
+        />
+      </div>
+
       <div className="max-w-5xl space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link href="/admin/products">
-            <Button variant="ghost" size="icon" className={isDark ? "hover:bg-white/5 text-white" : "hover:bg-black/5 text-black"}>
-              <ArrowLeft size={20} />
-            </Button>
-          </Link>
-          <div>
-            <h1 className={cn("text-3xl font-bold", isDark ? "text-white" : "text-black")}>
-              Add New Product
-            </h1>
-            <p className={cn("mt-1", isDark ? "text-white/40" : "text-black/40")}>
-              Create a new product with images and inventory tracking
-            </p>
-          </div>
-        </div>
 
         {/* Basic Product Info */}
-        <Card className={isDark ? 'bg-[#111] border border-white/[0.07]' : 'bg-white border border-black/[0.07]'}>
-          <CardHeader>
-            <CardTitle className={isDark ? "text-white" : "text-black"}>Product Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <AdminCard className="p-6">
+          <h2 style={{ color: "var(--text)" }} className="text-xl font-bold mb-6">Product Information</h2>
+          <div className="space-y-6">
             {/* Name & Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name" className={isDark ? "text-white/60" : "text-black/60"}>Product Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., BUSTED Vintage Tee"
-                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
-                />
-              </div>
+              <AdminInput
+                label="Product Name *"
+                id="name"
+                value={formData.name}
+                onChange={(e: any) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., BUSTED Vintage Tee"
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="category" className={isDark ? "text-white/60" : "text-black/60"}>Category</Label>
-                <select
-                  id="category"
+              <div className="w-full">
+                <AdminSelect
+                  label="Category"
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className={`w-full px-3 py-2.5 rounded-xl border text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-[#e93a3a]/50 ${
-                    isDark
-                      ? "border-white/[0.10] text-white bg-[#1a1a1a]"
-                      : "border-black/[0.10] text-black bg-white"
-                  }`}
-                >
-                  <option value="tshirt">T-Shirt</option>
-                  <option value="jersey">Jersey</option>
-                  <option value="hoodie">Hoodie</option>
-                  <option value="shorts">Shorts</option>
-                  <option value="accessories">Accessories</option>
-                  <option value="apparel">Apparel</option>
-                </select>
+                  onChange={(e: any) => setFormData({ ...formData, category: e.target.value })}
+                  options={[
+                    { value: "tshirt", label: "T-Shirt" },
+                    { value: "jersey", label: "Jersey" },
+                    { value: "hoodie", label: "Hoodie" },
+                    { value: "shorts", label: "Shorts" },
+                    { value: "accessories", label: "Accessories" },
+                    { value: "apparel", label: "Apparel" }
+                  ]}
+                />
               </div>
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description" className={isDark ? "text-white/60" : "text-black/60"}>Description</Label>
+            <div className="w-full space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-3)] ml-2 opacity-70">Description</label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Detailed product description..."
                 rows={4}
-                className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
+                className="w-full p-4 rounded-2xl text-[11px] font-bold outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/10 transition-all placeholder:opacity-30 tracking-tight"
+                style={{
+                  background: "rgba(var(--bg-rgb), 0.05)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text)",
+                }}
               />
             </div>
 
             {/* Price & Colors */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="price" className={isDark ? "text-white/60" : "text-black/60"}>Price (?) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min="0"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                  placeholder="2999"
-                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
-                />
-              </div>
+              <AdminInput
+                label="Price (?) *"
+                id="price"
+                type="number"
+                min={0}
+                value={formData.price}
+                onChange={(e: any) => setFormData({ ...formData, price: Number(e.target.value) })}
+                placeholder="2999"
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="colors" className={isDark ? "text-white/60" : "text-black/60"}>Available Colors</Label>
-                <Input
+              <div className="space-y-1">
+                <AdminInput
+                  label="Available Colors"
                   id="colors"
                   value={formData.colors.join(", ")}
-                  onChange={(e) => updateColors(e.target.value)}
+                  onChange={(e: any) => updateColors(e.target.value)}
                   placeholder="Black, White, Navy"
-                  className={isDark ? 'bg-[#1a1a1a] border-white/10 text-white placeholder:text-white/30' : 'bg-white border-black/10 text-black placeholder:text-black/30'}
                 />
-                <p className={cn("text-xs", isDark ? "text-white/40" : "text-black/40")}>
+                <p style={{ color: "var(--text-3)" }} className="text-[9px] uppercase tracking-widest pl-2 pt-1 opacity-50">
                   Separate multiple colors with commas
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </AdminCard>
 
         {/* Image Gallery Manager */}
         <ImageGalleryManager
@@ -280,16 +251,14 @@ export default function NewProductPage() {
         />
 
         {/* Preorder Section */}
-        <div className={`rounded-2xl border p-5 ${
-          isDark ? "bg-white/[0.02] border-white/[0.07]" : "bg-black/[0.01] border-black/[0.07]"
-        }`}>
-          <div className="flex items-center justify-between mb-1">
+        <AdminCard className="p-6">
+          <div className="flex items-center justify-between mb-2">
             <div>
-              <p className={`text-sm font-semibold ${isDark ? "text-white" : "text-black"}`}>
+              <p style={{ color: "var(--text)" }} className="text-[14px] font-bold uppercase tracking-tight">
                 Pre-Order
               </p>
-              <p className={`text-xs mt-0.5 ${isDark ? "text-white/40" : "text-black/40"}`}>
-                List this product before it&apos;s in stock. Customers can register interest.
+              <p style={{ color: "var(--text-3)" }} className="text-[10px] font-black uppercase tracking-[0.2em] mt-1 opacity-70">
+                List this product before it's in stock
               </p>
             </div>
             <Toggle
@@ -306,80 +275,66 @@ export default function NewProductPage() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/[0.06] overflow-hidden"
+              className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 overflow-hidden"
+              style={{ borderTop: "1px solid var(--border)" }}
             >
-              {/* Status */}
-              <div>
-                <Label className={`block text-xs font-medium mb-1.5 ${isDark ? "text-white/60" : "text-black/60"}`}>
-                  Status
-                </Label>
-                <select
+              <div className="w-full">
+                <AdminSelect
+                  label="Status"
                   value={preorderStatus}
-                  onChange={(e) => setPreorderStatus(e.target.value as any)}
-                  className={`w-full px-3 py-2.5 rounded-xl border text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-[#e93a3a]/50 ${
-                    isDark
-                      ? "border-white/[0.10] text-white"
-                      : "border-black/[0.10] text-black"
-                  }`}
-                >
-                  <option value="active" className={isDark ? "bg-[#111]" : ""}>Active — accepting registrations</option>
-                  <option value="sold_out" className={isDark ? "bg-[#111]" : ""}>Sold Out — no new registrations</option>
-                  <option value="stopped" className={isDark ? "bg-[#111]" : ""}>Stopped — hidden from public</option>
-                </select>
+                  onChange={(e: any) => setPreorderStatus(e.target.value as any)}
+                  options={[
+                    { value: "active", label: "Active — accepting registrations" },
+                    { value: "sold_out", label: "Sold Out — no new registrations" },
+                    { value: "stopped", label: "Stopped — hidden from public" }
+                  ]}
+                />
               </div>
 
               {/* Expected Date */}
-              <div>
-                <Label className={`block text-xs font-medium mb-1.5 ${isDark ? "text-white/60" : "text-black/60"}`}>
-                  Expected Date
-                  <span className={`ml-1 font-normal ${isDark ? "text-white/30" : "text-black/30"}`}>(optional)</span>
-                </Label>
-                <Input
+              <div className="space-y-1">
+                <AdminInput
+                  label="Expected Date (optional)"
                   type="date"
                   value={expectedDate}
-                  onChange={(e) => setExpectedDate(e.target.value)}
+                  onChange={(e: any) => setExpectedDate(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
-                  className={isDark ? 'bg-transparent border-white/10 text-white' : 'bg-transparent border-black/10 text-black'}
                 />
               </div>
 
               {/* Max Pre-orders */}
-              <div>
-                <Label className={`block text-xs font-medium mb-1.5 ${isDark ? "text-white/60" : "text-black/60"}`}>
-                  Max Pre-orders
-                  <span className={`ml-1 font-normal ${isDark ? "text-white/30" : "text-black/30"}`}>(leave blank for unlimited)</span>
-                </Label>
-                <Input
+              <div className="space-y-1">
+                <AdminInput
+                  label="Max Pre-orders (optional)"
                   type="number"
                   value={maxPreorders}
-                  onChange={(e) => setMaxPreorders(e.target.value)}
+                  onChange={(e: any) => setMaxPreorders(e.target.value)}
                   placeholder="e.g. 100"
                   min={1}
-                  className={isDark ? 'bg-transparent border-white/10 text-white placeholder:text-white/30' : 'bg-transparent border-black/10 text-black placeholder:text-black/30'}
                 />
               </div>
             </motion.div>
           )}
-        </div>
+        </AdminCard>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pb-8">
+        <div className="flex items-center justify-end gap-4 pb-8">
           <Link href="/admin/products">
-            <Button variant="outline" className={isDark ? "border-white/[0.06] hover:bg-white/5 text-white" : "border-black/[0.06] hover:bg-black/5 text-black"}>
+            <AdminButton variant="outline">
               Cancel
-            </Button>
+            </AdminButton>
           </Link>
-          <Button
+          <AdminButton
             onClick={handleSave}
             disabled={saving || !formData.name || formData.price <= 0}
-            className="gap-2 bg-red-600 hover:bg-red-700 text-white"
+            variant="accent"
+            icon={Save}
+            loading={saving}
           >
-            <Save size={16} />
             {saving ? "Creating..." : "Create Product"}
-          </Button>
+          </AdminButton>
         </div>
       </div>
     </div>
   )
 }
-

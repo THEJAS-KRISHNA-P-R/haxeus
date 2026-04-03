@@ -9,7 +9,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "email required" }, { status: 400 })
     }
 
-    await sendWelcomeEmail({ email, name: name ?? null })
+    await sendWelcomeEmail({ 
+      email, 
+      discountCode: "WELCOME10", 
+      customerName: name ?? null 
+    })
 
     return NextResponse.json({ success: true })
   } catch (err) {
