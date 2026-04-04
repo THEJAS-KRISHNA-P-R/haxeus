@@ -158,7 +158,7 @@ export default function ContactForm() {
                                         required
                                         type="text"
                                         className="w-full bg-theme-2/5 border border-theme focus:border-[var(--accent)]/60 rounded-3xl px-6 py-4 outline-none transition-colors italic font-medium text-theme"
-                                        placeholder="Aaryan Sharma"
+                                        placeholder="Your Name"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
@@ -169,7 +169,7 @@ export default function ContactForm() {
                                         required
                                         type="email"
                                         className="w-full bg-theme-2/5 border border-theme focus:border-[var(--accent)]/60 rounded-3xl px-6 py-4 outline-none transition-colors italic font-medium text-theme"
-                                        placeholder="aaryan@example.com"
+                                        placeholder="yourname@example.com"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     />
