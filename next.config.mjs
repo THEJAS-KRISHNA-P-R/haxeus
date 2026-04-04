@@ -12,7 +12,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' blob: data: https://*.supabase.co https://vercel.com https://www.googletagmanager.com https://*.razorpay.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live https://www.google-analytics.com https://va.vercel-scripts.com https://*.razorpay.com blob:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live https://www.google-analytics.com https://va.vercel-scripts.com https://*.razorpay.com https://api.postalpincode.in blob:",
       "frame-src 'self' https://*.razorpay.com",
       "frame-ancestors 'none'",
     ].join("; "),
