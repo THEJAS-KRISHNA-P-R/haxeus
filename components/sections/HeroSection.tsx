@@ -94,15 +94,21 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                 >
                   {/* Line 1 */}
                   <span className="relative grid items-start overflow-visible whitespace-nowrap tracking-tight">
-                    <span className="block text-white lg:text-theme pointer-events-none select-none invisible col-start-1 row-start-1" aria-hidden="true">{line1}</span>
+                    <span 
+                      className="block pointer-events-none select-none invisible col-start-1 row-start-1" 
+                      style={{ color: isMobileHero ? '#ffffff' : activeShinyColor }}
+                      aria-hidden="true"
+                    >
+                      {line1}
+                    </span>
                     <motion.span
                       className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine1Done || prefersReducedMotion ? 0 : 1 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
                       {prefersReducedMotion
-                        ? <span className="block text-white lg:text-theme" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.9)" }}>{line1}</span>
-                        : <SplitText text={line1} tag="span" className="block text-white lg:text-theme" splitType="chars" delay={65} duration={2.4} from={{ opacity: 0, y: 20 }} to={{ opacity: 1, y: 0 }} threshold={0} rootMargin="0px" textAlign="left" onLetterAnimationComplete={() => setHeroLine1Done(true)} />
+                        ? <span className="block" style={{ color: isMobileHero ? '#ffffff' : activeShinyColor, textShadow: isMobileHero ? "0 2px 20px rgba(0,0,0,0.9)" : "none" }}>{line1}</span>
+                        : <SplitText text={line1} tag="span" style={{ color: isMobileHero ? '#ffffff' : activeShinyColor }} className="block" splitType="chars" delay={65} duration={2.4} from={{ opacity: 0, y: 20 }} to={{ opacity: 1, y: 0 }} threshold={0} rootMargin="0px" textAlign="left" onLetterAnimationComplete={() => setHeroLine1Done(true)} />
                       }
                     </motion.span>
                     <motion.span
@@ -141,15 +147,21 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
 
                   {/* Line 3 */}
                   <span className="relative grid items-start overflow-visible whitespace-nowrap tracking-tight drop-shadow-[0_2px_10px_rgba(233,58,58,0.2)]">
-                    <span className="block text-white lg:text-theme-2 pointer-events-none select-none invisible col-start-1 row-start-1" aria-hidden="true">{line3}</span>
+                    <span 
+                      className="block pointer-events-none select-none invisible col-start-1 row-start-1" 
+                      style={{ color: isMobileHero ? '#ffffff' : activeShinySubtle }}
+                      aria-hidden="true"
+                    >
+                      {line3}
+                    </span>
                     <motion.span
                       className="col-start-1 row-start-1 block"
                       animate={{ opacity: heroLine3Done || prefersReducedMotion ? 0 : 1 }}
                       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
                     >
                       {prefersReducedMotion
-                        ? <span className="block text-white lg:text-theme-2">{line3}</span>
-                        : <SplitText text={line3} tag="span" className="block text-white lg:text-theme-2" splitType="chars" delay={65} duration={2.4} from={{ opacity: 0, y: 20 }} to={{ opacity: 1, y: 0 }} threshold={0} rootMargin="0px" textAlign="left" onLetterAnimationComplete={() => setHeroLine3Done(true)} />
+                        ? <span className="block" style={{ color: isMobileHero ? '#ffffff' : activeShinySubtle }}>{line3}</span>
+                        : <SplitText text={line3} tag="span" style={{ color: isMobileHero ? '#ffffff' : activeShinySubtle }} className="block" splitType="chars" delay={65} duration={2.4} from={{ opacity: 0, y: 20 }} to={{ opacity: 1, y: 0 }} threshold={0} rootMargin="0px" textAlign="left" onLetterAnimationComplete={() => setHeroLine3Done(true)} />
                       }
                     </motion.span>
                     <motion.span

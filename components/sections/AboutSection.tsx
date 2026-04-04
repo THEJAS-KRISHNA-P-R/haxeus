@@ -1,14 +1,11 @@
-"use client"
-
-import { useRef } from "react"
+import { createPortal } from "react-dom"
+import { useRef, useState, useEffect } from "react"
 import {
   motion,
-  useTransform,
-  useSpring,
+  useAnimate,
   useReducedMotion,
   useMotionValue,
   useAnimationFrame,
-  type MotionValue,
 } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -17,30 +14,36 @@ import { staggerContainer, fadeInRight, hoverScale, tapScale } from "@/lib/anima
 import type { AboutConfig } from "@/types/homepage"
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepage-defaults"
 
+type AnimPhase = 'idle' | 'popping' | 'zooming' | 'snapping-back'
+
 interface AboutSectionProps {
   config: AboutConfig
   isDark?: boolean
 }
 
-// ─── Shared text column ────────────────────────────────────────────────────────
-
-interface TextColumnProps {
-  heading: string
-  headingAccent: string
-  headingSuffix: string
-  body1: string
-  body2: string
-  features: { label: string; color: string }[]
-  ctaText: string
-  ctaHref: string
-  isDark: boolean
-  opacity: number | MotionValue<number>
-}
-
-function TextColumn({
+function TextHeading({
   heading,
   headingAccent,
   headingSuffix,
+  isDark,
+  opacity,
+}: {
+  heading: string
+  headingAccent: string
+  headingSuffix: string
+  isDark: boolean
+  opacity: number
+}) {
+  return (
+    <motion.div style={{ opacity }} className="mb-6 lg:mb-8 text-center lg:text-left">
+      <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold break-words ${isDark ? "text-white" : "text-black"}`}>
+        {heading} <span style={{ color: "var(--accent)" }}>{headingAccent}</span> {headingSuffix}
+      </h2>
+    </motion.div>
+  )
+}
+
+function TextBody({
   body1,
   body2,
   features,
@@ -48,7 +51,15 @@ function TextColumn({
   ctaHref,
   isDark,
   opacity,
-}: TextColumnProps) {
+}: {
+  body1: string
+  body2: string
+  features: { label: string; color: string }[]
+  ctaText: string
+  ctaHref: string
+  isDark: boolean
+  opacity: number
+}) {
   return (
     <motion.div
       style={{ opacity }}
@@ -56,38 +67,24 @@ function TextColumn({
       whileInView="visible"
       viewport={{ once: true }}
       variants={staggerContainer}
+      className="text-center lg:text-left"
     >
       <motion.div variants={fadeInRight}>
-        <h2 className={`text-2xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 break-words ${isDark ? "text-white" : "text-black"}`}>
-          {heading} <span style={{ color: "var(--accent)" }}>{headingAccent}</span> {headingSuffix}
-        </h2>
-      </motion.div>
-      <motion.div variants={fadeInRight}>
-        <p className={`mb-4 sm:mb-6 leading-relaxed text-base sm:text-lg ${isDark ? "text-white/90" : "text-black/90"}`}>
+        <p className={`mb-4 leading-relaxed text-base sm:text-lg ${isDark ? "text-white/90" : "text-black/99"}`}>
           {body1}
         </p>
       </motion.div>
       <motion.div variants={fadeInRight}>
-        <p className={`mb-6 sm:mb-8 leading-relaxed text-base sm:text-lg ${isDark ? "text-white/90" : "text-black/90"}`}>
+        <p className={`mb-6 leading-relaxed text-base sm:text-lg ${isDark ? "text-white/90" : "text-black/99"}`}>
           {body2}
         </p>
       </motion.div>
 
-      <motion.div variants={fadeInRight} className="grid grid-cols-2 gap-6 mb-8">
+      <motion.div variants={fadeInRight} className="grid grid-cols-2 gap-4 sm:gap-6 mb-8 max-w-sm mx-auto lg:mx-0">
         {features.map((feature, index) => (
-          <motion.div
-            key={index}
-            className="flex items-center"
-            whileHover={{ x: 10 }}
-            transition={{ duration: 0.2 }}
-          >
-            <motion.div
-              className="w-3 h-3 rounded-full mr-3 flex-shrink-0"
-              style={{ backgroundColor: feature.color }}
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
-            />
-            <span className={`font-semibold ${isDark ? "text-white/80" : "text-black/80"}`}>{feature.label}</span>
+          <motion.div key={index} className="flex items-center" whileHover={{ x: 5 }}>
+            <div className="w-2.5 h-2.5 rounded-full mr-2.5 flex-shrink-0" style={{ backgroundColor: feature.color }} />
+            <span className={`text-sm font-semibold ${isDark ? "text-white/80" : "text-black/80"}`}>{feature.label}</span>
           </motion.div>
         ))}
       </motion.div>
@@ -95,7 +92,7 @@ function TextColumn({
       <motion.div variants={fadeInRight}>
         <Link href={ctaHref}>
           <motion.div whileHover={hoverScale} whileTap={tapScale}>
-            <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-10 py-6 rounded-full text-lg font-semibold shadow-lg shadow-[var(--accent)]/20 transition-all duration-300">
+            <Button className="bg-[var(--accent)] hover:opacity-90 text-white px-8 py-5 rounded-full text-base font-semibold shadow-lg shadow-[var(--accent)]/20 transition-all duration-300">
               {ctaText}
             </Button>
           </motion.div>
@@ -109,25 +106,27 @@ function TextColumn({
 
 function OriginalAboutLayout({ config, isDark = true }: AboutSectionProps) {
   const imageUrl = config.image_url ?? DEFAULT_HOMEPAGE_CONFIG.about.image_url
-  const heading = config.heading ?? DEFAULT_HOMEPAGE_CONFIG.about.heading
-  const headingAccent = config.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_accent
-  const headingSuffix = config.heading_suffix ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_suffix
-  const body1 = config.body1 ?? DEFAULT_HOMEPAGE_CONFIG.about.body1
-  const body2 = config.body2 ?? DEFAULT_HOMEPAGE_CONFIG.about.body2
-  const features = config.features ?? DEFAULT_HOMEPAGE_CONFIG.about.features
-  const ctaText = config.cta_text ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_text
-  const ctaHref = config.cta_href ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_href
 
   return (
     <section className="relative z-10 border-t border-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 md:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-8 items-center">
+          <div className="order-1 lg:col-start-1 lg:row-start-1">
+            <TextHeading
+              heading={config.heading ?? DEFAULT_HOMEPAGE_CONFIG.about.heading}
+              headingAccent={config.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_accent}
+              headingSuffix={config.heading_suffix ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_suffix}
+              isDark={isDark}
+              opacity={1}
+            />
+          </div>
+
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative h-64 sm:h-80 lg:h-[500px]"
+            className="order-2 lg:col-start-2 lg:row-span-2 relative h-64 sm:h-80 lg:h-[500px]"
           >
             <motion.div
               whileHover={{ scale: 1.05, rotate: 1 }}
@@ -150,18 +149,17 @@ function OriginalAboutLayout({ config, isDark = true }: AboutSectionProps) {
             </motion.div>
           </motion.div>
 
-          <TextColumn
-            heading={heading}
-            headingAccent={headingAccent}
-            headingSuffix={headingSuffix}
-            body1={body1}
-            body2={body2}
-            features={features}
-            ctaText={ctaText}
-            ctaHref={ctaHref}
-            isDark={isDark}
-            opacity={1}
-          />
+          <div className="order-3 lg:col-start-1 lg:row-start-2">
+            <TextBody
+              body1={config.body1 ?? DEFAULT_HOMEPAGE_CONFIG.about.body1}
+              body2={config.body2 ?? DEFAULT_HOMEPAGE_CONFIG.about.body2}
+              features={config.features ?? DEFAULT_HOMEPAGE_CONFIG.about.features}
+              ctaText={config.cta_text ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_text}
+              ctaHref={config.cta_href ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_href}
+              isDark={isDark}
+              opacity={1}
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -174,169 +172,388 @@ function OriginalAboutLayout({ config, isDark = true }: AboutSectionProps) {
 // useScroll({ target: containerRef }) tracks when the container enters/leaves
 // the viewport — progress goes 0→1 as it scrolls THROUGH the screen.
 // For a sticky sequence we need progress 0→1 while the section is PINNED,
-// i.e. across the 500vh of virtual scroll distance. The only reliable way
 // to get this is to read raw scrollY from the window and map it manually
 // against the container's offsetTop (which stays fixed while sticky).
+// Update: Switched to manual scroll-lock trigger architecture.
 
 function ScrollZoomAboutSection({ config, isDark = true }: AboutSectionProps) {
   const imageUrl = config.image_url ?? DEFAULT_HOMEPAGE_CONFIG.about.image_url
-  const heading = config.heading ?? DEFAULT_HOMEPAGE_CONFIG.about.heading
-  const headingAccent = config.heading_accent ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_accent
-  const headingSuffix = config.heading_suffix ?? DEFAULT_HOMEPAGE_CONFIG.about.heading_suffix
-  const body1 = config.body1 ?? DEFAULT_HOMEPAGE_CONFIG.about.body1
-  const body2 = config.body2 ?? DEFAULT_HOMEPAGE_CONFIG.about.body2
-  const features = config.features ?? DEFAULT_HOMEPAGE_CONFIG.about.features
-  const ctaText = config.cta_text ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_text
-  const ctaHref = config.cta_href ?? DEFAULT_HOMEPAGE_CONFIG.about.cta_href
+  const prefersReduced = useReducedMotion()
 
-  const containerRef = useRef<HTMLDivElement>(null)
+  const imageContainerRef = useRef<HTMLDivElement>(null)
+  const savedScrollY = useRef(0)
+  const isLocked = useRef(false)
+  const lastSnapTime = useRef(0)
+  const phase = useRef<AnimPhase>('idle')
+  const originalRect = useRef<DOMRect | null>(null)
 
-  const progress = useMotionValue(0)
+  // wheelValue = target (accumulated scroll input)
+  // visualValue = what we actually see (advances at constant speed)
+  const wheelValue = useMotionValue(0)
+  const visualValue = useMotionValue(0)
+  const lastFrameTime = useRef(0)
+  const lastScrollY = useRef(0)
+  const isArmed = useRef(false)
+  const isTriggering = useRef(false)
 
-  useAnimationFrame(() => {
-    const el = containerRef.current
+  const [cloneVisible, setCloneVisible] = useState(false)
+  const [cloneStyle, setCloneStyle] = useState<React.CSSProperties>({})
+  const [hideOriginal, setHideOriginal] = useState(false)
+
+  const [scope, animate] = useAnimate()
+
+  const DESKTOP_BUDGET = 2200
+  const MOBILE_BUDGET = 1200
+
+  useEffect(() => {
+    if (prefersReduced) return
+    const el = imageContainerRef.current
     if (!el) return
-    const { top, height } = el.getBoundingClientRect()
 
-    // We want the 'active' scroll range to be when the container's center 
-    // is within the viewport. 
-    // progress 0: center of container is at viewport center
-    // progress 1: end of virtual scroll
+    const onScroll = () => {
+      // 1. SAFETY: Skip if already locked or triggering
+      if (isLocked.current || phase.current !== 'idle' || isTriggering.current) return
+      
+      const currentY = window.scrollY
+      if (currentY === lastScrollY.current) return // Skip tiny jitter
+      const isDown = currentY > lastScrollY.current
+      lastScrollY.current = currentY
+
+      const rect = el.getBoundingClientRect()
+      const centerY = rect.top + rect.height / 4 // Wider 'trigger' zone for fast flicks
+      const triggerY = window.innerHeight / 2
+
+      // 2. ARM: Ready it whenever we are on the 'Hero-side' (above center)
+      if (centerY > triggerY + 50) {
+        isArmed.current = true
+      }
+
+      // 3. FIRE: Catch the crossing if armed, moving DOWN, and threshold reached
+      // We check centerY <= triggerY to catch the 'jump' between frames
+      if (isArmed.current && isDown && centerY <= triggerY) {
+        isArmed.current = false
+        triggerAnimation()
+      }
+    }
+
+    // Attach immediately on mount for maximum reliability
+    window.addEventListener('scroll', onScroll, { passive: true })
+    // Initial check on mount
+    onScroll()
+
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [prefersReduced])
+
+  // ─── Animation Sequence ──────────────────────────────────────────────────
+  const triggerAnimation = async () => {
+    if (isLocked.current || phase.current !== 'idle' || isTriggering.current) return
+    if (!imageContainerRef.current) return
+
+    // Prevent immediate re-trigger after snapping back
+    if (Date.now() - lastSnapTime.current < 400) return
+    isTriggering.current = true
+    isArmed.current = false
+
+    // Capture rect BEFORE movement
+    const rect = imageContainerRef.current.getBoundingClientRect()
+    originalRect.current = rect
+    
+    // Lock body & PREVENT JUMP by neutralizing smooth-scroll on both HTML and BODY
+    savedScrollY.current = window.scrollY
+    
+    document.documentElement.style.scrollBehavior = 'auto'
+    document.body.style.scrollBehavior = 'auto'
+    
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${savedScrollY.current}px`
+    document.body.style.width = '100%'
+    
+    isLocked.current = true
+    isTriggering.current = false
+    wheelValue.set(0)
+    
+    // Unify: Desktop/Mobile both start "in place" and move via scroll
+    phase.current = 'zooming'
+    
+    // Show clone at exact spot
+    setCloneStyle({
+      position: 'fixed' as const,
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+      borderRadius: 20,
+      zIndex: 9999,
+    })
+    setHideOriginal(true)
+    setCloneVisible(true)
+    
+    // Wait for Portal match - lowered wait for better 'pop' feel
+    await new Promise(r => requestAnimationFrame(r))
+    if (!scope.current) return
+  }
+
+  const updateZoom = () => {
+    if (!scope.current || phase.current !== 'zooming' || !originalRect.current) return
+
+    const current = visualValue.get()
+    const vw = window.innerWidth
     const vh = window.innerHeight
-    const scrollable = height - vh
-    if (scrollable <= 0) return
+    const isMobile = vw < 1024
+    const rect = originalRect.current
+    const budget = isMobile ? MOBILE_BUDGET : DESKTOP_BUDGET
 
-    const raw = -top / scrollable
-    progress.set(Math.min(1, Math.max(0, raw)))
+    const peakW = vw * 0.94
+    const peakH = vh * 0.94
+
+    let targetTop, targetLeft, targetW, targetH
+
+    // Single Continuous Keyframe Engine (Mappings: 0% -> 25% -> 50% -> 75% -> 100%)
+    const t = Math.max(0, Math.min(1, current / budget))
+    
+    // Smooth linear interpolation (Lerp factor handles the cushions)
+    const getPoint = (t: number, stops: number[], values: number[]) => {
+      if (t <= stops[0]) return values[0]
+      if (t >= stops[stops.length - 1]) return values[values.length - 1]
+      for (let i = 0; i < stops.length - 1; i++) {
+        if (t <= stops[i+1]) {
+          const p = (t - stops[i]) / (stops[i+1] - stops[i])
+          return values[i] + (values[i+1] - values[i]) * p
+        }
+      }
+      return values[values.length - 1]
+    }
+
+    const stops = [0, 0.4, 1.0]
+    const peakT = (vh - peakH) / 2
+    const peakL = (vw - peakW) / 2
+    
+    targetW = getPoint(t, stops, [rect.width, peakW, rect.width])
+    targetH = getPoint(t, stops, [rect.height, peakH, rect.height])
+    targetTop = getPoint(t, stops, [rect.top, peakT, rect.top])
+    targetLeft = getPoint(t, stops, [rect.left, peakL, rect.left])
+
+    scope.current.style.top = `${targetTop}px`
+    scope.current.style.left = `${targetLeft}px`
+    scope.current.style.width = `${targetW}px`
+    scope.current.style.height = `${targetH}px`
+    scope.current.style.borderRadius = `20px`
+
+    // --- Completion Check (The Brake) ---
+    if (t >= 0.99 && wheelValue.get() >= budget) {
+      snapBack()
+    }
+    if (t <= 0.01 && wheelValue.get() <= -10) {
+      snapBack()
+    }
+  }
+
+  // Constant Velocity Accumulator
+  useAnimationFrame((time) => {
+    if (phase.current !== 'zooming') {
+      lastFrameTime.current = time
+      return
+    }
+
+    const target = wheelValue.get()
+    const current = visualValue.get()
+    const diff = target - current
+
+    // Momentum Lerp: High-Gravity tracking for ultimate smoothness
+    const factor = 0.07
+    const move = diff * factor
+
+    if (Math.abs(move) > 0.01) {
+      visualValue.set(current + move)
+      updateZoom()
+    } else if (Math.abs(diff) > 0) {
+      visualValue.set(target)
+      updateZoom()
+    }
+
+    lastFrameTime.current = time
   })
 
-  // ── Refined transform: hold → zoom in → hold → zoom out → hold ──────────────
-  // Max scale 1.6x. We wait until 10% progress to start the zoom for a "lock" feel.
-  const rawScale = useTransform(progress, [0, 0.12, 0.42, 0.58, 0.88, 1], [1, 1, 1.6, 1.6, 1, 1])
-  const rawBrightness = useTransform(progress, [0, 0.12, 0.42, 0.58, 0.88, 1], [1, 1, 1.15, 1.15, 1, 1])
+  const snapBack = async (immediate = false) => {
+    if (!isLocked.current) return
+    phase.current = 'snapping-back'
 
-  // Text fades out while image expands, fades back in as it contracts
-  const textOpacity = useTransform(progress, [0, 0.1, 0.25, 0.75, 0.9, 1], [1, 1, 0, 0, 1, 1])
+    if (!immediate && originalRect.current && scope.current) {
+      const rect = originalRect.current
+      await animate(scope.current, {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        borderRadius: 20
+      }, { duration: 0.5, ease: [0.16, 1, 0.3, 1] })
+    }
 
-  // Scroll hint: only at start
-  const hintOpacity = useTransform(progress, [0, 0.06], [1, 0])
+    // Restore
+    setCloneVisible(false)
+    setHideOriginal(false)
+    isLocked.current = false
+    phase.current = 'idle'
+    wheelValue.set(0)
+    visualValue.set(0)
 
-  // z-index elevates image above grid during zoom
-  const zIndex = useTransform(rawScale, (s: number) => Math.round(s > 1.02 ? 50 : 1))
+    // 1. CLEAR LOCK & UNLOCK Document
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.width = ''
 
-  // Spring wrapping — physical feel
-  const scale = useSpring(rawScale, { stiffness: 70, damping: 22, mass: 0.9 })
-  const brightnessSpring = useSpring(rawBrightness, { stiffness: 70, damping: 22 })
-  const filterStyle = useTransform(brightnessSpring, (b: number) => `brightness(${b})`)
+    // 2. INSTANTLY JUMP back to where we started to hide the Hero-snap flash
+    window.scrollTo(0, savedScrollY.current)
+
+    // 3. RESTORE native scroll settings
+    document.documentElement.style.scrollBehavior = ''
+    document.body.style.scrollBehavior = ''
+
+    lastSnapTime.current = Date.now()
+  }
+
+  // ─── Global Event Listeners (Wheel, Touch, Resize, Unmount) ──────────────
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      if (!isLocked.current || phase.current !== 'zooming') return
+      e.preventDefault()
+
+      const isMobile = window.innerWidth < 1024
+      const budget = isMobile ? MOBILE_BUDGET : DESKTOP_BUDGET
+      const currentTarget = wheelValue.get()
+
+      // We don't clamp the delta here anymore because the loop handles the speed limit
+      // But we still use a multiplier for responsiveness
+      const multiplier = 1.0
+      const next = Math.max(-100, Math.min(budget, currentTarget + e.deltaY * multiplier))
+      wheelValue.set(next)
+
+      // Snap back if we hit limits AND animation has caught up
+      const visualCurrent = visualValue.get()
+      if (next >= budget && visualCurrent >= budget - 1) snapBack()
+      if (next <= -10 && visualCurrent <= -5) snapBack()
+    }
+
+    const onResize = () => {
+      if (isLocked.current) snapBack(true)
+    }
+
+    let touchStartY = 0
+    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY }
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isLocked.current || phase.current !== 'zooming') return
+      e.preventDefault()
+      const delta = touchStartY - e.touches[0].clientY
+      touchStartY = e.touches[0].clientY
+      const synth = new WheelEvent('wheel', { deltaY: delta * 1 }) // multiplied by 1 for iOS momentum
+      onWheel(synth)
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    window.addEventListener('resize', onResize)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      // Safety unmount: ensure body isn't left locked
+      if (isLocked.current) {
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+      }
+    }
+  }, [])
 
   return (
-    // 600vh outer container — gives 500vh of virtual scroll while sticky.
-    // Added top-buffer padding for mobile "Center Lock" feel.
-    // 600vh outer container — gives 500vh of virtual scroll while sticky.
-    <div
-      ref={containerRef}
-      style={{
-        height: "600vh",
-        position: "relative"
-      }}
-    >
-
-      {/* Sticky wrapper — clipped so zoomed image stays within viewport */}
-      <div
-        style={{
-          position: "sticky",
-          top: "50%",
-          transform: "translateY(-50%)",
-          height: "100dvh",
-          minHeight: "100vh",
-          maxHeight: "100vh",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-        }}
-        className="border-y border-theme" // border top and bottom for center lock
-      >
+    <>
+      <section className="relative z-10 border-t border-theme py-12 md:py-20 bg-[var(--bg)] transition-colors duration-500 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16 items-center pt-12 pb-12 sm:pt-0 sm:pb-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-8 items-center">
 
-            {/* ── Image column ── */}
-            <div className="relative h-48 sm:h-80 lg:h-[500px] mb-6 lg:mb-0">
-              <motion.div
-                style={{
-                  scale,
-                  filter: filterStyle,
-                  zIndex,
-                  transformOrigin: "center center",
-                  position: "relative",
-                  height: "100%",
-                  borderRadius: "1rem",
-                  overflow: "hidden",
-                }}
-              >
+            {/* Heading Part */}
+            <div className="order-1 lg:col-start-1 lg:row-start-1 lg:self-end">
+              <TextHeading
+                heading={config.heading}
+                headingAccent={config.heading_accent}
+                headingSuffix={config.heading_suffix}
+                isDark={isDark}
+                opacity={1}
+              />
+            </div>
+
+            {/* Image Column */}
+            <div
+              ref={imageContainerRef}
+              className="relative order-2 lg:col-start-2 lg:row-span-2 h-[220px] sm:h-[280px] lg:h-auto lg:aspect-square w-full"
+              style={{ opacity: hideOriginal ? 0 : 1 }}
+            >
+              <div className="relative h-full rounded-[20px] overflow-hidden shadow-2xl">
                 <Image
                   src={imageUrl}
                   alt="HAXEUS Quality"
                   fill
-                  priority
-                  sizes="(max-width: 640px) 100vw, 50vw"
                   className="object-cover"
+                  priority
                   onError={(e) => {
                     const t = e.target as HTMLImageElement
-                    t.src = "/placeholder.svg?height=400&width=600&text=About+HAXEUS"
+                    t.src = "/placeholder.svg?height=800&width=600&text=About+HAXEUS"
                   }}
                 />
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#e7bf04] via-[#c03c9d] to-[#07e4e1]" />
-              </motion.div>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[var(--accent)]" />
+              </div>
             </div>
 
-            {/* ── Text column — fades out during zoom, back in after ── */}
-            <div className="lg:mt-0 mt-4 px-4 sm:px-0">
-              <TextColumn
-                heading={heading}
-                headingAccent={headingAccent}
-                headingSuffix={headingSuffix}
-                body1={body1}
-                body2={body2}
-                features={features}
-                ctaText={ctaText}
-                ctaHref={ctaHref}
+            {/* Body Column */}
+            <div className="order-3 lg:col-start-1 lg:row-start-2 lg:self-start">
+              <TextBody
+                body1={config.body1}
+                body2={config.body2}
+                features={config.features}
+                ctaText={config.cta_text}
+                ctaHref={config.cta_href}
                 isDark={isDark}
-                opacity={textOpacity}
+                opacity={1}
               />
             </div>
 
           </div>
         </div>
+      </section>
 
-        {/* ── Scroll hint ── */}
-        <motion.div
-          style={{ opacity: hintOpacity }}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none select-none"
-          aria-hidden
+      {cloneVisible && createPortal(
+        <div
+          ref={scope}
+          style={{
+            zIndex: 9999,
+            pointerEvents: 'none',
+            overflow: 'hidden',
+            backgroundColor: '#00000005', // Subtle underlay
+            ...cloneStyle,
+          }}
         >
-          <span className={`text-[10px] tracking-[0.25em] uppercase font-medium ${isDark ? "text-white/35" : "text-black/35"}`}>
-            scroll
-          </span>
-          <motion.div
-            animate={{ y: [0, 5, 0] }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
-              <path
-                d="M1 1L7 7L13 1"
-                stroke={isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)"}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </motion.div>
-        </motion.div>
-
-      </div>
-      {/* end sticky */}
-
-    </div>
+          <div className="relative w-full h-full">
+            <Image
+              src={imageUrl}
+              alt="Haxeus Focus"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-[var(--accent)]" />
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   )
 }
 

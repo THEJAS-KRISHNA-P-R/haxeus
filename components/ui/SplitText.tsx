@@ -11,6 +11,7 @@ gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP);
 export interface SplitTextProps {
   text: string
   className?: string
+  style?: React.CSSProperties
   delay?: number
   duration?: number
   ease?: string
@@ -38,6 +39,7 @@ const SplitText: React.FC<SplitTextProps> = ({
   tag = 'p',
   textAlign = 'center',
   onLetterAnimationComplete,
+  style: styleProp,
 }) => {
   const ref = useRef<HTMLParagraphElement>(null);
   const animationCompletedRef = useRef(false);
@@ -132,7 +134,13 @@ const SplitText: React.FC<SplitTextProps> = ({
     scope: ref,
   });
 
-  const style: React.CSSProperties = { textAlign, wordWrap: 'break-word', willChange: 'transform, opacity', visibility: 'hidden' };
+  const style: React.CSSProperties = { 
+    textAlign, 
+    wordWrap: 'break-word', 
+    willChange: 'transform, opacity', 
+    visibility: 'hidden',
+    ...styleProp 
+  };
   const classes = `split-parent inline-block whitespace-normal ${className}`;
   const Tag = (tag || 'p') as React.ElementType;
   return <Tag ref={ref} style={style} className={classes}>{text}</Tag>;
