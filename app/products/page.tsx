@@ -56,6 +56,7 @@ export async function generateMetadata({
       description: hasSearchIntent
         ? `Browse HAXEUS results for ${search}.`
         : "Explore premium HAXEUS streetwear products and limited drops.",
+      images: ["https://haxeus.in/og-image.jpg"],
     },
     twitter: {
       card: "summary_large_image",
@@ -63,6 +64,7 @@ export async function generateMetadata({
       description: shouldNoIndex
         ? `Browse HAXEUS results for ${search}.`
         : "Explore premium HAXEUS streetwear products and limited drops.",
+      images: ["https://haxeus.in/og-image.jpg"],
     },
   }
 }

@@ -5,6 +5,18 @@ import { JoinMovementCTA } from "@/components/JoinMovementCTA";
 export const metadata: Metadata = {
   title: 'Contact | HAXEUS Support',
   description: 'Connect with our team for orders, collaborations, or general inquiries. Direct WhatsApp and Instagram support available.',
+  openGraph: {
+    url: "https://haxeus.in/contact",
+    title: "Contact | HAXEUS Support",
+    description: "Connect with our team for orders, collaborations, or general inquiries. Direct WhatsApp and Instagram support available.",
+    images: ["https://haxeus.in/og-image.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact | HAXEUS Support",
+    description: "Connect with our team for orders, collaborations, or general inquiries. Direct WhatsApp and Instagram support available.",
+    images: ["https://haxeus.in/og-image.jpg"],
+  },
 };
 
 export default function ContactPage() {

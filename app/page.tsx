@@ -24,6 +24,7 @@ export const metadata: Metadata = {
     title: "HAXEUS — Premium Artistic Streetwear India",
     description:
       `Shop limited-drop graphic tees and oversized streetwear. Artistic designs made in India. Free shipping above ${CURRENCY_SYMBOL}999.`,
+    images: ["https://haxeus.in/og-image.jpg"],
   },
 }
 
