@@ -19,9 +19,7 @@ export async function completeOrder({
   intentData,
   razorpayOrderId,
   razorpayPaymentId,
-  razorpaySignature,
   supabaseAdmin,
-  eventId,
 }: OrderCompletionProps) {
   
   let finalOrderId = orderId;
