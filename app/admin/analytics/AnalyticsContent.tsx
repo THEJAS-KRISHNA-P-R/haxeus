@@ -256,7 +256,7 @@ export default function AnalyticsContent() {
                             <div key={o.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-[var(--bg-elevated)] transition-all group">
                                 <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }} className="w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-bold text-[var(--text-3)] group-hover:text-[var(--text)]">#{o.id.slice(-4).toUpperCase()}</div>
                                 <div className="flex-1">
-                                    <p style={{ color: "var(--text)" }} className="text-xs font-bold leading-tight truncate">#{o.order_number || o.id.slice(0, 8).toUpperCase()}</p>
+                                    <p style={{ color: "var(--text)" }} className="text-xs font-bold leading-tight truncate">#{o.order_number || o.id.slice(-8).toUpperCase()}</p>
                                     <p style={{ color: "var(--text-3)" }} className="text-[9px] font-medium truncate max-w-[180px]">{o.shipping_email}</p>
                                 </div>
                                 <div className="text-right">

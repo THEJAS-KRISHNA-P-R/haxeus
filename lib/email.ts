@@ -47,6 +47,7 @@ export async function sendOrderConfirmationEmail(params: {
       subject: `Order confirmed — HAXEUS #${subjectId}`,
       react: OrderConfirmationEmail({
         orderId: params.orderId,
+        displayOrderId: subjectId,
         orderItems: params.orderItems,
         subtotal: params.subtotal,
         shipping: params.shipping,

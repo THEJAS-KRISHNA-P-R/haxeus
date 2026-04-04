@@ -54,6 +54,7 @@ export async function completeOrder({
         razorpay_order_id: razorpayOrderId,
         razorpay_payment_id: razorpayPaymentId,
         payment_method: "online",
+        payment_status: "paid",
         // Add flat shipping columns for reliability
         shipping_name: intentData.order_data.shipping_address.full_name,
         shipping_email: intentData.order_data.shipping_address.email, // fallback if present

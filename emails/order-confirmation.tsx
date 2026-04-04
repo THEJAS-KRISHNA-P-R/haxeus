@@ -15,6 +15,7 @@ import {
 
 interface OrderConfirmationEmailProps {
   orderId: string;
+  displayOrderId?: string;
   orderItems: Array<{ name: string; size: string; quantity: number; price: number }>;
   subtotal: number;
   shipping: number;
@@ -27,6 +28,7 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL ? `https://${process.env.NEXT_PU
 
 export const OrderConfirmationEmail = ({
   orderId,
+  displayOrderId,
   orderItems,
   subtotal,
   shipping,
@@ -34,7 +36,8 @@ export const OrderConfirmationEmail = ({
   total,
   shippingAddress,
 }: OrderConfirmationEmailProps) => {
-  const previewText = `Order confirmed - HAXEUS #${orderId.slice(-8).toUpperCase()}`;
+  const finalDisplayId = displayOrderId || orderId.slice(-8).toUpperCase();
+  const previewText = `Order confirmed - HAXEUS #${finalDisplayId}`;
 
   return (
     <Html>

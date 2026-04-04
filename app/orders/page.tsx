@@ -17,6 +17,7 @@ interface Order {
   payment_status: string
   total_amount: number
   created_at: string
+  order_number?: string
 }
 
 export default function OrdersPage() {
@@ -46,7 +47,8 @@ export default function OrdersPage() {
           status,
           payment_status,
           total_amount,
-          created_at
+          created_at,
+          order_number
         `)
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
@@ -152,7 +154,7 @@ export default function OrdersPage() {
                         {getStatusIcon(order.status)}
                         <div>
                           <h3 className="font-bold text-lg">
-                            Order #{order.id.slice(0, 8).toUpperCase()}
+                            Order {order.order_number ? `#${order.order_number}` : `#${order.id.slice(-8).toUpperCase()}`}
                           </h3>
                           <p className="text-sm text-white/50">
                             Placed {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
