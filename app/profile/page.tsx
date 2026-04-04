@@ -131,15 +131,15 @@ function ProfileContent() {
 
   async function handleDeleteAddress(addressId: string) {
     if (!confirm("Are you sure you want to delete this address?")) return
-    
+
     try {
       const { error } = await supabase
         .from("user_addresses")
         .delete()
         .eq("id", addressId)
-      
+
       if (error) throw error
-      
+
       // Update local state
       setAddresses(addresses.filter(a => a.id !== addressId))
     } catch (err) {
@@ -207,7 +207,7 @@ function ProfileContent() {
               <h2 className="text-xl font-semibold text-theme">Recent Orders</h2>
               {orders.length > 0 && (
                 <Link href="/orders">
-                  <Button variant="ghost" className="text-[var(--accent)] hover:bg-[var(--accent)]/10">
+                  <Button variant="ghost" className="text-[var(--accent)] hover:bg-[var(--bg)]/10">
                     View Full History <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
@@ -253,7 +253,7 @@ function ProfileContent() {
                       </div>
                       <div className="flex items-center gap-3">
                         <Badge className={getStatusColor(order.status)}>
-                          {order.status}
+                          {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase() : 'Pending'}
                         </Badge>
                         <Link href={`/orders/${order.id}`}>
                           <Button variant="outline" size="sm" className="hidden sm:flex border-theme hover:bg-theme text-theme-2 hover:text-theme">
@@ -282,12 +282,12 @@ function ProfileContent() {
                             />
                           </div>
                           <Link href={`/products/${item.product_id}`} className="flex-1 group">
-                             <p className="font-medium text-sm text-theme group-hover:text-[var(--accent)] transition-colors">
-                               {item.product.name}
-                             </p>
-                             <p className="text-sm text-theme-2">
-                               Size: {item.size} • Qty: {item.quantity}
-                             </p>
+                            <p className="font-medium text-sm text-theme group-hover:text-[var(--accent)] transition-colors">
+                              {item.product.name}
+                            </p>
+                            <p className="text-sm text-theme-2">
+                              Size: {item.size} • Qty: {item.quantity}
+                            </p>
                           </Link>
                           <p className="font-semibold text-theme">
                             {formatPrice(item.price)}
@@ -354,9 +354,9 @@ function ProfileContent() {
                               <Edit size={16} />
                             </Button>
                           </Link>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="hover:bg-theme"
                             onClick={() => handleDeleteAddress(address.id)}
                           >

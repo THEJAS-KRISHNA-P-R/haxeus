@@ -60,14 +60,14 @@ export default function OrdersContent() {
             if (!res.ok) throw new Error("Failed to update status");
 
             const data = await res.json();
-            
+
             setOrders(prev => prev.map(o => o.id === orderId ? {
                 ...o,
                 status: newStatus,
                 delivered_at: data.delivered_at || o.delivered_at,
                 updated_at: new Date().toISOString(),
             } : o));
-            
+
             toast.success(`Order marked as ${newStatus}`);
         } catch (err) {
             console.error("Error updating order status:", err);
@@ -191,7 +191,7 @@ export default function OrdersContent() {
                         }}
                         className="flex gap-1 p-1 rounded-full w-fit"
                     >
-                        {["all", "pending", "confirmed", "preorder", "processing", "shipped", "delivered", "cancelled"].map((s) => (
+                        {["All", "Pending", "Confirmed", "Preorder", "Processing", "Shipped", "Delivered", "Cancelled"].map((s) => (
                             <button
                                 key={s}
                                 onClick={() => setFilter(s)}
@@ -250,8 +250,8 @@ export default function OrdersContent() {
                                                 whileHover={{ x: 2 }}
                                                 className="group transition-all duration-300"
                                             >
-                                                <AdminTableRow 
-                                                    cols="grid-cols-[1.2fr_1.8fr_1.2fr_0.6fr_1fr_0.8fr_1.2fr_0.8fr_1.5fr]" 
+                                                <AdminTableRow
+                                                    cols="grid-cols-[1.2fr_1.8fr_1.2fr_0.6fr_1fr_0.8fr_1.2fr_0.8fr_1.5fr]"
                                                     className="items-center py-4 border-l-2 border-transparent hover:border-[var(--accent)] hover:bg-white/[0.02]"
                                                     onClick={() => router.push(`/admin/orders/${order.id}`)}
                                                 >
@@ -259,7 +259,7 @@ export default function OrdersContent() {
                                                         <span className="truncate">
                                                             {order.order_number ?? `#${order.id.slice(-8).toUpperCase()}`}
                                                         </span>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => { e.stopPropagation(); copyToClipboard(order.id, "Order ID"); }}
                                                             className="opacity-0 group-hover/id:opacity-100 p-1 hover:bg-[var(--accent)]/10 rounded-md transition-all text-[var(--accent)] shrink-0"
                                                         >
@@ -294,8 +294,8 @@ export default function OrdersContent() {
                                                     <div className="flex items-center">
                                                         <span className={cn(
                                                             "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border",
-                                                            order.payment_method === 'online' 
-                                                                ? "bg-blue-400/10 text-blue-400 border-blue-400/20" 
+                                                            order.payment_method === 'online'
+                                                                ? "bg-blue-400/10 text-blue-400 border-blue-400/20"
                                                                 : "bg-orange-400/10 text-orange-400 border-orange-400/20"
                                                         )}>
                                                             {order.payment_method ?? 'online'}
@@ -305,11 +305,11 @@ export default function OrdersContent() {
                                                         <PaymentStatusBadge status={order.status} />
                                                     </div>
                                                     <div className="flex items-center justify-center">
-                                                        <div 
+                                                        <div
                                                             className={cn(
                                                                 "w-1.5 h-1.5 rounded-full",
-                                                                order.confirmation_email_sent 
-                                                                    ? "bg-green-400 shadow-[0_0_12px_rgba(74,222,128,0.6)]" 
+                                                                order.confirmation_email_sent
+                                                                    ? "bg-green-400 shadow-[0_0_12px_rgba(74,222,128,0.6)]"
                                                                     : "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]"
                                                             )}
                                                             title={order.confirmation_email_sent ? `Confirmed at ${new Date(order.confirmation_email_sent_at).toLocaleString()}` : "Pending email dispatch"}
@@ -322,12 +322,12 @@ export default function OrdersContent() {
                                                             className="text-[9px] font-black uppercase tracking-widest bg-transparent border border-[var(--border)] rounded-lg px-2.5 py-1.5 cursor-pointer text-[var(--text-3)] hover:text-[var(--text)] transition-all hover:border-[var(--text-3)] outline-none"
                                                             style={{ background: "rgba(var(--bg-rgb), 0.5)" }}
                                                         >
-                                                            {["pending","confirmed","preorder","processing","shipped","delivered","cancelled","refunded"].map(st => (
+                                                            {["Pending", "Confirmed", "Preorder", "Processing", "Shipped", "Delivered", "Cancelled", "Refunded"].map(st => (
                                                                 <option key={st} value={st} className="bg-[var(--bg)]">{st}</option>
                                                             ))}
                                                         </select>
-                                                        
-                                                        {(order.status === 'confirmed' || order.status === 'delivered') && order.payment_method === 'online' && (
+
+                                                        {(order.status === 'Confirmed' || order.status === 'Delivered') && order.payment_method === 'online' && (
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); handleRefund(order.id); }}
                                                                 title="Process Refund"
@@ -364,7 +364,7 @@ export default function OrdersContent() {
                     style={{ borderTop: "1px solid var(--border)" }}
                     className="flex flex-wrap divide-x"
                 >
-                    {["all", "pending", "confirmed", "preorder", "processing", "shipped", "delivered", "cancelled"].map((s) => {
+                    {["All", "Pending", "Confirmed", "Preorder", "Processing", "Shipped", "Delivered", "Cancelled"].map((s) => {
                         const count = s === "all"
                             ? orders.length
                             : orders.filter((o) => (o.status ?? "pending") === s).length;

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase, type Order, type OrderItem } from "@/lib/supabase"
 import { sendShippingUpdateEmail } from "@/lib/email"
-import { 
-  AdminCard, 
+import {
+  AdminCard,
   AdminButton,
   AdminBadge,
 } from "@/components/admin/AdminUI"
@@ -31,15 +31,15 @@ interface OrderWithDetails extends Order {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
-  paid:       { label: "Paid",       color: "var(--color-success, #16a34a)", icon: CheckCircle2 },
-  confirmed:  { label: "Confirmed",  color: "var(--color-success, #16a34a)", icon: CheckCircle2 },
-  pending:    { label: "Pending",    color: "var(--accent-yellow, #f59e0b)", icon: Clock },
-  preorder:   { label: "Pre-Order",  color: "var(--accent-yellow, #facc15)", icon: Package },
-  processing: { label: "Processing", color: "var(--accent-cyan, #3b82f6)",   icon: ClipboardList },
-  shipped:    { label: "Shipped",    color: "var(--accent-cyan, #3b82f6)",   icon: Truck },
-  delivered:  { label: "Delivered",  color: "var(--color-success, #16a34a)", icon: CheckCircle2 },
-  cancelled:  { label: "Cancelled",  color: "var(--color-accent, #f43f5e)",  icon: XCircle },
-  refunded:   { label: "Refunded",   color: "var(--accent-yellow, #fb923c)", icon: XCircle },
+  paid: { label: "Paid", color: "var(--color-success, #16a34a)", icon: CheckCircle2 },
+  confirmed: { label: "Confirmed", color: "var(--color-success, #16a34a)", icon: CheckCircle2 },
+  pending: { label: "Pending", color: "var(--accent-yellow, #f59e0b)", icon: Clock },
+  preorder: { label: "Pre-Order", color: "var(--accent-yellow, #facc15)", icon: Package },
+  processing: { label: "Processing", color: "var(--accent-cyan, #3b82f6)", icon: ClipboardList },
+  shipped: { label: "Shipped", color: "var(--accent-cyan, #3b82f6)", icon: Truck },
+  delivered: { label: "Delivered", color: "var(--color-success, #16a34a)", icon: CheckCircle2 },
+  cancelled: { label: "Cancelled", color: "var(--color-accent, #f43f5e)", icon: XCircle },
+  refunded: { label: "Refunded", color: "var(--accent-yellow, #fb923c)", icon: XCircle },
 }
 
 export default function OrderDetailPage() {
@@ -110,11 +110,11 @@ export default function OrderDetailPage() {
       setOrder((prev) =>
         prev
           ? {
-              ...prev,
-              status: newStatus as any,
-              delivered_at: isDelivered ? timestamp : undefined,
-              updated_at: timestamp,
-            }
+            ...prev,
+            status: newStatus as any,
+            delivered_at: isDelivered ? timestamp : undefined,
+            updated_at: timestamp,
+          }
           : null
       )
 
@@ -164,17 +164,17 @@ export default function OrderDetailPage() {
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-4">
-          <AdminButton 
-            variant="ghost" 
+          <AdminButton
+            variant="ghost"
             onClick={() => router.push("/admin/orders")}
             className="-ml-4"
           >
             <ArrowLeft size={14} className="mr-2" /> Back to Orders
           </AdminButton>
-          
+
           <div className="space-y-1">
-            <h1 
-              style={{ color: "var(--text)", fontFamily: "var(--font-clash)" }} 
+            <h1
+              style={{ color: "var(--text)", fontFamily: "var(--font-clash)" }}
               className="text-4xl font-black italic tracking-tighter uppercase"
             >
               Order <span className="text-[var(--accent)]">#{order.id.slice(0, 8)}</span>
@@ -192,12 +192,12 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Global Status Badge */}
-        <AdminBadge 
+        <AdminBadge
           variant={
-            status === "paid" || status === "confirmed" || status === "delivered" ? "success" :
-            status === "pending" || status === "preorder" || status === "refunded" ? "warning" :
-            status === "processing" || status === "shipped" ? "info" :
-            "danger"
+            status === "Paid" || status === "Confirmed" || status === "Delivered" ? "success" :
+              status === "Pending" || status === "Preorder" || status === "Refunded" ? "warning" :
+                status === "Processing" || status === "Shipped" ? "info" :
+                  "danger"
           }
           className="px-6 py-4 rounded-2xl border-2 shadow-lg"
           icon={s.icon}
@@ -225,7 +225,7 @@ export default function OrderDetailPage() {
                   style={{ borderColor: "var(--border)" }}
                   className="flex items-center gap-6 border-b pb-6 last:border-0 last:pb-0 group"
                 >
-                  <div 
+                  <div
                     style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
                     className="relative h-24 w-24 rounded-2xl overflow-hidden flex-shrink-0 border transition-transform group-hover:scale-105"
                   >
@@ -239,12 +239,12 @@ export default function OrderDetailPage() {
                   <div className="flex-1 min-w-0">
                     <p style={{ color: "var(--text)" }} className="font-bold text-lg leading-tight truncate">{item.product_name || item.product?.name || "Product Deleted"}</p>
                     <div className="flex flex-wrap gap-2 mt-3">
-                       <AdminBadge variant="neutral" className="bg-[var(--bg-card)]/50 backdrop-blur-sm border-[var(--border)]">
-                         <span className="opacity-60 mr-1">SIZE:</span> {item.size}
-                       </AdminBadge>
-                       <AdminBadge variant="neutral" className="bg-[var(--bg-card)]/50 backdrop-blur-sm border-[var(--border)]">
-                         <span className="opacity-60 mr-1">QTY:</span> {item.quantity}
-                       </AdminBadge>
+                      <AdminBadge variant="neutral" className="bg-[var(--bg-card)]/50 backdrop-blur-sm border-[var(--border)]">
+                        <span className="opacity-60 mr-1">SIZE:</span> {item.size}
+                      </AdminBadge>
+                      <AdminBadge variant="neutral" className="bg-[var(--bg-card)]/50 backdrop-blur-sm border-[var(--border)]">
+                        <span className="opacity-60 mr-1">QTY:</span> {item.quantity}
+                      </AdminBadge>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -259,13 +259,13 @@ export default function OrderDetailPage() {
               ))}
             </div>
 
-            <div 
-               style={{ 
-                 marginTop: "2rem",
-                 paddingTop: "2rem",
-                 borderTop: "2px solid var(--border)",
-               }}
-               className="flex justify-between items-center"
+            <div
+              style={{
+                marginTop: "2rem",
+                paddingTop: "2rem",
+                borderTop: "2px solid var(--border)",
+              }}
+              className="flex justify-between items-center"
             >
               <div className="flex flex-col">
                 <span style={{ color: "var(--text-3)" }} className="text-[10px] font-black uppercase tracking-[0.2em]">Grand Total / Paid</span>
@@ -288,7 +288,7 @@ export default function OrderDetailPage() {
             </div>
 
             <div className="space-y-4">
-              <div 
+              <div
                 style={{ background: "var(--bg-elevated)", borderColor: "var(--border)" }}
                 className="p-1 rounded-2xl border"
               >
@@ -302,9 +302,9 @@ export default function OrderDetailPage() {
                   </SelectTrigger>
                   <SelectContent style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
                     {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                      <SelectItem 
-                        key={key} 
-                        value={key} 
+                      <SelectItem
+                        key={key}
+                        value={key}
                         className="text-[10px] font-bold uppercase tracking-widest py-3 focus:bg-[var(--bg-elevated)] focus:text-[var(--text)]"
                       >
                         {cfg.label}
@@ -313,7 +313,7 @@ export default function OrderDetailPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div 
+              <div
                 style={{ background: "var(--bg-elevated)" }}
                 className="p-4 rounded-2xl"
               >
@@ -331,7 +331,7 @@ export default function OrderDetailPage() {
                 <MapPin size={18} style={{ color: "var(--accent)" }} />
                 <h2 style={{ color: "var(--text)" }} className="text-sm font-bold uppercase tracking-widest">Logistics / Destination</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <p style={{ color: "var(--text)" }} className="font-bold text-lg leading-tight uppercase italic">{order.shipping_name}</p>
@@ -341,13 +341,13 @@ export default function OrderDetailPage() {
                     {address.city}, {address.state} {address.pincode}
                   </p>
                 </div>
-                
-                <div 
+
+                <div
                   style={{ borderTop: "1px solid var(--border)" }}
                   className="pt-4 flex items-center justify-between"
                 >
                   <span style={{ color: "var(--text-3)" }} className="text-[10px] font-bold uppercase tracking-widest">Phone</span>
-                  <a 
+                  <a
                     href={`tel:${order.shipping_address.phone}`}
                     className="text-[var(--accent)] font-bold text-sm tracking-tight hover:underline"
                   >
@@ -360,26 +360,26 @@ export default function OrderDetailPage() {
 
           {/* Metadata Card */}
           <AdminCard className="p-8">
-             <div className="flex items-center gap-3 mb-6">
-                <BarChart3 size={18} style={{ color: "var(--accent)" }} className="rotate-90" />
-                <h2 style={{ color: "var(--text)" }} className="text-sm font-bold uppercase tracking-widest">System Metadata</h2>
+            <div className="flex items-center gap-3 mb-6">
+              <BarChart3 size={18} style={{ color: "var(--accent)" }} className="rotate-90" />
+              <h2 style={{ color: "var(--text)" }} className="text-sm font-bold uppercase tracking-widest">System Metadata</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                <span style={{ color: "var(--text-3)" }}>Order ID</span>
+                <span style={{ color: "var(--text-2)" }} className="font-mono opacity-80 decoration-[var(--border)]">{order.id.slice(0, 13)}...</span>
               </div>
-              <div className="space-y-3">
-                 <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                    <span style={{ color: "var(--text-3)" }}>Order ID</span>
-                    <span style={{ color: "var(--text-2)" }} className="font-mono opacity-80 decoration-[var(--border)]">{order.id.slice(0, 13)}...</span>
-                 </div>
-                 <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                    <span style={{ color: "var(--text-3)" }}>Payment Type</span>
-                    <AdminBadge variant="neutral">Razorpay / Secure</AdminBadge>
-                 </div>
-                 {order.updated_at && (
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                       <span style={{ color: "var(--text-3)" }}>Last Trace</span>
-                       <span style={{ color: "var(--text-2)" }}>{new Date(order.updated_at).toLocaleDateString()}</span>
-                    </div>
-                 )}
+              <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                <span style={{ color: "var(--text-3)" }}>Payment Type</span>
+                <AdminBadge variant="neutral">Razorpay / Secure</AdminBadge>
               </div>
+              {order.updated_at && (
+                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                  <span style={{ color: "var(--text-3)" }}>Last Trace</span>
+                  <span style={{ color: "var(--text-2)" }}>{new Date(order.updated_at).toLocaleDateString()}</span>
+                </div>
+              )}
+            </div>
           </AdminCard>
         </div>
       </div>

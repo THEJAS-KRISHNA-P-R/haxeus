@@ -67,46 +67,55 @@ export default function OrdersPage() {
     }
   }
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (rawStatus: string) => {
+    const status = (rawStatus || "pending").toLowerCase()
     switch (status) {
       case "delivered":
+      case "confirmed":
         return <CheckCircle className="w-5 h-5 text-green-600" />
       case "shipped":
         return <Truck className="w-5 h-5 text-blue-600" />
       case "processing":
+      case "preorder":
         return <Package className="w-5 h-5 text-orange-600" />
       case "cancelled":
-        return <XCircle className="w-5 h-5 text-[#e93a3a]" />
+      case "refunded":
+        return <XCircle className="w-5 h-5 text-[var(--accent)]" />
       default:
-        return <Clock className="w-5 h-5 text-white/50" />
+        return <Clock className="w-5 h-5 text-[var(--text-3)]" />
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (rawStatus: string) => {
+    const status = (rawStatus || "pending").toLowerCase()
     switch (status) {
       case "delivered":
-        return "border-green-200"
+      case "confirmed":
+        return "bg-green-500/10 text-green-600 border border-green-500/20"
       case "shipped":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "bg-blue-500/10 text-blue-600 border border-blue-500/20"
       case "processing":
-        return "bg-orange-100 text-orange-800 border-orange-200"
+      case "preorder":
+        return "bg-orange-500/10 text-orange-600 border border-orange-500/20"
       case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200"
+      case "refunded":
+        return "bg-red-500/10 text-red-600 border border-red-500/20"
       default:
-        return "bg-gray-100 text-white border-white/[0.06]"
+        return "bg-[var(--bg-elevated)] text-[var(--text-2)] border border-[var(--border)]"
     }
   }
 
-  const getPaymentStatusColor = (status: string) => {
+  const getPaymentStatusColor = (rawStatus: string) => {
+    const status = (rawStatus || "pending").toLowerCase()
     switch (status) {
       case "paid":
-        return "text-green-800"
+        return "bg-green-500/10 text-green-600 border border-green-500/20"
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-500/10 text-yellow-600 border border-yellow-500/20"
       case "failed":
-        return "bg-red-100 text-red-800"
+        return "bg-red-500/10 text-red-600 border border-red-500/20"
       default:
-        return "bg-gray-100 text-white"
+        return "bg-[var(--bg-elevated)] text-[var(--text-2)] border border-[var(--border)]"
     }
   }
 

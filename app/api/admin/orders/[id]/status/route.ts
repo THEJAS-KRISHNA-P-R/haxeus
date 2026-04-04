@@ -36,7 +36,7 @@ export async function PATCH(
     // 2. Perform Update
     const isDelivered = status === "delivered"
     const timestamp = new Date().toISOString()
-    
+
     const { error: updateError } = await supabaseAdmin
       .from("orders")
       .update({
@@ -53,7 +53,7 @@ export async function PATCH(
 
     // 3. Trigger Email (Async)
     // We only send updates for specific statuses to avoid spamming
-    const emailStatuses = ["confirmed", "shipped", "delivered", "cancelled"]
+    const emailStatuses = ["Confirmed", "Shipped", "Delivered", "Cancelled"]
     if (emailStatuses.includes(status)) {
       try {
         await sendShippingUpdateEmail({

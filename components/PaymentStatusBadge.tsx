@@ -52,7 +52,8 @@ const STATUS_MAP: Record<OrderStatus, { label: string; icon: any; colorCls: stri
 }
 
 export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProps) {
-  const config = STATUS_MAP[status] || STATUS_MAP.pending
+  const normalizedStatus = (status || 'pending').toLowerCase() as OrderStatus
+  const config = STATUS_MAP[normalizedStatus] || STATUS_MAP.pending
   const Icon = config.icon
 
   return (
