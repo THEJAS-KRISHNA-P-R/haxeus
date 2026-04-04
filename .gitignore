@@ -32,7 +32,11 @@ ts_errors.log
 tsc_errors.log
 *.log
 .mcp.json
+# diagnostic / one-off scripts (never commit these — may contain secrets)
+test-*.js
 check-schema.js
+convert-schema.js
+schema_dump*.sql
 
 # local env files
 .env
