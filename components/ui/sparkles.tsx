@@ -49,7 +49,7 @@ export const SparklesCore = (props: ParticlesProps) => {
     if (!init) return <></>;
 
     return (
-        <motion.div animate={controls} className={cn("inline-block", className)}>
+        <motion.div initial={{ opacity: 0 }} animate={controls} className={cn("block w-full h-full", className)}>
             <Particles
                 id={id || "tsparticles"}
                 className={"h-full w-full"}
@@ -77,13 +77,6 @@ export const SparklesCore = (props: ParticlesProps) => {
                         color: {
                             value: particleColor || "#ffffff",
                         },
-                        life: {
-                            count: 0,
-                            duration: {
-                                sync: false,
-                                value: 3,
-                            },
-                        },
                         move: {
                             enable: true,
                             speed: speed || 4,
@@ -95,8 +88,6 @@ export const SparklesCore = (props: ParticlesProps) => {
                         number: {
                             density: {
                                 enable: true,
-                                width: 400,
-                                height: 400,
                             },
                             value: particleDensity || 120,
                         },

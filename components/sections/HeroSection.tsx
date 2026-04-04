@@ -89,7 +89,7 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                     fontVariantLigatures: "none",
                     lineHeight: 0.92,
                     /* viewport-relative: big on phone, capped on desktop */
-                    fontSize: "clamp(3.25rem, 13vw, 5.5rem)",
+                    fontSize: "clamp(4.0rem, 15vw, 5.5rem)",
                   }}
                 >
                   {/* Line 1 */}
@@ -182,7 +182,11 @@ export function HeroSection({ config, activeDrop }: HeroSectionProps) {
                 transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.8, duration: 0.5 }}
                 layout="position"
               >
-                <p className="text-sm mt-4 leading-relaxed max-w-lg text-white/80 lg:text-theme-2 lg:text-base lg:sm:text-lg">
+                <p className={cn(
+                  "text-sm mt-4 leading-relaxed max-w-lg text-white/80",
+                  isDark ? "lg:text-white/80" : "lg:text-black/70",
+                  "lg:text-xl"
+                )}>
                   {config.subtext ?? DEFAULT_HOMEPAGE_CONFIG.hero.subtext}
                 </p>
               </motion.div>

@@ -13,17 +13,6 @@ export async function POST(req: NextRequest) {
       {
         cookies: {
           getAll: () => cookieStore.getAll(),
-          setAll: (cookiesToSet) => {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              );
-            } catch {
-              // The `setAll` method was called from a Server Component.
-              // This can be ignored if you have middleware refreshing
-              // user sessions.
-            }
-          },
         },
       }
     );
@@ -32,6 +21,12 @@ export async function POST(req: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const supabaseAdmin = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { cookies: { getAll: () => [] } }
+    );
 
     // ── 2. Parse Body ────────────────────────────────────────────────────────
     const { cart_items, coupon_code, shipping_address } = await req.json();
@@ -72,7 +67,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `Product ${cartItem.product_id} not found` }, { status: 400 });
       }
 
-      // Check stock for the specific size
       const stock = inventory.find(
         (inv) => String(inv.product_id) === String(cartItem.product_id) && inv.size === cartItem.size
       );
@@ -91,11 +85,29 @@ export async function POST(req: NextRequest) {
         name: product.name,
         quantity: cartItem.quantity,
         size: cartItem.size,
-        unit_price: Number(product.price),
+        price: Number(product.price),
       });
     }
 
     // ── 4. Calculate Discounts & Shipping ───────────────────────────────────
+    const { data: settingsData } = await supabaseAdmin
+      .from('store_settings')
+      .select('key, value')
+      .in('key', ['free_shipping_above', 'shipping_rate']);
+
+    const settings = { free_shipping_above: 999, shipping_rate: 99 };
+    if (settingsData) {
+      for (const row of settingsData) {
+         try {
+           const val = typeof row.value === 'string' ? Number(JSON.parse(row.value)) : Number(row.value);
+           if (!isNaN(val)) {
+             if (row.key === 'free_shipping_above') settings.free_shipping_above = val;
+             if (row.key === 'shipping_rate') settings.shipping_rate = val;
+           }
+         } catch { /* use defaults */ }
+      }
+    }
+
     let discount = 0;
     if (coupon_code) {
       const { data: coupon } = await supabase
@@ -121,7 +133,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const shipping = subtotal >= 999 ? 0 : 99;
+    const shipping = subtotal >= settings.free_shipping_above ? 0 : settings.shipping_rate;
     const total = subtotal + shipping - discount;
 
     // ── 5. Create Razorpay Order ───────────────────────────────────────────
@@ -135,51 +147,27 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ── 6. Insert Order into Supabase ───────────────────────────────────────
-    // Using service role client to bypass RLS for order creation
-    const supabaseAdmin = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { cookies: { getAll: () => [] } }
-    );
-
-    const { data: dbOrder, error: dbError } = await supabaseAdmin
-      .from('orders')
+    // ── 6. Save Payment Intent (Metadata Holding) ───────────────────────────
+    const { error: intentError } = await supabaseAdmin
+      .from('payment_intents')
       .insert({
-        user_id: user.id,
-        status: 'pending',
-        subtotal_amount: subtotal,
-        shipping_amount: shipping,
-        discount_amount: discount,
-        total_amount: total,
-        coupon_code: discount > 0 ? coupon_code : null,
-        shipping_address: shipping_address,
         razorpay_order_id: razorpayOrder.id,
-        payment_method: 'online',
-      })
-      .select('id')
-      .single();
+        user_id: user.id,
+        order_data: {
+          items: validatedItems,
+          subtotal,
+          shipping,
+          discount,
+          total,
+          coupon_code: discount > 0 ? coupon_code : null,
+          shipping_address,
+        },
+        status: 'pending',
+      });
 
-    if (dbError) {
-      console.error('Order insertion failed but Razorpay order was created:', razorpayOrder.id, dbError);
-      return NextResponse.json({ error: 'Failed to create order in database' }, { status: 500 });
-    }
-
-    // Insert order items
-    const { error: itemsError } = await supabaseAdmin.from('order_items').insert(
-      validatedItems.map((item) => ({
-        order_id: dbOrder.id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        size: item.size,
-        price: item.unit_price, // Stores unit price in INR
-      }))
-    );
-
-    if (itemsError) {
-      console.error('Failed to insert order items:', itemsError);
-      // We don't fail the whole request since the order row exists, 
-      // but this is a critical data integrity issue.
+    if (intentError) {
+      console.error('[create-order] Intent Save Failed:', intentError);
+      return NextResponse.json({ error: 'Failed to initialize payment session' }, { status: 500 });
     }
 
     // ── 7. Return Result ─────────────────────────────────────────────────────
@@ -187,7 +175,6 @@ export async function POST(req: NextRequest) {
       razorpay_order_id: razorpayOrder.id,
       amount_paise: Math.round(total * 100),
       currency: 'INR',
-      order_db_id: dbOrder.id,
     });
   } catch (err) {
     console.error('[create-order] Fatal Error:', err);

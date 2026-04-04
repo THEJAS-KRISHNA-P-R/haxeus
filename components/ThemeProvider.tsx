@@ -10,7 +10,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-    theme: "dark",
+    theme: "light",
     toggle: () => { },
     setTheme: () => { },
 })
@@ -24,15 +24,14 @@ function applyTheme(t: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setThemeState] = useState<Theme>("dark")
+    const [theme, setThemeState] = useState<Theme>("light")
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
         setMounted(true)
-        // Read from localStorage first, then system preference
+        // Read from localStorage first, default to light
         const stored = localStorage.getItem("haxeus-theme") as Theme | null
-        const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-        const resolved = stored ?? (systemDark ? "dark" : "light")
+        const resolved = stored ?? "light"
         applyTheme(resolved)
         setThemeState(resolved)
     }, [])
@@ -55,8 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                     __html: `
             (function() {
               var stored = localStorage.getItem('haxeus-theme');
-              var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              var theme = stored || (systemDark ? 'dark' : 'light');
+              var theme = stored || 'light';
               document.documentElement.setAttribute('data-theme', theme);
               document.documentElement.classList.add(theme);
             })();

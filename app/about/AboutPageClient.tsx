@@ -124,9 +124,9 @@ export default function AboutPageClient() {
     <main className="bg-theme min-h-screen">
 
       {/* ── 1. HERO ──────────────────────────────────────────────────── */}
-      <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden" style={{ backgroundColor: "#060606" }}>
+      <section className="relative min-h-[100dvh] py-20 flex flex-col items-center justify-center overflow-hidden" style={{ backgroundColor: "#060606" }}>
         <div className="absolute inset-0 w-full h-full">
-          <SparklesCore id="tsparticlesabout" background="transparent" minSize={0.4} maxSize={1.8} particleDensity={120} className="w-full h-full" particleColor="#e11d48" speed={0.5} />
+          <SparklesCore id="tsparticlesabout" background="transparent" minSize={0.4} maxSize={2.0} particleDensity={350} className="w-full h-full" particleColor="#e11d48" speed={0.5} />
         </div>
 
 
@@ -137,7 +137,7 @@ export default function AboutPageClient() {
               initial={prefersReducedMotion ? false : { opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
               transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", bounce: 0.2, delay: 0.2, duration: 2 }}
-              className="text-[var(--accent)] font-bold tracking-[0.3em] text-xl md:text-lg mb-0 uppercase pointer-events-auto"
+              className="text-[var(--accent)] font-bold tracking-[0.3em] text-2xl md:text-xl mb-0 uppercase pointer-events-auto"
             >
               Our Story
             </motion.p>
@@ -149,7 +149,7 @@ export default function AboutPageClient() {
               className="-mt-4.5 md:-mt-11 mb-2 w-full flex items-center justify-center overflow-visible"
             >
               <div className="min-w-max overflow-visible pointer-events-auto">
-                <ShinyText text="HAXEUS" disabled={false} speed={4} color="#d3d2d2ff" shineColor="#ffffff" className="text-[16vw] md:text-[13.5vw] font-black" />
+                <ShinyText text="HAXEUS" disabled={false} speed={4} color="#d3d2d2ff" shineColor="#ffffff" className="text-[16vw] md:text-[15.5vw] font-black" />
               </div>
             </motion.div>
 
@@ -171,7 +171,7 @@ export default function AboutPageClient() {
           </motion.div>
         </motion.div>
 
-        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-[#060606] pointer-events-none" />
+        {/* Removed gradient mask to ensure total particle persistence */}
       </section>
 
       {/* ── 2. ORIGIN STORY ──────────────────────────────────────────── */}
@@ -300,7 +300,7 @@ export default function AboutPageClient() {
             </h2>
 
             <motion.div initial={prefersReducedMotion ? false : { opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", bounce: 0.25, delay: 0.9, duration: 2.2 }}>
-              <Link href="/products" className="group/btn inline-flex items-center gap-4 bg-[var(--accent)] text-white px-12 py-6 rounded-full font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all duration-700 shadow-2xl shadow-[var(--accent)]/20">
+              <Link href="/products" className="group/btn inline-flex items-center gap-4 bg-[var(--accent)] text-white px-16 py-7 rounded-full font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all duration-700 shadow-2xl shadow-[var(--accent)]/20 text-lg">
                 Shop the current collection
                 <motion.span animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}>
                   <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />

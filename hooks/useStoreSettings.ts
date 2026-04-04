@@ -7,6 +7,7 @@ export interface StoreSettings {
   shipping_rate: number
 }
 
+// Aligning defaults with the Supabase seeded values
 const DEFAULTS: StoreSettings = { free_shipping_above: 1000, shipping_rate: 150 }
 
 export function useStoreSettings() {
@@ -22,7 +23,9 @@ export function useStoreSettings() {
           shipping_rate: data.shipping_rate ?? DEFAULTS.shipping_rate,
         })
       })
-      .catch(() => {})
+      .catch(() => {
+        console.warn("[useStoreSettings] Sync failed, using DEFAULTS")
+      })
       .finally(() => setLoading(false))
   }, [])
 

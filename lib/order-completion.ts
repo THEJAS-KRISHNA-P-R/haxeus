@@ -1,7 +1,9 @@
 import { sendOrderConfirmationEmail } from "@/lib/email"
 
 interface OrderCompletionProps {
-  orderId: string
+  orderId?: string // Optional if order already exists (legacy)
+  intentData?: any // New: Full order metadata for creation-on-success
+  razorpayOrderId: string
   razorpayPaymentId: string
   razorpaySignature: string
   supabaseAdmin: any // Service role client
@@ -10,56 +12,104 @@ interface OrderCompletionProps {
 
 /**
  * Handles the idempotent completion of an order after payment verification.
- * Aligned with Section 2 production-grade requirements.
+ * Supports the 'Pristine Orders' flow (Creation-on-Success).
  */
 export async function completeOrder({
   orderId,
+  intentData,
+  razorpayOrderId,
   razorpayPaymentId,
   razorpaySignature,
   supabaseAdmin,
   eventId,
 }: OrderCompletionProps) {
-  // ── 1. Fetch current order state ───────────────────────────────────────────
-  const { data: order, error: orderError } = await supabaseAdmin
+  
+  let finalOrderId = orderId;
+  let orderToProcess = null;
+
+  // ── 1. Idempotency Check & Order Retrieval/Creation ──────────────────────────
+  const { data: existingOrder } = await supabaseAdmin
     .from("orders")
-    .select(`
-      *,
-      order_items(*)
-    `)
-    .eq("id", orderId)
-    .single()
+    .select("*, order_items(*)")
+    .eq("razorpay_order_id", razorpayOrderId)
+    .maybeSingle();
 
-  if (orderError || !order) {
-    throw new Error(`Order ${orderId} not found`)
+  if (existingOrder) {
+    if (existingOrder.status !== "pending") {
+      return { success: true, alreadyProcessed: true, order: existingOrder };
+    }
+    finalOrderId = existingOrder.id;
+    orderToProcess = existingOrder;
+  } else if (intentData) {
+    // ── 2. Atomic Order Creation (First appearance in DB) ───────────────────
+    const { data: newOrder, error: createError } = await supabaseAdmin
+      .from("orders")
+      .insert({
+        user_id: intentData.user_id,
+        status: "confirmed", // Created directly as confirmed
+        subtotal_amount: intentData.order_data.subtotal,
+        shipping_amount: intentData.order_data.shipping,
+        discount_amount: intentData.order_data.discount,
+        total_amount: intentData.order_data.total,
+        coupon_code: intentData.order_data.coupon_code,
+        shipping_address: intentData.order_data.shipping_address,
+        razorpay_order_id: razorpayOrderId,
+        razorpay_payment_id: razorpayPaymentId,
+        razorpay_signature: razorpaySignature,
+        razorpay_event_id: eventId,
+        payment_method: "online",
+        payment_captured_at: new Date().toISOString(),
+        // Add flat shipping columns for reliability
+        shipping_name: intentData.order_data.shipping_address.full_name,
+        shipping_email: intentData.order_data.shipping_address.email, // fallback if present
+        shipping_phone: intentData.order_data.shipping_address.phone,
+        shipping_address_1: intentData.order_data.shipping_address.address_line1,
+        shipping_address_2: intentData.order_data.shipping_address.address_line2,
+        shipping_city: intentData.order_data.shipping_address.city,
+        shipping_state: intentData.order_data.shipping_address.state,
+        shipping_pincode: intentData.order_data.shipping_address.pincode,
+      })
+      .select()
+      .single();
+
+    if (createError) throw new Error(`Failed to create order: ${createError.message}`);
+    
+    finalOrderId = newOrder.id;
+    orderToProcess = newOrder;
+
+    // Insert order items
+    const { error: itemsError } = await supabaseAdmin.from("order_items").insert(
+      intentData.order_data.items.map((item: any) => ({
+        order_id: finalOrderId,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        size: item.size,
+        price: item.price || item.unit_price, // Support both mappings
+      }))
+    );
+
+    if (itemsError) {
+      console.error("[completeOrder] Items insertion failure:", itemsError);
+      throw new Error(`Failed to record order items: ${itemsError.message}`);
+    }
+    
+    // Mark intent as completed
+    await supabaseAdmin
+      .from("payment_intents")
+      .update({ status: "completed" })
+      .eq("razorpay_order_id", razorpayOrderId);
+
+  } else {
+    throw new Error(`Order or Intent not found for ${razorpayOrderId}`);
   }
 
-  // Idempotency: If already confirmed, skip logic but return success
-  if (order.status !== "pending") {
-    return { success: true, alreadyProcessed: true }
-  }
-
-  // ── 2. Update Order Status ────────────────────────────────────────────────
-  const { error: updateError } = await supabaseAdmin
-    .from("orders")
-    .update({
-      status: "confirmed",
-      razorpay_payment_id: razorpayPaymentId,
-      razorpay_signature: razorpaySignature,
-      razorpay_event_id: eventId,
-      payment_captured_at: new Date().toISOString(),
-    })
-    .eq("id", orderId)
-    .eq("status", "pending") // Atomic check
-
-  if (updateError) {
-    throw new Error(`Failed to update order ${orderId}: ${updateError.message}`)
-  }
-
-  // ── 3. Atomic Inventory Decrement & Fetch Details for Email ────────────────
+  // ── 3. Post-Creation Fulfillment (Stock, Cart, Coupon) ──────────────────────
+  
+  // A. Inventory Decrement
   const { data: items } = await supabaseAdmin
     .from("order_items")
-    .select("product_id, quantity, size, unit_price, product:products(name, front_image)")
-    .eq("order_id", orderId)
+    .select("product_id, quantity, size, price, product:products(name)")
+    .eq("order_id", finalOrderId);
 
   if (items) {
     for (const item of items) {
@@ -68,64 +118,65 @@ export async function completeOrder({
           p_product_id: item.product_id,
           p_size: item.size,
           p_quantity: item.quantity,
-        })
+        });
       } catch (err) {
-        console.error(`[inventory] Failed to decrement for ${item.product_id}:`, err)
-        // Log for manual resolution but don't fail the order completion
+        console.error(`[inventory] Decrement failed for ${item.product_id}:`, err);
       }
     }
   }
 
-  // ── 4. Clear User's Cart ──────────────────────────────────────────────────
-  if (order.user_id) {
-    await supabaseAdmin
-      .from("cart_items")
-      .delete()
-      .eq("user_id", order.user_id)
+  // B. Clear User Cart
+  if (orderToProcess.user_id) {
+    await supabaseAdmin.from("cart_items").delete().eq("user_id", orderToProcess.user_id);
   }
 
-  // ── 5. Coupon Usage Increment ─────────────────────────────────────────────
-  if (order.coupon_code) {
-    await supabaseAdmin.rpc("increment_coupon_usage", { p_coupon_code: order.coupon_code })
+  // C. Coupon Usage
+  if (orderToProcess.coupon_code) {
+    await supabaseAdmin.rpc("increment_coupon_usage", { p_coupon_code: orderToProcess.coupon_code });
   }
 
-  // ── 6. Async Side Effects (Email) ──────────────────────────────────────────
+  // ── 4. Email Confirmation ──────────────────────────────────────────────────
   try {
-    const emailResult = await sendOrderConfirmationEmail({
-      to: order.shipping_email || "customer@haxeus.in",
-      orderId: order.id, // Strictly use UUID for idempotency
-      displayOrderId: order.order_number,
-      orderItems: (items || []).map((item: any) => ({
-        name: item.product?.name || "HAXEUS Piece",
-        size: item.size,
-        quantity: item.quantity,
-        price: item.unit_price || 0,
-      })),
-      subtotal: order.subtotal || 0,
-      shipping: order.shipping_amount ?? 0,
-      discount: order.discount_amount || 0,
-      total: order.total_amount || 0,
-      shippingAddress: {
-        name: order.shipping_name || "Customer",
-        addressLine1: order.shipping_address?.address_1 || "",
-        city: order.shipping_address?.city || "",
-        pincode: order.shipping_address?.pincode || "",
-      },
-    })
+    // Attempt to get email: 1. shipping info, 2. auth user
+    let customerEmail = orderToProcess.shipping_email;
+    if (!customerEmail && orderToProcess.user_id) {
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(orderToProcess.user_id);
+        customerEmail = authUser?.user?.email;
+    }
 
-    if (emailResult.success) {
-      await supabaseAdmin
-        .from("orders")
-        .update({
+    if (customerEmail) {
+      const emailResult = await sendOrderConfirmationEmail({
+        to: customerEmail,
+        orderId: finalOrderId!,
+        displayOrderId: orderToProcess.order_number,
+        orderItems: (items || []).map((i: any) => ({
+          name: i.product?.name || "HAXEUS Piece",
+          size: i.size,
+          quantity: i.quantity,
+          price: i.price,
+        })),
+        subtotal: orderToProcess.subtotal_amount || 0,
+        shipping: orderToProcess.shipping_amount ?? 0,
+        discount: orderToProcess.discount_amount || 0,
+        total: orderToProcess.total_amount || 0,
+        shippingAddress: {
+          name: orderToProcess.shipping_name || "Customer",
+          addressLine1: orderToProcess.shipping_address_1 || "",
+          city: orderToProcess.shipping_city || "",
+          pincode: orderToProcess.shipping_pincode || "",
+        },
+      });
+
+      if (emailResult.success) {
+        await supabaseAdmin.from("orders").update({
           confirmation_email_sent: true,
           confirmation_email_sent_at: new Date().toISOString(),
-          confirmation_email_resend_id: emailResult.id,
-        })
-        .eq("id", orderId)
+        }).eq("id", finalOrderId);
+      }
     }
   } catch (emailErr) {
-    console.error(`[email] Failed to send for order ${order.id}:`, emailErr)
+    console.error("[completeOrder] Email failed:", emailErr);
   }
 
-  return { success: true, order: { ...order, order_items: items } }
+  return { success: true, order: { ...orderToProcess, order_items: items } };
 }

@@ -22,7 +22,7 @@ export function FreeShippingBar({ subtotal, className }: FreeShippingBarProps) {
 
   const isDark = !mounted ? true : theme === "dark"
 
-  const threshold = settings?.free_shipping_above ?? 999
+  const threshold = settings.free_shipping_above
   const remaining = Math.max(0, threshold - subtotal)
   const progress = Math.min(100, (subtotal / threshold) * 100)
   const achieved = subtotal >= threshold

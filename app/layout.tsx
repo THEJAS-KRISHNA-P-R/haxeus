@@ -120,8 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               (function() {
                 try {
                   var t = localStorage.getItem('haxeus-theme');
-                  var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  var theme = t || (dark ? 'dark' : 'light');
+                  var theme = t || 'light';
                   document.documentElement.setAttribute('data-theme', theme);
                   document.documentElement.classList.add(theme);
                 } catch(e) {}

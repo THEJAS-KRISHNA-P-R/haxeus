@@ -50,6 +50,21 @@ export default function CheckoutPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState("")
 
+  // 0. Cart Watcher (Bullet-Proof Sync)
+  // If items change during checkout, we must reset the state to ensure the final order 
+  // reflects the LATEST cart items.
+  useEffect(() => {
+    if (checkoutLoading && loadingMessage.includes("Razorpay")) {
+      toast({ 
+        title: "Cart Updated", 
+        description: "Your cart was modified. Please re-submit your details to ensure your order total is accurate.",
+        variant: "destructive" 
+      })
+      setCheckoutLoading(false)
+      setLoadingMessage("")
+    }
+  }, [items])
+
   // 1. Initialize Form
   const {
     register,
@@ -159,7 +174,7 @@ export default function CheckoutPage() {
 
   // 3. Totals
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-  const shipping = subtotal >= (settings?.free_shipping_above ?? 999) ? 0 : (settings?.shipping_rate ?? 99)
+  const shipping = subtotal >= settings.free_shipping_above ? 0 : settings.shipping_rate
   const discount = couponData?.discount_amount ?? 0
   const total = subtotal + shipping - discount
 
@@ -225,13 +240,7 @@ export default function CheckoutPage() {
         },
         theme: { color: "#e93a3a" },
         modal: {
-          ondismiss: async () => {
-            // Instant cleanup
-            await fetch("/api/payment/abandon", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ order_db_id: orderResult.order_db_id }),
-            })
+          ondismiss: () => {
             setCheckoutLoading(false)
             setLoadingMessage("")
           },
@@ -246,26 +255,25 @@ export default function CheckoutPage() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                ...response,
-                order_db_id: orderResult.order_db_id,
+                ...response
               }),
             })
 
-            if (verifyRes.ok) {
-              // ENSURE CLEAR CART HAPPENS ON SUCCESS
+            const verifyData = await verifyRes.json()
+
+            if (verifyRes.ok && verifyData.success) {
+              const newOrderId = verifyData.order_id
               await clearCart()
-              localStorage.removeItem('haxeus-cart') // Extra safety matches Context
-              router.push(`/orders/${orderResult.order_db_id}?payment=success`)
+              localStorage.removeItem('haxeus-cart')
+              router.push(`/orders/${newOrderId}?payment=success`)
             } else {
-              const errData = await verifyRes.json()
-              if (errData.error === 'INVALID_SIGNATURE') {
-                 router.push(`/orders/${orderResult.order_db_id}?payment=verification_failed`)
-              } else {
-                 router.push(`/orders/${orderResult.order_db_id}?payment=error`)
-              }
+              // Redirect to generic error or home if order wasn't created
+              toast({ title: "Verification Failed", description: "Payment was captured but order verification failed. Please contact support.", variant: "destructive" })
+              router.push("/products")
             }
           } catch (err) {
-            router.push(`/orders/${orderResult.order_db_id}?payment=error`)
+            toast({ title: "Fatal Error", description: "Connection lost during verification.", variant: "destructive" })
+            setCheckoutLoading(false)
           }
         },
       })
