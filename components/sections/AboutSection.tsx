@@ -213,24 +213,29 @@ function ScrollZoomAboutSection({ config, isDark = true }: AboutSectionProps) {
     const onScroll = () => {
       // 1. SAFETY: Skip if already locked or triggering
       if (isLocked.current || phase.current !== 'idle' || isTriggering.current) return
-      
+
       const currentY = window.scrollY
       if (currentY === lastScrollY.current) return // Skip tiny jitter
       const isDown = currentY > lastScrollY.current
       lastScrollY.current = currentY
 
       const rect = el.getBoundingClientRect()
-      const centerY = rect.top + rect.height / 4 // Wider 'trigger' zone for fast flicks
+      const centerY = rect.top + rect.height / 4 // Anchor on top-ish for mobile
       const triggerY = window.innerHeight / 2
 
+      // Mobile Latency Compensation: Catch 100px earlier to beat momentum overshoot
+      const isMobile = window.innerWidth < 1024
+      const triggerOffset = isMobile ? 100 : -50
+
       // 2. ARM: Ready it whenever we are on the 'Hero-side' (above center)
-      if (centerY > triggerY + 50) {
+      // Highly aggressive re-arm for mobile (0px) to allow infinite re-triggering
+      const armThreshold = isMobile ? 0 : 50
+      if (centerY > triggerY + armThreshold) {
         isArmed.current = true
       }
 
       // 3. FIRE: Catch the crossing if armed, moving DOWN, and threshold reached
-      // We check centerY <= triggerY to catch the 'jump' between frames
-      if (isArmed.current && isDown && centerY <= triggerY) {
+      if (isArmed.current && isDown && centerY <= triggerY + triggerOffset) {
         isArmed.current = false
         triggerAnimation()
       }
@@ -251,32 +256,65 @@ function ScrollZoomAboutSection({ config, isDark = true }: AboutSectionProps) {
 
     // Prevent immediate re-trigger after snapping back
     if (Date.now() - lastSnapTime.current < 400) return
+
+    const isMobile = window.innerWidth < 1024
+    const startY = window.scrollY
+
+    // 1. SYNC LOCKDOWN (Mobile Only): Kill scroll momentum Line 1
+    if (isMobile) {
+      document.documentElement.style.scrollBehavior = 'auto'
+      document.body.style.scrollBehavior = 'auto'
+      document.documentElement.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${startY}px`
+      document.body.style.width = '100%'
+    }
+
     isTriggering.current = true
     isArmed.current = false
 
     // Capture rect BEFORE movement
     const rect = imageContainerRef.current.getBoundingClientRect()
     originalRect.current = rect
-    
-    // Lock body & PREVENT JUMP by neutralizing smooth-scroll on both HTML and BODY
-    savedScrollY.current = window.scrollY
-    
-    document.documentElement.style.scrollBehavior = 'auto'
-    document.body.style.scrollBehavior = 'auto'
-    
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${savedScrollY.current}px`
-    document.body.style.width = '100%'
-    
+
+    let targetY = startY
+    if (isMobile) {
+      // Deterministic Snap: Calculate where the scroll SHOULD be for a perfect center
+      const vpCenterY = window.innerHeight / 2
+      const elCenterY = rect.top + rect.height / 4
+      targetY = startY + (elCenterY - vpCenterY)
+
+      // Zero-Latency Momentum Sniper: Force-hold position for 4 frames
+      let frames = 0
+      const sniper = () => {
+        window.scrollTo(0, targetY)
+        if (frames++ < 4) requestAnimationFrame(sniper)
+      }
+      sniper()
+    }
+
+    savedScrollY.current = targetY
+
+    if (!isMobile) {
+      // PC LOCKDOWN (Delayed as it was before)
+      document.documentElement.style.scrollBehavior = 'auto'
+      document.body.style.scrollBehavior = 'auto'
+      document.documentElement.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${targetY}px`
+      document.body.style.width = '100%'
+    }
+
     isLocked.current = true
     isTriggering.current = false
     wheelValue.set(0)
-    
+    visualValue.set(0)
+
     // Unify: Desktop/Mobile both start "in place" and move via scroll
     phase.current = 'zooming'
-    
+
     // Show clone at exact spot
     setCloneStyle({
       position: 'fixed' as const,
@@ -289,7 +327,7 @@ function ScrollZoomAboutSection({ config, isDark = true }: AboutSectionProps) {
     })
     setHideOriginal(true)
     setCloneVisible(true)
-    
+
     // Wait for Portal match - lowered wait for better 'pop' feel
     await new Promise(r => requestAnimationFrame(r))
     if (!scope.current) return
@@ -312,24 +350,24 @@ function ScrollZoomAboutSection({ config, isDark = true }: AboutSectionProps) {
 
     // Single Continuous Keyframe Engine (Mappings: 0% -> 25% -> 50% -> 75% -> 100%)
     const t = Math.max(0, Math.min(1, current / budget))
-    
+
     // Smooth linear interpolation (Lerp factor handles the cushions)
     const getPoint = (t: number, stops: number[], values: number[]) => {
       if (t <= stops[0]) return values[0]
       if (t >= stops[stops.length - 1]) return values[values.length - 1]
       for (let i = 0; i < stops.length - 1; i++) {
-        if (t <= stops[i+1]) {
-          const p = (t - stops[i]) / (stops[i+1] - stops[i])
-          return values[i] + (values[i+1] - values[i]) * p
+        if (t <= stops[i + 1]) {
+          const p = (t - stops[i]) / (stops[i + 1] - stops[i])
+          return values[i] + (values[i + 1] - values[i]) * p
         }
       }
       return values[values.length - 1]
     }
 
-    const stops = [0, 0.4, 1.0]
+    const stops = [0, 0.52, 1.0]
     const peakT = (vh - peakH) / 2
     const peakL = (vw - peakW) / 2
-    
+
     targetW = getPoint(t, stops, [rect.width, peakW, rect.width])
     targetH = getPoint(t, stops, [rect.height, peakH, rect.height])
     targetTop = getPoint(t, stops, [rect.top, peakT, rect.top])
@@ -388,7 +426,7 @@ function ScrollZoomAboutSection({ config, isDark = true }: AboutSectionProps) {
         width: rect.width,
         height: rect.height,
         borderRadius: 20
-      }, { duration: 0.5, ease: [0.16, 1, 0.3, 1] })
+      }, { duration: 0.4, ease: [0.16, 1, 0.3, 1] })
     }
 
     // Restore

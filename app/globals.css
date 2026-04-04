@@ -86,8 +86,8 @@
 
 [data-theme="light"] {
   --bg: #fff0f3;
-  --bg-card: rgba(255, 238, 238, 0.882);
-  --bg-card-2: rgba(255, 255, 255, 0.642);
+  --bg-card: color-mix(in srgb, var(--bg) 40%, white);
+  --bg-card-2: color-mix(in srgb, var(--bg) 40%, white);
   --bg-elevated: #ffffff;
   --border: rgba(33, 16, 19, 0.12);
   --border-hover: rgba(33, 16, 19, 0.2);
@@ -473,3 +473,61 @@ section {
   margin: 4rem 0;
   color: var(--text);
 }
+
+/* ── Content-Aware Adaptive Navbar — Optimized Sensing Edition ── */
+.nav-adaptive,
+.nav-adaptive-icon,
+.nav-pill-border {
+  transition: color 0.3s ease, stroke 0.3s ease, fill 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Light elements (for DARK backgrounds) */
+[data-scheme="light"] .nav-adaptive,
+[data-scheme="light"] .nav-adaptive-icon {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+[data-scheme="light"] .nav-adaptive-icon {
+  stroke: rgba(255, 255, 255, 0.95) !important;
+}
+[data-scheme="light"] .nav-adaptive-icon-muted {
+  color: rgba(255, 255, 255, 0.50) !important;
+  stroke: rgba(255, 255, 255, 0.50) !important;
+}
+[data-scheme="light"] .nav-adaptive-logo {
+  filter: invert(1) brightness(10) !important;
+}
+[data-scheme="light"].nav-pill-border,
+[data-scheme="light"] .nav-pill-border {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Dark elements (for LIGHT backgrounds) */
+[data-scheme="dark"] .nav-adaptive,
+[data-scheme="dark"] .nav-adaptive-icon {
+  color: rgba(0, 0, 0, 0.90) !important;
+}
+[data-scheme="dark"] .nav-adaptive-icon {
+  stroke: rgba(0, 0, 0, 0.90) !important;
+}
+[data-scheme="dark"] .nav-adaptive-icon-muted {
+  color: rgba(0, 0, 0, 0.45) !important;
+  stroke: rgba(0, 0, 0, 0.45) !important;
+}
+[data-scheme="dark"] .nav-adaptive-logo {
+  filter: invert(0) brightness(0) !important;
+}
+[data-scheme="dark"].nav-pill-border,
+[data-scheme="dark"] .nav-pill-border {
+  border-color: rgba(0, 0, 0, 0.10) !important;
+}
+
+/* Persistent brand elements — NEVER adaptive */
+.cart-badge {
+  background-color: #ef3939 !important;
+  mix-blend-mode: normal !important;
+}
+.nav-active-red {
+  color: #e93a3a !important;
+}
+
+

@@ -176,7 +176,7 @@ export default function AboutPageClient() {
 
       {/* ── 2. ORIGIN STORY ──────────────────────────────────────────── */}
       <section className="py-32 px-6 lg:px-8 border-t border-theme relative overflow-hidden">
-        <FloatingPill label="Since 2024" delay={0.3} style={{ top: "10%", right: "4%" }} color="rgba(225,29,72,0.08)" textColor="rgba(225,29,72,0.8)" />
+        <FloatingPill label="Since 2025" delay={0.3} style={{ top: "10%", right: "4%" }} color="rgba(225,29,72,0.08)" textColor="rgba(225,29,72,0.8)" />
         <FloatingPill label="Made in India" delay={0.55} style={{ bottom: "10%", left: "4%" }} color="rgba(225,29,72,0.08)" textColor="rgba(225,29,72,0.8)" />
 
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">

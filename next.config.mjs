@@ -38,7 +38,7 @@ const nextConfig = {
   //   ]
   // },
   output: "standalone",
-  allowedDevOrigins: ["192.168.1.5"],
+  allowedDevOrigins: ["192.168.1.4"],
   productionBrowserSourceMaps: false,
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   images: {

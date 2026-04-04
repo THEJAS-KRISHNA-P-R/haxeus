@@ -14,6 +14,8 @@ import GlassSurface from "@/components/GlassSurface"
 import { User as SupabaseUser } from "@supabase/supabase-js"
 import type { StaggeredMenuItem } from "@/components/StaggeredMenu"
 import { cn } from "@/lib/utils"
+import { useNavbarScheme } from "@/hooks/useNavbarScheme"
+import { useRef } from "react"
 
 // Isolated component that uses useSearchParams — wrapped in Suspense inside Navbar
 function NavbarSearchSync({ onSync }: { onSync: (q: string) => void }) {
@@ -51,10 +53,15 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
 
+  const desktopRef = useRef<HTMLDivElement>(null)
+  const mobileRef = useRef<HTMLDivElement>(null)
+  const desktopScheme = useNavbarScheme(desktopRef)
+  const mobileScheme = useNavbarScheme(mobileRef)
+
   const desktopNavbarGlassProps = {
     brightness: isDark ? 100 : 0,
     opacity: 0.2, // Subtle glass look that doesn't muddy the blend
-    blur: 24, 
+    blur: 24,
     backgroundOpacity: 0, // CRITICAL: background color blocks mix-blend-mode
     saturation: 1.2,
     distortionScale: -12,
@@ -62,7 +69,7 @@ export function Navbar() {
     greenOffset: 0,
     blueOffset: 0,
   }
-  
+
   const mobileNavbarGlassProps = {
     brightness: isDark ? 100 : 0,
     opacity: 0.25,
@@ -73,7 +80,7 @@ export function Navbar() {
     greenOffset: 0,
     blueOffset: 0,
   }
-  
+
   const glassFallbackStyle = { '--glass-bg': isDark ? 'rgba(230, 230, 230, 0.12)' : 'rgba(0, 0, 0, 0.05)' } as React.CSSProperties;
 
   useEffect(() => {
@@ -172,6 +179,8 @@ export function Navbar() {
       {/* ── DESKTOP FLOATING PILL ─────────────────────────────────── */}
       <div className="fixed left-1/2 top-4 z-[60] hidden w-[780px] max-w-[calc(100vw-2rem)] -translate-x-1/2 md:block">
         <motion.div
+          ref={desktopRef}
+          data-scheme={desktopScheme}
           className="w-full"
           animate={navbarMotion}
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: "easeInOut" }}
@@ -184,9 +193,9 @@ export function Navbar() {
             borderWidth={0.06}
             {...desktopNavbarGlassProps}
             style={glassFallbackStyle}
-            className="w-full glass-surface-fixed transition-all duration-300"
+            className="w-full glass-surface-fixed transition-all duration-300 nav-pill-border"
           >
-            <div className="flex items-center justify-between w-full px-5 gap-3 mix-blend-difference">
+            <div className="flex items-center justify-between w-full px-5 gap-3">
               <Link
                 href="/"
                 className="flex items-center gap-2 hover:scale-105 transition-transform shrink-0"
@@ -197,9 +206,9 @@ export function Navbar() {
                   width={24}
                   height={24}
                   priority
-                  className="w-6 h-6 contrast-200 transition-all invert brightness-0"
+                  className="w-6 h-6 transition-all nav-adaptive-logo"
                 />
-                <span className="text-sm font-bold tracking-widest text-white">HAXEUS</span>
+                <span className="text-sm font-bold tracking-widest text-[#ef3939]">HAXEUS</span>
               </Link>
 
               <nav className="flex items-center gap-0.5">
@@ -210,8 +219,8 @@ export function Navbar() {
                     className={cn(
                       "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 translate-z-0",
                       isActive(item.href)
-                        ? "text-[#e93a3a]"
-                        : "text-white hover:bg-white/[0.1] mix-blend-difference"
+                        ? "nav-active-red"
+                        : "nav-adaptive hover:bg-white/[0.1]"
                     )}
                   >
                     {item.label}
@@ -233,8 +242,8 @@ export function Navbar() {
                       layout="position"
                       className="overflow-hidden flex items-center"
                     >
-                      <div className="relative w-full mix-blend-difference">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+                      <div className="relative w-full">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 nav-adaptive-icon-muted" />
                         <Input
                           type="text"
                           placeholder="Search…"
@@ -246,7 +255,7 @@ export function Navbar() {
                         />
                         <button
                           onClick={() => { setSearchQuery(""); setIsSearchOpen(false) }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 transition-colors text-white/30 hover:text-white/70"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 transition-colors nav-adaptive-icon-muted hover:text-white/70"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -260,44 +269,44 @@ export function Navbar() {
                       transition={prefersReducedMotion ? { duration: 0 } : undefined}
                       layout="position"
                       onClick={() => setIsSearchOpen(true)}
-                      className="p-2 rounded-full transition-all touch-target text-white hover:bg-white/[0.1] mix-blend-difference"
+                      className="p-2 rounded-full transition-all touch-target hover:bg-white/[0.1]"
                       aria-label="Search"
                     >
-                      <Search className="h-4 w-4" />
+                      <Search className="h-4 w-4 nav-adaptive-icon" />
                     </motion.button>
                   )}
                 </AnimatePresence>
 
                 <Link
                   href="/cart"
-                  className="relative p-2 rounded-full transition-all touch-target flex items-center justify-center text-white hover:bg-white/[0.1]"
+                  className="relative p-2 rounded-full transition-all touch-target flex items-center justify-center hover:bg-white/[0.1]"
                   aria-label="Cart"
                 >
-                  <ShoppingCart className="h-4 w-4" />
+                  <ShoppingCart className="h-4 w-4 nav-adaptive-icon" />
                   {mounted && (isCartLoading ? (
                     <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-white/10 animate-pulse" aria-hidden="true" />
                   ) : totalItems > 0 ? (
-                    <span className="absolute -top-0.5 -right-0.5 bg-[#e93a3a] text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-bold font-sans mix-blend-normal">
-                      {totalItems > 9 ? "9+" : totalItems}
+                    <span className="absolute -top-0.5 -right-0.5 cart-badge text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-bold font-sans">
+                      <span className="nav-adaptive">{totalItems > 9 ? "9+" : totalItems}</span>
                     </span>
                   ) : null)}
                 </Link>
 
                 <Link
                   href="/profile?tab=wishlist"
-                  className="p-2 rounded-full transition-all touch-target flex items-center justify-center text-white hover:bg-white/[0.1]"
+                  className="p-2 rounded-full transition-all touch-target flex items-center justify-center hover:bg-white/[0.1]"
                   aria-label="Wishlist"
                 >
-                  <Heart className="h-4 w-4" />
+                  <Heart className="h-4 w-4 nav-adaptive-icon" />
                 </Link>
 
                 {user ? (
                   <button
                     onClick={() => router.push("/profile")}
-                    className="p-2 rounded-full transition-all text-white hover:bg-white/[0.1]"
+                    className="p-2 rounded-full transition-all hover:bg-white/[0.1]"
                     aria-label="Profile"
                   >
-                    <User className="h-4 w-4" />
+                    <User className="h-4 w-4 nav-adaptive-icon" />
                   </button>
                 ) : (
                   <button
@@ -348,6 +357,8 @@ export function Navbar() {
 
       {/* ── MOBILE TOP BAR ───────────────────────────────────────── */}
       <motion.div
+        ref={mobileRef}
+        data-scheme={mobileScheme}
         className="md:hidden fixed top-0 left-0 right-0 z-[60] px-3 pt-safe px-safe"
         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
         animate={navbarMotion}
@@ -371,10 +382,10 @@ export function Navbar() {
                 borderWidth={0.05}
                 {...mobileNavbarGlassProps}
                 style={glassFallbackStyle}
-                className="w-full glass-surface-fixed"
+                className="w-full glass-surface-fixed nav-pill-border"
               >
-                <div className="flex items-center gap-2 w-full px-4 mix-blend-difference">
-                  <Search className="shrink-0 text-white" />
+                <div className="flex items-center gap-2 w-full px-4 text-white">
+                  <Search className="shrink-0 nav-adaptive-icon" />
                   <Input
                     type="text"
                     placeholder="Search products…"
@@ -386,7 +397,7 @@ export function Navbar() {
                   />
                   <button
                     onClick={() => { setSearchQuery(""); setIsSearchOpen(false) }}
-                    className="transition-colors text-white hover:text-white/70"
+                    className="transition-colors nav-adaptive-icon hover:text-white/70"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -409,19 +420,19 @@ export function Navbar() {
                 borderWidth={0.05}
                 {...mobileNavbarGlassProps}
                 style={glassFallbackStyle}
-                className="w-full glass-surface-fixed"
+                className="w-full glass-surface-fixed nav-pill-border"
               >
-                <div className="flex items-center w-full px-4 gap-2 mix-blend-difference text-white">
-                  <Link href="/" className="flex items-center gap-2 text-white shrink-0">
+                <div className="flex items-center w-full px-4 gap-2">
+                  <Link href="/" className="flex items-center gap-2 shrink-0">
                     <Image
                       src="/android-chrome-192x192.png"
                       alt="Logo"
                       width={20}
                       height={20}
                       priority
-                      className="w-6 h-6 contrast-200 invert brightness-0"
+                      className="w-6 h-6 transition-all nav-adaptive-logo"
                     />
-                    <span className="text-sm font-bold tracking-widest">HAXEUS</span>
+                    <span className="text-sm font-bold tracking-widest text-[#ef3939]">HAXEUS</span>
                   </Link>
 
                   <div className="flex-1" />
@@ -433,7 +444,7 @@ export function Navbar() {
                     className="p-2 rounded-full transition-colors touch-target flex items-center justify-center"
                     aria-label="Search"
                   >
-                    <Search className="h-5 w-5" />
+                    <Search className="h-5 w-5 nav-adaptive-icon" />
                   </button>
 
                   <Link
@@ -441,12 +452,12 @@ export function Navbar() {
                     className="p-2 rounded-full transition-colors touch-target flex items-center justify-center relative"
                     aria-label="Cart"
                   >
-                    <ShoppingCart className="h-5 w-5" />
+                    <ShoppingCart className="h-5 w-5 nav-adaptive-icon" />
                     {mounted && (isCartLoading ? (
                       <span className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-white/10 animate-pulse" aria-hidden="true" />
                     ) : totalItems > 0 ? (
-                      <span className="absolute top-1 right-1 bg-[#e93a3a] text-white text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center font-bold font-sans mix-blend-normal">
-                        {totalItems > 9 ? "9+" : totalItems}
+                      <span className="absolute top-1 right-1 cart-badge text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center font-bold font-sans">
+                        <span className="nav-adaptive">{totalItems > 9 ? "9+" : totalItems}</span>
                       </span>
                     ) : null)}
                   </Link>
@@ -461,7 +472,7 @@ export function Navbar() {
                     className="p-2 rounded-full transition-colors touch-target flex items-center justify-center"
                     aria-label="Menu"
                   >
-                    <Menu className="h-5 w-5" />
+                    <Menu className="h-5 w-5 nav-adaptive-icon" />
                   </button>
                 </div>
               </GlassSurface>
