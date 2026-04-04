@@ -148,8 +148,8 @@ function ProfileContent() {
     }
   }
 
-  function getStatusColor(status: string) {
-    switch (status) {
+  function getStatusColor(status: string = "pending") {
+    switch (status.toLowerCase()) {
       case "pending": return "bg-[#e7bf04]/10 text-[#e7bf04] border border-[#e7bf04]/20"
       case "processing": return "bg-[#07e4e1]/10 text-[#07e4e1] border border-[#07e4e1]/20"
       case "shipped": return "bg-[#c03c9d]/10 text-[#c03c9d] border border-[#c03c9d]/20"

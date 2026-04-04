@@ -43,10 +43,10 @@ export async function GET(req: NextRequest) {
     const topProducts = Object.values(tally).sort((a, b) => b.sales - a.sales).slice(0, 5)
 
     return NextResponse.json({
-      totalRevenue: orders.filter((o: any) => o.payment_status === "paid").reduce((s: number, o: any) => s + Number(o.total_amount), 0),
+      totalRevenue: orders.filter((o: any) => o.payment_status?.toLowerCase() === "paid").reduce((s: number, o: any) => s + Number(o.total_amount), 0),
       totalOrders: orders.length,
       totalCustomers: unique.size,
-      pendingOrders: orders.filter((o: any) => o.payment_status === "pending").length,
+      pendingOrders: orders.filter((o: any) => o.payment_status?.toLowerCase() === "pending").length,
       recentOrders: recentRes.data ?? [],
       topProducts,
     })

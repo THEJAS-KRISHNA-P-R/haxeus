@@ -18,7 +18,7 @@ async function getTrendingProducts(supabaseAdmin: any) {
       quantity
     `)
     .gt('orders.created_at', thirtyDaysAgo.toISOString())
-    .eq('orders.status', 'confirmed');
+    .or('status.eq.confirmed,status.eq.Confirmed', { foreignTable: 'orders' });
 
   if (error) {
     console.error("Error fetching trending products:", error);

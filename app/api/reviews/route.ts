@@ -37,14 +37,25 @@ export async function GET(req: NextRequest) {
   try {
     const cookieStore = await cookies()
     const supabase = createAuthedSupabase(cookieStore)
+    
+    // Attempt join for author names
     const { data, error } = await supabase
       .from("reviews")
-      .select("id, product_id, order_id, user_id, rating, title, body, verified_purchase, image_urls, created_at")
+      .select("id, product_id, order_id, user_id, rating, title, body, verified_purchase, image_urls, created_at, profiles(full_name)")
       .eq("product_id", productId)
       .order("created_at", { ascending: false })
 
     if (error) {
-      return NextResponse.json({ reviews: [] })
+      // Fallback: Fetch without join
+      const { data: fallbackData } = await supabase
+        .from("reviews")
+        .select("id, product_id, order_id, user_id, rating, title, body, verified_purchase, image_urls, created_at")
+        .eq("product_id", productId)
+        .order("created_at", { ascending: false })
+      
+      return NextResponse.json({
+        reviews: ((fallbackData as ProductReviewRecord[] | null) ?? []).map(mapReviewRecord),
+      })
     }
 
     return NextResponse.json({
@@ -100,16 +111,15 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdmin()
     const { data: deliveredOrder } = await supabaseAdmin
-      .from("order_items")
-      .select("order_id, orders!inner(id, user_id, status, delivered_at)")
-      .eq("product_id", productId)
-      .eq("orders.user_id", user.id)
-      .eq("orders.status", "delivered")
-      .not("orders.delivered_at", "is", null)
+      .from("orders")
+      .select("id, order_items!inner(product_id)")
+      .eq("user_id", user.id)
+      .ilike("status", "delivered")
+      .eq("order_items.product_id", productId)
       .limit(1)
       .maybeSingle()
 
-    if (!deliveredOrder?.order_id) {
+    if (!deliveredOrder?.id) {
       return NextResponse.json(
         { error: "You can review this item only after it has been delivered to you." },
         { status: 403 }
@@ -120,7 +130,7 @@ export async function POST(req: NextRequest) {
       .from("reviews")
       .insert({
         product_id: productId,
-        order_id: deliveredOrder.order_id,
+        order_id: deliveredOrder.id,
         user_id: user.id,
         rating,
         title: title || null,
@@ -128,7 +138,7 @@ export async function POST(req: NextRequest) {
         image_urls: imageUrls,
         verified_purchase: true,
       })
-      .select("id, product_id, order_id, user_id, rating, title, body, verified_purchase, image_urls, created_at")
+      .select("id, product_id, order_id, user_id, rating, title, body, verified_purchase, image_urls, created_at, profiles(full_name)")
       .single()
 
     if (error || !data) {
@@ -185,7 +195,7 @@ export async function PATCH(req: NextRequest) {
         image_urls: Array.isArray(imageUrls) ? imageUrls : [],
       })
       .eq("id", reviewId)
-      .select("id, product_id, order_id, user_id, rating, title, body, verified_purchase, image_urls, created_at")
+      .select("id, product_id, order_id, user_id, rating, title, body, verified_purchase, image_urls, created_at, profiles(full_name)")
       .single()
 
     if (error || !data) {

@@ -86,7 +86,8 @@ export default function OrderDetailPage() {
   async function updateOrderStatus(newStatus: string) {
     setUpdating(true)
     try {
-      const isDelivered = newStatus === "delivered"
+      const normalizedStatus = newStatus.toLowerCase()
+      const isDelivered = normalizedStatus === "delivered"
       const confirmDelivered = isDelivered
         ? window.confirm("Mark this order as delivered only after India Post / post-office confirmation. Continue?")
         : true
@@ -99,7 +100,7 @@ export default function OrderDetailPage() {
       const { error } = await supabase
         .from("orders")
         .update({
-          status: newStatus,
+          status: normalizedStatus,
           delivered_at: isDelivered ? timestamp : null,
           updated_at: timestamp,
         })
@@ -111,21 +112,21 @@ export default function OrderDetailPage() {
         prev
           ? {
             ...prev,
-            status: newStatus as any,
+            status: normalizedStatus as any,
             delivered_at: isDelivered ? timestamp : undefined,
             updated_at: timestamp,
           }
           : null
       )
 
-      if (order && (newStatus === "shipped" || newStatus === "delivered")) {
+      if (order && (normalizedStatus === "shipped" || normalizedStatus === "delivered")) {
         const { data: userData } = await supabase.auth.admin.getUserById(order.user_id)
         if (userData?.user?.email) {
           await sendShippingUpdateEmail({
             orderId: order.id,
             customerEmail: userData.user.email,
             customerName: order.shipping_name || "Customer",
-            status: newStatus as any,
+            status: normalizedStatus as any,
           })
         }
       }
@@ -194,9 +195,9 @@ export default function OrderDetailPage() {
         {/* Global Status Badge */}
         <AdminBadge
           variant={
-            status === "Paid" || status === "Confirmed" || status === "Delivered" ? "success" :
-              status === "Pending" || status === "Preorder" || status === "Refunded" ? "warning" :
-                status === "Processing" || status === "Shipped" ? "info" :
+            status === "paid" || status === "confirmed" || status === "delivered" ? "success" :
+              status === "pending" || status === "preorder" || status === "refunded" ? "warning" :
+                status === "processing" || status === "shipped" ? "info" :
                   "danger"
           }
           className="px-6 py-4 rounded-2xl border-2 shadow-lg"
@@ -293,7 +294,7 @@ export default function OrderDetailPage() {
                 className="p-1 rounded-2xl border"
               >
                 <Select
-                  value={order.status}
+                  value={order.status?.toLowerCase()}
                   onValueChange={updateOrderStatus}
                   disabled={updating}
                 >

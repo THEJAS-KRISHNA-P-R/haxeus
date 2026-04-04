@@ -57,12 +57,13 @@ export default function AnalyticsContent() {
         const avgOrderValue = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0
 
         const statusCounts = allOrders.reduce((acc: Record<string, number>, o) => {
-            acc[o.status] = (acc[o.status] || 0) + 1
+            const s = (o.status || "pending").toLowerCase()
+            acc[s] = (acc[s] || 0) + 1
             return acc
         }, {})
         const ordersByStatus = Object.entries(statusCounts).map(([status, count]) => ({ status, count }))
 
-        const pendingOrders = allOrders.filter(o => o.payment_status === "pending").length
+        const pendingOrders = allOrders.filter(o => o.payment_status?.toLowerCase() === "pending").length
 
         const dayMap: Record<string, { revenue: number; orders: number }> = {}
         for (let i = days - 1; i >= 0; i--) {
@@ -211,7 +212,7 @@ export default function AnalyticsContent() {
                             return (
                                 <div key={s.status} className="group">
                                     <div className="flex justify-between items-end mb-1.5">
-                                        <span style={{ color: "var(--text-2)" }} className="text-[10px] uppercase font-bold tracking-wider">{s.status}</span>
+                                        <span style={{ color: "var(--text-2)" }} className="text-[10px] uppercase font-bold tracking-wider">{s.status.toLowerCase()}</span>
                                         <span style={{ color: "var(--text)" }} className="text-[10px] font-bold">{s.count} <span className="opacity-40 font-medium">({pct}%)</span></span>
                                     </div>
                                     <div style={{ background: "var(--bg-elevated)", borderRadius: "10px", height: "4px", overflow: "hidden" }}>
@@ -267,7 +268,7 @@ export default function AnalyticsContent() {
                                         ) : (
                                             <span style={{ color: "var(--accent-yellow, #f59e0b)" }} className="text-[8px] font-black uppercase tracking-[0.15em]">UNPAID</span>
                                         )}
-                                        <span style={{ color: o.status === "delivered" ? "var(--color-success, #16a34a)" : "var(--text-3)" }} className="text-[8px] font-black uppercase tracking-[0.15em]">{o.status}</span>
+                                        <span style={{ color: o.status?.toLowerCase() === "delivered" ? "var(--color-success, #16a34a)" : "var(--text-3)" }} className="text-[8px] font-black uppercase tracking-[0.15em]">{o.status}</span>
                                     </div>
                                 </div>
                             </div>

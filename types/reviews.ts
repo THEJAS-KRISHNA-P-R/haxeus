@@ -9,6 +9,11 @@ export interface ProductReviewRecord {
   verified_purchase: boolean
   image_urls?: string[] | null
   created_at: string
+  profiles?: {
+    full_name: string | null
+  } | {
+    full_name: string | null
+  }[] | null
 }
 
 export interface ProductReviewViewModel extends ProductReviewRecord {

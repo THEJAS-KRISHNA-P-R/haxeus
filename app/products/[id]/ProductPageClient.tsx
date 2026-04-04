@@ -91,7 +91,7 @@ export function ProductPageClient({
           order_items!inner(product_id)
         `)
         .eq('user_id', userId)
-        .eq('status', 'delivered')
+        .or(`status.eq.delivered,status.eq.Delivered`)
         .eq('order_items.product_id', p.id)
         .limit(1)
 

@@ -44,7 +44,8 @@ export default function OrdersContent() {
 
     async function updateOrderStatus(orderId: string, newStatus: string) {
         try {
-            const isDelivered = newStatus === "delivered";
+            const normalizedStatus = newStatus.toLowerCase();
+            const isDelivered = normalizedStatus === "delivered";
             const confirmDelivered = isDelivered
                 ? window.confirm("Mark this order as delivered only after India Post / post-office confirmation. Continue?")
                 : true;
@@ -54,7 +55,7 @@ export default function OrdersContent() {
             const res = await fetch(`/api/admin/orders/${orderId}/status`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: newStatus }),
+                body: JSON.stringify({ status: normalizedStatus }),
             });
 
             if (!res.ok) throw new Error("Failed to update status");
@@ -63,12 +64,12 @@ export default function OrdersContent() {
 
             setOrders(prev => prev.map(o => o.id === orderId ? {
                 ...o,
-                status: newStatus,
+                status: normalizedStatus,
                 delivered_at: data.delivered_at || o.delivered_at,
                 updated_at: new Date().toISOString(),
             } : o));
 
-            toast.success(`Order marked as ${newStatus}`);
+            toast.success(`Order marked as ${normalizedStatus}`);
         } catch (err) {
             console.error("Error updating order status:", err);
             toast.error("Failed to update order status");
@@ -150,7 +151,7 @@ export default function OrdersContent() {
                 (o.order_number ?? "").toLowerCase().includes(search.toLowerCase()) ||
                 (o.shipping_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
                 (o.shipping_email ?? "").toLowerCase().includes(search.toLowerCase());
-            const matchFilter = filter === "all" || status === filter;
+            const matchFilter = filter === "all" || status.toLowerCase() === filter.toLowerCase();
             return matchSearch && matchFilter;
         });
     }, [orders, search, filter]);
@@ -191,7 +192,7 @@ export default function OrdersContent() {
                         }}
                         className="flex gap-1 p-1 rounded-full w-fit"
                     >
-                        {["All", "Pending", "Confirmed", "Preorder", "Processing", "Shipped", "Delivered", "Cancelled"].map((s) => (
+                        {["all", "pending", "confirmed", "preorder", "processing", "shipped", "delivered", "cancelled", "refunded"].map((s) => (
                             <button
                                 key={s}
                                 onClick={() => setFilter(s)}
@@ -317,17 +318,26 @@ export default function OrdersContent() {
                                                     </div>
                                                     <div className="text-right flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                                                         <select
-                                                            value={order.status ?? "pending"}
+                                                            value={order.status?.toLowerCase() ?? "pending"}
                                                             onChange={e => updateOrderStatus(order.id, e.target.value)}
                                                             className="text-[9px] font-black uppercase tracking-widest bg-transparent border border-[var(--border)] rounded-lg px-2.5 py-1.5 cursor-pointer text-[var(--text-3)] hover:text-[var(--text)] transition-all hover:border-[var(--text-3)] outline-none"
                                                             style={{ background: "rgba(var(--bg-rgb), 0.5)" }}
                                                         >
-                                                            {["Pending", "Confirmed", "Preorder", "Processing", "Shipped", "Delivered", "Cancelled", "Refunded"].map(st => (
-                                                                <option key={st} value={st} className="bg-[var(--bg)]">{st}</option>
+                                                            {[
+                                                                { v: "pending", l: "Pending" },
+                                                                { v: "confirmed", l: "Confirmed" },
+                                                                { v: "preorder", l: "Preorder" },
+                                                                { v: "processing", l: "Processing" },
+                                                                { v: "shipped", l: "Shipped" },
+                                                                { v: "delivered", l: "Delivered" },
+                                                                { v: "cancelled", l: "Cancelled" },
+                                                                { v: "refunded", l: "Refunded" }
+                                                            ].map(st => (
+                                                                <option key={st.v} value={st.v} className="bg-[var(--bg)]">{st.l}</option>
                                                             ))}
                                                         </select>
 
-                                                        {(order.status === 'Confirmed' || order.status === 'Delivered') && order.payment_method === 'online' && (
+                                                        {(order.status?.toLowerCase() === 'confirmed' || order.status?.toLowerCase() === 'delivered') && order.payment_method === 'online' && (
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); handleRefund(order.id); }}
                                                                 title="Process Refund"
@@ -336,7 +346,7 @@ export default function OrdersContent() {
                                                                 <RotateCcw size={14} />
                                                             </button>
                                                         )}
-                                                        {order.status !== 'cancelled' && (
+                                                        {order.status?.toLowerCase() !== 'cancelled' && (
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); handleResendEmail(order.id); }}
                                                                 title="Trigger Manual Receipt Dispatch"
@@ -364,7 +374,7 @@ export default function OrdersContent() {
                     style={{ borderTop: "1px solid var(--border)" }}
                     className="flex flex-wrap divide-x"
                 >
-                    {["All", "Pending", "Confirmed", "Preorder", "Processing", "Shipped", "Delivered", "Cancelled"].map((s) => {
+                    {["all", "pending", "confirmed", "preorder", "processing", "shipped", "delivered", "cancelled", "refunded"].map((s) => {
                         const count = s === "all"
                             ? orders.length
                             : orders.filter((o) => (o.status ?? "pending") === s).length;

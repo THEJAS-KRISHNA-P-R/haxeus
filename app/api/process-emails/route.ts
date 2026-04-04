@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const { data: pendingEmails, error: fetchError } = await supabase
       .from('email_queue')
       .select('*')
-      .eq('status', 'pending')
+      .or('status.eq.pending,status.eq.Pending')
       .order('created_at', { ascending: true })
       .limit(50)
 
