@@ -99,24 +99,61 @@ export async function completeOrder({
     throw new Error(`Order or Intent not found for ${razorpayOrderId}`);
   }
 
-  // ── 3. Post-Creation Fulfillment (Stock, Cart, Coupon) ──────────────────────
+  // ── 3. Profile & Email Resolution ──────────────────────────────────────────
+  let customerEmail = orderToProcess.shipping_email;
+  if (!customerEmail && orderToProcess.user_id) {
+    try {
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(orderToProcess.user_id);
+      customerEmail = authUser?.user?.email;
+    } catch (e) {
+      console.error("[completeOrder] Auth resolution failed:", e);
+    }
+  }
+
+  // ── 4. Post-Creation Fulfillment (Stock, Cart, Coupon) ──────────────────────
   
   // A. Inventory Decrement
   const { data: items } = await supabaseAdmin
     .from("order_items")
-    .select("product_id, quantity, size, price, product:products(name)")
+    .select("product_id, quantity, size, price, product:products(name, is_preorder)")
     .eq("order_id", finalOrderId);
 
   if (items) {
     for (const item of items) {
       try {
+        // A1. Standard Inventory Decrement
         await supabaseAdmin.rpc("decrement_inventory_rpc", {
           p_product_id: item.product_id,
           p_size: item.size,
           p_quantity: item.quantity,
         });
+
+        // A2. Pre-Order Specific Sync (If product is marked is_preorder)
+        const isPreorder = (item.product as any)?.is_preorder;
+        if (isPreorder) {
+          // Increment the public preorder count (Quantity-sensitive)
+          for (let q = 0; q < item.quantity; q++) {
+            await supabaseAdmin.rpc("increment_preorder_count", { 
+              p_product_id: item.product_id 
+            });
+          }
+
+          // Log into preorder_registrations so it shows in Admin Pre-Orders list
+          // We use upsert to avoid duplicate registration errors for the same email
+          if (customerEmail) {
+            await supabaseAdmin
+              .from("preorder_registrations")
+              .upsert({
+                product_id: item.product_id,
+                email: customerEmail,
+                name: orderToProcess.shipping_name || "Customer",
+                size: item.size,
+                user_id: orderToProcess.user_id || null,
+              }, { onConflict: 'product_id,email' });
+          }
+        }
       } catch (err) {
-        console.error(`[inventory] Decrement failed for ${item.product_id}:`, err);
+        console.error(`[fulfillment] Fulfillment sync failed for ${item.product_id}:`, err);
       }
     }
   }
@@ -133,13 +170,6 @@ export async function completeOrder({
 
   // ── 4. Email Confirmation ──────────────────────────────────────────────────
   try {
-    // Attempt to get email: 1. shipping info, 2. auth user
-    let customerEmail = orderToProcess.shipping_email;
-    if (!customerEmail && orderToProcess.user_id) {
-        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(orderToProcess.user_id);
-        customerEmail = authUser?.user?.email;
-    }
-
     if (customerEmail) {
       const emailResult = await sendOrderConfirmationEmail({
         to: customerEmail,

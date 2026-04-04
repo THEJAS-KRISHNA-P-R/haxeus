@@ -25,6 +25,7 @@ interface OrderConfirmationEmailProps {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ? `https://${process.env.NEXT_PUBLIC_APP_URL}` : "https://haxeus.in";
+const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919746283912";
 
 export const OrderConfirmationEmail = ({
   orderId,
@@ -37,7 +38,14 @@ export const OrderConfirmationEmail = ({
   shippingAddress,
 }: OrderConfirmationEmailProps) => {
   const finalDisplayId = displayOrderId || orderId.slice(-8).toUpperCase();
-  const previewText = `Order confirmed - HAXEUS #${finalDisplayId}`;
+  const previewText = `Your gear is locked in. Order #${finalDisplayId}`;
+  const firstName = shippingAddress?.name?.split(' ')[0] || "there";
+
+  const orderDate = new Date().toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
 
   return (
     <Html>
@@ -46,27 +54,38 @@ export const OrderConfirmationEmail = ({
       <Body style={mainText}>
         <Container style={container}>
           <Section style={header}>
-            <Heading style={logo}>HAXEUS</Heading>
+            <Heading style={logoText}>HAXEUS</Heading>
             <Text style={tagline}>ORDER CONFIRMED</Text>
           </Section>
 
           <Section style={content}>
             <Section style={hero}>
-               {/* Hero checkmark icon placeholder using inline text styles for robustness */}
-               <Text style={heroIcon}>✓</Text>
-               <Heading style={h1}>Your order is confirmed</Heading>
-               <Text style={h2}>Order #{orderId.slice(-8).toUpperCase()}</Text>
+              <Text style={h1}>HEY {firstName.toUpperCase()}, WELCOME TO THE MOVEMENT.</Text>
+              <Text style={manifesto}>
+                Your order has been locked in. We're currently processing your order.
+              </Text>
+            </Section>
+
+            <Section style={orderTrackerMeta}>
+              <Column>
+                <Text style={metaKey}>ORDER NO.</Text>
+                <Text style={metaValue}>#{finalDisplayId}</Text>
+              </Column>
+              <Column align="right">
+                <Text style={metaKey}>DATE</Text>
+                <Text style={metaValue}>{orderDate}</Text>
+              </Column>
             </Section>
 
             <Section style={orderSection}>
-              <Text style={sectionTitle}>Order details</Text>
+              <Text style={sectionTitle}>Invoice details</Text>
               {orderItems.map((item, index) => (
                 <Row key={index} style={itemRow}>
-                  <Column style={{ verticalAlign: "top" }}>
+                  <Column style={{ verticalAlign: "top", width: "70%" }}>
                     <Text style={itemName}>{item.name}</Text>
-                    <Text style={itemSub}>Size: {item.size} | Qty: {item.quantity}</Text>
+                    <Text style={itemSub}>Size: {item.size} • Qty: {item.quantity}</Text>
                   </Column>
-                  <Column align="right" style={{ verticalAlign: "top" }}>
+                  <Column align="right" style={{ verticalAlign: "top", width: "30%" }}>
                     <Text style={itemPrice}>₹{item.price.toLocaleString()}</Text>
                   </Column>
                 </Row>
@@ -106,10 +125,10 @@ export const OrderConfirmationEmail = ({
               )}
 
               <Hr style={summaryHr} />
-              
+
               <Row style={{ paddingTop: "12px" }}>
                 <Column>
-                  <Text style={totalLabel}>Total Paid</Text>
+                  <Text style={totalLabel}>Total Target</Text>
                 </Column>
                 <Column align="right">
                   <Text style={totalValue}>₹{total.toLocaleString()}</Text>
@@ -117,33 +136,54 @@ export const OrderConfirmationEmail = ({
               </Row>
             </Section>
 
-            <Section style={addressBox}>
-              <Text style={sectionTitle}>Shipping to</Text>
-              <Text style={addressText}>
-                <strong>{shippingAddress.name}</strong><br />
-                {shippingAddress.addressLine1}<br />
-                {shippingAddress.city} {shippingAddress.pincode}
+            <Section style={dataDenseBox}>
+              <Row>
+                <Column style={{ width: "50%", paddingRight: "10px", verticalAlign: "top" }}>
+                  <Text style={sectionTitle}>Destination</Text>
+                  <Text style={addressText}>
+                    <strong>{shippingAddress.name}</strong><br />
+                    {shippingAddress.addressLine1}<br />
+                    {shippingAddress.city} — {shippingAddress.pincode}
+                  </Text>
+                </Column>
+                <Column style={{ width: "50%", paddingLeft: "10px", verticalAlign: "top" }}>
+                  <Text style={sectionTitle}>Delivery Specs</Text>
+                  <Text style={estimateText}>
+                    <strong>ETA:</strong> 7 - 14 Days
+                  </Text>
+                  <Text style={addressText}>
+                    Track your live progress anytime by logging into your profile and checking the Orders page.
+                  </Text>
+                </Column>
+              </Row>
+            </Section>
+
+            <Section style={viewMoreSection}>
+              <Text style={{ textAlign: "center" as const, margin: "0" }}>
+                <Link href={`${baseUrl}/orders/${orderId}`} style={textLink}>
+                  View more info & order status →
+                </Link>
               </Text>
             </Section>
 
-            <Section style={estimateBox}>
-              <Text style={estimateText}>
-                Estimated delivery: 3–5 business days
-              </Text>
-            </Section>
-
-            <Section style={{ textAlign: "center", margin: "32px 0" }}>
-              <Link href={`${baseUrl}/orders/${orderId}`} style={button}>
-                Track your order
-              </Link>
+            <Section style={socialSection}>
+              <Row>
+                <Column align="center" style={{ width: "50%", padding: "0 8px" }}>
+                  <Link href={`https://wa.me/${whatsappNumber}`} style={socialBox}>
+                    WHATSAPP SUPPORT
+                  </Link>
+                </Column>
+                <Column align="center" style={{ width: "50%", padding: "0 8px" }}>
+                  <Link href="https://instagram.com/haxeus" style={socialBox}>
+                    INSTAGRAM
+                  </Link>
+                </Column>
+              </Row>
             </Section>
 
             <Section style={footer}>
-              <Text style={footerContact}>
-                Questions? Reply to this email or WhatsApp us at +91 91522 36626
-              </Text>
-              <Text style={footerCopyright}>© {new Date().getFullYear()} HAXEUS. All rights reserved.</Text>
-              <Text style={footerMeta}>You're receiving this because you placed an order on haxeus.in</Text>
+              <Text style={footerCopyright}>© {new Date().getFullYear()} HAXEUS. ALL RIGHTS RESERVED.</Text>
+              <Text style={footerMeta}>This transmission was generated by the HAXEUS mainframe for your records.</Text>
             </Section>
           </Section>
         </Container>
@@ -171,19 +211,20 @@ const header = {
   marginBottom: "32px",
 };
 
-const logo = {
-  color: "#ffffff",
-  fontSize: "24px",
+const logoText = {
+  color: "#ef3939",
+  fontSize: "28px",
   fontWeight: "900",
-  letterSpacing: "4px",
+  letterSpacing: "6px",
   margin: "0",
+  fontStyle: "italic",
 };
 
 const tagline = {
-  color: "#e93a3a",
+  color: "#666",
   fontSize: "10px",
-  letterSpacing: "3px",
-  margin: "4px 0 0",
+  letterSpacing: "4px",
+  margin: "8px 0 0",
   textTransform: "uppercase" as const,
   fontWeight: "bold",
 };
@@ -193,37 +234,56 @@ const content = {
 };
 
 const hero = {
-  textAlign: "center" as const,
-  padding: "24px 0",
-};
-
-const heroIcon = {
-  fontSize: "48px",
-  color: "#e93a3a",
-  margin: "0 0 16px",
+  textAlign: "left" as const,
+  padding: "0 0 24px",
 };
 
 const h1 = {
   color: "#ffffff",
-  fontSize: "28px",
-  fontWeight: "700",
-  margin: "0 0 8px",
+  fontSize: "22px",
+  fontWeight: "800",
+  margin: "0 0 12px",
+  letterSpacing: "-0.5px",
 };
 
-const h2 = {
-  color: "#666",
+const manifesto = {
+  color: "#999",
   fontSize: "14px",
+  lineHeight: "1.6",
   margin: "0",
-  textTransform: "uppercase" as const,
+};
+
+const orderTrackerMeta = {
+  backgroundColor: "#161616",
+  padding: "16px 24px",
+  borderTop: "2px solid #ef3939",
+  borderRadius: "4px 4px 0 0",
+  marginTop: "16px",
+};
+
+const metaKey = {
+  color: "#666",
+  fontSize: "10px",
+  fontWeight: "800",
+  letterSpacing: "2px",
+  margin: "0 0 4px",
+};
+
+const metaValue = {
+  color: "#ef3939",
+  fontSize: "16px",
+  fontWeight: "800",
+  margin: "0",
   letterSpacing: "1px",
 };
 
 const orderSection = {
   backgroundColor: "#111",
-  borderRadius: "12px",
   padding: "24px",
-  marginTop: "32px",
-  border: "1px solid #1a1a1a",
+  borderTop: "1px solid #222",
+  borderLeft: "1px solid #1a1a1a",
+  borderRight: "1px solid #1a1a1a",
+  borderBottom: "1px solid #1a1a1a",
 };
 
 const sectionTitle = {
@@ -232,146 +292,166 @@ const sectionTitle = {
   textTransform: "uppercase" as const,
   letterSpacing: "2px",
   margin: "0 0 16px",
-  fontWeight: "bold",
+  fontWeight: "800",
 };
 
 const itemRow = {
-  paddingBottom: "12px",
+  paddingBottom: "16px",
 };
 
 const itemName = {
   color: "#fff",
-  fontSize: "15px",
+  fontSize: "14px",
   fontWeight: "700",
-  margin: "0 0 4px",
+  margin: "0 0 6px",
+  textTransform: "uppercase" as const,
 };
 
 const itemSub = {
   color: "#666",
-  fontSize: "13px",
+  fontSize: "12px",
   margin: "0",
+  fontWeight: "600",
 };
 
 const itemPrice = {
   color: "#fff",
-  fontSize: "15px",
-  fontWeight: "600",
+  fontSize: "14px",
+  fontWeight: "700",
   margin: "0",
 };
 
 const hr = {
-  borderTop: "1px solid #1a1a1a",
-  margin: "20px 0",
+  borderTop: "1px dashed #333",
+  margin: "16px 0",
 };
 
 const summaryRow = {
-  paddingBottom: "6px",
+  paddingBottom: "8px",
 };
 
 const summaryLabel = {
-  color: "#666",
-  fontSize: "14px",
+  color: "#888",
+  fontSize: "13px",
+  fontWeight: "600",
 };
 
 const summaryValue = {
   color: "#fff",
-  fontSize: "14px",
+  fontSize: "13px",
+  fontWeight: "600",
 };
 
 const freeLabel = {
   color: "#4ade80",
-  fontSize: "14px",
-  fontWeight: "bold",
+  fontSize: "13px",
+  fontWeight: "800",
 };
 
 const discountLabel = {
   color: "#4ade80",
-  fontSize: "14px",
+  fontSize: "13px",
+  fontWeight: "600",
 };
 
 const discountValue = {
   color: "#4ade80",
-  fontSize: "14px",
+  fontSize: "13px",
+  fontWeight: "800",
 };
 
 const summaryHr = {
-  borderTop: "1px solid #1a1a1a",
-  margin: "12px 0 0",
+  borderTop: "1px solid #333",
+  margin: "16px 0 0",
 };
 
 const totalLabel = {
   color: "#fff",
-  fontSize: "16px",
-  fontWeight: "700",
+  fontSize: "18px",
+  fontWeight: "800",
+  textTransform: "uppercase" as const,
 };
 
 const totalValue = {
-  color: "#e93a3a",
+  color: "#ef3939",
   fontSize: "20px",
-  fontWeight: "700",
+  fontWeight: "900",
 };
 
-const addressBox = {
+const dataDenseBox = {
   backgroundColor: "#111",
-  borderRadius: "12px",
+  borderRadius: "0 0 4px 4px",
   padding: "24px",
-  marginTop: "24px",
-  border: "1px solid #1a1a1a",
+  borderLeft: "1px solid #1a1a1a",
+  borderRight: "1px solid #1a1a1a",
+  borderBottom: "1px solid #1a1a1a",
+  marginBottom: "32px",
 };
 
 const addressText = {
-  color: "#fff",
-  fontSize: "14px",
-  lineHeight: "1.7",
+  color: "#888",
+  fontSize: "13px",
+  lineHeight: "1.6",
   margin: "0",
-};
-
-const estimateBox = {
-  marginTop: "24px",
-  textAlign: "center" as const,
 };
 
 const estimateText = {
-  color: "#4ade80",
+  color: "#fff",
   fontSize: "13px",
-  fontWeight: "600",
-  margin: "0",
-};
-
-const button = {
-  backgroundColor: "#e93a3a",
-  color: "#ffffff",
-  padding: "16px 40px",
-  borderRadius: "100px",
-  textDecoration: "none",
-  fontWeight: "700",
-  fontSize: "15px",
-  display: "inline-block",
-};
-
-const footer = {
-  marginTop: "48px",
-  textAlign: "center" as const,
-  borderTop: "1px solid #1a1a1a",
-  paddingTop: "32px",
-};
-
-const footerContact = {
-  color: "#ffffff",
-  fontSize: "13px",
-  margin: "0 0 16px",
-};
-
-const footerCopyright = {
-  color: "#333",
-  fontSize: "11px",
   margin: "0 0 8px",
+};
+
+const viewMoreSection = {
+  margin: "0 0 32px",
+  textAlign: "center" as const,
+};
+
+const textLink = {
+  color: "#ef3939",
+  textDecoration: "underline",
+  fontWeight: "800",
+  fontSize: "14px",
   textTransform: "uppercase" as const,
   letterSpacing: "1px",
 };
 
+const socialSection = {
+  margin: "0 0 48px",
+};
+
+const socialBox = {
+  display: "block",
+  backgroundColor: "#161616",
+  color: "#fff",
+  textDecoration: "none",
+  padding: "16px 0",
+  fontSize: "11px",
+  fontWeight: "800",
+  letterSpacing: "2px",
+  border: "1px solid #333",
+  borderRadius: "4px",
+  textAlign: "center" as const,
+  width: "100%",
+};
+
+const footer = {
+  textAlign: "center" as const,
+  borderTop: "1px dashed #333",
+  paddingTop: "32px",
+};
+
+const footerCopyright = {
+  color: "#ef3939",
+  fontSize: "12px",
+  fontWeight: "800",
+  margin: "0 0 8px",
+  letterSpacing: "1px",
+};
+
 const footerMeta = {
-  color: "#222",
+  color: "#444",
   fontSize: "10px",
   margin: "0",
+  textTransform: "uppercase" as const,
+  letterSpacing: "1px",
 };
