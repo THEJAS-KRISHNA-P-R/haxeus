@@ -114,8 +114,8 @@ export default function OrdersPage() {
     return (
       <div className="min-h-screen bg-[var(--bg)] pt-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#e93a3a] mx-auto"></div>
-          <p className="mt-4 text-white/50">Loading your orders...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[var(--accent)] mx-auto"></div>
+          <p className="mt-4 text-[var(--text-3)]">Loading your orders...</p>
         </div>
       </div>
     )
@@ -125,18 +125,18 @@ export default function OrdersPage() {
     <div className="min-h-screen bg-[var(--bg)] pt-20 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Order History</h1>
-          <p className="text-white/50">Track and manage your orders</p>
+          <h1 className="text-4xl font-bold text-[var(--text)] mb-2">Order History</h1>
+          <p className="text-[var(--text-3)]">Track and manage your orders</p>
         </div>
 
         {orders.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
-              <Package className="w-20 h-20 mx-auto text-white/30 mb-6" />
-              <h2 className="text-2xl font-bold text-white mb-2">No orders yet</h2>
-              <p className="text-white/50 mb-6">You haven't placed any orders yet.</p>
+              <Package className="w-20 h-20 mx-auto text-[var(--text-3)] opacity-50 mb-6" />
+              <h2 className="text-2xl font-bold text-[var(--text)] mb-2">No orders yet</h2>
+              <p className="text-[var(--text-3)] mb-6">You haven't placed any orders yet.</p>
               <Link href="/products">
-                <Button className="bg-[#e93a3a] hover:bg-[#e93a3a]/80">
+                <Button className="bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--bg)]">
                   Start Shopping
                 </Button>
               </Link>
@@ -153,10 +153,10 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-3 mb-2">
                         {getStatusIcon(order.status)}
                         <div>
-                          <h3 className="font-bold text-lg">
+                          <h3 className="font-bold text-lg text-[var(--text)]">
                             Order {order.order_number ? `#${order.order_number}` : `#${order.id.slice(-8).toUpperCase()}`}
                           </h3>
-                          <p className="text-sm text-white/50">
+                          <p className="text-sm text-[var(--text-3)]">
                             Placed {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                           </p>
                         </div>
@@ -175,8 +175,8 @@ export default function OrdersPage() {
                     {/* Order Total & Action */}
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-sm text-white/50">Total</p>
-                        <p className="text-2xl font-bold text-white">
+                        <p className="text-sm text-[var(--text-3)]">Total</p>
+                        <p className="text-2xl font-bold text-[var(--text)]">
                           {formatPrice(order.total_amount ?? 0)}
                         </p>
                       </div>

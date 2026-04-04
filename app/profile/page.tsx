@@ -21,6 +21,7 @@ import {
   Plus,
   Edit,
   Trash2,
+  ArrowRight,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -202,6 +203,16 @@ function ProfileContent() {
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-theme">Recent Orders</h2>
+              {orders.length > 0 && (
+                <Link href="/orders">
+                  <Button variant="ghost" className="text-[var(--accent)] hover:bg-[var(--accent)]/10">
+                    View Full History <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              )}
+            </div>
             {orders.length === 0 ? (
               <Card className="bg-card border-theme">
                 <CardContent className="py-12 text-center">
@@ -227,7 +238,7 @@ function ProfileContent() {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="text-lg text-theme">
-                          Order #{order.id.slice(0, 8)}
+                          Order {order.order_number ? `#${order.order_number}` : `#${order.id.slice(-8).toUpperCase()}`}
                         </CardTitle>
                         <p className="text-sm text-theme-2 mt-1">
                           {new Date(order.created_at!).toLocaleDateString(
@@ -240,9 +251,16 @@ function ProfileContent() {
                           )}
                         </p>
                       </div>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status}
-                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge className={getStatusColor(order.status)}>
+                          {order.status}
+                        </Badge>
+                        <Link href={`/orders/${order.id}`}>
+                          <Button variant="outline" size="sm" className="hidden sm:flex border-theme hover:bg-theme text-theme-2 hover:text-theme">
+                            View Details
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
